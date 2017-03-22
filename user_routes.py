@@ -10,6 +10,7 @@ from flask_restful import Api
 from flask_restful import Resource
 from flask_restful import reqparse
 from models.user import User, database
+from http.client import BAD_REQUEST
 from http.client import CREATED
 from http.client import INTERNAL_SERVER_ERROR
 from http.client import OK
@@ -69,8 +70,11 @@ class UserRoot(Resource):
 
         u_data = parser.parse_args()
 
-        # TODO: Check if the email is present in the database. if so return
-        # None, BAD_REQUEST
+        # If email is present in the database return a BAD_REQUEST response
+        # This is done automatically by peewee when trying to create the item,
+        # so this may be discontinued
+        if email_exits(u_data['email']):
+            return None, BAD_REQUEST
 
         # Create the new user
         new_user = User.create(
@@ -84,6 +88,7 @@ class UserRoot(Resource):
         if new_user is None:
             return None, INTERNAL_SERVER_ERROR
 
+        # If everything went OK return the newly created user and CREATED code
         return new_user.get_json(), CREATED
 
 
