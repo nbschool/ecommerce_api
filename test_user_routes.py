@@ -9,7 +9,6 @@ from http.client import OK
 from http.client import CREATED
 from http.client import BAD_REQUEST
 import json
-import uuid
 import random
 
 # main endpoint for API

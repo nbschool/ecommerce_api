@@ -99,16 +99,13 @@ class UserHandler(Resource):
     database.
     """
 
-    def get(self, user_id):
-        # TODO: Get the uuid4 from the string
-        # TODO: If malformed uuid return BAD_REQUEST
+    def get(self, email):
         # TODO: Check that the user exists
         # TODO: Return the jsonified user object
         # TODO: If not exists return NOT_FOUND
         pass
 
-    def put(self, user_id):
-        # TODO: validate uuid
+    def put(self, email):
         # TODO: Validate payload
         # TODO: Return BAD_REQUEST if uuid or payload not valid
         # TODO: Check user exists
@@ -117,8 +114,7 @@ class UserHandler(Resource):
         # TODO: Return (user, OK) if everything went fine
         pass
 
-    def delete(self, user_id):
-        # TODO: Validate uuid
+    def delete(self, email):
         # TODO: return BAD_REQUEST if malformed UUUID
         # TODO: Find user => return NOT_FOUND if not found
         # TODO: Delete user from database
@@ -127,4 +123,4 @@ class UserHandler(Resource):
 
 
 api.add_resource(UserRoot, '/api/users/')
-api.add_resource(UserHandler, '/api/user/<uuid:user_id>')
+api.add_resource(UserHandler, '/api/user/<email>')
