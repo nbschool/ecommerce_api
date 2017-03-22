@@ -8,6 +8,7 @@ TODO: Summarize what can be done with the api and the endpoints
 from flask import Flask
 from flask_restful import Resource
 from flask_restful import Api
+from models.user import User, database
 
 
 app = Flask(__name__)
