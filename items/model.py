@@ -29,8 +29,8 @@ class Item(BaseModel):
 
     def json(self):
         return {
-            'name': str(self.name),
-            'picture': self.picture,
+            'name': self.name,
+            'picture': str(self.picture),
             'price': self.price,
             'description': self.description
         }
