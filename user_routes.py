@@ -35,8 +35,7 @@ class UserRoot(Resource):
     """
 
     def get(self):
-        return tuple()
-        pass
+        return [user.get_json() for user in User.select()], OK
 
     def post(self):
         # TODO: Parse the rest arguments with reqparse
