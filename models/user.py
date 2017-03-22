@@ -14,7 +14,3 @@ database = SqliteDatabase('database.db')
 class BaseModel(Model):
     class Meta:
         database = database
-
-
-class User(BaseModel):
-    pass
