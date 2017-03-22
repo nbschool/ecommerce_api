@@ -25,6 +25,18 @@ def non_empty_str(val, name):
     return str(val)
 
 
+def email_exits(email):
+    """
+    Check that an email exists in the User table.
+    returns: bool
+    """
+    u = User.select().where(User.email == email)
+    if u.exists():
+        return True
+
+    return False
+
+
 @app.before_request
 def before_request():
     if database.is_closed():

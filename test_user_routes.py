@@ -83,6 +83,7 @@ class Testuser:
 
         del user['password']
         assert json.loads(resp.data) == user
+        assert User.select().count() == 1
 
     def test_post_new_user_no_email__fail(self):
         user = {
