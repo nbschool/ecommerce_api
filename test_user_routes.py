@@ -15,7 +15,6 @@ API_ENDPOINT = '/api/{}'
 # tests are run in temp database in memory
 TEST_DB = SqliteDatabase(':memory:')
 
-
 # TODO: Utility functions:
 #   - check_length(<int>) to check the table' size
 
