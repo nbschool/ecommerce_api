@@ -15,7 +15,6 @@ app = Flask(__name__)
 api = Api(app)
 
 
-# TODO: add before_request and teardown_request decorators for database connect
 @app.before_request
 def before_request():
     if database.is_closed():
