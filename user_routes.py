@@ -19,6 +19,7 @@ api = Api(app)
 def before_request():
     if database.is_closed():
         database.connect()
+        # TODO: create User table if not exists
 
 
 @app.teardown_request
@@ -79,5 +80,5 @@ class UserHandler(Resource):
         pass
 
 
-api.add_resource(UserRoot, '/user/')
-api.add_resource(UserHandler, '/user/<uuid:user_id>')
+api.add_resource(UserRoot, '/api/users/')
+api.add_resource(UserHandler, '/api/user/<uuid:user_id>')
