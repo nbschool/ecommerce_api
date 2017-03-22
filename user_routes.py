@@ -8,13 +8,26 @@ TODO: Summarize what can be done with the api and the endpoints
 from flask import Flask
 from flask_restful import Resource
 from flask_restful import Api
-
+from models.user import User, database
+from http.client import OK
 
 app = Flask(__name__)
 api = Api(app)
 
 
 # TODO: add before_request and teardown_request decorators for database connect
+@app.before_request
+def before_request():
+    if database.is_closed():
+        database.connect()
+
+
+@app.teardown_request
+def teardown_request(response):
+    if not database.is_closed():
+        database.close()
+    return response
+
 
 class UserRoot(Resource):
     """
@@ -23,7 +36,7 @@ class UserRoot(Resource):
     """
 
     def get(self):
-        # TODO: Get all users
+        return tuple()
         pass
 
     def post(self):
