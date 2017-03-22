@@ -18,6 +18,7 @@ TEST_DB = SqliteDatabase(':memory:')
 # TODO: Utility functions:
 #   - check_length(<int>) to check the table' size
 
+
 def _add_user():
     """Create a single user in the test database. """
     return User.create(
@@ -66,3 +67,24 @@ class Testuser:
         assert resp.status_code == OK
         assert json.loads(resp.data) == [user1.get_json(), user2.get_json()]
         assert User.select().count() == 2
+
+    def test_post_new_user__success(self):
+        user = {
+            'first_name': 'Mario',
+            'last_name': 'Rossi',
+            'email': 'asddjkasdjhv',
+            'password': 'aksdg'
+        }
+        resp = self.app.post(API_ENDPOINT.format('users/'), data=user)
+
+        assert resp.status_code == OK
+
+        del user['password']
+        assert json.loads(resp.data) == user
+
+
+
+
+
+
+
