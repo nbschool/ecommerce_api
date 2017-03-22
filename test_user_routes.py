@@ -34,7 +34,7 @@ def _add_user(email=None):
 
 
 class Testuser:
-    """Implements py.test suite for User operations. """
+    """Implements py.test suite for User operations in Flask-restful app. """
 
     @classmethod
     def setup_class(cls):
@@ -72,6 +72,7 @@ class Testuser:
         assert User.select().count() == 2
 
     def test_post_new_user__success(self):
+        """Test a correct insert of a new user into the database. """
         user = {
             'first_name': 'Mario',
             'last_name': 'Rossi',
@@ -102,6 +103,7 @@ class Testuser:
         assert User.select().count() == 1
 
     def test_post_new_user_no_email__fail(self):
+        """Test the case where the email field is missing on the post data. """
         user = {
             'first_name': 'Mario',
             'last_name': 'Rossi',
