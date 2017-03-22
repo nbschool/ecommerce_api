@@ -6,13 +6,23 @@ TODO: Summarize what can be done with the api and the endpoints
 """
 
 from flask import Flask
-from flask_restful import Resource
 from flask_restful import Api
+from flask_restful import Resource
+from flask_restful import reqparse
 from models.user import User, database
+from http.client import CREATED
+from http.client import INTERNAL_SERVER_ERROR
 from http.client import OK
 
 app = Flask(__name__)
 api = Api(app)
+
+
+def non_empty_str(val, name):
+    """ Custom type for reqparser, blocking empty strings. """
+    if not str(val).strip():
+        raise ValueError('The argument {} is not empty'.format(name))
+    return str(val)
 
 
 @app.before_request
@@ -39,11 +49,30 @@ class UserRoot(Resource):
         return [user.get_json() for user in User.select()], OK
 
     def post(self):
-        # TODO: Parse the rest arguments with reqparse
-        # TODO: Create the uuid
-        # TODO: Create the new user
-        # TODO: Return (new_user, OK)
-        pass
+        parser = reqparse.RequestParser()
+        parser.add_argument('first_name', type=non_empty_str)
+        parser.add_argument('last_name', type=non_empty_str)
+        parser.add_argument('email_name', required=True, type=non_empty_str)
+        parser.add_argument('password', required=True, type=non_empty_str)
+
+        u_data = parser.parse_args()
+
+        # TODO: Check if the email is present in the database. if so return
+        # None, BAD_REQUEST
+
+        # Create the new user
+        new_user = User.create(
+            first_name=u_data['first_name'].capitalize(),
+            last_name=u_data['last_name'].capitalize(),
+            email=u_data['email'],
+            password=u_data['password'],
+        )
+
+        # If there was an error creating the new user (None) notify the client
+        if new_user is None:
+            return None, INTERNAL_SERVER_ERROR
+
+        return new_user.get_json(), CREATED
 
 
 class UserHandler(Resource):
