@@ -17,18 +17,19 @@ API_ENDPOINT = '/api/{}'
 # tests are run in temp database in memory
 TEST_DB = SqliteDatabase(':memory:')
 
-# TODO: Utility functions:
-#   - check_length(<int>) to check the table' size
 
-
-def _add_user():
-    """Create a single user in the test database. """
+def _add_user(email=None):
+    """
+    Create a single user in the test database.
+    If an email is provided it will be used, otherwise it will be generated
+    by the function before adding the User to the database.
+    """
+    user_email = 'johndoe{}@email.com'.format(int(random.random() * 100))
     return User.create(
         first_name='John',
         last_name='Doe',
-        email='johndoe{}@email.com'.format(int(random.random() * 100)),
-        password='afoihseg',
-        objectID=uuid.uuid4()
+        email=email or user_email,
+        password='afoihseg'
     )
 
 
