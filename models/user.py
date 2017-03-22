@@ -26,7 +26,6 @@ class User(BaseModel):
       as a dictionary ready to be jsonified.
     """
 
-    objectID = UUIDField(unique=True)
     first_name = CharField()
     last_name = CharField()
     email = CharField(unique=True)
