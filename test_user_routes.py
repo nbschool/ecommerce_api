@@ -77,14 +77,7 @@ class Testuser:
         }
         resp = self.app.post(API_ENDPOINT.format('users/'), data=user)
 
-        assert resp.status_code == OK
+        assert resp.status_code == CREATED
 
         del user['password']
         assert json.loads(resp.data) == user
-
-
-
-
-
-
-
