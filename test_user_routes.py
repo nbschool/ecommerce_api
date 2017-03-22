@@ -7,6 +7,7 @@ from models.user import User
 from peewee import SqliteDatabase
 from http.client import OK
 from http.client import CREATED
+from http.client import BAD_REQUEST
 import json
 import uuid
 import random
@@ -82,3 +83,14 @@ class Testuser:
 
         del user['password']
         assert json.loads(resp.data) == user
+
+    def test_post_new_user_no_email__fail(self):
+        user = {
+            'first_name': 'Mario',
+            'last_name': 'Rossi',
+            'password': 'aksdg'
+        }
+        resp = self.app.post(API_ENDPOINT.format('users/'), data=user)
+
+        assert resp.status_code == BAD_REQUEST
+        assert User.select().count() == 0
