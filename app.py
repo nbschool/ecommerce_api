@@ -9,7 +9,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_restful import Resource
 from flask_restful import reqparse
-from models.user import User, database
+from models import User, database
 from http.client import BAD_REQUEST
 from http.client import CREATED
 from http.client import INTERNAL_SERVER_ERROR
@@ -55,7 +55,7 @@ def teardown_request(response):
     return response
 
 
-class UserRoot(Resource):
+class UsersHandler(Resource):
     """
     Handler for main user endpoint.
     Allows creation of new users and retrieval of the users list.
@@ -128,5 +128,5 @@ class UserHandler(Resource):
         pass
 
 
-api.add_resource(UserRoot, '/api/users/')
+api.add_resource(UsersHandler, '/api/users/')
 api.add_resource(UserHandler, '/api/user/<email>')

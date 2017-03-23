@@ -2,8 +2,8 @@
 Test suite for flask restful api endpoints for users.
 """
 
-from user_routes import app
-from models.user import User
+from app import app
+from models import User
 from peewee import SqliteDatabase
 from http.client import OK
 from http.client import CREATED
