@@ -29,6 +29,12 @@ class Item(BaseModel):
     price = DecimalField(decimal_places=2)
     description = TextField()
 
+    def __unicode__(self):
+        return u'{}, {}, {}'.format(
+            self.name,
+            self.price,
+            self.description)
+
     def json(self):
         return {
             'name': self.name,
