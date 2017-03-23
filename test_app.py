@@ -115,18 +115,18 @@ class Testuser:
 
     def test_post_new_user_empty_str_field__fail(self):
         """Test the case where the name field is missing on the post data. """
-        user_d = {
+        u_data = {
             'email': 'mario@email.com',
             'last_name': 'Rossi',
             'password': 'akjsgdf',
             'first_name': ''
         }
 
-        resp = self.app.post(API_ENDPOINT.format('users/'), data=user_d)
+        resp = self.app.post(API_ENDPOINT.format('users/'), data=u_data)
 
         assert resp.status_code == BAD_REQUEST
+        # TODO: find what exception is raised by ReqParse in case of wrong type
         assert User.select().count() == 0
-
 
     def test_get_single_user__success(self):
         """Try to get a single existing user by email. """
