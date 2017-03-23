@@ -108,24 +108,23 @@ class UserHandler(Resource):
 
     def get(self, email):
         # TODO: Check that the user exists
-        # TODO: Return the jsonified user object
+        # TODO: Return the (user, OK)
         # TODO: If not exists return NOT_FOUND
         pass
 
     def put(self, email):
         # TODO: Validate payload
-        # TODO: Return BAD_REQUEST if uuid or payload not valid
+        # TODO: Return BAD_REQUEST if payload not valid
         # TODO: Check user exists
-        # TODO: Return NOT_FOUND if uuid not found
+        # TODO: Return NOT_FOUND if user not found
         # TODO: Update user data
         # TODO: Return (user, OK) if everything went fine
         pass
 
     def delete(self, email):
-        # TODO: return BAD_REQUEST if malformed UUUID
         # TODO: Find user => return NOT_FOUND if not found
         # TODO: Delete user from database
-        # TODO: Return NO_CONTENT, OK
+        # TODO: Return (NO_CONTENT, OK)
         pass
 
 
