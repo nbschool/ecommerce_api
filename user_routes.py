@@ -67,8 +67,8 @@ class UserRoot(Resource):
 
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('first_name', type=non_empty_str)
-        parser.add_argument('last_name', type=non_empty_str)
+        parser.add_argument('first_name', required=True, type=non_empty_str)
+        parser.add_argument('last_name', required=True, type=non_empty_str)
         parser.add_argument('email', required=True, type=non_empty_str)
         parser.add_argument('password', required=True, type=non_empty_str)
 
