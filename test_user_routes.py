@@ -33,7 +33,7 @@ def _add_user(email=None):
 
 
 class Testuser:
-    """Implements py.test suite for User operations in Flask-restful app. """
+    """Implements py.test suite for User endpoints in Flask-restful app. """
 
     @classmethod
     def setup_class(cls):
@@ -98,7 +98,7 @@ class Testuser:
         resp = self.app.post(API_ENDPOINT.format('users/'), data=user)
 
         assert resp.status_code == BAD_REQUEST
-        assert json.loads(resp.data) is None
+        assert json.loads(resp.data)['message'] == 'email already present.'
         assert User.select().count() == 1
 
     def test_post_new_user_no_email__fail(self):
