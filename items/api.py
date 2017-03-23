@@ -30,7 +30,7 @@ def non_emtpy_str(val, name):
     return str(val)
 
 
-class Item(Resource):
+class ItemList(Resource):
 
     def post(self):
         parser = reqparse.RequestParser()
@@ -40,7 +40,7 @@ class Item(Resource):
         parser.add_argument('description', type=non_emtpy_str, required=True)
         args = parser.parse_args(strict=True)
         obj = ItemModel(name=args['name'],
-                        picture=uuid.uuid4(),
+                       # picture=uuid.uuid4(),
                         price=args['price'],
                         description=args['description'])
 
@@ -50,7 +50,16 @@ class Item(Resource):
         return obj.json(), CREATED
 
 
+class Item(Resource):
+    def get(self, iid):
+        try:
+            return ItemModel.select().where(ItemModel.id == iid).get().json(), OK
+        except ItemModel.DoesNotExist:
+            return None, NOT_FOUND
 
-api.add_resource(Item, "/items/")
+
+api.add_resource(ItemList, "/items/")
+api.add_resource(Item, "/items/<int:iid>")
+
 
 

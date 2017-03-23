@@ -4,6 +4,7 @@ from peewee import CharField
 from peewee import UUIDField
 from peewee import DecimalField
 from peewee import TextField
+import json
 
 DATABASE = {
     'name': 'ecommerce.db',
@@ -23,17 +24,21 @@ class BaseModel(Model):
 
 class Item(BaseModel):
     name = CharField(unique=True)
-    picture = UUIDField()
     price = DecimalField(decimal_places=2)
     description = TextField()
 
     def json(self):
         return {
             'name': self.name,
-            'picture': str(self.picture),
-            'price': self.price,
+            'price': str(self.price),
             'description': self.description
         }
+
+    @staticmethod
+    def deserialize(item_json):
+        item = json.loads(item_json)
+        item['price'] = float(item['price'])
+        return item
 
 
 def connect():

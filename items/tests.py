@@ -7,6 +7,7 @@ from http.client import NOT_FOUND
 from http.client import OK
 from http.client import INTERNAL_SERVER_ERROR
 from model import connect, close
+import json
 
 TEST_ITEM={
     'name': 'mario',
@@ -25,10 +26,21 @@ class TestItems:
     def teardown_class(cls):
         close()
 
+    def setup_method(self):
+        ItemModel.delete().execute()
+
     def test_post_item__success(self):
         resp = self.app.post('/items/', data=TEST_ITEM)
         assert resp.status_code == CREATED
         assert len(ItemModel.select()) == 1
+    
+    def test_get_item__success(self):
+        item= ItemModel.create(**TEST_ITEM)
+        resp = self.app.get('/items/{iid}'.format(iid=item.id))
+        assert resp.status_code == OK
+        assert ItemModel.deserialize(resp.data) == TEST_ITEM
+        
+
 
     
 
