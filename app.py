@@ -15,6 +15,7 @@ from http.client import CREATED
 from http.client import INTERNAL_SERVER_ERROR
 from http.client import OK
 from http.client import NOT_FOUND
+from http.client import NO_CONTENT
 
 app = Flask(__name__)
 api = Api(app)
@@ -125,10 +126,17 @@ class UserHandler(Resource):
         pass
 
     def delete(self, email):
-        # TODO: Find user => return NOT_FOUND if not found
-        # TODO: Delete user from database
-        # TODO: Return (NO_CONTENT, OK)
-        pass
+        if not email_exists(email):
+            return None, NOT_FOUND
+
+        user = User.get(User.email == email)
+
+        if user:
+            user.delete_instance()
+            return None, NO_CONTENT
+
+        # TODO: decide what to return in case of errors
+        return None, INTERNAL_SERVER_ERROR
 
 
 api.add_resource(UsersHandler, '/api/users/')

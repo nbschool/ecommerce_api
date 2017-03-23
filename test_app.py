@@ -8,6 +8,7 @@ from peewee import SqliteDatabase
 from http.client import OK
 from http.client import CREATED
 from http.client import BAD_REQUEST
+from http.client import NO_CONTENT
 import json
 import random
 
@@ -142,7 +143,13 @@ class Testuser:
 
     def test_delete_user__success(self):
         """Delete an existing user from the database. """
-        pass
+        email = 'mail@email.email'
+        _add_user(email)
+
+        user_path = 'user/{}'.format(email)
+        resp = self.app.delete(API_ENDPOINT.format(user_path))
+        assert User.select().count() == 0
+        assert resp.status_code == NO_CONTENT
 
     def test_delete_user_no_exists__fail(self):
         """Try to delete an user that does not exists. """
