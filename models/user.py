@@ -5,9 +5,7 @@ Models contains the sqlite3 database models for the application.
 from peewee import SqliteDatabase
 from peewee import Model
 from peewee import CharField
-from peewee import UUIDField
 
-# TODO: Change database reference when joining all the initial features
 database = SqliteDatabase('database.db')
 
 
@@ -20,10 +18,6 @@ class BaseModel(Model):
 class User(BaseModel):
     """
     User represent an user for the application.
-
-    exposes
-    * `get_json()` returns all fields but the password
-      as a dictionary ready to be jsonified.
     """
 
     first_name = CharField()
@@ -32,6 +26,10 @@ class User(BaseModel):
     password = CharField()
 
     def get_json(self):
+        """
+        Returns a dict describing the object, ready to be jsonified.
+        """
+
         return {
             'first_name': self.first_name,
             'last_name': self.last_name,
