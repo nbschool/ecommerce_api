@@ -108,7 +108,7 @@ class UserHandler(Resource):
     """
 
     def get(self, email):
-
+        """Get a single user using the email."""
         if not email_exists(email):
             return None, NOT_FOUND
 
