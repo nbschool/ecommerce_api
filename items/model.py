@@ -30,7 +30,7 @@ class Item(BaseModel):
     def json(self):
         return {
             'name': self.name,
-            'price': str(self.price),
+            'price': float(self.price),
             'description': self.description
         }
 
