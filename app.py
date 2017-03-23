@@ -14,6 +14,7 @@ from http.client import BAD_REQUEST
 from http.client import CREATED
 from http.client import INTERNAL_SERVER_ERROR
 from http.client import OK
+from http.client import NOT_FOUND
 
 app = Flask(__name__)
 api = Api(app)
@@ -107,10 +108,12 @@ class UserHandler(Resource):
     """
 
     def get(self, email):
-        # TODO: Check that the user exists
-        # TODO: Return the (user, OK)
-        # TODO: If not exists return NOT_FOUND
-        pass
+
+        if not email_exists(email):
+            return None, NOT_FOUND
+
+        user = User.get(User.email == email)
+        return user.get_json(), OK
 
     def put(self, email):
         # TODO: Validate payload
