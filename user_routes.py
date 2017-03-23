@@ -26,7 +26,7 @@ def non_empty_str(val, name):
     return str(val)
 
 
-def email_exits(email):
+def email_exists(email):
     """
     Check that an email exists in the User table.
     returns: bool
@@ -40,9 +40,12 @@ def email_exits(email):
 
 @app.before_request
 def before_request():
+
     if database.is_closed():
         database.connect()
-        # TODO: create User table if not exists
+
+    if not User.table_exists():
+        User.create_table()
 
 
 @app.teardown_request
@@ -59,6 +62,7 @@ class UserRoot(Resource):
     """
 
     def get(self):
+        # TODO: Add case for table missing
         return [user.get_json() for user in User.select()], OK
 
     def post(self):
@@ -70,11 +74,12 @@ class UserRoot(Resource):
 
         u_data = parser.parse_args()
 
-        # If email is present in the database return a BAD_REQUEST response
-        # This is done automatically by peewee when trying to create the item,
-        # so this may be discontinued
-        if email_exits(u_data['email']):
-            return None, BAD_REQUEST
+        # If email is present in the database return a BAD_REQUEST response.
+        if email_exists(u_data['email']):
+            msg = {
+                'message': 'email already present.'
+            }
+            return msg, BAD_REQUEST
 
         # Create the new user
         new_user = User.create(
@@ -86,6 +91,8 @@ class UserRoot(Resource):
 
         # If there was an error creating the new user (None) notify the client
         if new_user is None:
+            # TODO: get the exception for the creation of the new user and
+            # return that.
             return None, INTERNAL_SERVER_ERROR
 
         # If everything went OK return the newly created user and CREATED code
