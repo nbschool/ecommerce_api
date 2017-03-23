@@ -9,10 +9,15 @@ from http.client import INTERNAL_SERVER_ERROR
 from model import connect, close
 import json
 
-TEST_ITEM={
+TEST_ITEM = {
     'name': 'mario',
     'price': 20.20,
     'description': 'svariati mariii'
+}
+TEST_ITEM2 = {
+    'name': 'GINO',
+    'price': 30.20,
+    'description': 'svariati GINIIIII'
 }
 
 class TestItems:
@@ -33,15 +38,19 @@ class TestItems:
         resp = self.app.post('/items/', data=TEST_ITEM)
         assert resp.status_code == CREATED
         assert len(ItemModel.select()) == 1
-    
+
     def test_get_item__success(self):
-        item= ItemModel.create(**TEST_ITEM)
+        item = ItemModel.create(**TEST_ITEM)
         resp = self.app.get('/items/{iid}'.format(iid=item.id))
         assert resp.status_code == OK
-        assert ItemModel.deserialize(resp.data) == TEST_ITEM
-        
+        assert json.loads(resp.data) == TEST_ITEM
 
+    def test_put_item__success(self):
+        item = ItemModel.create(**TEST_ITEM)
+        resp = self.app.put('/items/{iid}'.format(iid=item.id), data=TEST_ITEM2)
+        assert resp.status_code == OK
+        db_item = ItemModel.select().where(ItemModel.id == item.id).get()
+        assert db_item.json() == TEST_ITEM2
 
-    
 
 

@@ -51,11 +51,33 @@ class ItemList(Resource):
 
 
 class Item(Resource):
+    
     def get(self, iid):
         try:
             return ItemModel.select().where(ItemModel.id == iid).get().json(), OK
         except ItemModel.DoesNotExist:
             return None, NOT_FOUND
+
+    def put(self, iid):
+        try:
+            obj = ItemModel.select().where(ItemModel.id == iid).get()
+        except ItemModel.DoesNotExist:
+            return None, NOT_FOUND
+        parser = reqparse.RequestParser()
+        parser.add_argument('name', type=non_emtpy_str, required=True)
+        parser.add_argument('picture', type=non_emtpy_str, required=False)
+        parser.add_argument('price', type=non_emtpy_str, required=True)
+        parser.add_argument('description', type=non_emtpy_str, required=True)
+        args = parser.parse_args(strict=True)
+
+        obj.name = args['name']
+        obj.price = args['price']
+        obj.description = args['description']
+
+        updated = obj.save()
+        if updated != 1:
+            return None, INTERNAL_SERVER_ERROR
+        return obj.json(), OK
 
 
 api.add_resource(ItemList, "/items/")
