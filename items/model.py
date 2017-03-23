@@ -1,9 +1,13 @@
+import os
 from peewee import SqliteDatabase
 from peewee import Model
 from peewee import CharField
 from peewee import UUIDField
 from peewee import DecimalField
 from peewee import TextField
+from peewee import ForeignKeyField
+from werkzeug import secure_filename
+
 
 DATABASE = {
     'name': 'ecommerce.db',
@@ -23,17 +27,30 @@ class BaseModel(Model):
 
 class Item(BaseModel):
     name = CharField(unique=True)
-    picture = UUIDField()
     price = DecimalField(decimal_places=2)
     description = TextField()
 
     def json(self):
         return {
             'name': str(self.name),
-            'picture': self.picture,
-            'price': self.price,
+            # 'picture': self.picture,
+            'price': str(self.price),
             'description': self.description
         }
+
+
+class Picture(BaseModel):
+    item = ForeignKeyField(Item)
+    image = CharField()
+
+    def save_image(self, file_obj):
+        self.image = secure_filename(file_obj.filename)
+        full_path = os.path.join('images', self.image)
+        file_obj.save(full_path)
+        self.save()
+
+    def __unicode__(self):
+        return self.image
 
 
 def connect():
