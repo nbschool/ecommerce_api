@@ -1,17 +1,12 @@
 import os
+import json
 from peewee import SqliteDatabase
 from peewee import Model
 from peewee import CharField
-from peewee import UUIDField
 from peewee import DecimalField
 from peewee import TextField
-<<<<<<< HEAD
 from peewee import ForeignKeyField
 from werkzeug import secure_filename
-
-=======
-import json
->>>>>>> 2d7167a014e7f42eee306c39696368a15e1b21c5
 
 DATABASE = {
     'name': 'ecommerce.db',
