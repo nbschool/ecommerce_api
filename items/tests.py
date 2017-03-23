@@ -2,10 +2,6 @@ from api import app
 from model import Item as ItemModel
 from peewee import SqliteDatabase
 from http.client import CREATED
-from http.client import NO_CONTENT
-from http.client import NOT_FOUND
-from http.client import OK
-from http.client import INTERNAL_SERVER_ERROR
 from model import connect, close
 import json
 
@@ -19,6 +15,7 @@ TEST_ITEM2 = {
     'price': 30.20,
     'description': 'svariati GINIIIII'
 }
+
 
 class TestItems:
     @classmethod
@@ -47,10 +44,9 @@ class TestItems:
 
     def test_put_item__success(self):
         item = ItemModel.create(**TEST_ITEM)
-        resp = self.app.put('/items/{iid}'.format(iid=item.id), data=TEST_ITEM2)
+        resp = self.app.put('/items/{iid}'.format(iid=item.id),
+                            data=TEST_ITEM2)
         assert resp.status_code == OK
         db_item = ItemModel.select().where(ItemModel.id == item.id).get()
         assert db_item.json() == TEST_ITEM2
-
-
 
