@@ -19,7 +19,6 @@ from flask import abort
 from flask import Flask
 from flask import request
 from models import database
-from models import User
 from flask_restful import Api
 from views.user import UsersHandler
 from views.user import UserHandler
@@ -49,9 +48,6 @@ def bad_content_type():
 def database_connect():
     if database.is_closed():
         database.connect()
-
-    if not User.table_exists():
-        User.create_table()
 
 
 @app.teardown_request

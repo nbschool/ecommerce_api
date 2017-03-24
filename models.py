@@ -35,3 +35,7 @@ class User(BaseModel):
             'last_name': self.last_name,
             'email': self.email
         }
+
+
+# Check if the table exists in the database; if not create it.
+User.create_table(fail_silently=True)
