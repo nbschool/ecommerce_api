@@ -8,6 +8,7 @@ from peewee import SqliteDatabase
 from http.client import OK
 from http.client import CREATED
 from http.client import BAD_REQUEST
+from http.client import NO_CONTENT
 import json
 import random
 
@@ -115,16 +116,17 @@ class Testuser:
 
     def test_post_new_user_empty_str_field__fail(self):
         """Test the case where the name field is missing on the post data. """
-        user_d = {
+        u_data = {
             'email': 'mario@email.com',
             'last_name': 'Rossi',
             'password': 'akjsgdf',
             'first_name': ''
         }
 
-        resp = self.app.post(API_ENDPOINT.format('users/'), data=user_d)
+        resp = self.app.post(API_ENDPOINT.format('users/'), data=u_data)
 
         assert resp.status_code == BAD_REQUEST
+        # TODO: find what exception is raised by ReqParse in case of wrong type
         assert User.select().count() == 0
 
         """Get an user and edit all the fields. """
@@ -132,7 +134,13 @@ class Testuser:
 
     def test_delete_user__success(self):
         """Delete an existing user from the database. """
-        pass
+        email = 'mail@email.email'
+        _add_user(email)
+
+        user_path = 'user/{}'.format(email)
+        resp = self.app.delete(API_ENDPOINT.format(user_path))
+        assert User.select().count() == 0
+        assert resp.status_code == NO_CONTENT
 
     def test_delete_user_no_exists__fail(self):
         """Try to delete an user that does not exists. """
