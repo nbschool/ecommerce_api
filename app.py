@@ -107,23 +107,6 @@ class UserHandler(Resource):
     database.
     """
 
-    def get(self, email):
-        """Get a single user using the email."""
-        if not email_exists(email):
-            return None, NOT_FOUND
-
-        user = User.get(User.email == email)
-        return user.get_json(), OK
-
-    def put(self, email):
-        # TODO: Validate payload
-        # TODO: Return BAD_REQUEST if payload not valid
-        # TODO: Check user exists
-        # TODO: Return NOT_FOUND if user not found
-        # TODO: Update user data
-        # TODO: Return (user, OK) if everything went fine
-        pass
-
     def delete(self, email):
         # TODO: Find user => return NOT_FOUND if not found
         # TODO: Delete user from database

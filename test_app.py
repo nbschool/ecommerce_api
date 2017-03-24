@@ -127,16 +127,6 @@ class Testuser:
         assert resp.status_code == BAD_REQUEST
         assert User.select().count() == 0
 
-
-    def test_get_single_user__success(self):
-        """Try to get a single existing user by email. """
-        pass
-
-    def test_get_single_user__fail(self):
-        """Try to get an user that does not exists. """
-        pass
-
-    def test_update_user__success(self):
         """Get an user and edit all the fields. """
         pass
 
