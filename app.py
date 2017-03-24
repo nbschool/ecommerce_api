@@ -15,21 +15,41 @@ User can be deleted using `/api/users/<email>` and a list of all existing users
 can be retrieved making a GET to `/api/users/`
 """
 
+from flask import abort
 from flask import Flask
+from flask import request
 from models import database
 from models import User
 from flask_restful import Api
 from views.user import UsersHandler
 from views.user import UserHandler
-
+from http.client import BAD_REQUEST
 
 app = Flask(__name__)
 api = Api(app)
 
 
 @app.before_request
-def before_request():
+def bad_content_type():
+    """
+    Force POST and PUT methods to have `Content-Type` as 'application/json'
+    before proceeding inside the method handlers.
+    """
 
+    if request.method in ('POST', 'PUT'):
+        # get the content-type for the request
+        ct = dict(request.headers).get('Content-Type', '')
+
+        # if not app/json block and return bad request.
+        if ct != 'application/json':
+            msg = "POST and PUT require Content-Type='application/json'. \
+                  Got {} instead.".format(ct)
+
+            abort(BAD_REQUEST, message=msg)
+
+
+@app.before_request
+def database_connect():
     if database.is_closed():
         database.connect()
 
@@ -38,7 +58,7 @@ def before_request():
 
 
 @app.teardown_request
-def teardown_request(response):
+def database_disconnect(response):
     if not database.is_closed():
         database.close()
     return response
