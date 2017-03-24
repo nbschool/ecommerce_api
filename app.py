@@ -33,6 +33,8 @@ def non_emtpy_dict(val, name):
 
 #populate_tables()
 
+# Views
+
 class OrdersHandler(Resource):
 	def get(self):
 		orders = {}
@@ -65,8 +67,6 @@ class OrdersHandler(Resource):
 
 def validateRequest(arg):
 	return request.form[arg]
-
-# Views
 		
 api.add_resource(OrdersHandler, '/orders/')
 
