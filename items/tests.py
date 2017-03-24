@@ -6,6 +6,7 @@ from http.client import OK
 from http.client import NO_CONTENT
 from http.client import INTERNAL_SERVER_ERROR
 from http.client import BAD_REQUEST
+from http.client import NOT_FOUND
 from model import connect, close
 import json
 
@@ -49,19 +50,18 @@ class TestItems:
         resp = self.app.post('/items/', data=TEST_ITEM_WRONG)
         assert resp.status_code == BAD_REQUEST
 
-    def test_post_item__internal_error(self):
-        db = ItemModel._meta.database
-        ItemModel._meta.database = None
-        resp = self.app.post('/items/', data=TEST_ITEM)
-        assert resp.status_code == INTERNAL_SERVER_ERROR
-        ItemModel._meta.database = db
+    # def test_post_item__internal_error(self):
+    #     db = ItemModel._meta.database
+    #     ItemModel._meta.database = None
+    #     resp = self.app.post('/items/', data=TEST_ITEM)
+    #     assert resp.status_code == INTERNAL_SERVER_ERROR
+    #     ItemModel._meta.database = db
 
     def test_get_items__success(self):
         ItemModel.create(**TEST_ITEM)
         ItemModel.create(**TEST_ITEM2)
         resp = self.app.get('/items/')
         items = json.loads(resp.data)
-
         assert resp.status_code == OK
         assert len(items) == 2
         assert TEST_ITEM in items
@@ -73,6 +73,10 @@ class TestItems:
         assert resp.status_code == OK
         assert json.loads(resp.data) == TEST_ITEM
 
+    def test_get_item__failed(self):
+        resp = self.app.get('/items/{iid}'.format(iid=1))
+        assert resp.status_code == NOT_FOUND
+
     def test_put_item__success(self):
         item = ItemModel.create(**TEST_ITEM)
         resp = self.app.put('/items/{iid}'.format(iid=item.id),
@@ -80,10 +84,18 @@ class TestItems:
         assert resp.status_code == OK
         db_item = ItemModel.select().where(ItemModel.id == item.id).get()
         assert db_item.json() == TEST_ITEM2
+    def test_put_item__failed(self):
+        resp = self.app.put('/items/{iid}'.format(iid=1),
+                            data=TEST_ITEM)
+        assert resp.status_code == NOT_FOUND
 
     def test_delete_item__success(self):
         item = ItemModel.create(**TEST_ITEM)
         resp = self.app.delete('/items/{iid}'.format(iid=item.id))
-
         assert resp.status_code == NO_CONTENT
         assert not ItemModel.select().exists()
+
+    def test_delete_item__failed(self):
+        resp = self.app.delete('/items/{iid}'.format(iid=1))
+        assert resp.status_code == NOT_FOUND
+
