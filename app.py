@@ -33,14 +33,14 @@ api = Api(app)
 def bad_content_type():
     """
     Force POST and PUT methods to have `Content-Type` as 'application/json'
-    before proceeding inside the method handlers.
+    before proceeding inside the method handlers, that use `request.get_json`
+    from `flask.request` that require the header to be set in order to return
+    the content of the request.
     """
 
     if request.method in ('POST', 'PUT'):
-        # get the content-type for the request
         ct = dict(request.headers).get('Content-Type', '')
 
-        # if not app/json block and return bad request.
         if ct != 'application/json':
             abort(BAD_REQUEST)
 
