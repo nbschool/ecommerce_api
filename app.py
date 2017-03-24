@@ -2,7 +2,17 @@
 Module contains the route handlers for the user part of the RESTful part of the
 flask application.
 
-TODO: Summarize what can be done with the api and the endpoints
+Enpoints can be found at `/api/users/` and allow the creation of new users with
+* `first_name`
+* `last_name`
+* `email`
+* `password`
+
+Fields are required non empty strings. At the current stage of development there
+is no validation on what the fields contain.
+
+User can be deleted using `/api/users/<email>` and a list of all existing users
+can be retrieved making a GET to `/api/users/`
 """
 
 from flask import Flask
@@ -65,7 +75,6 @@ class UsersHandler(Resource):
     """
 
     def get(self):
-        # TODO: Add case for table missing
         return [user.get_json() for user in User.select()], OK
 
     def post(self):
@@ -96,12 +105,8 @@ class UsersHandler(Resource):
             first_name=request.form['first_name'].capitalize(),
             last_name=request.form['last_name'].capitalize(),
             email=request.form['email'],
-            password=request.form['password'],
+            password=request.form['password']
         )
-
-        # If there was an error creating the new user (None) notify the client
-        if new_user is None:
-            return None, INTERNAL_SERVER_ERROR
 
         # If everything went OK return the newly created user and CREATED code
         return new_user.get_json(), CREATED
@@ -115,6 +120,10 @@ class UserHandler(Resource):
     """
 
     def delete(self, email):
+        """
+        Delete an existing user from the database, looking up by email.
+        If the email does not exists return NOT_FOUND.
+        """
         if not email_exists(email):
             return None, NOT_FOUND
 
@@ -124,9 +133,6 @@ class UserHandler(Resource):
             user.delete_instance()
             return None, NO_CONTENT
 
-        # TODO: decide what to return in case of errors
-        return None, INTERNAL_SERVER_ERROR
-
 
 api.add_resource(UsersHandler, '/api/users/')
-api.add_resource(UserHandler, '/api/user/<email>')
+api.add_resource(UserHandler, '/api/users/<email>')
