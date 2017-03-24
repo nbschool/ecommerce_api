@@ -10,6 +10,7 @@ ipython-genutils==0.2.0
 itsdangerous==0.24
 Jinja2==2.9.5
 MarkupSafe==1.0
+pbr==2.0.0
 peewee==2.9.1
 pexpect==4.2.1
 pickleshare==0.7.4

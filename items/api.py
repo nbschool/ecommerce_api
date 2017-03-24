@@ -92,6 +92,5 @@ class ItemHandler(Resource):
         return None, NO_CONTENT
 
 
-
 api.add_resource(ItemListHandler, "/items/")
 api.add_resource(ItemHandler, "/items/<int:iid>")

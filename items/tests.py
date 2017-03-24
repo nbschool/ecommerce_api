@@ -85,10 +85,21 @@ class TestItems:
         assert resp.status_code == OK
         db_item = ItemModel.select().where(ItemModel.id == item.id).get()
         assert db_item.json() == TEST_ITEM2
+
     def test_put_item__failed(self):
         resp = self.app.put('/items/{iid}'.format(iid=1),
                             data=TEST_ITEM)
         assert resp.status_code == NOT_FOUND
+
+    def test_put_item__internal_error(self):
+        item = ItemModel.create(**TEST_ITEM)
+        from api import ItemModel as MockItem
+        save = MockItem.save
+        MockItem.save = lambda x: 0
+        resp = self.app.put('/items/{iid}'.format(iid=item.id),
+                            data=TEST_ITEM2)
+        assert resp.status_code == INTERNAL_SERVER_ERROR
+        MockItem.save = save
 
     def test_delete_item__success(self):
         item = ItemModel.create(**TEST_ITEM)
@@ -99,4 +110,3 @@ class TestItems:
     def test_delete_item__failed(self):
         resp = self.app.delete('/items/{iid}'.format(iid=1))
         assert resp.status_code == NOT_FOUND
-
