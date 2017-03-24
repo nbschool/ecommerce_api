@@ -50,12 +50,13 @@ class TestItems:
         resp = self.app.post('/items/', data=TEST_ITEM_WRONG)
         assert resp.status_code == BAD_REQUEST
 
-    # def test_post_item__internal_error(self):
-    #     db = ItemModel._meta.database
-    #     ItemModel._meta.database = None
-    #     resp = self.app.post('/items/', data=TEST_ITEM)
-    #     assert resp.status_code == INTERNAL_SERVER_ERROR
-    #     ItemModel._meta.database = db
+    def test_post_item__internal_error(self):
+        from api import ItemModel as MockItem
+        save = MockItem.save
+        MockItem.save = lambda x: 0
+        resp = self.app.post('/items/', data=TEST_ITEM)
+        assert resp.status_code == INTERNAL_SERVER_ERROR
+        MockItem.save = save
 
     def test_get_items__success(self):
         ItemModel.create(**TEST_ITEM)

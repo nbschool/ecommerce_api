@@ -1,5 +1,4 @@
 import os
-import json
 from peewee import SqliteDatabase
 from peewee import Model
 from peewee import CharField
