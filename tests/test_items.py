@@ -1,5 +1,13 @@
-from api import app
-from model import Item as ItemModel
+"""
+Test suite for ItemHandler and ItemListHandler
+"""
+
+import json
+
+from ..views.items import app
+from ..models import Item as ItemModel
+from ..models import connect, close
+
 from peewee import SqliteDatabase
 from http.client import CREATED
 from http.client import OK
@@ -7,8 +15,10 @@ from http.client import NO_CONTENT
 from http.client import INTERNAL_SERVER_ERROR
 from http.client import BAD_REQUEST
 from http.client import NOT_FOUND
-from model import connect, close
-import json
+
+__author__ = "Francesco Mirabelli, Marco Tinacci"
+__copyright__ = "Copyright 2017"
+__email__ = "ceskomira90@gmail.com, marco.tinacci@gmail.com"
 
 TEST_ITEM = {
     'name': 'mario',
@@ -51,7 +61,7 @@ class TestItems:
         assert resp.status_code == BAD_REQUEST
 
     def test_post_item__internal_error(self):
-        from api import ItemModel as MockItem
+        from ..views.items import ItemModel as MockItem
         save = MockItem.save
         MockItem.save = lambda x: 0
         resp = self.app.post('/items/', data=TEST_ITEM)
@@ -93,7 +103,7 @@ class TestItems:
 
     def test_put_item__internal_error(self):
         item = ItemModel.create(**TEST_ITEM)
-        from api import ItemModel as MockItem
+        from ..views.items import ItemModel as MockItem
         save, MockItem.save = MockItem.save, lambda x: 0
         resp = self.app.put('/items/{iid}'.format(iid=item.id),
                             data=TEST_ITEM2)
