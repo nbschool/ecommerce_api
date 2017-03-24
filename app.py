@@ -57,5 +57,5 @@ def database_disconnect(response):
     return response
 
 
-api.add_resource(UsersHandler, '/api/users/')
-api.add_resource(UserHandler, '/api/users/<email>')
+api.add_resource(UsersHandler, '/users/')
+api.add_resource(UserHandler, '/users/<email>')

@@ -14,7 +14,7 @@ import json
 import random
 
 # main endpoint for API
-API_ENDPOINT = '/api/{}'
+API_ENDPOINT = '/{}'
 # tests are run in temp database in memory
 TEST_DB = SqliteDatabase(':memory:')
 
@@ -26,6 +26,7 @@ def _add_user(email=None):
     by the function before adding the User to the database.
     """
     email = email or 'johndoe{}@email.com'.format(int(random.random() * 100))
+
     return User.create(
         first_name='John',
         last_name='Doe',
