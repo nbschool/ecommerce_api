@@ -42,10 +42,7 @@ def bad_content_type():
 
         # if not app/json block and return bad request.
         if ct != 'application/json':
-            msg = "POST and PUT require Content-Type='application/json'. \
-                  Got {} instead.".format(ct)
-
-            abort(BAD_REQUEST, message=msg)
+            abort(BAD_REQUEST)
 
 
 @app.before_request

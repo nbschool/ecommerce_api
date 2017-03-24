@@ -90,6 +90,19 @@ class Testuser:
         assert json.loads(resp.data) == user
         assert User.select().count() == 1
 
+    def test_post_new_user_no_json__fail(self):
+        """Test a correct insert of a new user into the database. """
+        user = {
+            'first_name': 'Mario',
+            'last_name': 'Rossi',
+            'email': 'asddjkasdjhv',
+            'password': 'aksdg'
+        }
+        resp = self.app.post(API_ENDPOINT.format('users/'),
+                             data=json.dumps(user))
+
+        assert resp.status_code == BAD_REQUEST
+
     def test_post_new_user_email_exists__fail(self):
         """Test the case when an existing email is used to signup. """
         _add_user('mail@gmail.com')
