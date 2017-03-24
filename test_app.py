@@ -147,6 +147,9 @@ class Testuser:
         """Try to delete an user that does not exists. """
         email = 'user@email.it'
         _add_user(email)
+
         user_path = 'user/{}'.format('hi@email.it')
         resp = self.app.delete(API_ENDPOINT.format(user_path))
+
         assert resp.status_code == NOT_FOUND
+        assert User.select().count() == 1
