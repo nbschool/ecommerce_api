@@ -4,6 +4,8 @@ from peewee import SqliteDatabase
 from http.client import CREATED
 from http.client import OK
 from http.client import NO_CONTENT
+from http.client import INTERNAL_SERVER_ERROR
+from http.client import BAD_REQUEST
 from model import connect, close
 import json
 
@@ -17,7 +19,11 @@ TEST_ITEM2 = {
     'price': 30.20,
     'description': 'svariati GINIIIII'
 }
-
+TEST_ITEM_WRONG= {
+    'name': '',
+    'price': 30.20,
+    'description': 'svariati GINIIIII'
+}
 
 class TestItems:
     @classmethod
@@ -37,6 +43,29 @@ class TestItems:
         resp = self.app.post('/items/', data=TEST_ITEM)
         assert resp.status_code == CREATED
         assert len(ItemModel.select()) == 1
+
+    def test_post_item__failed(self):
+        resp = self.app.post('/items/', data=TEST_ITEM_WRONG)
+        assert resp.status_code == BAD_REQUEST
+
+    def test_post_item__internal_error(self):
+        db = ItemModel._meta.database
+        ItemModel._meta.database = None
+        resp = self.app.post('/items/', data=TEST_ITEM)
+        assert resp.status_code == INTERNAL_SERVER_ERROR
+        ItemModel._meta.database = db
+
+    def test_get_items__success(self):
+        item = ItemModel.create(**TEST_ITEM)
+        item2 = ItemModel.create(**TEST_ITEM2)
+        resp = self.app.get('/items/')
+        items = json.loads(resp.data)
+
+        assert resp.status_code == OK
+        assert len(items) == 2
+        assert TEST_ITEM in items
+        assert TEST_ITEM2 in items
+
 
     def test_get_item__success(self):
         item = ItemModel.create(**TEST_ITEM)

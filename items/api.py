@@ -33,6 +33,9 @@ def non_emtpy_str(val, name):
 
 class ItemListHandler(Resource):
 
+    def get(self):
+        return [o.json() for o in ItemModel.select()], OK
+
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('name', type=non_emtpy_str, required=True)
