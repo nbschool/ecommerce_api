@@ -9,6 +9,7 @@ from http.client import OK
 from http.client import CREATED
 from http.client import BAD_REQUEST
 from http.client import NO_CONTENT
+from http.client import NOT_FOUND
 import json
 import random
 
@@ -153,4 +154,8 @@ class Testuser:
 
     def test_delete_user_no_exists__fail(self):
         """Try to delete an user that does not exists. """
-        pass
+        email = 'user@email.it'
+        _add_user(email)
+        user_path = 'user/{}'.format('hi@email.it')
+        resp = self.app.delete(API_ENDPOINT.format(user_path))
+        assert resp.status_code == NOT_FOUND
