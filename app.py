@@ -20,13 +20,14 @@ from flask import request
 from flask_restful import Api
 from flask_restful import Resource
 from flask_restful import reqparse
-from models import User, database
+from models import database
+from models import User
 from http.client import BAD_REQUEST
 from http.client import CREATED
 from http.client import INTERNAL_SERVER_ERROR
-from http.client import OK
-from http.client import NOT_FOUND
 from http.client import NO_CONTENT
+from http.client import NOT_FOUND
+from http.client import OK
 
 app = Flask(__name__)
 api = Api(app)
@@ -44,8 +45,9 @@ def email_exists(email):
     Check that an email exists in the User table.
     returns: bool
     """
-    u = User.select().where(User.email == email)
-    if u.exists():
+    user = User.select().where(User.email == email)
+
+    if user.exists():
         return True
 
     return False
@@ -71,7 +73,10 @@ def teardown_request(response):
 class UsersHandler(Resource):
     """
     Handler for main user endpoint.
-    Allows creation of new users and retrieval of the users list.
+
+    Implements:
+    * `get` method to retrieve the list of all the users
+    * `post` method to add a new user to the database.
     """
 
     def get(self):
@@ -119,8 +124,9 @@ class UsersHandler(Resource):
 class UserHandler(Resource):
     """
     Handler for the operating on a single user.
-    Allows retrieving the user data, edit it and delete the user from the
-    database.
+
+    Implements:
+    * `delete` method to remove an existing user from the database.
     """
 
     def delete(self, email):
@@ -133,9 +139,8 @@ class UserHandler(Resource):
 
         user = User.get(User.email == email)
 
-        if user:
-            user.delete_instance()
-            return None, NO_CONTENT
+        user.delete_instance()
+        return None, NO_CONTENT
 
 
 api.add_resource(UsersHandler, '/api/users/')
