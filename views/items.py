@@ -1,3 +1,8 @@
+"""
+Small library for remote procedure calls between
+a client and a server
+"""
+
 from flask import Flask
 from flask_restful import Api
 from flask_restful import reqparse
@@ -10,6 +15,9 @@ from http.client import INTERNAL_SERVER_ERROR
 from model import Item as ItemModel
 from model import connect, close
 
+__author__ = "Marco Tinacci"
+__copyright__ = "Copyright 2017"
+__email__ = "marco@balzo.eu"
 
 app = Flask(__name__)
 api = Api(app)

@@ -94,8 +94,7 @@ class TestItems:
     def test_put_item__internal_error(self):
         item = ItemModel.create(**TEST_ITEM)
         from api import ItemModel as MockItem
-        save = MockItem.save
-        MockItem.save = lambda x: 0
+        save, MockItem.save = MockItem.save, lambda x: 0
         resp = self.app.put('/items/{iid}'.format(iid=item.id),
                             data=TEST_ITEM2)
         assert resp.status_code == INTERNAL_SERVER_ERROR
