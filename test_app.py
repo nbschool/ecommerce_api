@@ -1,5 +1,5 @@
 """
-Test suite for flask restful api endpoints for users.
+Test suite for User(s) resources.
 """
 
 from app import app
@@ -36,11 +36,12 @@ def _add_user(email=None):
 
 
 class Testuser:
-    """Implements py.test suite for User endpoints in Flask-restful app. """
+    """
+    Implements py.test suite for User Resource endpoints.
+    """
 
     @classmethod
     def setup_class(cls):
-        """Override the default database for testing. """
         User._meta.database = TEST_DB
         User.create_table()
 
@@ -48,11 +49,9 @@ class Testuser:
         cls.app = app.test_client()
 
     def setup_method(self, test_method):
-        """Empty the database on every test. """
         User.delete().execute()
 
     def test_get_empty_list__success(self):
-        """Pass if the api returns an empty list of users. """
         resp = self.app.get(API_ENDPOINT.format('users/'))
 
         assert resp.status_code == OK
@@ -60,10 +59,6 @@ class Testuser:
         assert User.select().count() == 0
 
     def test_get_users_list__success(self):
-        """
-        Add two users, check that they exists in the database and that
-        the API returns a list with all of them.
-        """
         user1 = _add_user()
         user2 = _add_user()
 
@@ -74,7 +69,6 @@ class Testuser:
         assert User.select().count() == 2
 
     def test_post_new_user__success(self):
-        """Test a correct insert of a new user into the database. """
         user = {
             'first_name': 'Mario',
             'last_name': 'Rossi',
@@ -92,7 +86,6 @@ class Testuser:
         assert User.select().count() == 1
 
     def test_post_new_user_no_json__fail(self):
-        """Test a correct insert of a new user into the database. """
         user = {
             'first_name': 'Mario',
             'last_name': 'Rossi',
@@ -105,7 +98,6 @@ class Testuser:
         assert resp.status_code == BAD_REQUEST
 
     def test_post_new_user_email_exists__fail(self):
-        """Test the case when an existing email is used to signup. """
         _add_user('mail@gmail.com')
         user = {
             'first_name': 'Mario',
@@ -122,7 +114,6 @@ class Testuser:
         assert User.select().count() == 1
 
     def test_post_new_user_no_email__fail(self):
-        """Test the case where the email field is missing on the post data. """
         user = {
             'first_name': 'Mario',
             'last_name': 'Rossi',
@@ -136,7 +127,6 @@ class Testuser:
         assert User.select().count() == 0
 
     def test_post_new_user_empty_str_field__fail(self):
-        """Test the case where the name field is missing on the post data. """
         user = {
             'email': 'mario@email.com',
             'last_name': 'Rossi',
@@ -152,7 +142,6 @@ class Testuser:
         assert User.select().count() == 0
 
     def test_delete_user__success(self):
-        """Delete an existing user from the database. """
         email = 'mail@email.it'
         _add_user(email)
 
@@ -163,7 +152,6 @@ class Testuser:
         assert User.select().count() == 0
 
     def test_delete_user_no_exists__fail(self):
-        """Try to delete an user that does not exists. """
         email = 'user@email.it'
         _add_user(email)
 
