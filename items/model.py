@@ -50,7 +50,7 @@ class Item(BaseModel):
 
 
 class Picture(BaseModel):
-    item = ForeignKeyField(Item)
+    item = ForeignKeyField(Item, related_name='pictures')
     image = CharField()
 
     def save_image(self, file_obj):
@@ -66,7 +66,7 @@ class Picture(BaseModel):
 def connect():
     if db.is_closed():
         db.connect()
-        db.create_tables([Item], safe=True)
+        db.create_tables([Item, Picture], safe=True)
 
 
 def close():
