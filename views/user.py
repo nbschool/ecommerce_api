@@ -1,9 +1,9 @@
 from flask import request
+from flask import abort
 from flask_restful import Resource
 from models import User
 from http.client import BAD_REQUEST
 from http.client import CREATED
-from http.client import INTERNAL_SERVER_ERROR
 from http.client import NO_CONTENT
 from http.client import NOT_FOUND
 from http.client import OK
@@ -16,17 +16,13 @@ def non_empty_str(val, name):
     return str(val)
 
 
-def email_exists(email):
+def user_exists(email):
     """
-    Check that an email exists in the User table.
-    returns: bool
+    Check that an user exists by checking the email field (unique).
     """
     user = User.select().where(User.email == email)
 
-    if user.exists():
-        return True
-
-    return False
+    return user.exists()
 
 
 class UsersHandler(Resource):
@@ -56,19 +52,14 @@ class UsersHandler(Resource):
             try:
                 value = request_data[field]
                 non_empty_str(value, field)
-            except KeyError:
-                # Return BAD_REQUEST if one of the required fields is missing
-                return None, BAD_REQUEST
-            except ValueError:
-                # Return BAD_REQUEST if one of the fields is an empty string
-                return None, BAD_REQUEST
+            except (KeyError, ValueError):
+                abort(BAD_REQUEST)
 
         # If email is present in the database return a BAD_REQUEST response.
-        if email_exists(request_data['email']):
+        if user_exists(request_data['email']):
             msg = {'message': 'email already present.'}
             return msg, BAD_REQUEST
 
-        # Create the new user
         new_user = User.create(
             first_name=request_data['first_name'].capitalize(),
             last_name=request_data['last_name'].capitalize(),
@@ -93,7 +84,7 @@ class UserHandler(Resource):
         Delete an existing user from the database, looking up by email.
         If the email does not exists return NOT_FOUND.
         """
-        if not email_exists(email):
+        if not user_exists(email):
             return None, NOT_FOUND
 
         user = User.get(User.email == email)

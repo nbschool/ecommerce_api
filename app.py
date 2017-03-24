@@ -19,7 +19,6 @@ from flask import abort
 from flask import Flask
 from flask import request
 from models import database
-from models import User
 from flask_restful import Api
 from views.user import UsersHandler
 from views.user import UserHandler
@@ -33,14 +32,14 @@ api = Api(app)
 def bad_content_type():
     """
     Force POST and PUT methods to have `Content-Type` as 'application/json'
-    before proceeding inside the method handlers.
+    before proceeding inside the method handlers, that use `request.get_json`
+    from `flask.request` that require the header to be set in order to return
+    the content of the request.
     """
 
     if request.method in ('POST', 'PUT'):
-        # get the content-type for the request
         ct = dict(request.headers).get('Content-Type', '')
 
-        # if not app/json block and return bad request.
         if ct != 'application/json':
             abort(BAD_REQUEST)
 
@@ -50,9 +49,6 @@ def database_connect():
     if database.is_closed():
         database.connect()
 
-    if not User.table_exists():
-        User.create_table()
-
 
 @app.teardown_request
 def database_disconnect(response):
@@ -61,5 +57,5 @@ def database_disconnect(response):
     return response
 
 
-api.add_resource(UsersHandler, '/api/users/')
-api.add_resource(UserHandler, '/api/users/<email>')
+api.add_resource(UsersHandler, '/users/')
+api.add_resource(UserHandler, '/users/<email>')
