@@ -83,29 +83,33 @@ class UsersHandler(Resource):
         # request and not be empty strings.
         required_fields = ['first_name', 'last_name', 'email', 'password']
 
+        request_data = request.get_json()
+
         # For every field required for creating a new user trry to get the
         # value from `request.form`. If the field is missing (KeyError) or
         # the value is an empty string (ValueError) return a BAD_REQUEST
         for field in required_fields:
             try:
-                value = request.form[field]
+                value = request_data[field]
                 non_empty_str(value, field)
             except KeyError:
+                # Return BAD_REQUEST if one of the required fields is missing
                 return None, BAD_REQUEST
             except ValueError:
+                # Return BAD_REQUEST if one of the fields is an empty string
                 return None, BAD_REQUEST
 
         # If email is present in the database return a BAD_REQUEST response.
-        if email_exists(request.form['email']):
+        if email_exists(request_data['email']):
             msg = {'message': 'email already present.'}
             return msg, BAD_REQUEST
 
         # Create the new user
         new_user = User.create(
-            first_name=request.form['first_name'].capitalize(),
-            last_name=request.form['last_name'].capitalize(),
-            email=request.form['email'],
-            password=request.form['password']
+            first_name=request_data['first_name'].capitalize(),
+            last_name=request_data['last_name'].capitalize(),
+            email=request_data['email'],
+            password=request_data['password']
         )
 
         # If everything went OK return the newly created user and CREATED code

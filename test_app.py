@@ -25,11 +25,11 @@ def _add_user(email=None):
     If an email is provided it will be used, otherwise it will be generated
     by the function before adding the User to the database.
     """
-    user_email = 'johndoe{}@email.com'.format(int(random.random() * 100))
+    email = email or 'johndoe{}@email.com'.format(int(random.random() * 100))
     return User.create(
         first_name='John',
         last_name='Doe',
-        email=email or user_email,
+        email=email,
         password='afoihseg'
     )
 
@@ -80,7 +80,9 @@ class Testuser:
             'email': 'asddjkasdjhv',
             'password': 'aksdg'
         }
-        resp = self.app.post(API_ENDPOINT.format('users/'), data=user)
+        resp = self.app.post(API_ENDPOINT.format('users/'),
+                             data=json.dumps(user),
+                             content_type='application/json')
 
         assert resp.status_code == CREATED
 
@@ -97,7 +99,9 @@ class Testuser:
             'email': 'mail@gmail.com',
             'password': 'aksdg'
         }
-        resp = self.app.post(API_ENDPOINT.format('users/'), data=user)
+        resp = self.app.post(API_ENDPOINT.format('users/'),
+                             data=json.dumps(user),
+                             content_type='application/json')
 
         assert resp.status_code == BAD_REQUEST
         assert json.loads(resp.data)['message'] == 'email already present.'
@@ -110,7 +114,9 @@ class Testuser:
             'last_name': 'Rossi',
             'password': 'aksdg'
         }
-        resp = self.app.post(API_ENDPOINT.format('users/'), data=user)
+        resp = self.app.post(API_ENDPOINT.format('users/'),
+                             data=json.dumps(user),
+                             content_type='application/json')
 
         assert resp.status_code == BAD_REQUEST
         assert User.select().count() == 0
@@ -124,27 +130,30 @@ class Testuser:
             'first_name': ''
         }
 
-        resp = self.app.post(API_ENDPOINT.format('users/'), data=user)
+        resp = self.app.post(API_ENDPOINT.format('users/'),
+                             data=user,
+                             content_type='application/json')
 
         assert resp.status_code == BAD_REQUEST
         assert User.select().count() == 0
 
     def test_delete_user__success(self):
         """Delete an existing user from the database. """
-        email = 'mail@email.email'
+        email = 'mail@email.it'
         _add_user(email)
 
-        user_path = 'user/{}'.format(email)
+        user_path = 'users/{}'.format(email)
         resp = self.app.delete(API_ENDPOINT.format(user_path))
-        assert User.select().count() == 0
+
         assert resp.status_code == NO_CONTENT
+        assert User.select().count() == 0
 
     def test_delete_user_no_exists__fail(self):
         """Try to delete an user that does not exists. """
         email = 'user@email.it'
         _add_user(email)
 
-        user_path = 'user/{}'.format('hi@email.it')
+        user_path = 'users/{}'.format('hi@email.it')
         resp = self.app.delete(API_ENDPOINT.format(user_path))
 
         assert resp.status_code == NOT_FOUND
