@@ -5,6 +5,7 @@ from flask_restful import Resource
 from http.client import CREATED
 from http.client import NOT_FOUND
 from http.client import OK
+from http.client import NO_CONTENT
 from http.client import INTERNAL_SERVER_ERROR
 from model import Item as ItemModel
 from model import connect, close
@@ -78,6 +79,15 @@ class ItemHandler(Resource):
         if updated != 1:
             return None, INTERNAL_SERVER_ERROR
         return obj.json(), OK
+
+    def delete(self, iid):
+        try:
+            obj = ItemModel.select().where(ItemModel.id == iid).get()
+        except ItemModel.DoesNotExist:
+            return None, NOT_FOUND
+        obj.delete_instance()
+        return None, NO_CONTENT
+
 
 
 api.add_resource(ItemListHandler, "/items/")

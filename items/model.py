@@ -36,12 +36,6 @@ class Item(BaseModel):
             'description': self.description
         }
 
-    @staticmethod
-    def deserialize(item_json):
-        item = json.loads(item_json)
-        item['price'] = float(item['price'])
-        return item
-
 
 class Picture(BaseModel):
     item = ForeignKeyField(Item)

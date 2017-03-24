@@ -2,6 +2,8 @@ from api import app
 from model import Item as ItemModel
 from peewee import SqliteDatabase
 from http.client import CREATED
+from http.client import OK
+from http.client import NO_CONTENT
 from model import connect, close
 import json
 
@@ -49,4 +51,12 @@ class TestItems:
         assert resp.status_code == OK
         db_item = ItemModel.select().where(ItemModel.id == item.id).get()
         assert db_item.json() == TEST_ITEM2
+
+    def test_delete_item__success(self):
+        item = ItemModel.create(**TEST_ITEM)
+        resp = self.app.delete('/items/{iid}'.format(iid=item.id))
+
+        assert resp.status_code == NO_CONTENT
+        assert not ItemModel.select().exists()
+
 
