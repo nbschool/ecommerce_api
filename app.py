@@ -10,8 +10,9 @@ from http.client import INTERNAL_SERVER_ERROR
 import uuid
 import datetime
 from flask import request
+import json
 
-from models import Order, OrderItem, Item, database, populate_tables1
+from models import Order, OrderItem, Item, database, populate_tables
 
 app = Flask(__name__)
 api = Api(app)
@@ -31,18 +32,17 @@ def non_emtpy_dict(val, name):
 		raise ValueError('The argument {} is not empty'.format(name))
 	return str(val)
 
-#populate_tables()
-
 # Views
 
 class OrdersHandler(Resource):
+	"""OrderS endpoint."""
 	def get(self):
 		orders = {}
 
 		res = (Order
-		 	.select(Order, OrderItem, Item)
-		 	.join(OrderItem)
-		 	.join(Item))
+			.select(Order, OrderItem, Item)
+			.join(OrderItem)
+			.join(Item))
 
 		for row in res:
 			if row.order_id not in orders:
@@ -59,16 +59,51 @@ class OrdersHandler(Resource):
 				'item_name': row.orderitem.item.name,
 				'item_description': row.orderitem.item.description,
 			})
-			
+		
 		return list(orders.values()), OK
 		
 	def post(self):	
-		res = validateRequest('order')
+		res = json.loads(request.form['order'])
+		import pdb; pdb.set_trace()
 
-def validateRequest(arg):
-	return request.form[arg]
+		# for i in len(obj['items']):
+		# 	obj = Order(
+		# 		...
+		# 	)	
+		# 	inserted = obj.save()
+		# 	if inserted !=1:
+		# 		return None, INTERNAL_SERVER_ERROR
+		# return obj.json(), CREATED
+
+class OrderHandler(Resource):
+	"""Single order endpoints."""
+	def get(self, oid):
+
+		res_list = []
+		try:
+			res = (Order
+			.select(Order, OrderItem, Item)
+			.join(OrderItem)
+			.join(Item)
+			.where(Order.order_id == str(oid)))
+
+			for raw in res:
+			 	res_list.append(raw.json())
+
+			return res_list, OK
+		except Order.DoesNotExist:
+		    return None, NOT_FOUND
+
+	# def delete(self, oid):
+	# 	try:
+	# 		obj = Order.get(order_id=oid)
+	# 	except Order.DoesNotExist:
+	# 		return None, NOT_FOUND
+
+	# 	obj.delete_instance()
+	# 	return None, NO_CONTENT
 		
 api.add_resource(OrdersHandler, '/orders/')
+api.add_resource(OrderHandler, '/orders/<uuid:oid>')
 
-
-
+populate_tables()
