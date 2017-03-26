@@ -59,13 +59,13 @@ class OrdersHandler(Resource):
 				'item_name': row.orderitem.item.name,
 				'item_description': row.orderitem.item.description,
 			})
-		
 		return list(orders.values()), OK
 		
 	def post(self):	
 		res = json.loads(request.form['order'])
 		import pdb; pdb.set_trace()
 
+		
 		# for i in len(obj['items']):
 		# 	obj = Order(
 		# 		...
@@ -94,14 +94,16 @@ class OrderHandler(Resource):
 		except Order.DoesNotExist:
 		    return None, NOT_FOUND
 
-	# def delete(self, oid):
-	# 	try:
-	# 		obj = Order.get(order_id=oid)
-	# 	except Order.DoesNotExist:
-	# 		return None, NOT_FOUND
+	def delete(self, oid):
+		try:
+			obj = Order.get(order_id=str(oid))
+			obj2 = OrderItem.get(order=obj)
+		except Order.DoesNotExist:
+			return None, NOT_FOUND
 
-	# 	obj.delete_instance()
-	# 	return None, NO_CONTENT
+		obj.delete_instance()
+		obj2.delete_instance()
+		return None, NO_CONTENT
 		
 api.add_resource(OrdersHandler, '/orders/')
 api.add_resource(OrderHandler, '/orders/<uuid:oid>')
