@@ -67,6 +67,77 @@ class TestOrders:
 		assert resp.status_code == OK
 		assert json.loads(resp.data) == [{"order_id": str(oid), "date": dt, "total_price": 100.0, "delivery_address": 'Via Rossi 12', "items": [{"quantity": 2, "subtotal": 50.0, "item_name": "item1", "item_description": "item1description."}]}]
 
+	def test_get_order__non_existing_empty_orders(self):
+		resp = self.app.get('/orders/{}©√'.format(uuid.uuid4()))
+		assert resp.status_code == NOT_FOUND
+
+	def test_get_order__non_existing(self):
+		item1 = Item.create(
+			name = "item1",
+			picture = uuid.uuid4(),
+			price = "20.00",
+			description = "item1description."
+		)
+		order1 = Order.create(
+			order_id = uuid.uuid4(),
+			date = json.dumps(datetime.datetime.now(),cls=DateTimeEncoder),
+			total_price = 100,
+			delivery_address = 'Via Rossi 12'
+		)
+		orderitem1 = OrderItem.create(
+			order = order1,
+			item = item1,
+			quantity = 2,
+			subtotal = 40.00
+		)
+		resp = self.app.get('/orders/{}©√'.format(uuid.uuid4()))
+		assert resp.status_code == NOT_FOUND
+
+	def test_get_order(self):
+		item1 = Item.create(
+			name = "item1",
+			picture = uuid.uuid4(),
+			price = "20.00",
+			description = "item1description."
+		)
+
+		oid = uuid.uuid4()
+		dt = json.dumps(datetime.datetime.now(), cls=DateTimeEncoder)
+		order1 = Order.create(
+			order_id = oid,
+			date = dt,
+			total_price = 100,
+			delivery_address = 'Via Rossi 12'
+		)
+		orderitem1 = OrderItem.create(
+			order = order1,
+			item = item1,
+			quantity = 2,
+			subtotal = 50.00
+		)
+		item2 = Item.create(
+			name = "item2",
+			picture = uuid.uuid4(),
+			price = "20.00",
+			description = "item2description."
+		)
+		order2 = Order.create(
+			order_id = uuid.uuid4(),
+			date = json.dumps(datetime.datetime.now(), cls=DateTimeEncoder),
+			total_price = 200,
+			delivery_address = 'Via Verdi 12'
+		)
+		orderitem1 = OrderItem.create(
+			order = order2,
+			item = item2,
+			quantity = 3,
+			subtotal = 100.00
+		)
+
+		resp = self.app.get('/orders/{}'.format(oid))
+		assert resp.status_code == OK
+		assert json.loads(resp.data) == [str(oid), dt, 100.0, 'Via Rossi 12', [{"quantity": 2, "subtotal": 50.0, "item_name": "item1", "item_description": "item1description."}]]
+
 	def test_delete_article__success(self):
 		item1 = Item.create(
 			name = "item1",
@@ -100,16 +171,14 @@ class TestOrders:
 		assert len(OrderItem.select()) == 0
 		assert Order.get(order_id = order2.order_id)
 
-	def test_delete_order__failure_non_existing_empty_articles(self):
+	def test_delete_order__failure_non_existing_empty_orders(self):
 		resp = self.app.delete('/orders/{}'.format(str(uuid.uuid4())))
 		assert resp.status_code == NOT_FOUND
 
 	def test_delete_order__failure__failure_non_existing(self):
-		oid =  uuid.uuid4()
-		dt = json.dumps(datetime.datetime.now(),cls=DateTimeEncoder)
 		order1 = Order.create(
-			order_id = oid,
-			date = dt,
+			order_id = uuid.uuid4(),
+			date = json.dumps(datetime.datetime.now(), cls=DateTimeEncoder),
 			total_price = 100,
 			delivery_address = 'Via Rossi 12'
 		)
