@@ -1,9 +1,9 @@
 from flask import Flask, request
 from flask_restful import Api, reqparse
-from orders import OrdersHandler, OrderHandler
 from models import database
 import sys
 sys.path.append('./views')
+from orders import OrdersHandler, OrderHandler
 
 
 
