@@ -1,12 +1,7 @@
-from flask import request
-from flask import abort
+from flask import request, abort
 from flask_restful import Resource
 from models import User
-from http.client import BAD_REQUEST
-from http.client import CREATED
-from http.client import NO_CONTENT
-from http.client import NOT_FOUND
-from http.client import OK
+from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
 
 
 def non_empty_str(val, name):
