@@ -33,9 +33,9 @@ class Item(BaseModel):
             'description': self.description
         }
 
-""" The model Order contains a list of orders - one row per order. 
-    Each order is placed by a ordeclient. """
 class Order(BaseModel):
+    """ The model Order contains a list of orders - one row per order. 
+    Each order is placed by a ordeclient. """
     order_id = UUIDField(unique=True)
     date = DateTimeField()
     total_price = FloatField()
@@ -133,25 +133,3 @@ def populate_tables():
         quantity = 2,
         subtotal = 200
     )
-
-def populate_tables1():
-    item1 = Item.create(
-        name = "item1",
-        picture = uuid.uuid4(),
-        price = "20.00",
-        description = "item1description."
-    )
-    order1 = Order.create(
-        order_id = uuid.uuid4(),
-        date = json.dumps(datetime.datetime.now(),cls=DateTimeEncoder),
-        total_price = 100,
-        delivery_address = 'Via Rossi 12'
-    )
-    orderitem1 = OrderItem.create(
-        order = order1,
-        item = item1,
-        quantity = 2,
-        subtotal = 50.00
-    )
-
-#populate_tables()

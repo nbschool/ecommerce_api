@@ -62,13 +62,12 @@ class OrdersHandler(Resource):
 		return list(orders.values()), OK
 		
 	def post(self):	
-		res = json.loads(request.form['order'])
-		import pdb; pdb.set_trace()
+		#res = request.form['order']
+		res = request.get_json(silent=True)
 
-		
-		# for i in len(obj['items']):
-		# 	obj = Order(
-		# 		...
+		# for i in len(res['order']):
+		#  	obj = Order(
+		#  		...
 		# 	)	
 		# 	inserted = obj.save()
 		# 	if inserted !=1:
@@ -79,20 +78,39 @@ class OrderHandler(Resource):
 	"""Single order endpoints."""
 	def get(self, oid):
 
-		res_list = []
+		order = {}
 		try:
 			res = (Order
 			.select(Order, OrderItem, Item)
 			.join(OrderItem)
 			.join(Item)
 			.where(Order.order_id == str(oid)))
-
-			for raw in res:
-			 	res_list.append(raw.json())
-
-			return res_list, OK
+	
+			order = {
+				'order_id': str(res[0].order_id),
+				'date': res[0].date,
+				'total_price': res[0].total_price,
+				'delivery_address': res[0].delivery_address,
+				'items': []
+			}
+			for row in res:
+				order['items'].append({'quantity': row.orderitem.quantity,
+				'subtotal': row.orderitem.subtotal,
+				'item_name': row.orderitem.item.name,
+				'item_description': row.orderitem.item.description,
+				})
+			return list(order.values()), OK
+		
 		except Order.DoesNotExist:
 		    return None, NOT_FOUND
+
+    def put(self, oid):
+    	try:
+    		obj = Order.get(oid=oid)
+    	except Order.DoesNotExist:
+    		return None, NOT_FOUND
+
+    	res = request.get_json(silent=True)
 
 	def delete(self, oid):
 		try:

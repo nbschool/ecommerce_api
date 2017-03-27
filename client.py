@@ -5,19 +5,20 @@ from urllib.parse import urljoin
 import requests
 import json
 
-
 if __name__ == '__main__':
     
     order = {
         'items': [
             {
-                'item_name': 'bla',
-                'quantity': 231,
-                'subtotal': 123.2
+                'name': 'bla',
+                'picture': uuid.uuid4(),
+                'price' = 100.00,
+                'description' = "item3description."
             }
         ], 
         'total_price': 32132
     }
-    import pdb; pdb.set_trace()
-    resp = requests.post('http://localhost:5000/orders/', json={'order': order})
-    #main()
+
+    #resp = requests.post('http://gitlocalhost:5000/orders/', json={'order':  json.dumps(order)})
+    resp = requests.post('http://localhost:5000/orders/', json={'order':  order})
+    
