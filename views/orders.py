@@ -1,8 +1,9 @@
 from flask_restful import Resource
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, INTERNAL_SERVER_ERROR
-import sys
+import sys, uuid, datetime, dateutil.parser
 sys.path.append('../ecommerce_api')
 from models import Order, OrderItem, Item
+from flask import request
 
 
 class OrdersHandler(Resource):
@@ -34,6 +35,18 @@ class OrdersHandler(Resource):
 		
 	def post(self):	
 		res = request.get_json(silent=True)
+		order1 = Order.create(
+			order_id = uuid.UUID(res['order']['order_id']),
+			date = dateutil.parser.parse(res['order']['date']),
+			total_price = res['order']['total_price'],
+			delivery_address = res['order']['delivery_address']
+		)
+		inserted = order1.save()
+		if inserted != 1:
+			return None, INTERNAL_SERVER_ERROR
+
+		return order1.json(), CREATED
+		
 
 class OrderHandler(Resource):
 	"""Single order endpoints."""
