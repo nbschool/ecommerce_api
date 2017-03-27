@@ -1,8 +1,8 @@
 from flask_restful import Resource
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, INTERNAL_SERVER_ERROR
-from models import Order, OrderItem, Item
 import sys
 sys.path.append('../ecommerce_api')
+from models import Order, OrderItem, Item
 
 
 class OrdersHandler(Resource):
