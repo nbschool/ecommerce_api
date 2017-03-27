@@ -29,7 +29,7 @@ class Item(BaseModel):
     price = peewee.FloatField()
     description = peewee.TextField()
 
-    def __unicode__(self):
+    def __str__(self):
         return u'{}, {}, {}'.format(
             self.name,
             round(float(self.price), PRICE_PRECISION),
@@ -54,7 +54,7 @@ class Picture(BaseModel):
         full_path = os.path.join('images', filename)
         return Picture(item=item, image=full_path)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.image
 
 
