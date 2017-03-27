@@ -48,11 +48,11 @@ class Picture(BaseModel):
     item = peewee.ForeignKeyField(Item, related_name='pictures')
     image = peewee.CharField()
 
-    def save_image(self, file_obj):
-        self.image = secure_filename(file_obj.filename)
-        full_path = os.path.join('images', self.image)
-        file_obj.save(full_path)
-        self.save()
+    @staticmethod
+    def save_image(file_obj, item):
+        filename = secure_filename(file_obj.filename)
+        full_path = os.path.join('images', filename)
+        return Picture(item=item, image=full_path)
 
     def __unicode__(self):
         return self.image
