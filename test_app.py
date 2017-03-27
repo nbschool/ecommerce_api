@@ -65,7 +65,7 @@ class Testuser:
         resp = self.app.get(API_ENDPOINT.format('users/'))
 
         assert resp.status_code == OK
-        assert json.loads(resp.data) == [user1.get_json(), user2.get_json()]
+        assert json.loads(resp.data) == [user1.json(), user2.json()]
         assert User.select().count() == 2
 
     def test_post_new_user__success(self):

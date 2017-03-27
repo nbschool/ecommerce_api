@@ -20,7 +20,7 @@ class UsersHandler(Resource):
     """
 
     def get(self):
-        return [user.get_json() for user in User.select()], OK
+        return [user.json() for user in User.select()], OK
 
     def post(self):
         """ Add an user to the database."""
@@ -53,7 +53,7 @@ class UsersHandler(Resource):
         )
 
         # If everything went OK return the newly created user and CREATED code
-        return new_user.get_json(), CREATED
+        return new_user.json(), CREATED
 
 
 class UserHandler(Resource):
