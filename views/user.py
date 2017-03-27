@@ -3,6 +3,7 @@ from flask_restful import Resource
 from models import User
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
 import utils
+from auth import auth
 
 
 class UsersHandler(Resource):
@@ -59,6 +60,7 @@ class UserHandler(Resource):
     * `delete` method to remove an existing user from the database.
     """
 
+    @auth.login_required
     def delete(self, email):
         """
         Delete an existing user from the database, looking up by email.
