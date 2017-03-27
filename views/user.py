@@ -2,22 +2,7 @@ from flask import request, abort
 from flask_restful import Resource
 from models import User
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
-
-
-def non_empty_str(val, name):
-    """ Custom type for reqparser, blocking empty strings. """
-    if not str(val).strip():
-        raise ValueError('The argument {} is not empty'.format(name))
-    return str(val)
-
-
-def user_exists(email):
-    """
-    Check that an user exists by checking the email field (unique).
-    """
-    user = User.select().where(User.email == email)
-
-    return user.exists()
+import utils
 
 
 class UsersHandler(Resource):
@@ -30,7 +15,7 @@ class UsersHandler(Resource):
     """
 
     def get(self):
-        return [user.get_json() for user in User.select()], OK
+        return [user.json() for user in User.select()], OK
 
     def post(self):
         """ Add an user to the database."""
@@ -46,12 +31,12 @@ class UsersHandler(Resource):
         for field in required_fields:
             try:
                 value = request_data[field]
-                non_empty_str(value, field)
+                utils.non_empty_str(value, field)
             except (KeyError, ValueError):
                 abort(BAD_REQUEST)
 
         # If email is present in the database return a BAD_REQUEST response.
-        if user_exists(request_data['email']):
+        if User.exists(request_data['email']):
             msg = {'message': 'email already present.'}
             return msg, BAD_REQUEST
 
@@ -63,7 +48,7 @@ class UsersHandler(Resource):
         )
 
         # If everything went OK return the newly created user and CREATED code
-        return new_user.get_json(), CREATED
+        return new_user.json(), CREATED
 
 
 class UserHandler(Resource):
@@ -79,7 +64,7 @@ class UserHandler(Resource):
         Delete an existing user from the database, looking up by email.
         If the email does not exists return NOT_FOUND.
         """
-        if not user_exists(email):
+        if not User.exists(email):
             return None, NOT_FOUND
 
         user = User.get(User.email == email)

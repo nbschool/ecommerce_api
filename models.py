@@ -25,7 +25,16 @@ class User(BaseModel):
     email = CharField(unique=True)
     password = CharField()
 
-    def get_json(self):
+    @staticmethod
+    def exists(email):
+        """
+        Check that an user exists by checking the email field (unique).
+        """
+        user = User.select().where(User.email == email)
+
+        return user.exists()
+
+    def json(self):
         """
         Returns a dict describing the object, ready to be jsonified.
         """
@@ -38,4 +47,5 @@ class User(BaseModel):
 
 
 # Check if the table exists in the database; if not create it.
+# TODO: Use database migration
 User.create_table(fail_silently=True)
