@@ -1,3 +1,4 @@
+import datetime
 import os
 import peewee
 from werkzeug import secure_filename
@@ -18,6 +19,13 @@ PRICE_PRECISION = 2
 
 class BaseModel(peewee.Model):
     """Common features of models"""
+
+    created_at = peewee.DateTimeField(default=datetime.datetime.now)
+    updated_at = peewee.DateTimeField(default=datetime.datetime.now)
+
+    def save(self, *args, **kwargs):
+        self.modified = datetime.datetime.now()
+        return super(BaseModel, self).save(*args, **kwargs)
 
     class Meta:
         database = db
