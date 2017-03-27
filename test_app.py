@@ -5,11 +5,7 @@ Test suite for User(s) resources.
 from app import app
 from models import User
 from peewee import SqliteDatabase
-from http.client import OK
-from http.client import CREATED
-from http.client import BAD_REQUEST
-from http.client import NO_CONTENT
-from http.client import NOT_FOUND
+from http.client import OK, NOT_FOUND, NO_CONTENT, BAD_REQUEST, CREATED
 import json
 import random
 

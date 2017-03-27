@@ -15,13 +15,10 @@ User can be deleted using `/api/users/<email>` and a list of all existing users
 can be retrieved making a GET to `/api/users/`
 """
 
-from flask import abort
-from flask import Flask
-from flask import request
+from flask import abort, Flask, request
 from models import database
 from flask_restful import Api
-from views.user import UsersHandler
-from views.user import UserHandler
+from views.user import UsersHandler, UserHandler
 from http.client import BAD_REQUEST
 
 app = Flask(__name__)
