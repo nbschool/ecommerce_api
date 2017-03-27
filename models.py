@@ -45,7 +45,7 @@ class Item(BaseModel):
 
 class Picture(BaseModel):
     """Picture model"""
-    item = peewee.ForeignKeyField(Item, related_name='pictures')
+
     image = peewee.CharField()
 
     @staticmethod
@@ -56,6 +56,12 @@ class Picture(BaseModel):
 
     def __str__(self):
         return self.image
+
+
+class ItemPicture(BaseModel):
+    """Item-Picture cross-table"""
+    item = peewee.ForeignKeyField(Item)
+    picture = peewee.ForeignKeyField(Picture)
 
 
 def connect():
