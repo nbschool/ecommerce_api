@@ -1,10 +1,5 @@
 import os
-from peewee import SqliteDatabase
-from peewee import Model
-from peewee import CharField
-from peewee import FloatField
-from peewee import TextField
-from peewee import ForeignKeyField
+import peewee
 from werkzeug import secure_filename
 
 __author__ = "Francesco Mirabelli, Marco Tinacci"
@@ -16,12 +11,12 @@ DATABASE = {
     'engine': 'peewee.SqliteDatabase',
 }
 
-db = SqliteDatabase(DATABASE['name'])
+db = peewee.SqliteDatabase(DATABASE['name'])
 
 PRICE_PRECISION = 2
 
 
-class BaseModel(Model):
+class BaseModel(peewee.Model):
     """Common features of models"""
 
     class Meta:
@@ -30,9 +25,9 @@ class BaseModel(Model):
 
 class Item(BaseModel):
     """Item model"""
-    name = CharField(unique=True)
-    price = FloatField()
-    description = TextField()
+    name = peewee.CharField(unique=True)
+    price = peewee.FloatField()
+    description = peewee.TextField()
 
     def __unicode__(self):
         return u'{}, {}, {}'.format(
@@ -50,8 +45,8 @@ class Item(BaseModel):
 
 class Picture(BaseModel):
     """Picture model"""
-    item = ForeignKeyField(Item, related_name='pictures')
-    image = CharField()
+    item = peewee.ForeignKeyField(Item, related_name='pictures')
+    image = peewee.CharField()
 
     def save_image(self, file_obj):
         self.image = secure_filename(file_obj.filename)

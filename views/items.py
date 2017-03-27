@@ -7,14 +7,8 @@ from ..models import Item as ItemModel
 from ..models import connect, close
 
 from flask import Flask
-from flask_restful import Api
-from flask_restful import reqparse
-from flask_restful import Resource
-from http.client import CREATED
-from http.client import NOT_FOUND
-from http.client import OK
-from http.client import NO_CONTENT
-from http.client import INTERNAL_SERVER_ERROR
+from flask_restful import Api, reqparse, Resource
+import http.client as client
 
 __author__ = "Francesco Mirabelli, Marco Tinacci"
 __copyright__ = "Copyright 2017"
@@ -45,7 +39,7 @@ class ItemListHandler(Resource):
 
     def get(self):
         """Retrieve every item"""
-        return [o.json() for o in ItemModel.select()], OK
+        return [o.json() for o in ItemModel.select()], client.OK
 
     def post(self):
         """Insert a new item"""
@@ -61,8 +55,8 @@ class ItemListHandler(Resource):
 
         inserted = obj.save()
         if inserted != 1:
-            return None, INTERNAL_SERVER_ERROR
-        return obj.json(), CREATED
+            return None, client.INTERNAL_SERVER_ERROR
+        return obj.json(), client.CREATED
 
 
 class ItemHandler(Resource):
@@ -72,16 +66,16 @@ class ItemHandler(Resource):
         """Retrieve the item specified by iid"""
         try:
             return ItemModel.select().where(
-                ItemModel.id == iid).get().json(), OK
+                ItemModel.id == iid).get().json(), client.OK
         except ItemModel.DoesNotExist:
-            return None, NOT_FOUND
+            return None, client.NOT_FOUND
 
     def put(self, iid):
         """Edit the item specified by iid"""
         try:
             obj = ItemModel.select().where(ItemModel.id == iid).get()
         except ItemModel.DoesNotExist:
-            return None, NOT_FOUND
+            return None, client.NOT_FOUND
         parser = reqparse.RequestParser()
         parser.add_argument('name', type=non_emtpy_str, required=True)
         parser.add_argument('picture', type=non_emtpy_str, required=False)
@@ -95,17 +89,17 @@ class ItemHandler(Resource):
 
         updated = obj.save()
         if updated != 1:
-            return None, INTERNAL_SERVER_ERROR
-        return obj.json(), OK
+            return None, client.INTERNAL_SERVER_ERROR
+        return obj.json(), client.OK
 
     def delete(self, iid):
         """Remove the item specified by iid"""
         try:
             obj = ItemModel.select().where(ItemModel.id == iid).get()
         except ItemModel.DoesNotExist:
-            return None, NOT_FOUND
+            return None, client.NOT_FOUND
         obj.delete_instance()
-        return None, NO_CONTENT
+        return None, client.NO_CONTENT
 
 
 api.add_resource(ItemListHandler, "/items/")

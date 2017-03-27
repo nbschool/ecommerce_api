@@ -9,12 +9,7 @@ from ..models import Item as ItemModel
 from ..models import connect, close
 
 from peewee import SqliteDatabase
-from http.client import CREATED
-from http.client import OK
-from http.client import NO_CONTENT
-from http.client import INTERNAL_SERVER_ERROR
-from http.client import BAD_REQUEST
-from http.client import NOT_FOUND
+import http.client as client
 
 __author__ = "Francesco Mirabelli, Marco Tinacci"
 __copyright__ = "Copyright 2017"
@@ -53,19 +48,19 @@ class TestItems:
 
     def test_post_item__success(self):
         resp = self.app.post('/items/', data=TEST_ITEM)
-        assert resp.status_code == CREATED
+        assert resp.status_code == client.CREATED
         assert len(ItemModel.select()) == 1
 
     def test_post_item__failed(self):
         resp = self.app.post('/items/', data=TEST_ITEM_WRONG)
-        assert resp.status_code == BAD_REQUEST
+        assert resp.status_code == client.BAD_REQUEST
 
     def test_post_item__internal_error(self):
         from ..views.items import ItemModel as MockItem
         save = MockItem.save
         MockItem.save = lambda x: 0
         resp = self.app.post('/items/', data=TEST_ITEM)
-        assert resp.status_code == INTERNAL_SERVER_ERROR
+        assert resp.status_code == client.INTERNAL_SERVER_ERROR
         MockItem.save = save
 
     def test_get_items__success(self):
@@ -73,7 +68,7 @@ class TestItems:
         ItemModel.create(**TEST_ITEM2)
         resp = self.app.get('/items/')
         items = json.loads(resp.data)
-        assert resp.status_code == OK
+        assert resp.status_code == client.OK
         assert len(items) == 2
         assert TEST_ITEM in items
         assert TEST_ITEM2 in items
@@ -81,25 +76,25 @@ class TestItems:
     def test_get_item__success(self):
         item = ItemModel.create(**TEST_ITEM)
         resp = self.app.get('/items/{iid}'.format(iid=item.id))
-        assert resp.status_code == OK
+        assert resp.status_code == client.OK
         assert json.loads(resp.data) == TEST_ITEM
 
     def test_get_item__failed(self):
         resp = self.app.get('/items/{iid}'.format(iid=1))
-        assert resp.status_code == NOT_FOUND
+        assert resp.status_code == client.NOT_FOUND
 
     def test_put_item__success(self):
         item = ItemModel.create(**TEST_ITEM)
         resp = self.app.put('/items/{iid}'.format(iid=item.id),
                             data=TEST_ITEM2)
-        assert resp.status_code == OK
+        assert resp.status_code == client.OK
         db_item = ItemModel.select().where(ItemModel.id == item.id).get()
         assert db_item.json() == TEST_ITEM2
 
     def test_put_item__failed(self):
         resp = self.app.put('/items/{iid}'.format(iid=1),
                             data=TEST_ITEM)
-        assert resp.status_code == NOT_FOUND
+        assert resp.status_code == client.NOT_FOUND
 
     def test_put_item__internal_error(self):
         item = ItemModel.create(**TEST_ITEM)
@@ -107,15 +102,15 @@ class TestItems:
         save, MockItem.save = MockItem.save, lambda x: 0
         resp = self.app.put('/items/{iid}'.format(iid=item.id),
                             data=TEST_ITEM2)
-        assert resp.status_code == INTERNAL_SERVER_ERROR
+        assert resp.status_code == client.INTERNAL_SERVER_ERROR
         MockItem.save = save
 
     def test_delete_item__success(self):
         item = ItemModel.create(**TEST_ITEM)
         resp = self.app.delete('/items/{iid}'.format(iid=item.id))
-        assert resp.status_code == NO_CONTENT
+        assert resp.status_code == client.NO_CONTENT
         assert not ItemModel.select().exists()
 
     def test_delete_item__failed(self):
         resp = self.app.delete('/items/{iid}'.format(iid=1))
-        assert resp.status_code == NOT_FOUND
+        assert resp.status_code == client.NOT_FOUND
