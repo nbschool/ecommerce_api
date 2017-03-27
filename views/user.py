@@ -41,8 +41,8 @@ class UsersHandler(Resource):
             return msg, BAD_REQUEST
 
         new_user = User.create(
-            first_name=request_data['first_name'].capitalize(),
-            last_name=request_data['last_name'].capitalize(),
+            first_name=request_data['first_name'],
+            last_name=request_data['last_name'],
             email=request_data['email'],
             password=request_data['password']
         )
