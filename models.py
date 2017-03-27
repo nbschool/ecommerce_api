@@ -2,9 +2,7 @@
 Models contains the database models for the application.
 """
 
-from peewee import SqliteDatabase
-from peewee import Model
-from peewee import CharField
+from peewee import CharField, Model, SqliteDatabase
 
 database = SqliteDatabase('database.db')
 
