@@ -41,7 +41,7 @@ class UsersHandler(Resource):
                 abort(BAD_REQUEST)
 
         # If email is present in the database return a BAD_REQUEST response.
-        if utils.user_exists(request_data['email']):
+        if User.exists(request_data['email']):
             msg = {'message': 'email already present.'}
             return msg, BAD_REQUEST
 
@@ -69,7 +69,7 @@ class UserHandler(Resource):
         Delete an existing user from the database, looking up by email.
         If the email does not exists return NOT_FOUND.
         """
-        if not utils.user_exists(email):
+        if not User.exists(email):
             return None, NOT_FOUND
 
         user = User.get(User.email == email)
