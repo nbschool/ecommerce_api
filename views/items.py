@@ -3,29 +3,14 @@ Items view: this module provides methods to interact
 with items resources
 """
 
-from ..models import Item as ItemModel
-from ..models import connect, close
+from models import Item as ItemModel
 
-from flask import Flask
-from flask_restful import Api, reqparse, Resource
+from flask_restful import reqparse, Resource
 import http.client as client
 
 __author__ = "Francesco Mirabelli, Marco Tinacci"
 __copyright__ = "Copyright 2017"
 __email__ = "ceskomira90@gmail.com, marco.tinacci@gmail.com"
-
-app = Flask(__name__)
-api = Api(app)
-
-
-@app.before_request
-def _db_connect():
-    connect()
-
-
-@app.teardown_request
-def _db_close(exc):
-    close()
 
 
 def non_emtpy_str(val, name):
@@ -100,7 +85,3 @@ class ItemHandler(Resource):
             return None, client.NOT_FOUND
         obj.delete_instance()
         return None, client.NO_CONTENT
-
-
-api.add_resource(ItemListHandler, "/items/")
-api.add_resource(ItemHandler, "/items/<int:iid>")
