@@ -30,7 +30,7 @@ class Item(BaseModel):
     description = peewee.TextField()
 
     def __str__(self):
-        return u'{}, {}, {}'.format(
+        return '{}, {}, {}'.format(
             self.name,
             round(float(self.price), PRICE_PRECISION),
             self.description)
