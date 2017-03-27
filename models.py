@@ -1,5 +1,5 @@
 """
-Models contains the sqlite3 database models for the application.
+Models contains the database models for the application.
 """
 
 from peewee import SqliteDatabase
@@ -17,7 +17,7 @@ class BaseModel(Model):
 
 class User(BaseModel):
     """
-    User represent an user for the application.
+    User represents an user for the application.
     """
 
     first_name = CharField()
@@ -35,3 +35,7 @@ class User(BaseModel):
             'last_name': self.last_name,
             'email': self.email
         }
+
+
+# Check if the table exists in the database; if not create it.
+User.create_table(fail_silently=True)
