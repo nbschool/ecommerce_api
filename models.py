@@ -38,4 +38,5 @@ class User(BaseModel):
 
 
 # Check if the table exists in the database; if not create it.
+# TODO: Use database migration
 User.create_table(fail_silently=True)
