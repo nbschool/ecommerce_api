@@ -3,6 +3,8 @@ Flask Auth implementation
 """
 
 from flask_httpauth import HTTPBasicAuth
+from passlib.hash import pbkdf2_sha256
+
 from models import User
 
 auth = HTTPBasicAuth()
@@ -12,13 +14,15 @@ auth = HTTPBasicAuth()
 def verify(username, password):
     """
     Verify the request to api endpoints.
+
     TODO: Write a proper docstring
+    TODO: For delete user, verify that the request has been made by the
+          owner of the User (email on request auth == User.email)
     """
+
     try:
-        # TODO: email will change with an username field
         user = User.get(User.email == username)
-        # TODO: Use passlib to verify the password
-        # TODO: store the hashed password in the users
-        return user.password == password
+        return pbkdf2_sha256.verify(password, user.password)
+
     except User.DoesNotExist:
         return False

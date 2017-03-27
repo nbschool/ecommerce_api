@@ -1,9 +1,11 @@
 from flask import request, abort
 from flask_restful import Resource
-from models import User
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
-import utils
+from passlib.hash import pbkdf2_sha256
+
 from auth import auth
+from models import User
+import utils
 
 
 class UsersHandler(Resource):
@@ -41,11 +43,13 @@ class UsersHandler(Resource):
             msg = {'message': 'email already present.'}
             return msg, BAD_REQUEST
 
+        hash_password = pbkdf2_sha256.hash(request_data['password'])
+
         new_user = User.create(
             first_name=request_data['first_name'],
             last_name=request_data['last_name'],
             email=request_data['email'],
-            password=request_data['password']
+            password=hash_password
         )
 
         # If everything went OK return the newly created user and CREATED code
