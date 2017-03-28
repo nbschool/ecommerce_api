@@ -4,9 +4,6 @@ from flask_restful import Resource, reqparse
 from models import Picture
 import http.client as client
 import uuid
-__author__ = "Francesco Mirabelli, Marco Tinacci"
-__copyright__ = "Copyright 2017"
-__email__ = "ceskomira90@gmail.com, marco.tinacci@gmail.com"
 
 IMAGE_FOLDER = 'images'
 ALLOWED_EXTENSION = ['.jpg', '.jpeg', '.png', '.gif']
@@ -27,12 +24,13 @@ class PictureListHandler(Resource):
         args = parser.parse_args(strict=True)
         image = self._save_image(args['image'])
         if not image:
-            return {"message": "File extension not allowed"}, client.BAD_REQUEST
+            return {"message": "File extension not allowed"},\
+                client.BAD_REQUEST
         return image.json(), client.CREATED
 
     def _save_image(self, file):
         extension = os.path.splitext(file.filename)[1]
-        if not extension in ALLOWED_EXTENSION:
+        if extension not in ALLOWED_EXTENSION:
             return None
         filename = str(uuid.uuid4()) + extension
         full_path = os.path.join(IMAGE_FOLDER, filename)

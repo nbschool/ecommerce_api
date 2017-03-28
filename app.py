@@ -20,6 +20,6 @@ def _db_close(exc):
 
 
 api.add_resource(ItemListHandler, "/items/")
-api.add_resource(ItemHandler, "/items/<int:iid>")
+api.add_resource(ItemHandler, "/items/<int:item_id>")
 api.add_resource(PictureListHandler, "/pictures/")
 api.add_resource(PictureHandler, "/pictures/<int:picture_id>")

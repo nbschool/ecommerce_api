@@ -8,10 +8,6 @@ from models import Item as ItemModel
 from flask_restful import reqparse, Resource
 import http.client as client
 
-__author__ = "Francesco Mirabelli, Marco Tinacci"
-__copyright__ = "Copyright 2017"
-__email__ = "ceskomira90@gmail.com, marco.tinacci@gmail.com"
-
 
 def non_emtpy_str(val, name):
     if not str(val).strip():
@@ -47,18 +43,18 @@ class ItemListHandler(Resource):
 class ItemHandler(Resource):
     """Handler of a specific item"""
 
-    def get(self, iid):
-        """Retrieve the item specified by iid"""
+    def get(self, item_id):
+        """Retrieve the item specified by item_id"""
         try:
             return ItemModel.select().where(
-                ItemModel.id == iid).get().json(), client.OK
+                ItemModel.id == item_id).get().json(), client.OK
         except ItemModel.DoesNotExist:
             return None, client.NOT_FOUND
 
-    def put(self, iid):
-        """Edit the item specified by iid"""
+    def put(self, item_id):
+        """Edit the item specified by item_id"""
         try:
-            obj = ItemModel.select().where(ItemModel.id == iid).get()
+            obj = ItemModel.select().where(ItemModel.id == item_id).get()
         except ItemModel.DoesNotExist:
             return None, client.NOT_FOUND
         parser = reqparse.RequestParser()
@@ -77,10 +73,10 @@ class ItemHandler(Resource):
             return None, client.INTERNAL_SERVER_ERROR
         return obj.json(), client.OK
 
-    def delete(self, iid):
-        """Remove the item specified by iid"""
+    def delete(self, item_id):
+        """Remove the item specified by item_id"""
         try:
-            obj = ItemModel.select().where(ItemModel.id == iid).get()
+            obj = ItemModel.select().where(ItemModel.id == item_id).get()
         except ItemModel.DoesNotExist:
             return None, client.NOT_FOUND
         obj.delete_instance()
