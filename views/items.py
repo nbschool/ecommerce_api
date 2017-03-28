@@ -7,12 +7,7 @@ from models import Item as ItemModel
 
 from flask_restful import reqparse, Resource
 import http.client as client
-
-
-def non_emtpy_str(val, name):
-    if not str(val).strip():
-        raise ValueError('The argument {} is not empty'.format(name))
-    return str(val)
+import utils
 
 
 class ItemListHandler(Resource):
@@ -25,10 +20,12 @@ class ItemListHandler(Resource):
     def post(self):
         """Insert a new item"""
         parser = reqparse.RequestParser()
-        parser.add_argument('name', type=non_emtpy_str, required=True)
-        parser.add_argument('picture', type=non_emtpy_str, required=False)
+        parser.add_argument('name', type=utils.non_emtpy_str, required=True)
+        parser.add_argument('picture', type=utils.non_emtpy_str,
+                            required=False)
         parser.add_argument('price', type=float, required=True)
-        parser.add_argument('description', type=non_emtpy_str, required=True)
+        parser.add_argument('description', type=utils.non_emtpy_str,
+                            required=True)
         args = parser.parse_args(strict=True)
         obj = ItemModel(
             name=args['name'],
