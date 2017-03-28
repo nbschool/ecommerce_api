@@ -139,6 +139,7 @@ class Testuser:
         assert User.select().count() == 0
 
     def test_delete_user__success(self):
+        # TODO: refactor for auth implementation
         email = 'mail@email.it'
         _add_user(email)
 
@@ -149,6 +150,10 @@ class Testuser:
         assert User.select().count() == 0
 
     def test_delete_user_no_exists__fail(self):
+        # TODO: refactor for auth implementation.
+        #       currently the response code is 401. modify the test or find
+        #       a way to return NOT_FOUND when calling the auth decorator
+        #       (found in auth.py used in views/user.py::UserHandler.delete())
         email = 'user@email.it'
         _add_user(email)
 
@@ -157,3 +162,18 @@ class Testuser:
 
         assert resp.status_code == NOT_FOUND
         assert User.select().count() == 1
+
+    def test_delete_user_wrong_credentials__fail(self):
+        # TODO:
+        # Test should implement a delete request of user A called by an
+        # existing user B.
+        # delete should fail returning a 401 (unauthorized) status code and the
+        # number of users should remain the same
+        return False
+
+    def test_delete_user_wrong_password__fail(self):
+        # TODO:
+        # Test a user A that tries to delete its own User profile, but passing
+        # the wrong password. status code should be 401 and the number of user
+        # rows should remain the same
+        return False
