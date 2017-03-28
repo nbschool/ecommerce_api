@@ -1,13 +1,13 @@
 import os
-import uuid
-
-from models import Item
-from models import Picture
 import utils
+import uuid
 
 from flask import request, send_from_directory
 from flask_restful import Resource
 import http.client as client
+
+from models import Item
+from models import Picture
 
 ALLOWED_EXTENSION = ['jpg', 'jpeg', 'png', 'gif']
 
@@ -56,7 +56,6 @@ class PictureHandler(Resource):
 
     def get(self, picture_id):
         """Retrieve the picture specified by picture_id"""
-
         try:
             picture = Picture.get(Picture.picture_id == picture_id)
         except Picture.DoesNotExist:

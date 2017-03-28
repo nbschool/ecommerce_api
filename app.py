@@ -24,9 +24,9 @@ from models import database
 from views.orders import OrdersHandler, OrderHandler
 from views.items import ItemHandler, ItemsHandler
 from views.user import UsersHandler, UserHandler
+from views.pictures import ItemPictureHandler, PictureHandler
 
 from views.address import AddressesHandler, AddressHandler
-from views.pictures import PictureHandler, ItemPictureHandler
 
 app = Flask(__name__)
 CORS(app)
