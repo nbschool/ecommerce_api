@@ -63,33 +63,33 @@ class TestItems:
 
     def test_get_item__success(self):
         item = ItemModel.create(**TEST_ITEM)
-        resp = self.app.get('/items/{iid}'.format(iid=item.id))
+        resp = self.app.get('/items/{item_id}'.format(item_id=item.id))
         assert resp.status_code == client.OK
         assert json.loads(resp.data) == TEST_ITEM
 
     def test_get_item__failed(self):
-        resp = self.app.get('/items/{iid}'.format(iid=1))
+        resp = self.app.get('/items/{item_id}'.format(item_id=1))
         assert resp.status_code == client.NOT_FOUND
 
     def test_put_item__success(self):
         item = ItemModel.create(**TEST_ITEM)
-        resp = self.app.put('/items/{iid}'.format(iid=item.id),
+        resp = self.app.put('/items/{item_id}'.format(item_id=item.id),
                             data=TEST_ITEM2)
         assert resp.status_code == client.OK
         db_item = ItemModel.select().where(ItemModel.id == item.id).get()
         assert db_item.json() == TEST_ITEM2
 
     def test_put_item__failed(self):
-        resp = self.app.put('/items/{iid}'.format(iid=1),
+        resp = self.app.put('/items/{item_id}'.format(item_id=1),
                             data=TEST_ITEM)
         assert resp.status_code == client.NOT_FOUND
 
     def test_delete_item__success(self):
         item = ItemModel.create(**TEST_ITEM)
-        resp = self.app.delete('/items/{iid}'.format(iid=item.id))
+        resp = self.app.delete('/items/{item_id}'.format(item_id=item.id))
         assert resp.status_code == client.NO_CONTENT
         assert not ItemModel.select().exists()
 
     def test_delete_item__failed(self):
-        resp = self.app.delete('/items/{iid}'.format(iid=1))
+        resp = self.app.delete('/items/{item_id}'.format(item_id=1))
         assert resp.status_code == client.NOT_FOUND
