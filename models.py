@@ -8,8 +8,6 @@ DATABASE = {
 
 db = peewee.SqliteDatabase(DATABASE['name'])
 
-PRICE_PRECISION = 2
-
 
 class BaseModel(peewee.Model):
     """Common features of models"""
@@ -29,19 +27,19 @@ class BaseModel(peewee.Model):
 class Item(BaseModel):
     """Item model"""
     name = peewee.CharField(unique=True)
-    price = peewee.FloatField()
+    price = peewee.DecimalField()
     description = peewee.TextField()
 
     def __str__(self):
         return '{}, {}, {}'.format(
             self.name,
-            round(float(self.price), PRICE_PRECISION),
+            self.price,
             self.description)
 
     def json(self):
         return {
             'name': self.name,
-            'price': round(float(self.price), PRICE_PRECISION),
+            'price': float(self.price),
             'description': self.description
         }
 
