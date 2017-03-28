@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_restful import Api
 from views.items import ItemHandler, ItemListHandler
+from views.pictures import PictureHandler, PictureListHandler
 from models import connect, close
 
 
@@ -20,3 +21,5 @@ def _db_close(exc):
 
 api.add_resource(ItemListHandler, "/items/")
 api.add_resource(ItemHandler, "/items/<int:iid>")
+api.add_resource(PictureListHandler, "/pictures/")
+api.add_resource(PictureHandler, "/pictures/<int:picture_id>")
