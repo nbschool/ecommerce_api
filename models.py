@@ -1,19 +1,23 @@
+"""
+Models contains the database models for the application.
+"""
 import datetime
-import peewee
+from peewee import DateTimeField, TextField, CharField, ForeignKeyField
+from peewee import Model, SqliteDatabase, DecimalField
 
 DATABASE = {
-    'name': 'ecommerce.db',
+    'name': 'database.db',
     'engine': 'peewee.SqliteDatabase',
 }
 
-db = peewee.SqliteDatabase(DATABASE['name'])
+database = SqliteDatabase(DATABASE['name'])
 
 
-class BaseModel(peewee.Model):
-    """Common features of models"""
+class BaseModel(Model):
+    """ Base model for all the database models. """
 
-    created_at = peewee.DateTimeField(default=datetime.datetime.now)
-    updated_at = peewee.DateTimeField(default=datetime.datetime.now)
+    created_at = DateTimeField(default=datetime.datetime.now)
+    updated_at = DateTimeField(default=datetime.datetime.now)
 
     def save(self, *args, **kwargs):
         """Automatically update updated_at time during save"""
@@ -21,14 +25,14 @@ class BaseModel(peewee.Model):
         return super(BaseModel, self).save(*args, **kwargs)
 
     class Meta:
-        database = db
+        database = database
 
 
 class Item(BaseModel):
     """Item model"""
-    name = peewee.CharField(unique=True)
-    price = peewee.DecimalField(decimal_places=2, auto_round=True)
-    description = peewee.TextField()
+    name = CharField(unique=True)
+    price = DecimalField(decimal_places=2, auto_round=True)
+    description = TextField()
 
     def __str__(self):
         return '{}, {}, {}'.format(
@@ -47,7 +51,7 @@ class Item(BaseModel):
 class Picture(BaseModel):
     """Picture model"""
 
-    image = peewee.CharField()
+    image = CharField()
 
     def json(self):
         return {
@@ -60,22 +64,43 @@ class Picture(BaseModel):
 
 class ItemPicture(BaseModel):
     """Item-Picture cross-table"""
-    item = peewee.ForeignKeyField(Item)
-    picture = peewee.ForeignKeyField(Picture)
+    item = ForeignKeyField(Item)
+    picture = ForeignKeyField(Picture)
 
 
-def connect():
+class User(BaseModel):
     """
-    Establish a connection to the database, create tables
-    if not existing already
+    User represents an user for the application.
     """
-    if db.is_closed():
-        db.connect()
-        Item.create_table(fail_silently=True)
-        Picture.create_table(fail_silently=True)
+
+    first_name = CharField()
+    last_name = CharField()
+    email = CharField(unique=True)
+    password = CharField()
+
+    @staticmethod
+    def exists(email):
+        """
+        Check that an user exists by checking the email field (unique).
+        """
+        user = User.select().where(User.email == email)
+
+        return user.exists()
+
+    def json(self):
+        """
+        Returns a dict describing the object, ready to be jsonified.
+        """
+
+        return {
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'email': self.email
+        }
 
 
-def close():
-    """Close the database connection"""
-    if not db.is_closed():
-        db.close()
+# Check if the table exists in the database; if not create it.
+# TODO: Use database migration
+User.create_table(fail_silently=True)
+Item.create_table(fail_silently=True)
+Picture.create_table(fail_silently=True)

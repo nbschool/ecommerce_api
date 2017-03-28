@@ -90,7 +90,7 @@ envcommerce/
 .ropeproject
 
 # DB
-ecommerce.db
+database.db
 
 # folders
 images/
