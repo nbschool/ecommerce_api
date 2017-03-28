@@ -7,7 +7,7 @@ from models import Item as ItemModel
 
 from flask_restful import reqparse, Resource
 import http.client as client
-import utils
+from utils import non_empty_str
 
 
 class ItemListHandler(Resource):
@@ -20,11 +20,11 @@ class ItemListHandler(Resource):
     def post(self):
         """Insert a new item"""
         parser = reqparse.RequestParser()
-        parser.add_argument('name', type=utils.non_emtpy_str, required=True)
-        parser.add_argument('picture', type=utils.non_emtpy_str,
+        parser.add_argument('name', type=non_empty_str, required=True)
+        parser.add_argument('picture', type=non_empty_str,
                             required=False)
         parser.add_argument('price', type=float, required=True)
-        parser.add_argument('description', type=utils.non_emtpy_str,
+        parser.add_argument('description', type=non_empty_str,
                             required=True)
         args = parser.parse_args(strict=True)
         obj = ItemModel(
@@ -53,11 +53,11 @@ class ItemHandler(Resource):
         except ItemModel.DoesNotExist:
             return None, client.NOT_FOUND
         parser = reqparse.RequestParser()
-        parser.add_argument('name', type=utils.non_emtpy_str, required=True)
-        parser.add_argument('picture', type=utils.non_emtpy_str,
+        parser.add_argument('name', type=non_empty_str, required=True)
+        parser.add_argument('picture', type=non_empty_str,
                             required=False)
         parser.add_argument('price', type=float, required=True)
-        parser.add_argument('description', type=utils.non_emtpy_str,
+        parser.add_argument('description', type=non_empty_str,
                             required=True)
         args = parser.parse_args(strict=True)
 
