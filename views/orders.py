@@ -1,6 +1,6 @@
 from flask_restful import Resource
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, INTERNAL_SERVER_ERROR, BAD_REQUEST
-import sys, uuid, datetime, dateutil.parser
+import sys, uuid, datetime
 sys.path.append('../ecommerce_api')
 from models import Order, OrderItem, Item
 from flask import abort, request
@@ -43,7 +43,7 @@ class OrdersHandler(Resource):
 		except Item.DoesNotExist:
 			abort(BAD_REQUEST)
 
-		order1 = Order(
+		order1 = Order.create(
 			order_id = uuid.uuid4(),
 			date = datetime.datetime.now().isoformat(),
 			total_price = 0,
@@ -62,8 +62,9 @@ class OrdersHandler(Resource):
 
 		order1.total_price += total_price
 
-		inserted = order1.save()
-		if inserted != 1:
+		import pdb; pdb.set_trace()
+
+		if obj != 1:
 			return None, INTERNAL_SERVER_ERROR
 
 		return CREATED
@@ -100,7 +101,6 @@ class OrderHandler(Resource):
 
 	def put(self, order_id):
 		pass
-
 	def delete(self, order_id):
 		try:
 			obj = Order.get(order_id=str(order_id))
