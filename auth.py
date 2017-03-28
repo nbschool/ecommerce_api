@@ -3,8 +3,6 @@ Flask Auth implementation
 """
 
 from flask_httpauth import HTTPBasicAuth
-from passlib.hash import pbkdf2_sha256
-
 from models import User
 
 auth = HTTPBasicAuth()
@@ -22,7 +20,7 @@ def verify(username, password):
 
     try:
         user = User.get(User.email == username)
-        return pbkdf2_sha256.verify(password, user.password)
+        return user.verify_password(password)
 
     except User.DoesNotExist:
         return False
