@@ -1,9 +1,9 @@
 from flask_restful import Resource
-from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, INTERNAL_SERVER_ERROR
+from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, INTERNAL_SERVER_ERROR, BAD_REQUEST
 import sys, uuid, datetime, dateutil.parser
 sys.path.append('../ecommerce_api')
 from models import Order, OrderItem, Item
-from flask import request
+from flask import abort, request
 
 
 class OrdersHandler(Resource):
@@ -34,20 +34,40 @@ class OrdersHandler(Resource):
 		return list(orders.values()), OK
 		
 	def post(self):	
-		res = request.get_json(silent=True)
-		order1 = Order.create(
-			order_id = uuid.UUID(res['order']['order_id']),
-			date = dateutil.parser.parse(res['order']['date']),
-			total_price = res['order']['total_price'],
-			delivery_address = res['order']['delivery_address']
+		res = request.get_json()
+
+		try:
+			for item in res['order']['items']:
+				Item.get(name=item['name'])
+
+		except Item.DoesNotExist:
+			abort(BAD_REQUEST)
+
+		order1 = Order(
+			order_id = uuid.uuid4(),
+			date = datetime.datetime.now().isoformat(),
+			total_price = 0,
+			delivery_address = res['order']['delivery_address'],
 		)
+
+		total_price = 0
+		for item in res['order']['items']:
+			obj = OrderItem.create(
+				order = order1,
+				item = Item.get(name=(item['name'])),
+				quantity = item['quantity'],
+				subtotal = item['price'] * item['quantity']
+			)
+			total_price = item['price']
+
+		order1.total_price += total_price
+
 		inserted = order1.save()
 		if inserted != 1:
 			return None, INTERNAL_SERVER_ERROR
 
-		return order1.json(), CREATED
+		return CREATED
 		
-
 class OrderHandler(Resource):
 	"""Single order endpoints."""
 	def get(self, order_id):
