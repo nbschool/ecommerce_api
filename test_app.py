@@ -5,7 +5,8 @@ Test suite for User(s) resources.
 from app import app
 from models import User
 from peewee import SqliteDatabase
-from http.client import OK, NOT_FOUND, NO_CONTENT, BAD_REQUEST, CREATED
+from http.client import (OK, NOT_FOUND, NO_CONTENT, BAD_REQUEST,
+                         CREATED, CONFLICT)
 import json
 import random
 
@@ -105,7 +106,7 @@ class Testuser:
                              data=json.dumps(user),
                              content_type='application/json')
 
-        assert resp.status_code == BAD_REQUEST
+        assert resp.status_code == CONFLICT
         assert json.loads(resp.data)['message'] == 'email already present.'
         assert User.select().count() == 1
 
