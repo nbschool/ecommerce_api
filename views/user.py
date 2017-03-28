@@ -1,7 +1,7 @@
-from flask import request, abort
+from flask import request, abort, g
 from flask_restful import Resource
 from http.client import (CREATED, NO_CONTENT, NOT_FOUND, OK,
-                         BAD_REQUEST, CONFLICT)
+                         BAD_REQUEST, CONFLICT, UNAUTHORIZED)
 
 from auth import auth
 from models import User
@@ -68,10 +68,20 @@ class UserHandler(Resource):
         Delete an existing user from the database, looking up by email.
         If the email does not exists return NOT_FOUND.
         """
+
         if not User.exists(email):
-            return None, NOT_FOUND
+            return ({'message': 'user `{}` not found'.format(email)},
+                    NOT_FOUND)
 
         user = User.get(User.email == email)
+
+        # get the user from the flask.g global object registered inside the
+        # auth.py::verify function, called by login_required decorator
+        # and match it against the found user.
+        # This is to prevent users from deleting other users' account.
+        if g.user != user:
+            return ({'message': "You can't delete another user's account"},
+                    UNAUTHORIZED)
 
         user.delete_instance()
         return None, NO_CONTENT

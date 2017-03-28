@@ -2,6 +2,7 @@
 Flask Auth implementation
 """
 
+from flask import g
 from flask_httpauth import HTTPBasicAuth
 from models import User
 
@@ -20,7 +21,11 @@ def verify(username, password):
 
     try:
         user = User.get(User.email == username)
-        return user.verify_password(password)
+        if user.verify_password(password):
+            # if the user is found and verified, register it inside the flask.g
+            # global object for further use inside the request handler
+            g.user = user
+            return True
 
     except User.DoesNotExist:
         return False
