@@ -1,11 +1,5 @@
 import datetime
-import os
 import peewee
-from werkzeug import secure_filename
-
-__author__ = "Francesco Mirabelli, Marco Tinacci"
-__copyright__ = "Copyright 2017"
-__email__ = "ceskomira90@gmail.com, marco.tinacci@gmail.com"
 
 DATABASE = {
     'name': 'ecommerce.db',
