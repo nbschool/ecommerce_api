@@ -57,12 +57,6 @@ class Picture(BaseModel):
 
     image = peewee.CharField()
 
-    @staticmethod
-    def save_image(file_obj, item):
-        filename = secure_filename(file_obj.filename)
-        full_path = os.path.join('images', filename)
-        return Picture(item=item, image=full_path)
-
     def json(self):
         return {
             'image': self.image
