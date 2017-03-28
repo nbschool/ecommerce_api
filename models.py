@@ -24,6 +24,7 @@ class BaseModel(peewee.Model):
     updated_at = peewee.DateTimeField(default=datetime.datetime.now)
 
     def save(self, *args, **kwargs):
+        """Automatically update updated_at time during save"""
         self.modified = datetime.datetime.now()
         return super(BaseModel, self).save(*args, **kwargs)
 
@@ -61,6 +62,11 @@ class Picture(BaseModel):
         filename = secure_filename(file_obj.filename)
         full_path = os.path.join('images', filename)
         return Picture(item=item, image=full_path)
+
+    def json(self):
+        return {
+            'image': self.image
+        }
 
     def __str__(self):
         return self.image
