@@ -26,6 +26,11 @@ TEST_ITEM_WRONG = {
     'price': 30.20,
     'description': 'svariati GINIIIII'
 }
+TEST_ITEM_PRECISION = {
+    'name': 'Anna Pannocchia',
+    'price': 30.2222,
+    'description': 'lorem ipsum'
+}
 
 
 class TestItems:
@@ -46,10 +51,20 @@ class TestItems:
         resp = self.app.post('/items/', data=TEST_ITEM)
         assert resp.status_code == client.CREATED
         assert len(ItemModel.select()) == 1
+        assert ItemModel.select()[0].json() == TEST_ITEM
 
     def test_post_item__failed(self):
         resp = self.app.post('/items/', data=TEST_ITEM_WRONG)
         assert resp.status_code == client.BAD_REQUEST
+
+    def test_post_item__round_price(self):
+        resp = self.app.post('/items/', data=TEST_ITEM_PRECISION)
+        assert resp.status_code == client.CREATED
+        item = ItemModel.select().get()
+        assert round(TEST_ITEM_PRECISION['price'], 2) == float(item.price)
+        assert not TEST_ITEM_PRECISION['price'] == item.price
+        assert TEST_ITEM_PRECISION['name'] == item.name
+        assert TEST_ITEM_PRECISION['description'] == item.description
 
     def test_get_items__success(self):
         ItemModel.create(**TEST_ITEM)

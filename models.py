@@ -27,7 +27,7 @@ class BaseModel(peewee.Model):
 class Item(BaseModel):
     """Item model"""
     name = peewee.CharField(unique=True)
-    price = peewee.DecimalField()
+    price = peewee.DecimalField(decimal_places=2, auto_round=True)
     description = peewee.TextField()
 
     def __str__(self):
