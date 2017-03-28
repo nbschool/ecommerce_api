@@ -100,7 +100,34 @@ class OrderHandler(Resource):
 			return None, NOT_FOUND
 
 	def put(self, order_id):
-		pass
+		res = request.get_json()
+
+		try:
+			order_to_modify = Order.get(order_id=str(order_id))
+		except Order.DoesNotExist:
+			return None, NOT_FOUND
+
+		try:
+			OrderItem.delete().where(OrderItem.order == order_to_modify).execute()
+		except OrderItem.DoesNotExist:
+			return None, NOT_FOUND
+
+		order_to_modify.total_price = 0
+		for item in res['order']['items']:
+			obj = OrderItem.create(
+				order = order_to_modify,
+				item = Item.get(name=(item['name'])),
+				quantity = item['quantity'],
+				subtotal = item['price'] * item['quantity']
+			)
+			order_to_modify.total_price += item['price']
+			updated = obj.save()
+			if updated != 1:
+				return None, INTERNAL_SERVER_ERROR
+		order_to_modify.date = datetime.datetime.now().isoformat()
+
+		return OK
+
 	def delete(self, order_id):
 		try:
 			obj = Order.get(order_id=str(order_id))
