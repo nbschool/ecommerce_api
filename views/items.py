@@ -53,10 +53,12 @@ class ItemHandler(Resource):
         except ItemModel.DoesNotExist:
             return None, client.NOT_FOUND
         parser = reqparse.RequestParser()
-        parser.add_argument('name', type=non_emtpy_str, required=True)
-        parser.add_argument('picture', type=non_emtpy_str, required=False)
+        parser.add_argument('name', type=utils.non_emtpy_str, required=True)
+        parser.add_argument('picture', type=utils.non_emtpy_str,
+                            required=False)
         parser.add_argument('price', type=float, required=True)
-        parser.add_argument('description', type=non_emtpy_str, required=True)
+        parser.add_argument('description', type=utils.non_emtpy_str,
+                            required=True)
         args = parser.parse_args(strict=True)
 
         obj.name = args['name']
