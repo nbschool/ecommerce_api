@@ -11,10 +11,6 @@ from models import connect, close
 from peewee import SqliteDatabase
 import http.client as client
 
-__author__ = "Francesco Mirabelli, Marco Tinacci"
-__copyright__ = "Copyright 2017"
-__email__ = "ceskomira90@gmail.com, marco.tinacci@gmail.com"
-
 TEST_ITEM = {
     'name': 'mario',
     'price': 20.20,
