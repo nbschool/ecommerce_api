@@ -22,6 +22,7 @@ from http.client import BAD_REQUEST
 from models import database
 from views.items import ItemHandler, ItemsHandler
 from views.user import UsersHandler, UserHandler
+from views.pictures import PicturesHandler, PictureHandler
 
 app = Flask(__name__)
 api = Api(app)
@@ -60,3 +61,5 @@ api.add_resource(ItemsHandler, "/items/")
 api.add_resource(ItemHandler, "/items/<uuid:item_id>")
 api.add_resource(UsersHandler, '/users/')
 api.add_resource(UserHandler, '/users/<email>')
+api.add_resource(PicturesHandler, "/pictures/")
+api.add_resource(PictureHandler, "/pictures/<int:picture_id>")
