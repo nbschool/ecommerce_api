@@ -30,13 +30,11 @@ class ItemListHandler(Resource):
         parser.add_argument('price', type=float, required=True)
         parser.add_argument('description', type=non_emtpy_str, required=True)
         args = parser.parse_args(strict=True)
-        obj = ItemModel(name=args['name'],
-                        price=args['price'],
-                        description=args['description'])
-
-        inserted = obj.save()
-        if inserted != 1:
-            return None, client.INTERNAL_SERVER_ERROR
+        obj = ItemModel(
+            name=args['name'],
+            price=args['price'],
+            description=args['description'])
+        obj.save()
         return obj.json(), client.CREATED
 
 
@@ -67,10 +65,8 @@ class ItemHandler(Resource):
         obj.name = args['name']
         obj.price = args['price']
         obj.description = args['description']
+        obj.save()
 
-        updated = obj.save()
-        if updated != 1:
-            return None, client.INTERNAL_SERVER_ERROR
         return obj.json(), client.OK
 
     def delete(self, item_id):
