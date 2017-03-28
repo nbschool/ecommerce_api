@@ -10,17 +10,18 @@ auth = HTTPBasicAuth()
 
 
 @auth.verify_password
-def verify(username, password):
+def verify(email, password):
     """
-    Verify the request to api endpoints.
-
-    TODO: Write a proper docstring
-    TODO: For delete user, verify that the request has been made by the
-          owner of the User (email on request auth == User.email)
+    Verify the request to api users endpoints, trying to get the user with the
+    provided email and verifying the password against the stored hashed one.
+    
+    If the user is verified it will be stored inside `Flask.g` to be used from
+    the enpoint handler if needed, for example to allow `delete` or `put` only
+    on the user's own account.
     """
 
     try:
-        user = User.get(User.email == username)
+        user = User.get(User.email == email)
         if user.verify_password(password):
             # if the user is found and verified, register it inside the flask.g
             # global object for further use inside the request handler

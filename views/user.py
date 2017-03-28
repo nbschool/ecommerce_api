@@ -28,9 +28,10 @@ class UsersHandler(Resource):
 
         request_data = request.get_json()
 
-        # For every field required for creating a new user trry to get the
-        # value from `request.form`. If the field is missing (KeyError) or
-        # the value is an empty string (ValueError) return a BAD_REQUEST
+        # For every field required for creating a new user try to get the
+        # value from the json data of the request.
+        # If the field is missing (KeyError) or the value is an empty
+        # string (ValueError) return a BAD_REQUEST
         for field in required_fields:
             try:
                 value = request_data[field]
@@ -76,7 +77,7 @@ class UserHandler(Resource):
         user = User.get(User.email == email)
 
         # get the user from the flask.g global object registered inside the
-        # auth.py::verify function, called by login_required decorator
+        # auth.py::verify() function, called by @auth.login_required decorator
         # and match it against the found user.
         # This is to prevent users from deleting other users' account.
         if g.user != user:
