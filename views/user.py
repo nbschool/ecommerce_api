@@ -1,6 +1,7 @@
 from flask import request, abort
 from flask_restful import Resource
-from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
+from http.client import (CREATED, NO_CONTENT, NOT_FOUND, OK,
+                         BAD_REQUEST, CONFLICT)
 
 from auth import auth
 from models import User
@@ -40,7 +41,7 @@ class UsersHandler(Resource):
         # If email is present in the database return a BAD_REQUEST response.
         if User.exists(request_data['email']):
             msg = {'message': 'email already present.'}
-            return msg, BAD_REQUEST
+            return msg, CONFLICT
 
         new_user = User.create(
             first_name=request_data['first_name'],
