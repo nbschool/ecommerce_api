@@ -5,9 +5,10 @@ with items resources
 
 from models import Item as ItemModel
 
-from flask_restful import reqparse, Resource
+from flask_restful import Resource
+from flask import request
 import http.client as client
-from utils import non_empty_str
+from utils import check_required_fields
 
 
 class ItemListHandler(Resource):
@@ -19,18 +20,15 @@ class ItemListHandler(Resource):
 
     def post(self):
         """Insert a new item"""
-        parser = reqparse.RequestParser()
-        parser.add_argument('name', type=non_empty_str, required=True)
-        parser.add_argument('picture', type=non_empty_str,
-                            required=False)
-        parser.add_argument('price', type=float, required=True)
-        parser.add_argument('description', type=non_empty_str,
-                            required=True)
-        args = parser.parse_args(strict=True)
+        request_data = request.get_json()
+        check_required_fields(
+            request_data=request_data,
+            required_fields=['name', 'price', 'description'])
+
         obj = ItemModel(
-            name=args['name'],
-            price=args['price'],
-            description=args['description'])
+            name=request_data['name'],
+            price=float(request_data['price']),
+            description=request_data['description'])
         obj.save()
         return obj.json(), client.CREATED
 
@@ -52,18 +50,15 @@ class ItemHandler(Resource):
             obj = ItemModel.select().where(ItemModel.id == item_id).get()
         except ItemModel.DoesNotExist:
             return None, client.NOT_FOUND
-        parser = reqparse.RequestParser()
-        parser.add_argument('name', type=non_empty_str, required=True)
-        parser.add_argument('picture', type=non_empty_str,
-                            required=False)
-        parser.add_argument('price', type=float, required=True)
-        parser.add_argument('description', type=non_empty_str,
-                            required=True)
-        args = parser.parse_args(strict=True)
 
-        obj.name = args['name']
-        obj.price = args['price']
-        obj.description = args['description']
+        request_data = request.get_json()
+        check_required_fields(
+            request_data=request_data,
+            required_fields=['name', 'price', 'description'])
+
+        obj.name = request_data['name']
+        obj.price = request_data['price']
+        obj.description = request_data['description']
         obj.save()
 
         return obj.json(), client.OK
