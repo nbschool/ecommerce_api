@@ -28,19 +28,6 @@ api = Api(app)
 
 
 @app.before_request
-def database_connect():
-    if database.is_closed():
-        database.connect()
-
-
-@app.teardown_request
-def database_disconnect(response):
-    if not database.is_closed():
-        database.close()
-    return response
-
-
-@app.before_request
 def bad_content_type():
     """
     Force POST and PUT methods to have `Content-Type` as 'application/json'
@@ -54,6 +41,19 @@ def bad_content_type():
 
         if ct != 'application/json':
             abort(BAD_REQUEST)
+
+
+@app.before_request
+def database_connect():
+    if database.is_closed():
+        database.connect()
+
+
+@app.teardown_request
+def database_disconnect(response):
+    if not database.is_closed():
+        database.close()
+    return response
 
 
 api.add_resource(ItemsHandler, "/items/")
