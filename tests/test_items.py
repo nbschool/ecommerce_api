@@ -43,17 +43,20 @@ class TestItems:
         Item.delete().execute()
 
     def test_post_item__success(self):
-        resp = self.app.post('/items/', data=TEST_ITEM)
+        resp = self.app.post('/items/', data=json.dumps(TEST_ITEM),
+                             content_type='application/json')
         assert resp.status_code == client.CREATED
         assert len(Item.select()) == 1
         assert Item.select()[0].json() == TEST_ITEM
 
     def test_post_item__failed(self):
-        resp = self.app.post('/items/', data=TEST_ITEM_WRONG)
+        resp = self.app.post('/items/', data=json.dumps(TEST_ITEM_WRONG),
+                             content_type='application/json')
         assert resp.status_code == client.BAD_REQUEST
 
     def test_post_item__round_price(self):
-        resp = self.app.post('/items/', data=TEST_ITEM_PRECISION)
+        resp = self.app.post('/items/', data=json.dumps(TEST_ITEM_PRECISION),
+                             content_type='application/json')
         assert resp.status_code == client.CREATED
         item = Item.select().get()
         assert round(TEST_ITEM_PRECISION['price'], 2) == float(item.price)
@@ -84,14 +87,16 @@ class TestItems:
     def test_put_item__success(self):
         item = Item.create(**TEST_ITEM)
         resp = self.app.put('/items/{item_id}'.format(item_id=item.id),
-                            data=TEST_ITEM2)
+                            data=json.dumps(TEST_ITEM2),
+                            content_type='application/json')
         assert resp.status_code == client.OK
         db_item = Item.select().where(Item.id == item.id).get()
         assert db_item.json() == TEST_ITEM2
 
     def test_put_item__failed(self):
         resp = self.app.put('/items/{item_id}'.format(item_id=1),
-                            data=TEST_ITEM)
+                            data=json.dumps(TEST_ITEM),
+                            content_type='application/json')
         assert resp.status_code == client.NOT_FOUND
 
     def test_delete_item__success(self):
