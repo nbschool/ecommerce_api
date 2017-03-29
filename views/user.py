@@ -32,7 +32,7 @@ class UsersHandler(Resource):
             try:
                 value = request_data[field]
                 non_empty_str(value, field)
-            except (KeyError, ValueError, TypeError):
+            except (KeyError, ValueError):
                 abort(BAD_REQUEST)
 
         # If email is present in the database return a BAD_REQUEST response.
