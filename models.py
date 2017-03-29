@@ -27,11 +27,11 @@ class Item(BaseModel):
     """
     Product model
         name: product unique name
-        price: product price with 2 decimal
+        price: product price
         description: product description text
     """
     name = CharField(unique=True)
-    price = DecimalField(decimal_places=2, auto_round=True)
+    price = DecimalField(auto_round=True)
     description = TextField()
 
     def __str__(self):

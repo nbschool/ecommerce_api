@@ -27,7 +27,7 @@ TEST_ITEM_WRONG = {
 }
 TEST_ITEM_PRECISION = {
     'name': 'Anna Pannocchia',
-    'price': 30.2222,
+    'price': 30.222222,
     'description': 'lorem ipsum'
 }
 
@@ -59,7 +59,7 @@ class TestItems:
                              content_type='application/json')
         assert resp.status_code == client.CREATED
         item = Item.select().get()
-        assert round(TEST_ITEM_PRECISION['price'], 2) == float(item.price)
+        assert round(TEST_ITEM_PRECISION['price'], 5) == float(item.price)
         assert not TEST_ITEM_PRECISION['price'] == item.price
         assert TEST_ITEM_PRECISION['name'] == item.name
         assert TEST_ITEM_PRECISION['description'] == item.description
