@@ -35,13 +35,18 @@ class OrdersHandler(Resource):
 		
 	def post(self):	
 		res = request.get_json()
-
 		try:
 			for item in res['order']['items']:
 				Item.get(name=item['name'])
 
 		except Item.DoesNotExist:
 			abort(BAD_REQUEST)
+
+		if not ('items' in res['order']) or not ('delivery_address' in res['order']):
+			return None, BAD_REQUEST
+
+		if not (res['order']['items']) or not (res['order']['delivery_address']):
+		 	return None, BAD_REQUEST
 
 		order1 = Order.create(
 			order_id = uuid.uuid4(),
@@ -52,22 +57,16 @@ class OrdersHandler(Resource):
 
 		total_price = 0
 		for item in res['order']['items']:
+			subtotal = item['price'] * item['quantity']
 			obj = OrderItem.create(
 				order = order1,
 				item = Item.get(name=(item['name'])),
 				quantity = item['quantity'],
-				subtotal = item['price'] * item['quantity']
+				subtotal = subtotal
 			)
-			total_price = item['price']
+			order1.total_price += subtotal
 
-		order1.total_price += total_price
-
-		import pdb; pdb.set_trace()
-
-		if obj != 1:
-			return None, INTERNAL_SERVER_ERROR
-
-		return CREATED
+		return order1.json(), CREATED
 		
 class OrderHandler(Resource):
 	"""Single order endpoints."""
@@ -106,6 +105,12 @@ class OrderHandler(Resource):
 			order_to_modify = Order.get(order_id=str(order_id))
 		except Order.DoesNotExist:
 			return None, NOT_FOUND
+
+		if not ('items' in res['order']) or not ('delivery_address' in res['order']) or not ('order_id' in res['order']):
+			return None, BAD_REQUEST
+
+		if not (res['order']['items']) or not (res['order']['delivery_address']) or not (res['order']['order_id']):
+		 	return None, BAD_REQUEST
 
 		try:
 			OrderItem.delete().where(OrderItem.order == order_to_modify).execute()
