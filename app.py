@@ -20,7 +20,7 @@ from models import database
 from flask_restful import Api
 from views.user import UsersHandler, UserHandler
 from http.client import BAD_REQUEST
-from views.items import ItemHandler, ItemListHandler
+from views.items import ItemHandler, ItemsHandler
 
 
 app = Flask(__name__)
@@ -56,7 +56,7 @@ def bad_content_type():
             abort(BAD_REQUEST)
 
 
-api.add_resource(ItemListHandler, "/items/")
+api.add_resource(ItemsHandler, "/items/")
 api.add_resource(ItemHandler, "/items/<int:item_id>")
 api.add_resource(UsersHandler, '/users/')
 api.add_resource(UserHandler, '/users/<email>')

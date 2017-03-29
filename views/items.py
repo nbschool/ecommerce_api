@@ -11,7 +11,7 @@ import http.client as client
 from utils import check_required_fields
 
 
-class ItemListHandler(Resource):
+class ItemsHandler(Resource):
     """Handler of the collection of items"""
 
     def get(self):
