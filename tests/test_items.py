@@ -36,7 +36,7 @@ class TestItems:
     @classmethod
     def setup_class(cls):
         Item._meta.database = SqliteDatabase(':memory:')
-        Item.create_table(fail_silently=True)
+        Item.create_table()
         cls.app = app.test_client()
 
     def setup_method(self):
