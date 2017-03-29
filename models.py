@@ -2,6 +2,7 @@
 Models contains the database models for the application.
 """
 import datetime
+
 from peewee import DateTimeField, TextField, CharField
 from peewee import Model, SqliteDatabase, DecimalField
 

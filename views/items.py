@@ -3,11 +3,11 @@ Items view: this module provides methods to interact
 with items resources
 """
 
-from models import Item
-
-from flask_restful import Resource
 from flask import request
+from flask_restful import Resource
 import http.client as client
+
+from models import Item
 from utils import check_required_fields
 
 

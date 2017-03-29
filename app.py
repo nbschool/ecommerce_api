@@ -16,12 +16,12 @@ can be retrieved making a GET to `/api/users/`
 """
 
 from flask import abort, Flask, request
-from models import database
 from flask_restful import Api
-from views.user import UsersHandler, UserHandler
 from http.client import BAD_REQUEST
-from views.items import ItemHandler, ItemsHandler
 
+from models import database
+from views.items import ItemHandler, ItemsHandler
+from views.user import UsersHandler, UserHandler
 
 app = Flask(__name__)
 api = Api(app)

@@ -4,11 +4,11 @@ Test suite for ItemHandler and ItemListHandler
 
 import json
 
-from app import app
-from models import Item
-
 from peewee import SqliteDatabase
 import http.client as client
+
+from app import app
+from models import Item
 
 TEST_ITEM = {
     'name': 'mario',
