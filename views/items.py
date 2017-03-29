@@ -19,7 +19,10 @@ class ItemsHandler(Resource):
         return [o.json() for o in Item.select()], client.OK
 
     def post(self):
-        """Insert a new item"""
+        """
+        Insert a new item, the item_id identifier is forwarded
+        from the one generated from the database
+        """
         request_data = request.get_json()
         check_required_fields(
             request_data=request_data,
@@ -29,7 +32,9 @@ class ItemsHandler(Resource):
             name=request_data['name'],
             price=float(request_data['price']),
             description=request_data['description'])
-        return obj.json(), client.CREATED
+        item = obj.json()
+        item.update({'item_id': obj.id})
+        return item, client.CREATED
 
 
 class ItemHandler(Resource):

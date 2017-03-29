@@ -48,6 +48,7 @@ class TestItems:
         assert resp.status_code == client.CREATED
         assert len(Item.select()) == 1
         assert Item.select()[0].json() == TEST_ITEM
+        assert Item.select()[0].id == json.loads(resp.data)['item_id']
 
     def test_post_item__failed(self):
         resp = self.app.post('/items/', data=json.dumps(TEST_ITEM_WRONG),
@@ -92,6 +93,12 @@ class TestItems:
         assert resp.status_code == client.OK
         db_item = Item.select().where(Item.id == item.id).get()
         assert db_item.json() == TEST_ITEM2
+
+    def test_put_item__wrong_id(self):
+        resp = self.app.put('/items/{item_id}'.format(item_id=1),
+                            data=json.dumps(TEST_ITEM2),
+                            content_type='application/json')
+        assert resp.status_code == client.NOT_FOUND
 
     def test_put_item__failed(self):
         resp = self.app.put('/items/{item_id}'.format(item_id=1),
