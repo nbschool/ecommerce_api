@@ -81,7 +81,6 @@ celerybeat-schedule
 # virtualenv
 venv/
 ENV/
-envcommerce/
 
 # Spyder project settings
 .spyderproject
@@ -91,6 +90,3 @@ envcommerce/
 
 # DB
 database.db
-
-# folders
-images/
