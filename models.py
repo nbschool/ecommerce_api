@@ -24,7 +24,12 @@ class BaseModel(Model):
 
 
 class Item(BaseModel):
-    """Item model"""
+    """
+    Product model
+        name: product unique name
+        price: product price with 2 decimal
+        description: product description text
+    """
     name = CharField(unique=True)
     price = DecimalField(decimal_places=2, auto_round=True)
     description = TextField()
