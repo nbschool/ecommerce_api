@@ -29,6 +29,10 @@ class PictureListHandler(Resource):
         return image.json(), client.CREATED
 
     def _save_image(self, file):
+        """
+        Save the temporary file in the image folder if it has an
+        allowed extension
+        """
         extension = os.path.splitext(file.filename)[1]
         if extension not in ALLOWED_EXTENSION:
             return None
