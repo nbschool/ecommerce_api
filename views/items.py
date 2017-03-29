@@ -39,15 +39,14 @@ class ItemHandler(Resource):
     def get(self, item_id):
         """Retrieve the item specified by item_id"""
         try:
-            return Item.select().where(
-                Item.id == item_id).get().json(), client.OK
+            return Item.get(Item.id == item_id).json(), client.OK
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
 
     def put(self, item_id):
         """Edit the item specified by item_id"""
         try:
-            obj = Item.select().where(Item.id == item_id).get()
+            obj = Item.get(Item.id == item_id)
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
 
@@ -66,7 +65,7 @@ class ItemHandler(Resource):
     def delete(self, item_id):
         """Remove the item specified by item_id"""
         try:
-            obj = Item.select().where(Item.id == item_id).get()
+            obj = Item.get(Item.id == item_id)
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
         obj.delete_instance()
