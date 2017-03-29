@@ -26,6 +26,7 @@ class PictureListHandler(Resource):
         if not image:
             return {"message": "File extension not allowed"},\
                 client.BAD_REQUEST
+        image.save()
         return image.json(), client.CREATED
 
     def _save_image(self, file):
@@ -41,7 +42,7 @@ class PictureListHandler(Resource):
         if not os.path.exists(IMAGE_FOLDER):
             os.makedirs(IMAGE_FOLDER)
         file.save(full_path)
-        return Picture(image=full_path)
+        return Picture(image=filename)
 
 
 class PictureHandler(Resource):
