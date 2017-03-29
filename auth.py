@@ -14,7 +14,7 @@ def verify(email, password):
     """
     Verify the request to api users endpoints, trying to get the user with the
     provided email and verifying the password against the stored hashed one.
-    
+
     If the user is verified it will be stored inside `Flask.g` to be used from
     the enpoint handler if needed, for example to allow `delete` or `put` only
     on the user's own account.

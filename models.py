@@ -35,7 +35,10 @@ class User(BaseModel):
 
     @staticmethod
     def hash_password(password):
-        """ Use passlib to get a crypted password. """
+        """Use passlib to get a crypted password.
+
+        :returns: str
+        """
         return pbkdf2_sha256.hash(password)
 
     def verify_password(self, password):

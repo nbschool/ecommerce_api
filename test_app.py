@@ -3,10 +3,11 @@ Test suite for User(s) resources.
 """
 
 from app import app
+from base64 import b64encode
 from models import User
 from peewee import SqliteDatabase
 from http.client import (OK, NOT_FOUND, NO_CONTENT, BAD_REQUEST,
-                         CREATED, CONFLICT)
+                         CREATED, CONFLICT, UNAUTHORIZED)
 import json
 import random
 
@@ -14,6 +15,8 @@ import random
 API_ENDPOINT = '/{}'
 # tests are run in temp database in memory
 TEST_DB = SqliteDatabase(':memory:')
+# correct password used for all test users.
+TEST_USER_PSW = 'my_password123@'
 
 
 def _add_user(email=None):
@@ -28,7 +31,7 @@ def _add_user(email=None):
         first_name='John',
         last_name='Doe',
         email=email,
-        password='afoihseg'
+        password=User.hash_password(TEST_USER_PSW)
     )
 
 
@@ -47,6 +50,18 @@ class Testuser:
 
     def setup_method(self, test_method):
         User.delete().execute()
+
+    def open_with_auth(self, url, method, username, password):
+        """Generic call to app for http request. """
+
+        AUTH_TYPE = 'Basic'
+        bytes_auth = bytes('{}:{}'.format(username, password), 'ascii')
+        auth_str = '{} {}'.format(
+            AUTH_TYPE, b64encode(bytes_auth).decode('ascii'))
+
+        return self.app.open(url,
+                             method=method,
+                             headers={'Authorization': auth_str})
 
     def test_get_empty_list__success(self):
         resp = self.app.get(API_ENDPOINT.format('users/'))
@@ -125,14 +140,14 @@ class Testuser:
 
     def test_post_new_user_empty_str_field__fail(self):
         user = {
-            'email': 'mario@email.com',
+            'first_name': '',
             'last_name': 'Rossi',
-            'password': 'akjsgdf',
-            'first_name': ''
+            'email': 'mario@email.com',
+            'password': 'akjsgdf'
         }
 
         resp = self.app.post(API_ENDPOINT.format('users/'),
-                             data=user,
+                             data=json.dumps(user),
                              content_type='application/json')
 
         assert resp.status_code == BAD_REQUEST
@@ -144,36 +159,40 @@ class Testuser:
         _add_user(email)
 
         user_path = 'users/{}'.format(email)
-        resp = self.app.delete(API_ENDPOINT.format(user_path))
+        resp = self.open_with_auth(API_ENDPOINT.format(user_path), 'DELETE',
+                                   email, TEST_USER_PSW)
 
         assert resp.status_code == NO_CONTENT
         assert User.select().count() == 0
 
-    def test_delete_user_no_exists__fail(self):
-        # TODO: refactor for auth implementation.
-        #       currently the response code is 401. modify the test or find
-        #       a way to return NOT_FOUND when calling the auth decorator
-        #       (found in auth.py used in views/user.py::UserHandler.delete())
-        email = 'user@email.it'
-        _add_user(email)
+    def test_delete_user_dont_exists__fail(self):
+        user = _add_user()
 
         user_path = 'users/{}'.format('hi@email.it')
-        resp = self.app.delete(API_ENDPOINT.format(user_path))
+        resp = self.open_with_auth(API_ENDPOINT.format(user_path), 'DELETE',
+                                   user.email, TEST_USER_PSW)
 
         assert resp.status_code == NOT_FOUND
         assert User.select().count() == 1
 
-    def test_delete_user_wrong_credentials__fail(self):
-        # TODO:
-        # Test should implement a delete request of user A called by an
-        # existing user B.
-        # delete should fail returning a 401 (unauthorized) status code and the
-        # number of users should remain the same
-        return False
+    def test_delete_user_other_user__fail(self):
+        user_A = _add_user('user.a@users.com')
+        user_B = _add_user('user.b@users.com')
 
-    def test_delete_user_wrong_password__fail(self):
-        # TODO:
-        # Test a user A that tries to delete its own User profile, but passing
-        # the wrong password. status code should be 401 and the number of user
-        # rows should remain the same
-        return False
+        path = 'users/{}'.format(user_A.email)
+        resp = self.open_with_auth(API_ENDPOINT.format(path), 'DELETE',
+                                   user_B.email, TEST_USER_PSW)
+
+        assert resp.status_code == UNAUTHORIZED
+        assert User.exists(user_A.email)
+        assert User.select().count() == 2
+
+    def test_delete_user_auth_does_not_exists__fail(self):
+        user = _add_user()
+
+        path = 'users/{}'.format(user.email)
+        resp = self.open_with_auth(API_ENDPOINT.format(path), 'DELETE',
+                                   'donot@exists.com', 'unused_psw')
+
+        assert resp.status_code == UNAUTHORIZED
+        assert User.exists(user.email)
