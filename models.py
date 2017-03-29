@@ -5,12 +5,7 @@ import datetime
 from peewee import DateTimeField, TextField, CharField, ForeignKeyField
 from peewee import Model, SqliteDatabase, DecimalField
 
-DATABASE = {
-    'name': 'database.db',
-    'engine': 'peewee.SqliteDatabase',
-}
-
-database = SqliteDatabase(DATABASE['name'])
+database = SqliteDatabase('database.db')
 
 
 class BaseModel(Model):
@@ -21,7 +16,7 @@ class BaseModel(Model):
 
     def save(self, *args, **kwargs):
         """Automatically update updated_at time during save"""
-        self.modified = datetime.datetime.now()
+        self.updated_at = datetime.datetime.now()
         return super(BaseModel, self).save(*args, **kwargs)
 
     class Meta:
