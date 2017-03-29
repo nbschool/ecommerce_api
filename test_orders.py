@@ -1,11 +1,9 @@
 from app import app
 from models import  Order, OrderItem, Item, database, create_tables
-from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, INTERNAL_SERVER_ERROR
+from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, INTERNAL_SERVER_ERROR, BAD_REQUEST
 from peewee import SqliteDatabase
-import json
-import uuid
-import datetime
-import sys
+import datetime, json, sys, uuid
+
 sys.path.append('./views')
 
 class TestOrders:
@@ -127,7 +125,120 @@ class TestOrders:
 		assert resp.status_code == OK
 		assert json.loads(resp.data) == [str(order_id), dt, 100.0, 'Via Rossi 12', [{"quantity": 2, "subtotal": 50.0, "item_name": "item1", "item_description": "item1description."}]]
 
-	def test_delete_article__success(self):
+	def test_create_order__success(self):
+		item1 = Item.create(
+		name = "item1",
+		picture = uuid.uuid4(),
+		price = "50000.0",
+		description = "item1description."
+		)
+		item2 = Item.create(
+			name = "item2",
+			picture = uuid.uuid4(),
+			price = "40000.0",
+			description = "item2description."
+		)
+		item3 = Item.create(
+			name = "item3",
+			picture = uuid.uuid4(),
+			price = "99999.0",
+			description = "item3description."
+		)
+
+		order = {
+			'order': {
+				'items': [
+					{ 'name': 'item1', 'price': 50.0, 'quantity': 4 }, 
+					{ 'name': 'item2', 'price': 20.0, 'quantity': 5 },
+					{ 'name': 'item3', 'price': 20.0, 'quantity': 10 }
+				],
+					'delivery_address': 'Via Rossi 12'
+				}
+		}
+		resp = self.app.post('/orders/', data=json.dumps(order), content_type='application/json')
+
+		assert resp.status_code == CREATED
+		assert len(Order.select()) == 1
+		assert len(OrderItem.select()) == 3
+
+		total_price = 0
+		for p in order['order']['items']:
+			total_price += (p['price'] * p['quantity'])
+
+		assert json.loads(resp.data)['total_price'] == total_price
+		assert json.loads(resp.data)['delivery_address'] == order['order']['delivery_address']
+		assert json.loads(resp.data)['order_id']
+		assert Order.get().json()['order_id'] == json.loads(resp.data)['order_id']
+
+	def test_create_order__failure_missing_field(self):
+		item1 = Item.create(
+		name = "item1",
+		picture = uuid.uuid4(),
+		price = "50.0",
+		description = "item1description."
+		)
+		item2 = Item.create(
+			name = "item2",
+			picture = uuid.uuid4(),
+			price = "20.0",
+			description = "item2description."
+		)
+		item3 = Item.create(
+			name = "item3",
+			picture = uuid.uuid4(),
+			price = "20.0",
+			description = "item3description."
+		)
+
+		order = {
+			'order': {
+				'items': [
+					{ 'name': 'item1', 'price': 50.0, 'quantity': 4 }, 
+					{ 'name': 'item2', 'price': 20.0, 'quantity': 5 },
+					{ 'name': 'item3', 'price': 20.0, 'quantity': 10 }
+				]
+				}
+		}
+		resp = self.app.post('/orders/', data=json.dumps(order), content_type='application/json')
+		assert resp.status_code == BAD_REQUEST
+		assert len(Order.select()) == 0
+
+	def test_create_order__failure_empty_field(self):
+		item1 = Item.create(
+		name = "item1",
+		picture = uuid.uuid4(),
+		price = "50.0",
+		description = "item1description."
+		)
+		item2 = Item.create(
+			name = "item2",
+			picture = uuid.uuid4(),
+			price = "20.0",
+			description = "item2description."
+		)
+		item3 = Item.create(
+			name = "item3",
+			picture = uuid.uuid4(),
+			price = "20.0",
+			description = "item3description."
+		)
+
+		order = {
+			'order': {
+				'items': [
+					{ 'name': 'item1', 'price': 50.0, 'quantity': 4 }, 
+					{ 'name': 'item2', 'price': 20.0, 'quantity': 5 },
+					{ 'name': 'item3', 'price': 20.0, 'quantity': 10 }
+				],
+					'delivery_address': ''
+				}
+		}
+		resp = self.app.post('/orders/', data=json.dumps(order), content_type='application/json')
+		assert resp.status_code == BAD_REQUEST
+		assert len(Order.select()) == 0
+
+
+	def test_delete_order__success(self):
 		item1 = Item.create(
 			name = "item1",
 			picture = uuid.uuid4(),
