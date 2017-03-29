@@ -25,11 +25,10 @@ class ItemsHandler(Resource):
             request_data=request_data,
             required_fields=['name', 'price', 'description'])
 
-        obj = Item(
+        obj = Item.create(
             name=request_data['name'],
             price=float(request_data['price']),
             description=request_data['description'])
-        obj.save()
         return obj.json(), client.CREATED
 
 
