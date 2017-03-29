@@ -2,7 +2,7 @@
 Models contains the database models for the application.
 """
 import datetime
-from peewee import DateTimeField, TextField, CharField, ForeignKeyField
+from peewee import DateTimeField, TextField, CharField
 from peewee import Model, SqliteDatabase, DecimalField
 
 database = SqliteDatabase('database.db')
@@ -48,26 +48,6 @@ class Item(BaseModel):
         }
 
 
-class Picture(BaseModel):
-    """Picture model"""
-
-    image = CharField()
-
-    def json(self):
-        return {
-            'image': self.image
-        }
-
-    def __str__(self):
-        return self.image
-
-
-class ItemPicture(BaseModel):
-    """Item-Picture cross-table"""
-    item = ForeignKeyField(Item)
-    picture = ForeignKeyField(Picture)
-
-
 class User(BaseModel):
     """
     User represents an user for the application.
@@ -103,4 +83,3 @@ class User(BaseModel):
 # TODO: Use database migration
 User.create_table(fail_silently=True)
 Item.create_table(fail_silently=True)
-Picture.create_table(fail_silently=True)
