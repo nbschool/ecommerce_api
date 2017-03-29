@@ -21,7 +21,6 @@ from flask_restful import Api
 from views.user import UsersHandler, UserHandler
 from http.client import BAD_REQUEST
 from views.items import ItemHandler, ItemListHandler
-from views.pictures import PictureHandler, PictureListHandler
 
 
 app = Flask(__name__)
@@ -41,6 +40,7 @@ def database_disconnect(response):
     return response
 
 
+@app.before_request
 def bad_content_type():
     """
     Force POST and PUT methods to have `Content-Type` as 'application/json'
@@ -58,7 +58,5 @@ def bad_content_type():
 
 api.add_resource(ItemListHandler, "/items/")
 api.add_resource(ItemHandler, "/items/<int:item_id>")
-api.add_resource(PictureListHandler, "/pictures/")
-api.add_resource(PictureHandler, "/pictures/<int:picture_id>")
 api.add_resource(UsersHandler, '/users/')
 api.add_resource(UserHandler, '/users/<email>')
