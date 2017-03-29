@@ -3,7 +3,7 @@ Items view: this module provides methods to interact
 with items resources
 """
 
-from models import Item as ItemModel
+from models import Item
 
 from flask_restful import Resource
 from flask import request
@@ -16,7 +16,7 @@ class ItemListHandler(Resource):
 
     def get(self):
         """Retrieve every item"""
-        return [o.json() for o in ItemModel.select()], client.OK
+        return [o.json() for o in Item.select()], client.OK
 
     def post(self):
         """Insert a new item"""
@@ -25,7 +25,7 @@ class ItemListHandler(Resource):
             request_data=request_data,
             required_fields=['name', 'price', 'description'])
 
-        obj = ItemModel(
+        obj = Item(
             name=request_data['name'],
             price=float(request_data['price']),
             description=request_data['description'])
@@ -39,16 +39,16 @@ class ItemHandler(Resource):
     def get(self, item_id):
         """Retrieve the item specified by item_id"""
         try:
-            return ItemModel.select().where(
-                ItemModel.id == item_id).get().json(), client.OK
-        except ItemModel.DoesNotExist:
+            return Item.select().where(
+                Item.id == item_id).get().json(), client.OK
+        except Item.DoesNotExist:
             return None, client.NOT_FOUND
 
     def put(self, item_id):
         """Edit the item specified by item_id"""
         try:
-            obj = ItemModel.select().where(ItemModel.id == item_id).get()
-        except ItemModel.DoesNotExist:
+            obj = Item.select().where(Item.id == item_id).get()
+        except Item.DoesNotExist:
             return None, client.NOT_FOUND
 
         request_data = request.get_json()
@@ -66,8 +66,8 @@ class ItemHandler(Resource):
     def delete(self, item_id):
         """Remove the item specified by item_id"""
         try:
-            obj = ItemModel.select().where(ItemModel.id == item_id).get()
-        except ItemModel.DoesNotExist:
+            obj = Item.select().where(Item.id == item_id).get()
+        except Item.DoesNotExist:
             return None, client.NOT_FOUND
         obj.delete_instance()
         return None, client.NO_CONTENT
