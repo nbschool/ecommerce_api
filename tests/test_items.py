@@ -46,9 +46,10 @@ class TestItems:
         resp = self.app.post('/items/', data=json.dumps(TEST_ITEM),
                              content_type='application/json')
         assert resp.status_code == client.CREATED
-        assert len(Item.select()) == 1
-        assert Item.select()[0].json() == TEST_ITEM
-        assert Item.select()[0].id == json.loads(resp.data)['item_id']
+        item = Item.select().first()
+        assert item
+        assert item.json() == TEST_ITEM
+        assert item.id == json.loads(resp.data)['item_id']
 
     def test_post_item__failed(self):
         resp = self.app.post('/items/', data=json.dumps(TEST_ITEM_WRONG),
