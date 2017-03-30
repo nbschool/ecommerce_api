@@ -237,7 +237,66 @@ class TestOrders:
 		assert resp.status_code == BAD_REQUEST
 		assert len(Order.select()) == 0
 
-
+	def test_update_order__success(self):
+		item1 = Item.create(
+			name = "item1",
+			picture = uuid.uuid4(),
+			price = "20.00",
+			description = "item1description."
+		)
+		item2 = Item.create(
+			name = "item2",
+			picture = uuid.uuid4(),
+			price = "60.00",
+			description = "item2description."
+		)
+		order1 = Order.create(
+			order_id = uuid.uuid4(),
+			date = datetime.datetime.now().isoformat(),
+			total_price = 100,
+			delivery_address = 'Via Rossi 12'
+		)
+		orderitem1 = OrderItem.create(
+			order = order1,
+			item = item1,
+			quantity = 2,
+			subtotal = 40.00
+		)
+		orderitem2 = OrderItem.create(
+			order = order1,
+			item = item2,
+			quantity = 1,
+			subtotal = 60
+		) 
+		order2 = Order.create(
+			order_id = uuid.uuid4(),
+			date = datetime.datetime.now().isoformat(),
+			total_price = 60,
+			delivery_address = 'Via Bianchi 10'
+		)
+		orderitem3 = OrderItem.create(
+			order = order2,
+			item = item2,
+			quantity = 1,
+			subtotal = 60
+		) 
+		order_id = str(order1.order_id)
+		order = {
+			"order": {
+				"order_id": order_id,
+				'items': [
+					{ 'name': 'item1', 'price': 100.0, 'quantity': 5 }, 
+					{ 'name': 'item2', 'price': 2222.0, 'quantity': 1 }
+				],
+				'delivery_address': 'Via Verdi 20'
+			}
+		}
+		resp = self.app.put('/orders/{}'.format(order1.order_id), data=json.dumps(order), content_type='application/json')
+		assert resp.status_code == OK
+		modified_order = Order.get(order_id=order1.order_id).json()
+		assert modified_order['order_id'] == order['order']['order_id']
+		assert modified_order['delivery_address'] == order['order']['delivery_address']
+		
 	def test_delete_order__success(self):
 		item1 = Item.create(
 			name = "item1",
