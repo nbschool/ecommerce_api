@@ -113,9 +113,9 @@ class OrderHandler(Resource):
 		 	return None, BAD_REQUEST
 
 		try:
-			OrderItem.delete().where(OrderItem.order == order_to_modify).execute()
+		 	OrderItem.delete().where(OrderItem.order == order_to_modify).execute()
 		except OrderItem.DoesNotExist:
-			return None, NOT_FOUND
+		 	return None, NOT_FOUND
 
 		order_to_modify.total_price = 0
 		for item in res['order']['items']:
@@ -126,21 +126,19 @@ class OrderHandler(Resource):
 				subtotal = item['price'] * item['quantity']
 			)
 			order_to_modify.total_price += item['price']
-			updated = obj.save()
-			if updated != 1:
-				return None, INTERNAL_SERVER_ERROR
 		order_to_modify.date = datetime.datetime.now().isoformat()
+		order_to_modify.delivery_address = res['order']['delivery_address']
+		order_to_modify.save()
 
-		return OK
+		return order_to_modify.json(), OK
 
 	def delete(self, order_id):
 		try:
 			obj = Order.get(order_id=str(order_id))
-			obj2 = OrderItem.get(order=obj)
+			OrderItem.delete().where(OrderItem.order == obj).execute()
 
 		except Order.DoesNotExist:
 			return None, NOT_FOUND
 
 		obj.delete_instance()
-		obj2.delete_instance()
 		return None, NO_CONTENT
