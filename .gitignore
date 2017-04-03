@@ -90,3 +90,6 @@ ENV/
 
 # DB
 database.db
+
+# Heroku Files
+.env
