@@ -1,17 +1,57 @@
 """
 Models contains the database models for the application.
 """
+import datetime
 
 from passlib.hash import pbkdf2_sha256
-from peewee import CharField, Model, SqliteDatabase
+from peewee import DateTimeField, TextField, CharField
+from peewee import Model, SqliteDatabase, DecimalField
+from peewee import UUIDField
 
 database = SqliteDatabase('database.db')
 
 
 class BaseModel(Model):
     """ Base model for all the database models. """
+
+    created_at = DateTimeField(default=datetime.datetime.now)
+    updated_at = DateTimeField(default=datetime.datetime.now)
+
+    def save(self, *args, **kwargs):
+        """Automatically update updated_at time during save"""
+        self.updated_at = datetime.datetime.now()
+        return super(BaseModel, self).save(*args, **kwargs)
+
     class Meta:
         database = database
+
+
+class Item(BaseModel):
+    """
+    Product model
+        name: product unique name
+        price: product price
+        description: product description text
+    """
+    item_id = UUIDField(unique=True)
+    name = CharField()
+    price = DecimalField(auto_round=True)
+    description = TextField()
+
+    def __str__(self):
+        return '{}, {}, {}, {}'.format(
+            self.item_id,
+            self.name,
+            self.price,
+            self.description)
+
+    def json(self):
+        return {
+            'item_id': str(self.item_id),
+            'name': self.name,
+            'price': float(self.price),
+            'description': self.description
+        }
 
 
 class User(BaseModel):
@@ -65,3 +105,4 @@ class User(BaseModel):
 # Check if the table exists in the database; if not create it.
 # TODO: Use database migration
 User.create_table(fail_silently=True)
+Item.create_table(fail_silently=True)

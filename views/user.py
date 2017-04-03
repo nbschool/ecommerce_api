@@ -5,7 +5,7 @@ from http.client import (CREATED, NO_CONTENT, NOT_FOUND, OK,
 
 from auth import auth
 from models import User
-import utils
+from utils import non_empty_str
 
 
 class UsersHandler(Resource):
@@ -35,7 +35,7 @@ class UsersHandler(Resource):
         for field in required_fields:
             try:
                 value = request_data[field]
-                utils.non_empty_str(value, field)
+                non_empty_str(value, field)
             except (KeyError, ValueError):
                 abort(BAD_REQUEST)
 
