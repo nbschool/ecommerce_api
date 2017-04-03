@@ -5,6 +5,7 @@ import datetime
 
 from peewee import DateTimeField, TextField, CharField
 from peewee import Model, SqliteDatabase, DecimalField
+from peewee import UUIDField
 
 database = SqliteDatabase('database.db')
 
@@ -31,18 +32,21 @@ class Item(BaseModel):
         price: product price
         description: product description text
     """
-    name = CharField(unique=True)
+    item_id = UUIDField(unique=True)
+    name = CharField()
     price = DecimalField(auto_round=True)
     description = TextField()
 
     def __str__(self):
-        return '{}, {}, {}'.format(
+        return '{}, {}, {}, {}'.format(
+            self.item_id,
             self.name,
             self.price,
             self.description)
 
     def json(self):
         return {
+            'item_id': str(self.item_id),
             'name': self.name,
             'price': float(self.price),
             'description': self.description
