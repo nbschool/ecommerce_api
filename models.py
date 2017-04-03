@@ -6,7 +6,7 @@ import datetime
 from passlib.hash import pbkdf2_sha256
 from peewee import DateTimeField, TextField, CharField
 from peewee import Model, SqliteDatabase, DecimalField
-from peewee import UUIDField
+from peewee import UUIDField, ForeignKeyField
 
 database = SqliteDatabase('database.db')
 
@@ -52,6 +52,26 @@ class Item(BaseModel):
             'price': float(self.price),
             'description': self.description
         }
+
+
+class Picture(BaseModel):
+    """Picture model"""
+
+    image = CharField()
+
+    def json(self):
+        return {
+            'image': self.image
+        }
+
+    def __str__(self):
+        return self.image
+
+
+class ItemPicture(BaseModel):
+    """Item-Picture cross-table"""
+    item = ForeignKeyField(Item)
+    picture = ForeignKeyField(Picture)
 
 
 class User(BaseModel):
