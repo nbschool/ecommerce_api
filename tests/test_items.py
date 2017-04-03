@@ -24,13 +24,13 @@ TEST_ITEM2 = {
     'description': 'svariati GINIIIII'
 }
 TEST_ITEM_WRONG = {
-    'id': '19b4c6dc-e393-4e76-bf0f-72559dd5d32e',
+    'item_id': '19b4c6dc-e393-4e76-bf0f-72559dd5d32e',
     'name': '',
     'price': 30.20,
     'description': 'svariati GINIIIII'
 }
 TEST_ITEM_PRECISION = {
-    'id': '68e587f7-3982-4b6a-a882-dd43b89134fe',
+    'item_id': '68e587f7-3982-4b6a-a882-dd43b89134fe',
     'name': 'Anna Pannocchia',
     'price': 30.222222,
     'description': 'lorem ipsum'
@@ -94,7 +94,8 @@ class TestItems:
         assert json.loads(resp.data) == TEST_ITEM
 
     def test_get_item__failed(self):
-        resp = self.app.get('/items/{item_id}'.format(item_id=WRONG_UUID)) #todo
+
+        resp = self.app.get('/items/{item_id}'.format(item_id=WRONG_UUID))
         assert resp.status_code == client.NOT_FOUND
 
     def test_put_item__success(self):
@@ -103,14 +104,15 @@ class TestItems:
                             data=json.dumps(TEST_ITEM2),
                             content_type='application/json')
         assert resp.status_code == client.OK
-        json_item = Item.select().where(Item.item_id == item.item_id).get().json()
+        json_item = Item.select().where(
+            Item.item_id == item.item_id).get().json()
         assert json_item['name'] == TEST_ITEM2['name']
         assert json_item['price'] == TEST_ITEM2['price']
         assert json_item['description'] == TEST_ITEM2['description']
         assert json_item['item_id'] == item.item_id
 
     def test_put_item__wrong_id(self):
-        item = Item.create(**TEST_ITEM)
+        Item.create(**TEST_ITEM)
         resp = self.app.put('/items/{item_id}'.format(item_id=WRONG_UUID),
                             data=json.dumps(TEST_ITEM2),
                             content_type='application/json')

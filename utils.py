@@ -3,6 +3,11 @@ from http.client import BAD_REQUEST
 
 
 def check_required_fields(required_fields, request_data):
+    """
+    Check whether request_data provides all fields in
+    required_fields and they are not empty, bad request
+    is raised otherwise
+    """
     for field in required_fields:
         try:
             value = request_data[field]

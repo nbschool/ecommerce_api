@@ -2,7 +2,7 @@
 Module contains the route handlers for the user part of the RESTful part of the
 flask application.
 
-Enpoints can be found at `/api/users/` and allow the creation of new users with
+Enpoints can be found at `/users/` and allow the creation of new users with
 * `first_name`
 * `last_name`
 * `email`
