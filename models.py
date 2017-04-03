@@ -13,6 +13,7 @@ from uuid import uuid4
 from exceptions import InsufficientAvailabilityException
 from utils import remove_image
 
+
 database = SqliteDatabase('database.db')
 
 
