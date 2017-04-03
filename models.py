@@ -1,89 +1,107 @@
+"""
+Models contains the database models for the application.
+"""
 import datetime
-import os
-import peewee
-from werkzeug import secure_filename
+from passlib.hash import pbkdf2_sha256
+from peewee import DateTimeField, TextField, CharField
+from peewee import Model, SqliteDatabase, DecimalField
+from peewee import UUIDField
 
-__author__ = "Francesco Mirabelli, Marco Tinacci"
-__copyright__ = "Copyright 2017"
-__email__ = "ceskomira90@gmail.com, marco.tinacci@gmail.com"
-
-DATABASE = {
-    'name': 'ecommerce.db',
-    'engine': 'peewee.SqliteDatabase',
-}
-
-db = peewee.SqliteDatabase(DATABASE['name'])
-
-PRICE_PRECISION = 2
+database = SqliteDatabase('database.db')
 
 
-class BaseModel(peewee.Model):
-    """Common features of models"""
+class BaseModel(Model):
+    """ Base model for all the database models. """
 
-    created_at = peewee.DateTimeField(default=datetime.datetime.now)
-    updated_at = peewee.DateTimeField(default=datetime.datetime.now)
+    created_at = DateTimeField(default=datetime.datetime.now)
+    updated_at = DateTimeField(default=datetime.datetime.now)
 
     def save(self, *args, **kwargs):
-        self.modified = datetime.datetime.now()
+        """Automatically update updated_at time during save"""
+        self.updated_at = datetime.datetime.now()
         return super(BaseModel, self).save(*args, **kwargs)
 
     class Meta:
-        database = db
+        database = database
 
 
 class Item(BaseModel):
-    """Item model"""
-    name = peewee.CharField(unique=True)
-    price = peewee.FloatField()
-    description = peewee.TextField()
+    """
+    Product model
+        name: product unique name
+        price: product price
+        description: product description text
+    """
+    item_id = UUIDField(unique=True)
+    name = CharField()
+    price = DecimalField(auto_round=True)
+    description = TextField()
 
     def __str__(self):
-        return '{}, {}, {}'.format(
+        return '{}, {}, {}, {}'.format(
+            self.item_id,
             self.name,
-            round(float(self.price), PRICE_PRECISION),
+            self.price,
             self.description)
 
     def json(self):
         return {
+            'item_id': str(self.item_id),
             'name': self.name,
-            'price': round(float(self.price), PRICE_PRECISION),
+            'price': float(self.price),
             'description': self.description
         }
 
 
-class Picture(BaseModel):
-    """Picture model"""
+class User(BaseModel):
+    """
+    User represents an user for the application.
+    """
 
-    image = peewee.CharField()
+    first_name = CharField()
+    last_name = CharField()
+    email = CharField(unique=True)
+    password = CharField()
 
     @staticmethod
-    def save_image(file_obj, item):
-        filename = secure_filename(file_obj.filename)
-        full_path = os.path.join('images', filename)
-        return Picture(item=item, image=full_path)
+    def exists(email):
+        """
+        Check that an user exists by checking the email field (unique).
+        """
+        user = User.select().where(User.email == email)
 
-    def __str__(self):
-        return self.image
+        return user.exists()
+
+    @staticmethod
+    def hash_password(password):
+        """Use passlib to get a crypted password.
+
+        :returns: str
+        """
+        return pbkdf2_sha256.hash(password)
+
+    def verify_password(self, password):
+        """
+        Verify a clear password against the stored hashed password of the user
+        using passlib.
+
+        :returns: bool
+        """
+        return pbkdf2_sha256.verify(password, self.password)
+
+    def json(self):
+        """
+        Returns a dict describing the object, ready to be jsonified.
+        """
+
+        return {
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'email': self.email
+        }
 
 
-class ItemPicture(BaseModel):
-    """Item-Picture cross-table"""
-    item = peewee.ForeignKeyField(Item)
-    picture = peewee.ForeignKeyField(Picture)
-
-
-def connect():
-    """
-    Establish a connection to the database, create tables
-    if not existing already
-    """
-    if db.is_closed():
-        db.connect()
-        Item.create_table(fail_silently=True)
-        Picture.create_table(fail_silently=True)
-
-
-def close():
-    """Close the database connection"""
-    if not db.is_closed():
-        db.close()
+# Check if the table exists in the database; if not create it.
+# TODO: Use database migration
+User.create_table(fail_silently=True)
+Item.create_table(fail_silently=True)
