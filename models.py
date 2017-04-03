@@ -3,6 +3,7 @@ Models contains the database models for the application.
 """
 import datetime
 
+from passlib.hash import pbkdf2_sha256
 from peewee import DateTimeField, TextField, CharField
 from peewee import Model, SqliteDatabase, DecimalField
 from peewee import UUIDField
@@ -71,6 +72,23 @@ class User(BaseModel):
         user = User.select().where(User.email == email)
 
         return user.exists()
+
+    @staticmethod
+    def hash_password(password):
+        """Use passlib to get a crypted password.
+
+        :returns: str
+        """
+        return pbkdf2_sha256.hash(password)
+
+    def verify_password(self, password):
+        """
+        Verify a clear password against the stored hashed password of the user
+        using passlib.
+
+        :returns: bool
+        """
+        return pbkdf2_sha256.verify(password, self.password)
 
     def json(self):
         """
