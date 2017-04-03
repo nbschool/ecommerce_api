@@ -24,13 +24,13 @@ TEST_ITEM2 = {
     'description': 'svariati GINIIIII'
 }
 TEST_ITEM_WRONG = {
-    'id': '19b4c6dc-e393-4e76-bf0f-72559dd5d32e',
+    'item_id': '19b4c6dc-e393-4e76-bf0f-72559dd5d32e',
     'name': '',
     'price': 30.20,
     'description': 'svariati GINIIIII'
 }
 TEST_ITEM_PRECISION = {
-    'id': '68e587f7-3982-4b6a-a882-dd43b89134fe',
+    'item_id': '68e587f7-3982-4b6a-a882-dd43b89134fe',
     'name': 'Anna Pannocchia',
     'price': 30.222222,
     'description': 'lorem ipsum'
