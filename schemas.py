@@ -1,10 +1,40 @@
 from marshmallow import Schema, fields
+from marshmallow import pprint
+from marshmallow_jsonschema import JSONSchema
+from jsonschema import validate
+from jsonschema.exceptions import ValidationError
+
 
 
 class BaseSchema(Schema):
     @classmethod
     def json(cls, obj):
-        return cls().dump(obj)
+        """
+        converte un oggetto complesso (User, ad esempio) in un oggetto serializzabile (marshmallow object), un json in pratica
+        """
+        return cls().dump(obj).data
+
+    @classmethod
+    def schema(cls):
+        """"
+        converte un marshmallow schemas in un JSON Schema
+        """
+        return JSONSchema().dump(cls()).data
+
+    @classmethod
+    def validate(cls, jsondata):
+        """"
+        valida il json con il suo schema
+        """
+        schema = cls.schema()
+
+        try:
+            validate(jsondata, schema)
+            return True
+        except ValidationError as e:
+            print('e')
+            return False
+
 
 
 class UserSchema(BaseSchema):
@@ -12,3 +42,28 @@ class UserSchema(BaseSchema):
     last_name = fields.Str(required=True)
     email = fields.Email(required=True)
     password = fields.Str(required=True)
+
+
+"""
+TESTS
+"""
+#mio oggetto di prova
+user = User(first_name="Monty", last_name="Python", email="montsdf@asdhon.org", password="ewrwer")
+userjson = {
+    "first_name": "Monty",
+    "last_name": "Python",
+    "email": "montsdf@asdhon.org",
+    "password": "ewrwer"
+}
+
+print('\nTEST METHOD json')
+result = UserSchema.json(user)
+pprint(result)
+
+print('\nTEST METHOD schema')
+result = UserSchema.schema()
+pprint(result)
+
+print('\nTEST METHOD validate')
+result = UserSchema.validate(userjson)
+pprint(result)
