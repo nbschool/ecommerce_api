@@ -26,10 +26,10 @@ class Item(BaseModel):
         }
 
 class Order(BaseModel):
-    """ The model Order contains a list of orders - one row per order. 
+    """ The model Order contains a list of orders - one row per order.
     Each order will be place by one client.
     An order is represented by an order_id, which is a UUID,
-    a dateTimeField which is the date of the order, a FloatField which 
+    a dateTimeField which is the date of the order, a FloatField which
     is the total price of the order. Finally, there is the delivery address,
     if it's different from the customers address from their record.
     """
@@ -46,12 +46,12 @@ class Order(BaseModel):
             'order_id': str(self.order_id),
             'date': self.date,
             'total_price': self.total_price,
-            'delivery_address': self.delivery_address 
+            'delivery_address': self.delivery_address
         }
 
 class OrderItem(BaseModel):
-    """ The model OrderItem is a cross table that contains the order 
-        items - one row for each item on an order (so each order can 
+    """ The model OrderItem is a cross table that contains the order
+        items - one row for each item on an order (so each order can
         generate multiple rows).
         It contains two reference field. The first one is a reference
         of the model Order and the other one is for the Item.
@@ -62,7 +62,7 @@ class OrderItem(BaseModel):
     item = ForeignKeyField(Item)
     quantity = IntegerField()
     subtotal = FloatField()
-    
+
     def json(self):
         return {
             'order_id': self.order.order_id,

@@ -1,14 +1,17 @@
+"""
+Orders-view: this module contains functions for the interaction with the orders.
+"""
+
 from flask_restful import Resource
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, INTERNAL_SERVER_ERROR, BAD_REQUEST
 import sys, uuid, datetime
-sys.path.append('../ecommerce_api')
 from models import Order, OrderItem, Item
 from flask import abort, request
 
-
 class OrdersHandler(Resource):
-	"""OrderS endpoint."""
+	""" OrderS endpoint. """
 	def get(self):
+		""" Get all the orders."""
 		orders = {}
 
 		res = (Order
@@ -32,8 +35,9 @@ class OrdersHandler(Resource):
 				'item_description': row.orderitem.item.description
 			})
 		return list(orders.values()), OK
-		
-	def post(self):	
+
+	def post(self):
+		""" Insert a new order."""
 		res = request.get_json()
 		try:
 			for item in res['order']['items']:
@@ -67,10 +71,11 @@ class OrdersHandler(Resource):
 			order1.total_price += subtotal
 
 		return order1.json(), CREATED
-		
+
 class OrderHandler(Resource):
-	"""Single order endpoints."""
+	""" Single order endpoints."""
 	def get(self, order_id):
+		""" Get a specific order. """
 		order = {}
 
 		try:
@@ -79,7 +84,7 @@ class OrderHandler(Resource):
 			.join(OrderItem)
 			.join(Item)
 			.where(Order.order_id == str(order_id)))
-	
+
 			order = {
 				'order_id': str(res[0].order_id),
 				'date': res[0].date,
@@ -99,6 +104,7 @@ class OrderHandler(Resource):
 			return None, NOT_FOUND
 
 	def put(self, order_id):
+		""" Modify a specific order. """
 		res = request.get_json()
 
 		try:
@@ -133,6 +139,7 @@ class OrderHandler(Resource):
 		return order_to_modify.json(), OK
 
 	def delete(self, order_id):
+		""" Delete a specific order. """
 		try:
 			obj = Order.get(order_id=str(order_id))
 			OrderItem.delete().where(OrderItem.order == obj).execute()

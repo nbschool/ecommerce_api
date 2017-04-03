@@ -1,8 +1,5 @@
 Flask==0.12
 Flask-RESTful==0.3.5
 peewee==2.9.1
-py==1.4.33
 pytest==3.0.7
-request==0.0.0
-requests==2.13.0
-Werkzeug==0.12.1
+pytest-cov==2.4.0
