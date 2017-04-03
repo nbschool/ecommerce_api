@@ -88,4 +88,8 @@ ENV/
 # Rope project settings
 .ropeproject
 
+# DB
 database.db
+
+# Heroku Files
+.env

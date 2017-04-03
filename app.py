@@ -2,24 +2,26 @@
 Module contains the route handlers for the user part of the RESTful part of the
 flask application.
 
-Enpoints can be found at `/api/users/` and allow the creation of new users with
+Enpoints can be found at `/users/` and allow the creation of new users with
 * `first_name`
 * `last_name`
 * `email`
 * `password`
 
-Fields are required non empty strings. At the current stage of development there
-is no validation on what the fields contain.
+Fields are required non empty strings. At the current stage of development
+there is no validation on what the fields contain.
 
 User can be deleted using `/api/users/<email>` and a list of all existing users
 can be retrieved making a GET to `/api/users/`
 """
 
 from flask import abort, Flask, request
-from models import database
 from flask_restful import Api
-from views.user import UsersHandler, UserHandler
 from http.client import BAD_REQUEST
+
+from models import database
+from views.items import ItemHandler, ItemsHandler
+from views.user import UsersHandler, UserHandler
 
 app = Flask(__name__)
 api = Api(app)
@@ -54,5 +56,7 @@ def database_disconnect(response):
     return response
 
 
+api.add_resource(ItemsHandler, "/items/")
+api.add_resource(ItemHandler, "/items/<uuid:item_id>")
 api.add_resource(UsersHandler, '/users/')
 api.add_resource(UserHandler, '/users/<email>')
