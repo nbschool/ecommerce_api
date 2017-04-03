@@ -57,6 +57,6 @@ def database_disconnect(response):
 
 
 api.add_resource(ItemsHandler, "/items/")
-api.add_resource(ItemHandler, "/items/<int:item_id>")
+api.add_resource(ItemHandler, "/items/<uuid:item_id>")
 api.add_resource(UsersHandler, '/users/')
 api.add_resource(UserHandler, '/users/<email>')

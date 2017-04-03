@@ -3,6 +3,8 @@ Items view: this module provides methods to interact
 with items resources
 """
 
+import uuid
+
 from flask import request
 from flask_restful import Resource
 import http.client as client
@@ -29,6 +31,7 @@ class ItemsHandler(Resource):
             required_fields=['name', 'price', 'description'])
 
         obj = Item.create(
+            item_id=str(uuid.uuid4()),
             name=request_data['name'],
             price=float(request_data['price']),
             description=request_data['description'])
@@ -43,14 +46,14 @@ class ItemHandler(Resource):
     def get(self, item_id):
         """Retrieve the item specified by item_id"""
         try:
-            return Item.get(Item.id == item_id).json(), client.OK
+            return Item.get(Item.item_id == item_id).json(), client.OK
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
 
     def put(self, item_id):
         """Edit the item specified by item_id"""
         try:
-            obj = Item.get(Item.id == item_id)
+            obj = Item.get(Item.item_id == item_id)
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
 
@@ -69,7 +72,7 @@ class ItemHandler(Resource):
     def delete(self, item_id):
         """Remove the item specified by item_id"""
         try:
-            obj = Item.get(Item.id == item_id)
+            obj = Item.get(Item.item_id == item_id)
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
         obj.delete_instance()
