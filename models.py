@@ -2,6 +2,7 @@
 Models contains the database models for the application.
 """
 import datetime
+
 from passlib.hash import pbkdf2_sha256
 from peewee import DateTimeField, TextField, CharField
 from peewee import Model, SqliteDatabase, DecimalField

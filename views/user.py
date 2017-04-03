@@ -5,10 +5,6 @@ from http.client import (CREATED, NO_CONTENT, NOT_FOUND, OK,
 
 from auth import auth
 from models import User
-<<<<<<< HEAD
-from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
-=======
->>>>>>> 3733e71c095468f5c8801498deb4d3ab8f28b891
 from utils import non_empty_str
 
 

@@ -94,7 +94,6 @@ class TestItems:
         assert json.loads(resp.data) == TEST_ITEM
 
     def test_get_item__failed(self):
-
         resp = self.app.get('/items/{item_id}'.format(item_id=WRONG_UUID))
         assert resp.status_code == client.NOT_FOUND
 
