@@ -90,3 +90,7 @@ ENV/
 
 # DB
 database.db
+
+# folders
+images/
+
