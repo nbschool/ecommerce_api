@@ -55,21 +55,30 @@ class Item(BaseModel):
 
 
 class Picture(BaseModel):
-    """Picture model"""
-
-    image = CharField()
+    """
+    Picture model
+        picture_id: picture identifier and file name stored
+        extension: picture type
+    """
+    picture_id = UUIDField(unique=True)
+    extension = CharField()
 
     def json(self):
         return {
-            'image': self.image
+            'picture_id': str(self.picture_id),
+            'extension': self.extension
         }
 
     def __str__(self):
-        return self.image
+        return '{}.{}'.format(self.picture_id, self.extension)
 
 
 class ItemPicture(BaseModel):
-    """Item-Picture cross-table"""
+    """
+    Item-Picture cross-table
+        item: foreign key to Item
+        picture: foreign key to Picture
+    """
     item = ForeignKeyField(Item)
     picture = ForeignKeyField(Picture)
 
@@ -124,5 +133,8 @@ class User(BaseModel):
 
 # Check if the table exists in the database; if not create it.
 # TODO: Use database migration
-User.create_table(fail_silently=True)
+
 Item.create_table(fail_silently=True)
+Picture.create_table(fail_silently=True)
+ItemPicture.create_table(fail_silently=True)
+User.create_table(fail_silently=True)
