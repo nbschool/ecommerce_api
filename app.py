@@ -2,14 +2,14 @@
 Module contains the route handlers for the user part of the RESTful part of the
 flask application.
 
-Enpoints can be found at `/api/users/` and allow the creation of new users with
+Enpoints can be found at `/users/` and allow the creation of new users with
 * `first_name`
 * `last_name`
 * `email`
 * `password`
 
-Fields are required non empty strings. At the current stage of development there
-is no validation on what the fields contain.
+Fields are required non empty strings.
+No field content validation is currently present.
 
 User can be deleted using `/api/users/<email>` and a list of all existing users
 can be retrieved making a GET to `/api/users/`
