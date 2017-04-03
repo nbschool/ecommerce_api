@@ -5,12 +5,13 @@ with items resources
 
 import uuid
 
-from flask import request
+from flask import request, g
 from flask_restful import Resource
 import http.client as client
 
-from models import Item
+from models import Item, User
 from utils import check_required_fields
+from auth import auth
 
 
 class ItemsHandler(Resource):
@@ -69,8 +70,28 @@ class ItemHandler(Resource):
 
         return obj.json(), client.OK
 
+    @auth.login_required
     def delete(self, item_id):
         """Remove the item specified by item_id"""
+        """
+        Delete an existing user from the database, looking up by email.
+        If the email does not exists return NOT_FOUND.
+        """
+
+        if not User.exists(email):
+            return ({'message': 'user `{}` without authorization to delete.'
+                    .format(email)}, NOT_FOUND)
+
+        user = User.get(User.email == email)
+
+        # get the user from the flask.g global object registered inside the
+        # auth.py::verify() function, called by @auth.login_required decorator
+        # and match it against the found user.
+        # This is to prevent users from deleting other users' account.
+        if g.user != user:
+            return ({'message': "You can't delete any item"},
+                    UNAUTHORIZED)
+
         try:
             obj = Item.get(Item.item_id == item_id)
         except Item.DoesNotExist:
