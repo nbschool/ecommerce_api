@@ -37,28 +37,3 @@ class UserSchema(BaseSchema):
     last_name = fields.Str(required=True)
     email = fields.Email(required=True)
     password = fields.Str(required=True)
-
-
-"""
-TESTS
-"""
-#mio oggetto di prova
-user = User(first_name="Monty", last_name="Python", email="montsdf@asdhon.org", password="ewrwer")
-userjson = {
-    "first_name": "Monty",
-    "last_name": "Python",
-    "email": "montsdf@asdhon.org",
-    "password": "ewrwer"
-}
-
-print('\nTEST METHOD json')
-result = UserSchema.json(user)
-pprint(result)
-
-print('\nTEST METHOD schema')
-result = UserSchema.schema()
-pprint(result)
-
-print('\nTEST METHOD validate')
-result = UserSchema.validate(userjson)
-pprint(result)
