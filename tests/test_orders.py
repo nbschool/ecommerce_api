@@ -150,8 +150,6 @@ class TestOrders:
 				}
 		}
 		resp = self.app.post('/orders/', data=json.dumps(order), content_type='application/json')
-		import pdb; pdb.set_trace()
-
 		assert resp.status_code == CREATED
 		assert len(Order.select()) == 1
 		assert len(OrderItem.select()) == 2
