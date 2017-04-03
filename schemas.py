@@ -1,7 +1,6 @@
 from marshmallow import Schema, fields
 from marshmallow import pprint
 from marshmallow_jsonschema import JSONSchema
-from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 
 
@@ -15,25 +14,21 @@ class BaseSchema(Schema):
         return cls().dump(obj).data
 
     @classmethod
-    def schema(cls):
+    def json_schema(cls):
         """"
         converte un marshmallow schemas in un JSON Schema
         """
         return JSONSchema().dump(cls()).data
 
     @classmethod
-    def validate(cls, jsondata):
+    def validate_input(cls, jsondata):
         """"
         valida il json con il suo schema
         """
-        schema = cls.schema()
-
-        try:
-            validate(jsondata, schema)
+        errors = cls().validate(jsondata)
+        if not errors:
             return True
-        except ValidationError as e:
-            print('e')
-            return False
+        return errors
 
 
 
