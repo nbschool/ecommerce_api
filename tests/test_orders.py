@@ -3,7 +3,7 @@ Test suite.
 """
 
 from app import app
-from models import  Order, OrderItem, Item, database, create_tables
+from models import  Order, OrderItem, Item, database
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, INTERNAL_SERVER_ERROR, BAD_REQUEST
 from peewee import SqliteDatabase
 import datetime, json, sys, uuid
@@ -16,9 +16,9 @@ class TestOrders:
 		Item._meta.database = test_db
 		OrderItem._meta.database = test_db
 		test_db.connect()
-		Order.create_table(fail_silently=False)
-		Item.create_table(fail_silently=False)
-		OrderItem.create_table(fail_silently=False)
+		Order.create_table()
+		Item.create_table()
+		OrderItem.create_table()
 		cls.app = app.test_client()
 
 	def setup_method(self):
@@ -33,10 +33,10 @@ class TestOrders:
 
 	def test_get_orders(self):
 		item1 = Item.create(
-			name = "item1",
-			picture = uuid.uuid4(),
-			price = "20.00",
-			description = "item1description."
+			item_id = '429994bf-784e-47cc-a823-e0c394b823e8',
+    		name = 'mario',
+    		price = 20.20,
+		    description = 'svariati mariii'
 		)
 		order_id =  uuid.uuid4()
 		dt = datetime.datetime.now().isoformat()
@@ -54,7 +54,7 @@ class TestOrders:
 		)
 		resp = self.app.get('/orders/')
 		assert resp.status_code == OK
-		assert json.loads(resp.data) == [{"order_id": str(order_id), "date": dt, "total_price": 100.0, "delivery_address": 'Via Rossi 12', "items": [{"quantity": 2, "subtotal": 50.0, "item_name": "item1", "item_description": "item1description."}]}]
+		assert json.loads(resp.data) == [{"order_id": str(order_id), "date": dt, "total_price": 100.0, "delivery_address": 'Via Rossi 12', "items": [{"quantity": 2, "subtotal": 50.0, "item_name": "mario", "item_description": "svariati mariii"}]}]
 
 	def test_get_order__non_existing_empty_orders(self):
 		resp = self.app.get('/orders/{}©√'.format(uuid.uuid4()))
@@ -62,10 +62,10 @@ class TestOrders:
 
 	def test_get_order__non_existing(self):
 		item1 = Item.create(
-			name = "item1",
-			picture = uuid.uuid4(),
-			price = "20.00",
-			description = "item1description."
+			item_id = '429994bf-784e-47cc-a823-e0c394b823e8',
+    		name = 'mario',
+    		price = 20.20,
+		    description = 'svariati mariii'
 		)
 		order1 = Order.create(
 			order_id = uuid.uuid4(),
@@ -84,12 +84,11 @@ class TestOrders:
 
 	def test_get_order(self):
 		item1 = Item.create(
-			name = "item1",
-			picture = uuid.uuid4(),
-			price = "20.00",
-			description = "item1description."
+			item_id = '429994bf-784e-47cc-a823-e0c394b823e8',
+    		name = 'mario',
+    		price = 20.20,
+		    description = 'svariati mariii'
 		)
-
 		order_id = uuid.uuid4()
 		dt = datetime.datetime.now().isoformat()
 		order1 = Order.create(
@@ -105,10 +104,10 @@ class TestOrders:
 			subtotal = 50.00
 		)
 		item2 = Item.create(
-			name = "item2",
-			picture = uuid.uuid4(),
-			price = "20.00",
-			description = "item2description."
+			item_id = '577ad826-a79d-41e9-a5b2-7955bcf03499',
+    		name = 'GINO',
+    		price = 30.20,
+    		description = 'svariati GINIIIII'
 		)
 		order2 = Order.create(
 			order_id = uuid.uuid4(),
@@ -125,43 +124,37 @@ class TestOrders:
 
 		resp = self.app.get('/orders/{}'.format(order_id))
 		assert resp.status_code == OK
-		assert json.loads(resp.data) == [str(order_id), dt, 100.0, 'Via Rossi 12', [{"quantity": 2, "subtotal": 50.0, "item_name": "item1", "item_description": "item1description."}]]
+		assert json.loads(resp.data) == [str(order_id), dt, 100.0, 'Via Rossi 12', [{"quantity": 2, "subtotal": 50.0, "item_name": "mario", "item_description": "svariati mariii"}]]
 
 	def test_create_order__success(self):
 		item1 = Item.create(
-		name = "item1",
-		picture = uuid.uuid4(),
-		price = "50000.0",
-		description = "item1description."
+			item_id = '429994bf-784e-47cc-a823-e0c394b823e8',
+    		name = 'mario',
+    		price = 20.20,
+		    description = 'svariati mariii'
 		)
 		item2 = Item.create(
-			name = "item2",
-			picture = uuid.uuid4(),
-			price = "40000.0",
-			description = "item2description."
-		)
-		item3 = Item.create(
-			name = "item3",
-			picture = uuid.uuid4(),
-			price = "99999.0",
-			description = "item3description."
+			item_id = '577ad826-a79d-41e9-a5b2-7955bcf03499',
+    		name = 'GINO',
+    		price = 30.20,
+    		description = 'svariati GINIIIII'
 		)
 
 		order = {
 			'order': {
 				'items': [
-					{ 'name': 'item1', 'price': 50.0, 'quantity': 4 },
-					{ 'name': 'item2', 'price': 20.0, 'quantity': 5 },
-					{ 'name': 'item3', 'price': 20.0, 'quantity': 10 }
+					{ 'name': 'mario', 'price': 20.20, 'quantity': 4 },
+					{ 'name': 'GINO', 'price': 30.20, 'quantity': 10 }
 				],
 					'delivery_address': 'Via Rossi 12'
 				}
 		}
 		resp = self.app.post('/orders/', data=json.dumps(order), content_type='application/json')
+		import pdb; pdb.set_trace()
 
 		assert resp.status_code == CREATED
 		assert len(Order.select()) == 1
-		assert len(OrderItem.select()) == 3
+		assert len(OrderItem.select()) == 2
 
 		total_price = 0
 		for p in order['order']['items']:
@@ -174,30 +167,22 @@ class TestOrders:
 
 	def test_create_order__failure_missing_field(self):
 		item1 = Item.create(
-		name = "item1",
-		picture = uuid.uuid4(),
-		price = "50.0",
-		description = "item1description."
+			item_id = '429994bf-784e-47cc-a823-e0c394b823e8',
+    		name = 'mario',
+    		price = 20.20,
+		    description = 'svariati mariii'
 		)
 		item2 = Item.create(
-			name = "item2",
-			picture = uuid.uuid4(),
-			price = "20.0",
-			description = "item2description."
+			item_id = '577ad826-a79d-41e9-a5b2-7955bcf03499',
+    		name = 'GINO',
+    		price = 30.20,
+    		description = 'svariati GINIIIII'
 		)
-		item3 = Item.create(
-			name = "item3",
-			picture = uuid.uuid4(),
-			price = "20.0",
-			description = "item3description."
-		)
-
 		order = {
 			'order': {
 				'items': [
 					{ 'name': 'item1', 'price': 50.0, 'quantity': 4 },
-					{ 'name': 'item2', 'price': 20.0, 'quantity': 5 },
-					{ 'name': 'item3', 'price': 20.0, 'quantity': 10 }
+					{ 'name': 'item2', 'price': 20.0, 'quantity': 10 }
 				]
 				}
 		}
@@ -207,30 +192,23 @@ class TestOrders:
 
 	def test_create_order__failure_empty_field(self):
 		item1 = Item.create(
-		name = "item1",
-		picture = uuid.uuid4(),
-		price = "50.0",
-		description = "item1description."
+			item_id = '429994bf-784e-47cc-a823-e0c394b823e8',
+    		name = 'mario',
+    		price = 20.20,
+		    description = 'svariati mariii'
 		)
 		item2 = Item.create(
-			name = "item2",
-			picture = uuid.uuid4(),
-			price = "20.0",
-			description = "item2description."
-		)
-		item3 = Item.create(
-			name = "item3",
-			picture = uuid.uuid4(),
-			price = "20.0",
-			description = "item3description."
+			item_id = '577ad826-a79d-41e9-a5b2-7955bcf03499',
+    		name = 'GINO',
+    		price = 30.20,
+    		description = 'svariati GINIIIII'
 		)
 
 		order = {
 			'order': {
 				'items': [
 					{ 'name': 'item1', 'price': 50.0, 'quantity': 4 },
-					{ 'name': 'item2', 'price': 20.0, 'quantity': 5 },
-					{ 'name': 'item3', 'price': 20.0, 'quantity': 10 }
+					{ 'name': 'item2', 'price': 20.0, 'quantity': 10 }
 				],
 					'delivery_address': ''
 				}
@@ -241,16 +219,16 @@ class TestOrders:
 
 	def test_update_order__success(self):
 		item1 = Item.create(
-			name = "item1",
-			picture = uuid.uuid4(),
-			price = "20.00",
-			description = "item1description."
+			item_id = '429994bf-784e-47cc-a823-e0c394b823e8',
+    		name = 'mario',
+    		price = 20.20,
+		    description = 'svariati mariii'
 		)
 		item2 = Item.create(
-			name = "item2",
-			picture = uuid.uuid4(),
-			price = "60.00",
-			description = "item2description."
+			item_id = '577ad826-a79d-41e9-a5b2-7955bcf03499',
+    		name = 'GINO',
+    		price = 30.20,
+    		description = 'svariati GINIIIII'
 		)
 		order1 = Order.create(
 			order_id = uuid.uuid4(),
@@ -287,8 +265,8 @@ class TestOrders:
 			"order": {
 				"order_id": order_id,
 				'items': [
-					{ 'name': 'item1', 'price': 100.0, 'quantity': 5 },
-					{ 'name': 'item2', 'price': 2222.0, 'quantity': 1 }
+					{ 'name': 'mario', 'price': 20.0, 'quantity': 5 },
+					{ 'name': 'GINO', 'price': 30.20, 'quantity': 1 }
 				],
 				'delivery_address': 'Via Verdi 20'
 			}
@@ -301,10 +279,10 @@ class TestOrders:
 
 	def test_update_order__failure_non_existing(self):
 		item1 = Item.create(
-			name = "item1",
-			picture = uuid.uuid4(),
-			price = "20.00",
-			description = "item1description."
+			item_id = '429994bf-784e-47cc-a823-e0c394b823e8',
+    		name = 'mario',
+    		price = 20.20,
+		    description = 'svariati mariii'
 		)
 		order1 = Order.create(
 			order_id = uuid.uuid4(),
@@ -350,10 +328,10 @@ class TestOrders:
 
 	def test_delete_order__success(self):
 		item1 = Item.create(
-			name = "item1",
-			picture = uuid.uuid4(),
-			price = "20.00",
-			description = "item1description."
+			item_id = '429994bf-784e-47cc-a823-e0c394b823e8',
+    		name = 'mario',
+    		price = 20.20,
+		    description = 'svariati mariii'
 		)
 		order_id =  uuid.uuid4()
 		dt = datetime.datetime.now().isoformat()
