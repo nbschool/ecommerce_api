@@ -61,7 +61,7 @@ class TestOrders:
 							"mario", "item_description": "svariati mariii"}]}]
 
 	def test_get_order__non_existing_empty_orders(self):
-		resp = self.app.get('/orders/{}©√'.format(uuid.uuid4()))
+		resp = self.app.get('/orders/{}'.format(uuid.uuid4()))
 		assert resp.status_code == NOT_FOUND
 
 	def test_get_order__non_existing(self):
@@ -83,7 +83,7 @@ class TestOrders:
 			quantity = 2,
 			subtotal = 40.00
 		)
-		resp = self.app.get('/orders/{}©√'.format(uuid.uuid4()))
+		resp = self.app.get('/orders/{}'.format(uuid.uuid4()))
 		assert resp.status_code == NOT_FOUND
 
 	def test_get_order(self):
