@@ -9,15 +9,17 @@ from models import Order, OrderItem, Item
 from flask import abort, request
 
 class OrdersHandler(Resource):
-	""" OrderS endpoint. """
+	""" Orders endpoint. """
 	def get(self):
 		""" Get all the orders."""
 		orders = {}
 
-		res = (Order
+		res = (
+			Order
 			.select(Order, OrderItem, Item)
 			.join(OrderItem)
-			.join(Item))
+			.join(Item)
+		)
 
 		for row in res:
 			if row.order_id not in orders:
@@ -79,11 +81,13 @@ class OrderHandler(Resource):
 		order = {}
 
 		try:
-			res = (Order
-			.select(Order, OrderItem, Item)
-			.join(OrderItem)
-			.join(Item)
-			.where(Order.order_id == str(order_id)))
+			res = (
+				Order
+				.select(Order, OrderItem, Item)
+				.join(OrderItem)
+				.join(Item)
+				.where(Order.order_id == str(order_id))
+			)
 
 			order = {
 				'order_id': str(res[0].order_id),
