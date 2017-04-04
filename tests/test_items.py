@@ -149,5 +149,6 @@ class TestItems:
         assert not Item.select().exists()
 
     def test_delete_item__failed(self):
-        resp = self.app.delete('/items/{item_id}'.format(item_id=WRONG_UUID))
+        resp = self.open_with_auth('/items/{item_id}'.format(item_id=WRONG_UUID), 'DELETE', 'test@email.com',
+                TEST_USER_PSW)
         assert resp.status_code == client.NOT_FOUND
