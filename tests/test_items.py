@@ -12,28 +12,28 @@ from app import app
 from models import Item
 
 TEST_ITEM = {
-    'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
-    'name': 'mario',
-    'price': 20.20,
-    'description': 'svariati mariii'
+    "item_id": "429994bf-784e-47cc-a823-e0c394b823e8",
+    "name": "mario",
+    "price": 20.20,
+    "description": "svariati mariii"
 }
 TEST_ITEM2 = {
-    'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
-    'name': 'GINO',
-    'price': 30.20,
-    'description': 'svariati GINIIIII'
+    "item_id": "577ad826-a79d-41e9-a5b2-7955bcf03499",
+    "name": "GINO",
+    "price": 30.20,
+    "description": "svariati GINIIIII"
 }
 TEST_ITEM_WRONG = {
-    'item_id': '19b4c6dc-e393-4e76-bf0f-72559dd5d32e',
-    'name': '',
-    'price': 30.20,
-    'description': 'svariati GINIIIII'
+    "item_id": "19b4c6dc-e393-4e76-bf0f-72559dd5d32e",
+    "name": "",
+    "price": 30.20,
+    "description": "svariati GINIIIII"
 }
 TEST_ITEM_PRECISION = {
-    'item_id': '68e587f7-3982-4b6a-a882-dd43b89134fe',
-    'name': 'Anna Pannocchia',
-    'price': 30.222222,
-    'description': 'lorem ipsum'
+    "item_id": "68e587f7-3982-4b6a-a882-dd43b89134fe",
+    "name": "Anna Pannocchia",
+    "price": 30.222222,
+    "description": "lorem ipsum"
 }
 WRONG_UUID = '04f2f213-1a0f-443d-a5ab-79097ba725ba'
 
