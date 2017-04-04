@@ -31,12 +31,12 @@ class ItemsHandler(Resource):
             required_fields=['name', 'price', 'description'])
 
         obj = Item.create(
-            item_id=str(uuid.uuid4()),
+            item_id=uuid.uuid4(),
             name=request_data['name'],
             price=float(request_data['price']),
             description=request_data['description'])
         item = obj.json()
-        item.update({'item_id': obj.id})
+
         return item, client.CREATED
 
 
