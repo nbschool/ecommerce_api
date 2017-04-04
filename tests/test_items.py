@@ -132,9 +132,6 @@ class TestItems:
 
     def test_put_item__success(self):
         item = Item.create(**TEST_ITEM)
-        resp = self.app.put('/items/{item_id}'.format(item_id=item.item_id),
-                            data=json.dumps(TEST_ITEM2),
-                            content_type='application/json')
         resp = self.put_with_auth('/items/{item_id}'.
                                 format(item_id=item.item_id), 
                                 data=json.dumps(TEST_ITEM2),
@@ -169,8 +166,6 @@ class TestItems:
                                 method='PUT', 
                                 username='test@email.com',
                                 password=TEST_USER_PSW) 
-
-
         assert resp.status_code == client.NOT_FOUND
 
     def test_delete_item__success(self):
