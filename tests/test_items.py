@@ -53,6 +53,14 @@ class TestItems:
     def setup_method(self):
         Item.delete().execute()
 
+    def open_with_auth(self, url, method, username, password):
+        """Generic call to app for http request. """
+
+        AUTH_TYPE = 'Basic'
+        bytes_auth = bytes('{}:{}'.format(username, password), 'ascii')
+        auth_str = '{} {}'.format(
+            AUTH_TYPE, b64encode(bytes_auth).decode('ascii'))
+
     def test_post_item__success(self):
         resp = self.app.post('/items/', data=json.dumps(TEST_ITEM),
                              content_type='application/json')
