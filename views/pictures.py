@@ -2,12 +2,12 @@ import os
 import uuid
 
 from models import Picture
+import utils
 
 from flask import request
 from flask_restful import Resource
 import http.client as client
 
-IMAGE_FOLDER = 'images'
 ALLOWED_EXTENSION = ['jpg', 'jpeg', 'png', 'gif']
 
 
@@ -23,34 +23,21 @@ class PicturesHandler(Resource):
         if 'image' not in request.files:
             return {"message": "No image received"},\
                 client.BAD_REQUEST
-        file = request.files['image']
-        picture = self._save_image(file)
 
-        if not picture:
+        file = request.files['image']
+        picture_id = uuid.uuid4()
+        extension = os.path.splitext(file.filename)[1][1:]
+
+        if extension not in ALLOWED_EXTENSION:
             return {"message": "File extension not allowed"},\
                 client.BAD_REQUEST
 
-        return picture.json(), client.CREATED
+        utils.save_image(file, picture_id, extension)
 
-    def _save_image(self, file):
-        extension = os.path.splitext(file.filename)[1][1:]
-        if extension not in ALLOWED_EXTENSION:
-            return None
-        picture_id = uuid.uuid4()
-        if not os.path.exists(IMAGE_FOLDER):
-            os.makedirs(IMAGE_FOLDER)
-        file.save(self.image_fullpath(picture_id, extension))
-        picture = Picture.create(
+        return Picture.create(
             picture_id=picture_id,
             extension=extension
-        )
-        return picture
-
-    @staticmethod
-    def image_fullpath(picture_id, extension):
-        return os.path.join(
-            IMAGE_FOLDER,
-            '{}.{}'.format(str(picture_id), extension))
+        ).json(), client.CREATED
 
 
 class PictureHandler(Resource):
@@ -71,13 +58,9 @@ class PictureHandler(Resource):
         except Picture.DoesNotExist:
             return None, client.NOT_FOUND
         try:
-            self._remove_image(obj.picture_id, obj.extension)
+            utils.remove_image(obj.picture_id, obj.extension)
         except OSError:
             # TODO log inconsistency
             return None, client.INTERNAL_SERVER_ERROR
         obj.delete_instance(recursive=True)
         return None, client.NO_CONTENT
-
-    @staticmethod
-    def _remove_image(picture_id, extension):
-        os.remove(PicturesHandler.image_fullpath(picture_id, extension))
