@@ -42,6 +42,7 @@ WRONG_UUID = '04f2f213-1a0f-443d-a5ab-79097ba725ba'
 TEST_DB = SqliteDatabase(':memory:')
 # correct password used for all test users.
 TEST_USER_PSW = 'my_password123@'
+TEST_USER_WRONG_PSW = '@321drowssap_my'
 
 
 class TestItems:
@@ -112,6 +113,30 @@ class TestItems:
             uuid.UUID(item['item_id'], version=4)
         except ValueError:
             assert False
+
+    def test_post_item_no_valid_email(self):
+        resp = self.post_with_auth('/items/', data=json.dumps(TEST_ITEM),
+                                    content_type='application/json',
+                                    method='POST', 
+                                    username='test_false@email.com',
+                                    password=TEST_USER_PSW )
+        assert resp.status_code == client.UNAUTHORIZED
+
+    def test_post_item_no_valid_pass(self):
+        resp = self.post_with_auth('/items/', data=json.dumps(TEST_ITEM),
+                                    content_type='application/json',
+                                    method='POST', 
+                                    username='test@email.com',
+                                    password=TEST_USER_WRONG_PSW )
+        assert resp.status_code == client.UNAUTHORIZED
+
+    def test_post_item_valid_values_wrong_place(self):
+        resp = self.post_with_auth('/items/', data=json.dumps(TEST_ITEM),
+                                    content_type='application/json',
+                                    method='POST', 
+                                    username=TEST_USER_PSW,
+                                    password='test@email.com')
+        assert resp.status_code == client.UNAUTHORIZED
 
     def test_post_item__failed(self):
         resp = self.post_with_auth('/items/', data=json.dumps(TEST_ITEM_WRONG),
@@ -191,6 +216,39 @@ class TestItems:
                                 username='test@email.com',
                                 password=TEST_USER_PSW) 
         assert resp.status_code == client.NOT_FOUND
+
+    def test_put_item_no_valid_email(self):
+        item = Item.create(**TEST_ITEM)
+        resp = self.put_with_auth('/items/{item_id}'.
+                                format(item_id=item.item_id), 
+                                data=json.dumps(TEST_ITEM),
+                                content_type='application/json',
+                                method='PUT', 
+                                username='test_false@email.com',
+                                password=TEST_USER_PSW )
+        assert resp.status_code == client.UNAUTHORIZED
+
+    def test_put_item_no_valid_pass(self):
+        item = Item.create(**TEST_ITEM)
+        resp = self.put_with_auth('/items/{item_id}'.
+                                format(item_id=item.item_id), 
+                                data=json.dumps(TEST_ITEM),
+                                content_type='application/json',
+                                method='PUT', 
+                                username='test_false@email.com',
+                                password=TEST_USER_WRONG_PSW )
+        assert resp.status_code == client.UNAUTHORIZED
+
+    def test_put_item_valid_values_wrong_place(self):
+        item = Item.create(**TEST_ITEM)
+        resp = self.put_with_auth('/items/{item_id}'.
+                                format(item_id=item.item_id), 
+                                data=json.dumps(TEST_ITEM),
+                                content_type='application/json',
+                                method='PUT', 
+                                username=TEST_USER_PSW,
+                                password='test_false@email.com')
+        assert resp.status_code == client.UNAUTHORIZED
 
     def test_delete_item__success(self):
         item = Item.create(**TEST_ITEM2)
