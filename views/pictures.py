@@ -15,8 +15,8 @@ class PicturesHandler(Resource):
     """Handler of the collection of items"""
 
     def get(self):
-        """Retrieve every item"""
-        pass
+        """Retrieve every picture"""
+        return [o.json() for o in Picture.select()], client.OK
 
     def post(self):
         """Insert a new picture"""
@@ -40,10 +40,11 @@ class PicturesHandler(Resource):
         if not os.path.exists(IMAGE_FOLDER):
             os.makedirs(IMAGE_FOLDER)
         file.save(self.image_fullpath(picture_id, extension))
-        return Picture(
+        picture = Picture.create(
             picture_id=picture_id,
             extension=extension
         )
+        return picture
 
     @staticmethod
     def image_fullpath(picture_id, extension):
