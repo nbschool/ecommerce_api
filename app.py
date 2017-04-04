@@ -60,3 +60,8 @@ api.add_resource(ItemsHandler, "/items/")
 api.add_resource(ItemHandler, "/items/<uuid:item_id>")
 api.add_resource(UsersHandler, '/users/')
 api.add_resource(UserHandler, '/users/<email>')
+<<<<<<< Updated upstream
+=======
+api.add_resource(PicturesHandler, "/pictures/")
+api.add_resource(PictureHandler, "/pictures/<uuid:picture_id>")
+>>>>>>> Stashed changes
