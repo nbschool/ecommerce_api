@@ -61,6 +61,10 @@ class TestItems:
         auth_str = '{} {}'.format(
             AUTH_TYPE, b64encode(bytes_auth).decode('ascii'))
 
+        return self.app.open(url,
+                     method=method,
+                     headers={'Authorization': auth_str})
+
     def test_post_item__success(self):
         resp = self.app.post('/items/', data=json.dumps(TEST_ITEM),
                              content_type='application/json')
