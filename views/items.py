@@ -21,9 +21,12 @@ class ItemsHandler(Resource):
         """Retrieve every item"""
         return [o.json() for o in Item.select()], client.OK
 
+    @auth.login_required
     def post(self):
         """
-        Insert a new item, the item_id identifier is forwarded
+        Insert a new item only if the pair email/password
+        is validated by Authorization. 
+        The item_id identifier is forwarded
         from the one generated from the database
         """
         request_data = request.get_json()
@@ -51,8 +54,13 @@ class ItemHandler(Resource):
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
 
+    @auth.login_required
     def put(self, item_id):
-        """Edit the item specified by item_id"""
+        """
+        Edit the item specified by item_id only 
+        if the pair email/password is validated by
+        Authorization.
+        """
         try:
             obj = Item.get(Item.item_id == item_id)
         except Item.DoesNotExist:
@@ -72,26 +80,11 @@ class ItemHandler(Resource):
 
     @auth.login_required
     def delete(self, item_id):
-        """Remove the item specified by item_id"""
         """
-        Delete an existing user from the database, looking up by email.
-        If the email does not exists return NOT_FOUND.
+        Remove the item specified by item_id
+        only if the pair email/password
+        is validated by Authorization.
         """
-
-        if not User.exists(email):
-            return ({'message': 'user `{}` without authorization to delete.'
-                    .format(email)}, NOT_FOUND)
-
-        user = User.get(User.email == email)
-
-        # get the user from the flask.g global object registered inside the
-        # auth.py::verify() function, called by @auth.login_required decorator
-        # and match it against the found user.
-        # This is to prevent users from deleting other users' account.
-        if g.user != user:
-            return ({'message': "You can't delete any item"},
-                    UNAUTHORIZED)
-
         try:
             obj = Item.get(Item.item_id == item_id)
         except Item.DoesNotExist:
