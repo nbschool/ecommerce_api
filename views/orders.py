@@ -26,13 +26,13 @@ class OrdersHandler(Resource):
 				orders[row.order_id] = {
 					'order_id': str(row.order_id),
 					'date': row.date,
-					'total_price': row.total_price,
+					'total_price': float(row.total_price),
 					'delivery_address': row.delivery_address,
 					'items': []
 				}
 			orders[row.order_id]['items'].append({
 				'quantity': row.orderitem.quantity,
-				'subtotal': row.orderitem.subtotal,
+				'subtotal': float(row.orderitem.subtotal),
 				'item_name': row.orderitem.item.name,
 				'item_description': row.orderitem.item.description
 			})
@@ -92,13 +92,13 @@ class OrderHandler(Resource):
 			order = {
 				'order_id': str(res[0].order_id),
 				'date': res[0].date,
-				'total_price': res[0].total_price,
+				'total_price': float(res[0].total_price),
 				'delivery_address': res[0].delivery_address,
 				'items': []
 			}
 			for row in res:
 				order['items'].append({'quantity': row.orderitem.quantity,
-				'subtotal': row.orderitem.subtotal,
+				'subtotal': float(row.orderitem.subtotal),
 				'item_name': row.orderitem.item.name,
 				'item_description': row.orderitem.item.description
 				})

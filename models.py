@@ -113,7 +113,7 @@ class Order(BaseModel):
     """
     order_id = UUIDField(unique=True)
     date = DateTimeField()
-    total_price = FloatField()
+    total_price = DecimalField()
     delivery_address = CharField()
 
     class Meta:
@@ -123,7 +123,7 @@ class Order(BaseModel):
         return {
             'order_id': str(self.order_id),
             'date': self.date,
-            'total_price': self.total_price,
+            'total_price': float(self.total_price),
             'delivery_address': self.delivery_address
         }
 
@@ -140,14 +140,14 @@ class OrderItem(BaseModel):
     order = ForeignKeyField(Order)
     item = ForeignKeyField(Item)
     quantity = IntegerField()
-    subtotal = FloatField()
+    subtotal = DecimalField()
 
     def json(self):
         return {
             'order_id': self.order.order_id,
             'item_name': self.item.name,
             'quantity': str(self.quantity),
-            'subtotal': self.subtotal
+            'subtotal': float(self.subtotal)
         }
 
 
