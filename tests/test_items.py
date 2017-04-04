@@ -10,6 +10,7 @@ import http.client as client
 
 from app import app
 from models import Item
+from base64 import b64encode
 
 TEST_ITEM = {
     'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
@@ -142,7 +143,8 @@ class TestItems:
 
     def test_delete_item__success(self):
         item = Item.create(**TEST_ITEM2)
-        resp = self.app.delete('/items/{item_id}'.format(item_id=item.item_id))
+        resp = self.open_with_auth('/items/{item_id}'.format(item_id=item.item_id), 'DELETE', 'test@email.com',
+                TEST_USER_PSW)
         assert resp.status_code == client.NO_CONTENT
         assert not Item.select().exists()
 
