@@ -58,12 +58,26 @@ class PictureHandler(Resource):
 
     def get(self, picture_id):
         """Retrieve the picture specified by picture_id"""
-        pass
-
-    def put(self, picture_id):
-        """Edit the picture specified by picture_id"""
-        pass
+        try:
+            return Picture.get(Picture.picture_id == picture_id).json(),\
+                client.OK
+        except Picture.DoesNotExist:
+            return None, client.NOT_FOUND
 
     def delete(self, picture_id):
         """Remove the picture specified by picture_id"""
-        pass
+        try:
+            obj = Picture.get(Picture.picture_id == picture_id)
+        except Picture.DoesNotExist:
+            return None, client.NOT_FOUND
+        try:
+            self._remove_image(obj.picture_id, obj.extension)
+        except OSError:
+            # TODO log inconsistency
+            return None, client.INTERNAL_SERVER_ERROR
+        obj.delete_instance(recursive=True)
+        return None, client.NO_CONTENT
+
+    @staticmethod
+    def _remove_image(picture_id, extension):
+        os.remove(PicturesHandler.image_fullpath(picture_id, extension))
