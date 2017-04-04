@@ -12,7 +12,7 @@ ALLOWED_EXTENSION = ['jpg', 'jpeg', 'png', 'gif']
 
 
 class PicturesHandler(Resource):
-    """Handler of the collection of items"""
+    """Handler of the collection of pictures"""
 
     def get(self):
         """Retrieve every picture"""
@@ -54,16 +54,16 @@ class PicturesHandler(Resource):
 
 
 class PictureHandler(Resource):
-    """Handler of a specific item"""
+    """Handler of a specific picture"""
 
-    def get(self, iid):
-        """Retrieve the item specified by iid"""
+    def get(self, picture_id):
+        """Retrieve the picture specified by picture_id"""
         pass
 
-    def put(self, iid):
-        """Edit the item specified by iid"""
+    def put(self, picture_id):
+        """Edit the picture specified by picture_id"""
         pass
 
-    def delete(self, iid):
-        """Remove the item specified by iid"""
+    def delete(self, picture_id):
+        """Remove the picture specified by picture_id"""
         pass
