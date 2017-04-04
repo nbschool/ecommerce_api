@@ -43,7 +43,7 @@ class TestOrders:
 		order1 = Order.create(
 			order_id = order_id,
 			date = dt,
-			total_price = 100,
+			total_price = 100.00,
 			delivery_address = 'Via Rossi 12'
 		)
 		orderitem1 = OrderItem.create(
@@ -53,8 +53,12 @@ class TestOrders:
 			subtotal = 50.00
 		)
 		resp = self.app.get('/orders/')
+
 		assert resp.status_code == OK
-		assert json.loads(resp.data) == [{"order_id": str(order_id), "date": dt, "total_price": 100.0, "delivery_address": 'Via Rossi 12', "items": [{"quantity": 2, "subtotal": 50.0, "item_name": "mario", "item_description": "svariati mariii"}]}]
+		assert json.loads(resp.data) == [{ "order_id": str(order_id), "date": dt, \
+							"total_price": 100.00, "delivery_address": 'Via Rossi 12', \
+							"items": [{"quantity": 2, "subtotal": 50.00, "item_name": \
+							"mario", "item_description": "svariati mariii"}]}]
 
 	def test_get_order__non_existing_empty_orders(self):
 		resp = self.app.get('/orders/{}©√'.format(uuid.uuid4()))
@@ -124,7 +128,9 @@ class TestOrders:
 
 		resp = self.app.get('/orders/{}'.format(order_id))
 		assert resp.status_code == OK
-		assert json.loads(resp.data) == [str(order_id), dt, 100.0, 'Via Rossi 12', [{"quantity": 2, "subtotal": 50.0, "item_name": "mario", "item_description": "svariati mariii"}]]
+		assert json.loads(resp.data) == [str(order_id), dt, 100.0, 'Via Rossi 12', \
+										[{"quantity": 2, "subtotal": 50.0, "item_name": \
+										"mario", "item_description": "svariati mariii"}]]
 
 	def test_create_order__success(self):
 		item1 = Item.create(
