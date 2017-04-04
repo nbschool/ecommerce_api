@@ -37,6 +37,11 @@ TEST_ITEM_PRECISION = {
 }
 WRONG_UUID = '04f2f213-1a0f-443d-a5ab-79097ba725ba'
 
+# tests are run in temp database in memory
+TEST_DB = SqliteDatabase(':memory:')
+# correct password used for all test users.
+TEST_USER_PSW = 'my_password123@'
+
 
 class TestItems:
     @classmethod
