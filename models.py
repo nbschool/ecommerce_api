@@ -58,7 +58,7 @@ class User(BaseModel):
     """
     User represents an user for the application.
     """
-
+    user_id = UUIDField(unique=True)
     first_name = CharField()
     last_name = CharField()
     email = CharField(unique=True)
