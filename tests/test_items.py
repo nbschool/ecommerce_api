@@ -54,7 +54,7 @@ class TestItems:
     def setup_method(self):
         Item.delete().execute()
 
-    def open_with_auth(self, url, method, username, password):
+    def delete_with_auth(self, url, method, username, password):
         """Generic call to app for http request. """
 
         AUTH_TYPE = 'Basic'
@@ -136,21 +136,21 @@ class TestItems:
         assert resp.status_code == client.NOT_FOUND
 
     def test_put_item__failed(self):
-        resp = self.app.put('/items/{item_id}'.format(item_id=WRONG_UUID),
+        resp = self.open_with_auth('/items/{item_id}'.format(item_id=WRONG_UUID),
                             data=json.dumps(TEST_ITEM),
                             content_type='application/json')
         assert resp.status_code == client.NOT_FOUND
 
     def test_delete_item__success(self):
         item = Item.create(**TEST_ITEM2)
-        resp = self.open_with_auth('/items/{item_id}'.
+        resp = self.delete_with_auth('/items/{item_id}'.
                 format(item_id=item.item_id), 'DELETE', 
                 'test@email.com', TEST_USER_PSW)
         assert resp.status_code == client.NO_CONTENT
         assert not Item.select().exists()
 
     def test_delete_item__failed(self):
-        resp = self.open_with_auth('/items/{item_id}'.
+        resp = self.delete_with_auth('/items/{item_id}'.
                 format(item_id=WRONG_UUID), 'DELETE', 
                 'test@email.com', TEST_USER_PSW)
         assert resp.status_code == client.NOT_FOUND
