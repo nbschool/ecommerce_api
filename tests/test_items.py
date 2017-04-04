@@ -68,7 +68,7 @@ class TestItems:
 
     def put_with_auth(self, url, data, content_type, method, username, 
                     password):
-        """Generic call to app for http request. """
+        """Generic call to app for http request for PUT request. """
 
         AUTH_TYPE = 'Basic'
         bytes_auth = bytes('{}:{}'.format(username, password), 'ascii')
@@ -81,9 +81,27 @@ class TestItems:
                      method=method,
                      headers={'Authorization': auth_str})
 
+    def post_with_auth(self, url, data, content_type, method, username, 
+                    password):
+        """Generic call to app for http request for POST request. """
+
+        AUTH_TYPE = 'Basic'
+        bytes_auth = bytes('{}:{}'.format(username, password), 'ascii')
+        auth_str = '{} {}'.format(
+            AUTH_TYPE, b64encode(bytes_auth).decode('ascii'))
+
+        return self.app.post(url,
+                     data=data, 
+                     content_type=content_type,
+                     method=method,
+                     headers={'Authorization': auth_str})        
+
     def test_post_item__success(self):
-        resp = self.app.post('/items/', data=json.dumps(TEST_ITEM),
-                             content_type='application/json')
+        resp = self.post_with_auth('/items/', data=json.dumps(TEST_ITEM),
+                                    content_type='application/json',
+                                    method='POST', 
+                                    username='test@email.com',
+                                    password=TEST_USER_PSW )
         assert resp.status_code == client.CREATED
         assert len(Item.select()) == 1
         item = Item.select()[0].json()
@@ -96,13 +114,19 @@ class TestItems:
             assert False
 
     def test_post_item__failed(self):
-        resp = self.app.post('/items/', data=json.dumps(TEST_ITEM_WRONG),
-                             content_type='application/json')
+        resp = self.post_with_auth('/items/', data=json.dumps(TEST_ITEM_WRONG),
+                                    content_type='application/json',
+                                    method='POST', 
+                                    username='test@email.com',
+                                    password=TEST_USER_PSW )
         assert resp.status_code == client.BAD_REQUEST
 
     def test_post_item__round_price(self):
-        resp = self.app.post('/items/', data=json.dumps(TEST_ITEM_PRECISION),
-                             content_type='application/json')
+        resp = self.post_with_auth('/items/', data=json.dumps(TEST_ITEM_PRECISION),
+                                    content_type='application/json',
+                                    method='POST', 
+                                    username='test@email.com',
+                                    password=TEST_USER_PSW )        
         assert resp.status_code == client.CREATED
         item = Item.select().get()
         assert round(TEST_ITEM_PRECISION['price'], 5) == float(item.price)
