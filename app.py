@@ -20,6 +20,7 @@ from flask_restful import Api
 from http.client import BAD_REQUEST
 
 from models import database
+from views.orders import OrdersHandler, OrderHandler
 from views.items import ItemHandler, ItemsHandler
 from views.user import UsersHandler, UserHandler
 from views.pictures import PicturesHandler, PictureHandler
@@ -63,6 +64,8 @@ def database_disconnect(response):
 
 api.add_resource(ItemsHandler, "/items/")
 api.add_resource(ItemHandler, "/items/<uuid:item_id>")
+api.add_resource(OrdersHandler, '/orders/')
+api.add_resource(OrderHandler, '/orders/<uuid:order_id>')
 api.add_resource(UsersHandler, '/users/')
 api.add_resource(UserHandler, '/users/<email>')
 api.add_resource(PicturesHandler, "/pictures/")

@@ -94,3 +94,5 @@ database.db
 # folders
 images/
 
+# Heroku Files
+.env

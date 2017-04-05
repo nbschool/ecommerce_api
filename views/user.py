@@ -2,6 +2,7 @@ from flask import request, abort, g
 from flask_restful import Resource
 from http.client import (CREATED, NO_CONTENT, NOT_FOUND, OK,
                          BAD_REQUEST, CONFLICT, UNAUTHORIZED)
+import uuid
 
 from auth import auth
 from models import User
@@ -45,6 +46,7 @@ class UsersHandler(Resource):
             return msg, CONFLICT
 
         new_user = User.create(
+            user_id=uuid.uuid4(),
             first_name=request_data['first_name'],
             last_name=request_data['last_name'],
             email=request_data['email'],
