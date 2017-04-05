@@ -70,9 +70,11 @@ class User(BaseModel):
         """
         Check that an user exists by checking the email field (unique).
         """
-        user = User.select().where(User.email == email)
-
-        return user.exists()
+        try:
+            User.get(User.email == email)
+        except User.DoesNotExist:
+            return False
+        return True
 
     @staticmethod
     def hash_password(password):

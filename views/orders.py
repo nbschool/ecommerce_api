@@ -43,8 +43,9 @@ class OrdersHandler(Resource):
         """ Insert a new order."""
         res = request.get_json()
         try:
-            for item in res['order']['items']:
-                Item.get(name=item['name'])
+            item_names = [e for e in map(
+                lambda x: x['name'], res['order']['items'])]
+            Item.get(Item.name << item_names)
 
         except Item.DoesNotExist:
             abort(BAD_REQUEST)
