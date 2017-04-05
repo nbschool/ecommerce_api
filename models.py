@@ -7,7 +7,6 @@ from passlib.hash import pbkdf2_sha256
 from peewee import DateTimeField, TextField, CharField
 from peewee import Model, SqliteDatabase, DecimalField
 from peewee import UUIDField, ForeignKeyField, IntegerField
-from peewee import FloatField
 
 database = SqliteDatabase('database.db')
 
@@ -55,6 +54,35 @@ class Item(BaseModel):
         }
 
 
+class Picture(BaseModel):
+    """
+    Picture model
+        picture_id: picture identifier and file name stored
+        extension: picture type
+    """
+    picture_id = UUIDField(unique=True)
+    extension = CharField()
+
+    def json(self):
+        return {
+            'picture_id': str(self.picture_id),
+            'extension': self.extension
+        }
+
+    def __str__(self):
+        return '{}.{}'.format(self.picture_id, self.extension)
+
+
+class ItemPicture(BaseModel):
+    """
+    Item-Picture cross-table
+        item: foreign key to Item
+        picture: foreign key to Picture
+    """
+    item = ForeignKeyField(Item)
+    picture = ForeignKeyField(Picture)
+
+
 class User(BaseModel):
     """
     User represents an user for the application.
@@ -70,9 +98,11 @@ class User(BaseModel):
         """
         Check that an user exists by checking the email field (unique).
         """
-        user = User.select().where(User.email == email)
-
-        return user.exists()
+        try:
+            User.get(User.email == email)
+        except User.DoesNotExist:
+            return False
+        return True
 
     @staticmethod
     def hash_password(password):
@@ -155,8 +185,10 @@ class OrderItem(BaseModel):
 
 # Check if the table exists in the database; if not create it.
 # TODO: Use database migration
-User.create_table(fail_silently=True)
+
 Item.create_table(fail_silently=True)
+Picture.create_table(fail_silently=True)
+ItemPicture.create_table(fail_silently=True)
+User.create_table(fail_silently=True)
 Order.create_table(fail_silently=True)
 OrderItem.create_table(fail_silently=True)
-
