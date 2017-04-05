@@ -81,13 +81,6 @@ class OrderHandler(Resource):
     """ Single order endpoints."""
     def get(self, order_id):
         """ Get a specific order. """
-        order = {}
-
-        try:
-            Order.get(order_id=str(order_id))
-        except Order.DoesNotExist:
-            return None, NOT_FOUND
-
         res = (
             Order
             .select(Order, OrderItem, Item)
@@ -96,19 +89,24 @@ class OrderHandler(Resource):
             .where(Order.order_id == str(order_id))
         )
 
+        if not res:
+            return None, NOT_FOUND
+
+        orderitems = []
+        for row in res:
+            orderitems.append({'quantity': row.orderitem.quantity,
+            'subtotal': float(row.orderitem.subtotal),
+            'item_name': row.orderitem.item.name,
+            'item_description': row.orderitem.item.description
+            })
+
         order = {
             'order_id': str(res[0].order_id),
             'date': res[0].date,
             'total_price': float(res[0].total_price),
             'delivery_address': res[0].delivery_address,
-            'items': []
+            'items': orderitems
         }
-        for row in res:
-            order['items'].append({'quantity': row.orderitem.quantity,
-            'subtotal': float(row.orderitem.subtotal),
-            'item_name': row.orderitem.item.name,
-            'item_description': row.orderitem.item.description
-            })
         return list(order.values()), OK
 
 
@@ -151,10 +149,8 @@ class OrderHandler(Resource):
         """ Delete a specific order. """
         try:
             obj = Order.get(order_id=str(order_id))
-            OrderItem.delete().where(OrderItem.order == obj).execute()
-
         except Order.DoesNotExist:
             return None, NOT_FOUND
 
-        obj.delete_instance()
+        obj.delete_instance(recursive=True)
         return None, NO_CONTENT
