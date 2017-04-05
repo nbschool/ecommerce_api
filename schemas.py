@@ -104,6 +104,8 @@ class OrderSchema(BaseSchema):
 
 
 class UserSchema(BaseSchema):
+    class Meta:
+        type_ = 'user'
     """
     Schema for models.User
     """
