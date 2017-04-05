@@ -8,6 +8,7 @@ import sys, uuid, datetime
 from models import Order, OrderItem, Item
 from flask import abort, request
 
+
 class OrdersHandler(Resource):
     """ Orders endpoint. """
     def get(self):
@@ -73,6 +74,7 @@ class OrdersHandler(Resource):
             order1.total_price += subtotal
 
         return order1.json(), CREATED
+
 
 class OrderHandler(Resource):
     """ Single order endpoints."""
