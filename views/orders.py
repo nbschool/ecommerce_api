@@ -3,13 +3,16 @@ Orders-view: this module contains functions for the interaction with the orders.
 """
 
 from flask_restful import Resource
-from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, INTERNAL_SERVER_ERROR, BAD_REQUEST
-import sys, uuid, datetime
+from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
+import datetime
+import uuid
 from models import Order, OrderItem, Item
 from flask import abort, request
 
+
 class OrdersHandler(Resource):
     """ Orders endpoint. """
+
     def get(self):
         """ Get all the orders."""
         orders = {}
@@ -55,27 +58,28 @@ class OrdersHandler(Resource):
             return None, BAD_REQUEST
 
         order1 = Order.create(
-            order_id = uuid.uuid4(),
-            date = datetime.datetime.now().isoformat(),
-            total_price = 0,
-            delivery_address = res['order']['delivery_address'],
+            order_id=uuid.uuid4(),
+            date=datetime.datetime.now().isoformat(),
+            total_price=0,
+            delivery_address=res['order']['delivery_address'],
         )
 
-        total_price = 0
         for item in res['order']['items']:
             subtotal = item['price'] * item['quantity']
-            obj = OrderItem.create(
-                order = order1,
-                item = Item.get(name=(item['name'])),
-                quantity = item['quantity'],
-                subtotal = subtotal
+            OrderItem.create(
+                order=order1,
+                item=Item.get(name=(item['name'])),
+                quantity=item['quantity'],
+                subtotal=subtotal
             )
             order1.total_price += subtotal
 
         return order1.json(), CREATED
 
+
 class OrderHandler(Resource):
     """ Single order endpoints."""
+
     def get(self, order_id):
         """ Get a specific order. """
         order = {}
@@ -102,12 +106,11 @@ class OrderHandler(Resource):
         }
         for row in res:
             order['items'].append({'quantity': row.orderitem.quantity,
-            'subtotal': float(row.orderitem.subtotal),
-            'item_name': row.orderitem.item.name,
-            'item_description': row.orderitem.item.description
-            })
+                                   'subtotal': float(row.orderitem.subtotal),
+                                   'item_name': row.orderitem.item.name,
+                                   'item_description': row.orderitem.item.description
+                                   })
         return list(order.values()), OK
-
 
     def put(self, order_id):
         """ Modify a specific order. """
@@ -118,10 +121,14 @@ class OrderHandler(Resource):
         except Order.DoesNotExist:
             return None, NOT_FOUND
 
-        if not ('items' in res['order']) or not ('delivery_address' in res['order']) or not ('order_id' in res['order']):
+        if not ('items' in res['order']) or not\
+            ('delivery_address' in res['order']) or not\
+                ('order_id' in res['order']):
             return None, BAD_REQUEST
 
-        if not (res['order']['items']) or not (res['order']['delivery_address']) or not (res['order']['order_id']):
+        if not (res['order']['items']) or not\
+            (res['order']['delivery_address']) or not\
+                (res['order']['order_id']):
             return None, BAD_REQUEST
 
         try:
@@ -131,11 +138,11 @@ class OrderHandler(Resource):
 
         order_to_modify.total_price = 0
         for item in res['order']['items']:
-            obj = OrderItem.create(
-                order = order_to_modify,
-                item = Item.get(name=(item['name'])),
-                quantity = item['quantity'],
-                subtotal = item['price'] * item['quantity']
+            OrderItem.create(
+                order=order_to_modify,
+                item=Item.get(name=(item['name'])),
+                quantity=item['quantity'],
+                subtotal=item['price'] * item['quantity']
             )
             order_to_modify.total_price += item['price']
         order_to_modify.date = datetime.datetime.now().isoformat()
