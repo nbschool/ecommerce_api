@@ -7,7 +7,6 @@ from passlib.hash import pbkdf2_sha256
 from peewee import DateTimeField, TextField, CharField
 from peewee import Model, SqliteDatabase, DecimalField
 from peewee import UUIDField, ForeignKeyField, IntegerField
-from peewee import FloatField
 
 database = SqliteDatabase('database.db')
 
@@ -154,11 +153,9 @@ class OrderItem(BaseModel):
         }
 
 
-
 # Check if the table exists in the database; if not create it.
 # TODO: Use database migration
 User.create_table(fail_silently=True)
 Item.create_table(fail_silently=True)
 Order.create_table(fail_silently=True)
 OrderItem.create_table(fail_silently=True)
-
