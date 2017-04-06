@@ -221,9 +221,42 @@ def main():
             'attributes': TEST_USER
         }
     }
+    TEST_ITEM2 = {
+        'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+        'name': 'GINO',
+        'price': 30.20,
+        'description': 'svariati GINIIIII'
+    }
+    item = Item.create(**TEST_ITEM)
+    item2 = Item.create(**TEST_ITEM2)
 
     print('\nUser jsonapi validation (True or dict with errors if any)')
     pprint(UserSchema.validate_input(post_data))
+
+    # # This simulates what needs to be present inside a POST/PUT request for the
+    # # User endpoints, where `attributes` are the actual data needed to create
+    # # the new user
+    # post_data = {
+    #     'data': {
+    #         'type': 'user',
+    #         'attributes': user_data
+    #     }
+    # }
+
+    # user = User(**user_data, user_id=uuid.uuid4())
+    # schema = UserSchema(user)
+
+    # pprint('\nJSONSchema for User')
+    # pprint(UserSchema.json_schema())
+
+    # print('\nTest user peewee object json')
+    # pprint(user.json())
+
+    # print('\nUserSchema for test user')
+    # pprint(UserSchema.json(user))
+
+    # print('\nUser jsonapi validation (True or dict with errors if any)')
+    # pprint(UserSchema.validate_input(post_data))
 
 
 if __name__ == '__main__':
