@@ -43,8 +43,7 @@ class OrdersHandler(Resource):
         """ Insert a new order."""
         res = request.get_json()
         try:
-            item_names = [e for e in map(
-                lambda x: x['name'], res['order']['items'])]
+            item_names = [e['name'] for e in res['order']['items']]
             Item.get(Item.name << item_names)
 
         except Item.DoesNotExist:
@@ -86,7 +85,7 @@ class OrderHandler(Resource):
             .select(Order, OrderItem, Item)
             .join(OrderItem)
             .join(Item)
-            .where(Order.order_id == str(order_id))
+            .where(Order.order_id == order_id)
         )
 
         if not res:
