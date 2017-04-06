@@ -104,8 +104,6 @@ class OrderSchema(BaseSchema):
 
 
 class UserSchema(BaseSchema):
-    class Meta:
-        type_ = 'user'
     """
     Schema for models.User
     """
@@ -243,23 +241,6 @@ def main():
     #     }
     # }
 
-    user = User(**user_data, user_id=uuid.uuid4())
-    user.orders = [order1]
-    # schema = UserSchema(user)
-
-    # pprint('\nJSONSchema for User')
-    # pprint(UserSchema.json_schema())
-
-    # print('\nTest user peewee object json')
-    # pprint(user.json())
-
-    print('\nUserSchema for test user')
-    pprint(UserSchema.json(user, include_data=['orders']))
-
-    # print('\nUser jsonapi validation (True or dict with errors if any)')
-    # pprint(UserSchema.validate_input(post_data))
-
-    # print(OrderSchema.json_schema())
 
 if __name__ == '__main__':
     main()
