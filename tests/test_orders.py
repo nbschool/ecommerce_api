@@ -14,7 +14,7 @@ import uuid
 class TestOrders:
     @classmethod
     def setup_class(cls):
-        test_db = SqliteDatabase(':memory:')
+        test_db = SqliteDatabase('test_database.db')
         Order._meta.database = test_db
         Item._meta.database = test_db
         OrderItem._meta.database = test_db

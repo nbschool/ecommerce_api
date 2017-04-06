@@ -11,6 +11,7 @@ import http.client as client
 
 from models import Item
 from utils import check_required_fields
+from auth import auth
 
 
 class ItemsHandler(Resource):
@@ -20,9 +21,12 @@ class ItemsHandler(Resource):
         """Retrieve every item"""
         return [o.json() for o in Item.select()], client.OK
 
+    @auth.login_required
     def post(self):
         """
-        Insert a new item, the item_id identifier is forwarded
+        Insert a new item only if the pair email/password
+        is validated by Authorization.
+        The item_id identifier is forwarded
         from the one generated from the database
         """
         request_data = request.get_json()
@@ -50,8 +54,13 @@ class ItemHandler(Resource):
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
 
+    @auth.login_required
     def put(self, item_id):
-        """Edit the item specified by item_id"""
+        """
+        Edit the item specified by item_id only
+        if the pair email/password is validated by
+        Authorization.
+        """
         try:
             obj = Item.get(Item.item_id == item_id)
         except Item.DoesNotExist:
@@ -69,8 +78,13 @@ class ItemHandler(Resource):
 
         return obj.json(), client.OK
 
+    @auth.login_required
     def delete(self, item_id):
-        """Remove the item specified by item_id"""
+        """
+        Remove the item specified by item_id
+        only if the pair email/password
+        is validated by Authorization.
+        """
         try:
             obj = Item.get(Item.item_id == item_id)
         except Item.DoesNotExist:

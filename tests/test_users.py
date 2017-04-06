@@ -15,7 +15,7 @@ import uuid
 # main endpoint for API
 API_ENDPOINT = '/{}'
 # tests are run in temp database in memory
-TEST_DB = SqliteDatabase(':memory:')
+TEST_DB = SqliteDatabase('test_database.db')
 # correct password used for all test users.
 TEST_USER_PSW = 'my_password123@'
 
@@ -32,8 +32,7 @@ def _add_user(email=None):
         first_name='John',
         last_name='Doe',
         email=email,
-        password=User.hash_password(TEST_USER_PSW),
-        user_id=uuid.uuid4()
+        password=User.hash_password(TEST_USER_PSW)
     )
 
 
@@ -95,13 +94,8 @@ class Testuser:
 
         assert resp.status_code == CREATED
 
-        resp_user = json.loads(resp.data)
-
-        assert 'user_id' in resp_user
-
-        del user['password']  # user inside response does not have the password
-        del resp_user['user_id']  # sent user data does not have the id field
-        assert resp_user == user
+        del user['password']
+        assert json.loads(resp.data) == user
         assert User.select().count() == 1
 
     def test_post_new_user_no_json__fail(self):
