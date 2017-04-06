@@ -15,7 +15,7 @@ import uuid
 # main endpoint for API
 API_ENDPOINT = '/{}'
 # tests are run in temp database in memory
-TEST_DB = SqliteDatabase(':memory:')
+TEST_DB = SqliteDatabase('test_database.db')
 # correct password used for all test users.
 TEST_USER_PSW = 'my_password123@'
 

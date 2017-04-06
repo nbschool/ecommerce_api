@@ -39,7 +39,7 @@ TEST_ITEM_PRECISION = {
 WRONG_UUID = '04f2f213-1a0f-443d-a5ab-79097ba725ba'
 
 # tests are run in temp database in memory
-TEST_DB = SqliteDatabase(':memory:')
+TEST_DB = SqliteDatabase('test_database.db')
 # correct password used for all test users.
 TEST_USER_PSW = 'my_password123@'
 TEST_USER_WRONG_PSW = '@321drowssap_my'
@@ -48,7 +48,7 @@ TEST_USER_WRONG_PSW = '@321drowssap_my'
 class TestItems:
     @classmethod
     def setup_class(cls):
-        Item._meta.database = SqliteDatabase(':memory:')
+        Item._meta.database = SqliteDatabase('test_database.db')
         Item.create_table()
         cls.app = app.test_client()
 
