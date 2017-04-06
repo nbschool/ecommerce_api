@@ -19,7 +19,7 @@ def add_user(email, psw):
         user_id=uuid.uuid4()
     )
 
-def open_with_auth(app, url, method, username, password):
+def open_with_auth(app, url, method, username, password, content_type, data):
     """Generic call to app for http request. """
 
     AUTH_TYPE = 'Basic'
@@ -29,4 +29,6 @@ def open_with_auth(app, url, method, username, password):
 
     return app.open(url,
                     method=method,
-                    headers={'Authorization': auth_str})
+                    headers={'Authorization': auth_str},
+                    content_type=content_type,
+                    data=data)

@@ -2,12 +2,16 @@
 Orders-view: this module contains functions for the interaction with the orders.
 """
 
+import random
 from flask_restful import Resource
+from flask_httpauth import HTTPBasicAuth
+from base64 import b64encode
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
 import datetime
 import uuid
-from models import Order, OrderItem, Item
-from flask import abort, request
+from models import Order, OrderItem, Item, User
+from flask import abort, request, g
+
 
 
 class OrdersHandler(Resource):
@@ -41,8 +45,10 @@ class OrdersHandler(Resource):
             })
         return list(orders.values()), OK
 
+	@auth.login_required
     def post(self):
         """ Insert a new order."""
+		user = g.user
         res = request.get_json()
         try:
             item_names = [e['name'] for e in res['order']['items']]
@@ -64,6 +70,7 @@ class OrdersHandler(Resource):
             date=datetime.datetime.now().isoformat(),
             total_price=0,
             delivery_address=res['order']['delivery_address'],
+            user=user
         )
 
         for item in res['order']['items']:
@@ -110,8 +117,10 @@ class OrderHandler(Resource):
                                    })
         return list(order.values()), OK
 
+	@auth.login_required
     def put(self, order_id):
         """ Modify a specific order. """
+		user = g.user
         res = request.get_json()
 
         try:
@@ -147,6 +156,7 @@ class OrderHandler(Resource):
 
         return order_to_modify.json(), OK
 
+	@auth.login_required
     def delete(self, order_id):
         """ Delete a specific order. """
         try:

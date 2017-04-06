@@ -147,8 +147,10 @@ class Testuser:
 
     def test_delete_user_dont_exists__fail(self):
         user = add_user(None, TEST_USER_PSW)
+
         wrong_uuid = uuid.UUID(int=user.user_id.int + 1)
         user_path = 'users/{}'.format(wrong_uuid)
+
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
                                    user.email, TEST_USER_PSW)
 
