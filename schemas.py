@@ -22,11 +22,14 @@ class BaseSchema(Schema):
         :param obj object: The object to serialize
         :param include_data list: a list of fields inside the object to include
                                   inside the serialized response
+        :returns: (data, errors)
         """
         if not include_data:
-            return cls().dump(obj).data
+            serialized = cls().dump(obj)
+        else:
+            serialized = cls(include_data=include_data).dump(obj)
 
-        return cls(include_data=include_data).dump(obj).data
+        return serialized.data, serialized.errors
 
     @classmethod
     def json_schema(cls):
@@ -51,19 +54,6 @@ class BaseSchema(Schema):
         return errors
 
 
-class UserSchema(BaseSchema):
-    class Meta:
-        type_ = 'user'
-    """
-    Schema for models.User
-    """
-    id = fields.Str(dump_only=True, attribute='user_id')
-    first_name = fields.Str(required=True)
-    last_name = fields.Str(required=True)
-    email = fields.Email(required=True)
-    password = fields.Str(required=True, load_only=True)
-
-
 class ItemSchema(BaseSchema):
     class Meta:
         type_ = 'item'
@@ -83,13 +73,13 @@ class OrderSchema(BaseSchema):
         self_url_many = '/orders/'
 
     id = fields.Str(dump_only=True, attribute='order_id')
-    date = fields.Date()
+    date = fields.DateTime()
     total_price = fields.Float()
     delivery_address = fields.Str()
 
     items = fields.Relationship(
-        related_url='/orders/{id}/items/',
-        related_url_kwargs={'id': '<order_id>'},
+        # related_url='/orders/{id}/items/',
+        # related_url_kwargs={'id': '<order_id>'},
         many=True, include_resource_linkage=True,
         type_='item', schema=ItemSchema
     )
@@ -101,6 +91,26 @@ class OrderSchema(BaseSchema):
         of the order.
         """
         return super(OrderSchema, cls).json(obj, include_data)
+
+
+class UserSchema(BaseSchema):
+    class Meta:
+        type_ = 'user'
+    """
+    Schema for models.User
+    """
+    id = fields.Str(dump_only=True, attribute='user_id')
+    first_name = fields.Str(required=True)
+    last_name = fields.Str(required=True)
+    email = fields.Email(required=True)
+    password = fields.Str(required=True, load_only=True)
+
+    orders = fields.Relationship(
+        related_url='/users/{id}/orders',
+        related_url_kwargs={'id': '<user_id>'},
+        many=True, include_resource_linkage=True,
+        type_='order', schema=OrderSchema
+    )
 
 
 def main():
@@ -128,7 +138,7 @@ def main():
 
     order1 = Order.create(
         order_id=uuid.uuid4(),
-        date=datetime.now().isoformat(),
+        date=datetime.now(),
         total_price=100.00,
         delivery_address='Via Rossi 12'
     )
@@ -157,15 +167,19 @@ def main():
     order1.items = [item, item2]
     # pprint(order1.json())
 
-    pprint(OrderSchema.json(order1))
+    serialized, errors = OrderSchema.json(order1)
+
+    print('Errors:', errors)
+    print('\nData:')
+    pprint(serialized)
 
     # # data for a test user
-    # user_data = {
-    #     "first_name": "John",
-    #     "last_name": "Doe",
-    #     "password": "antani",
-    #     "email": "john.doe@email.com"
-    # }
+    user_data = {
+        "first_name": "John",
+        "last_name": "Doe",
+        "password": "antani",
+        "email": "john.doe@email.com"
+    }
 
     # # This simulates what needs to be present inside a POST/PUT request for the
     # # User endpoints, where `attributes` are the actual data needed to create
@@ -177,7 +191,8 @@ def main():
     #     }
     # }
 
-    # user = User(**user_data, user_id=uuid.uuid4())
+    user = User(**user_data, user_id=uuid.uuid4())
+    user.orders = [order1]
     # schema = UserSchema(user)
 
     # pprint('\nJSONSchema for User')
@@ -186,12 +201,13 @@ def main():
     # print('\nTest user peewee object json')
     # pprint(user.json())
 
-    # print('\nUserSchema for test user')
-    # pprint(UserSchema.json(user))
+    print('\nUserSchema for test user')
+    pprint(UserSchema.json(user, include_data=['orders']))
 
     # print('\nUser jsonapi validation (True or dict with errors if any)')
     # pprint(UserSchema.validate_input(post_data))
 
+    # print(OrderSchema.json_schema())
 
 if __name__ == '__main__':
     main()
