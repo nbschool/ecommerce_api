@@ -43,8 +43,7 @@ class OrdersHandler(Resource):
         """ Insert a new order."""
         res = request.get_json()
         try:
-            item_names = [e for e in map(
-                lambda x: x['name'], res['order']['items'])]
+            item_names = [e['name'] for e in res['order']['items']]
             Item.get(Item.name << item_names)
 
         except Item.DoesNotExist:
@@ -81,20 +80,16 @@ class OrderHandler(Resource):
     """ Single order endpoints."""
     def get(self, order_id):
         """ Get a specific order. """
-        order = {}
-
-        try:
-            Order.get(order_id=str(order_id))
-        except Order.DoesNotExist:
-            return None, NOT_FOUND
-
         res = (
             Order
             .select(Order, OrderItem, Item)
             .join(OrderItem)
             .join(Item)
-            .where(Order.order_id == str(order_id))
+            .where(Order.order_id == order_id)
         )
+
+        if not res:
+            return None, NOT_FOUND
 
         order = {
             'order_id': str(res[0].order_id),
@@ -151,10 +146,8 @@ class OrderHandler(Resource):
         """ Delete a specific order. """
         try:
             obj = Order.get(order_id=str(order_id))
-            OrderItem.delete().where(OrderItem.order == obj).execute()
-
         except Order.DoesNotExist:
             return None, NOT_FOUND
 
-        obj.delete_instance()
+        obj.delete_instance(recursive=True)
         return None, NO_CONTENT
