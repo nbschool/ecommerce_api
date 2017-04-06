@@ -51,11 +51,13 @@ class OrdersHandler(Resource):
         except Item.DoesNotExist:
             abort(BAD_REQUEST)
 
-        if not ('items' in res['order']) or not ('delivery_address' in res['order']):
-            return None, BAD_REQUEST
+        for i in ('items', 'delivery_address'):
+            if i not in res['order']:
+                return None, BAD_REQUEST
 
-        if not (res['order']['items']) or not (res['order']['delivery_address']):
-            return None, BAD_REQUEST
+        for i in ('items', 'delivery_address'):
+            if not res['order'][i]:
+                return None, BAD_REQUEST
 
         order1 = Order.create(
             order_id=uuid.uuid4(),
@@ -121,15 +123,13 @@ class OrderHandler(Resource):
         except Order.DoesNotExist:
             return None, NOT_FOUND
 
-        if not ('items' in res['order']) or not\
-            ('delivery_address' in res['order']) or not\
-                ('order_id' in res['order']):
-            return None, BAD_REQUEST
+        for i in ('items', 'delivery_address', 'order_id'):
+            if i not in res['order']:
+                return None, BAD_REQUEST
 
-        if not (res['order']['items']) or not\
-            (res['order']['delivery_address']) or not\
-                (res['order']['order_id']):
-            return None, BAD_REQUEST
+        for i in ('items', 'delivery_address', 'order_id'):
+            if not res['order'][i]:
+                return None, BAD_REQUEST
 
         try:
             OrderItem.delete().where(OrderItem.order == order_to_modify).execute()
