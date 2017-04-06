@@ -101,7 +101,7 @@ class User(BaseModel):
             'user_id': str(self.user_id),
             'first_name': self.first_name,
             'last_name': self.last_name,
-            'email': self.email
+            'email': self.email,
         }
 
 
@@ -117,6 +117,7 @@ class Order(BaseModel):
     date = DateTimeField()
     total_price = DecimalField()
     delivery_address = CharField()
+    user = ForeignKeyField(User, related_name="orders")
 
     class Meta:
         order_by = ('date',)
@@ -126,7 +127,8 @@ class Order(BaseModel):
             'order_id': str(self.order_id),
             'date': self.date,
             'total_price': float(self.total_price),
-            'delivery_address': self.delivery_address
+            'delivery_address': self.delivery_address,
+            'user_id': self.user.user_id
         }
 
 
