@@ -137,11 +137,11 @@ class Testuser:
     def test_delete_user__success(self):
         # TODO: refactor for auth implementation
         email = 'mail@email.it'
-        add_user(email, TEST_USER_PSW)
+        user = add_user(email, TEST_USER_PSW)
 
-        user_path = 'users/{}'.format(email)
+        user_path = 'users/{}'.format(user.user_id)
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
-                                   email, TEST_USER_PSW)
+                                   email, TEST_USER_PSW, None, None)
         assert resp.status_code == NO_CONTENT
         assert User.select().count() == 0
 
@@ -152,7 +152,7 @@ class Testuser:
         user_path = 'users/{}'.format(wrong_uuid)
 
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
-                                   user.email, TEST_USER_PSW)
+                                   user.email, TEST_USER_PSW, None, None)
 
         assert resp.status_code == NOT_FOUND
         assert User.select().count() == 1
@@ -163,7 +163,7 @@ class Testuser:
 
         path = 'users/{}'.format(user_A.user_id)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'DELETE',
-                                   user_B.user_id, TEST_USER_PSW)
+                                   user_B.user_id, TEST_USER_PSW, None, None)
 
         assert resp.status_code == UNAUTHORIZED
         assert User.get(User.email == user_A.email)
@@ -176,7 +176,7 @@ class Testuser:
 
         path = 'users/{}'.format(user.user_id)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'DELETE',
-                                   'donot@exists.com', 'unused_psw')
+                                   'donot@exists.com', 'unused_psw', None, None)
 
         assert resp.status_code == UNAUTHORIZED
         assert User.exists(user.email)
