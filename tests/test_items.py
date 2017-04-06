@@ -60,30 +60,21 @@ class TestItems:
 
         AUTH_TYPE = 'Basic'
         bytes_auth = bytes('{}:{}'.format(username, password), 'ascii')
-        auth_str = '{} {}'.format(
-            AUTH_TYPE, b64encode(bytes_auth).decode('ascii'))
+        auth_str = '{} {}'.format(AUTH_TYPE, b64encode(bytes_auth).decode('ascii'))
 
-        return self.app.open(url,
-                     method=method,
-                     headers={'Authorization': auth_str})
+        return self.app.open(url, method=method, headers={'Authorization': auth_str})
 
-    def put_with_auth(self, url, data, content_type, method, username, 
-                    password):
+    def put_with_auth(self, url, data, content_type, method, username, password):
         """Generic call to app for http request for PUT request. """
 
         AUTH_TYPE = 'Basic'
         bytes_auth = bytes('{}:{}'.format(username, password), 'ascii')
-        auth_str = '{} {}'.format(
-            AUTH_TYPE, b64encode(bytes_auth).decode('ascii'))
+        auth_str = '{} {}'.format(AUTH_TYPE, b64encode(bytes_auth).decode('ascii'))
 
-        return self.app.put(url,
-                     data=data, 
-                     content_type=content_type,
-                     method=method,
-                     headers={'Authorization': auth_str})
+        return self.app.put(url, data=data, content_type=content_type, method=method,
+                            headers={'Authorization': auth_str})
 
-    def post_with_auth(self, url, data, content_type, method, username, 
-                    password):
+    def post_with_auth(self, url, data, content_type, method, username, password):
         """Generic call to app for http request for POST request. """
 
         AUTH_TYPE = 'Basic'
@@ -91,18 +82,15 @@ class TestItems:
         auth_str = '{} {}'.format(
             AUTH_TYPE, b64encode(bytes_auth).decode('ascii'))
 
-        return self.app.post(url,
-                     data=data, 
-                     content_type=content_type,
-                     method=method,
-                     headers={'Authorization': auth_str})        
+        return self.app.post(url, data=data, content_type=content_type, method=method,
+                             headers={'Authorization': auth_str})
 
     def test_post_item__success(self):
         resp = self.post_with_auth('/items/', data=json.dumps(TEST_ITEM),
-                                    content_type='application/json',
-                                    method='POST', 
-                                    username='test@email.com',
-                                    password=TEST_USER_PSW )
+                                   content_type='application/json',
+                                   method='POST',
+                                   username='test@email.com',
+                                   password=TEST_USER_PSW)
         assert resp.status_code == client.CREATED
         assert len(Item.select()) == 1
         item = Item.select()[0].json()
@@ -116,42 +104,42 @@ class TestItems:
 
     def test_post_item_no_valid_email(self):
         resp = self.post_with_auth('/items/', data=json.dumps(TEST_ITEM),
-                                    content_type='application/json',
-                                    method='POST', 
-                                    username='test_false@email.com',
-                                    password=TEST_USER_PSW )
+                                   content_type='application/json',
+                                   method='POST',
+                                   username='test_false@email.com',
+                                   password=TEST_USER_PSW)
         assert resp.status_code == client.UNAUTHORIZED
 
     def test_post_item_no_valid_pass(self):
         resp = self.post_with_auth('/items/', data=json.dumps(TEST_ITEM),
-                                    content_type='application/json',
-                                    method='POST', 
-                                    username='test@email.com',
-                                    password=TEST_USER_WRONG_PSW )
+                                   content_type='application/json',
+                                   method='POST',
+                                   username='test@email.com',
+                                   password=TEST_USER_WRONG_PSW)
         assert resp.status_code == client.UNAUTHORIZED
 
     def test_post_item_valid_values_wrong_place(self):
         resp = self.post_with_auth('/items/', data=json.dumps(TEST_ITEM),
-                                    content_type='application/json',
-                                    method='POST', 
-                                    username=TEST_USER_PSW,
-                                    password='test@email.com')
+                                   content_type='application/json',
+                                   method='POST',
+                                   username=TEST_USER_PSW,
+                                   password='test@email.com')
         assert resp.status_code == client.UNAUTHORIZED
 
     def test_post_item__failed(self):
         resp = self.post_with_auth('/items/', data=json.dumps(TEST_ITEM_WRONG),
-                                    content_type='application/json',
-                                    method='POST', 
-                                    username='test@email.com',
-                                    password=TEST_USER_PSW )
+                                   content_type='application/json',
+                                   method='POST',
+                                   username='test@email.com',
+                                   password=TEST_USER_PSW)
         assert resp.status_code == client.BAD_REQUEST
 
     def test_post_item__round_price(self):
         resp = self.post_with_auth('/items/', data=json.dumps(TEST_ITEM_PRECISION),
-                                    content_type='application/json',
-                                    method='POST', 
-                                    username='test@email.com',
-                                    password=TEST_USER_PSW )        
+                                   content_type='application/json',
+                                   method='POST',
+                                   username='test@email.com',
+                                   password=TEST_USER_PSW)
         assert resp.status_code == client.CREATED
         item = Item.select().get()
         assert round(TEST_ITEM_PRECISION['price'], 5) == float(item.price)
@@ -181,13 +169,12 @@ class TestItems:
 
     def test_put_item__success(self):
         item = Item.create(**TEST_ITEM)
-        resp = self.put_with_auth('/items/{item_id}'.
-                                format(item_id=item.item_id), 
-                                data=json.dumps(TEST_ITEM2),
-                                content_type='application/json',
-                                method='PUT', 
-                                username='test@email.com',
-                                password=TEST_USER_PSW)
+        resp = self.put_with_auth('/items/{item_id}'.format(item_id=item.item_id),
+                                  data=json.dumps(TEST_ITEM2),
+                                  content_type='application/json',
+                                  method='PUT',
+                                  username='test@email.com',
+                                  password=TEST_USER_PSW)
         assert resp.status_code == client.OK
         json_item = Item.select().where(
             Item.item_id == item.item_id).get().json()
@@ -198,68 +185,61 @@ class TestItems:
 
     def test_put_item__wrong_id(self):
         Item.create(**TEST_ITEM)
-        resp = self.put_with_auth('/items/{item_id}'.
-                                format(item_id=WRONG_UUID), 
-                                data=json.dumps(TEST_ITEM2),
-                                content_type='application/json',
-                                method='PUT', 
-                                username='test@email.com',
-                                password=TEST_USER_PSW)
+        resp = self.put_with_auth('/items/{item_id}'.format(item_id=WRONG_UUID),
+                                  data=json.dumps(TEST_ITEM2),
+                                  content_type='application/json',
+                                  method='PUT',
+                                  username='test@email.com',
+                                  password=TEST_USER_PSW)
         assert resp.status_code == client.NOT_FOUND
 
     def test_put_item__failed(self):
-        resp = self.put_with_auth('/items/{item_id}'.
-                                format(item_id=WRONG_UUID), 
-                                data=json.dumps(TEST_ITEM),
-                                content_type='application/json',
-                                method='PUT', 
-                                username='test@email.com',
-                                password=TEST_USER_PSW) 
+        resp = self.put_with_auth('/items/{item_id}'.format(item_id=WRONG_UUID),
+                                  data=json.dumps(TEST_ITEM),
+                                  content_type='application/json',
+                                  method='PUT',
+                                  username='test@email.com',
+                                  password=TEST_USER_PSW)
         assert resp.status_code == client.NOT_FOUND
 
     def test_put_item_no_valid_email(self):
         item = Item.create(**TEST_ITEM)
-        resp = self.put_with_auth('/items/{item_id}'.
-                                format(item_id=item.item_id), 
-                                data=json.dumps(TEST_ITEM),
-                                content_type='application/json',
-                                method='PUT', 
-                                username='test_false@email.com',
-                                password=TEST_USER_PSW )
+        resp = self.put_with_auth('/items/{item_id}'.format(item_id=item.item_id),
+                                  data=json.dumps(TEST_ITEM),
+                                  content_type='application/json',
+                                  method='PUT',
+                                  username='test_false@email.com',
+                                  password=TEST_USER_PSW)
         assert resp.status_code == client.UNAUTHORIZED
 
     def test_put_item_no_valid_pass(self):
         item = Item.create(**TEST_ITEM)
-        resp = self.put_with_auth('/items/{item_id}'.
-                                format(item_id=item.item_id), 
-                                data=json.dumps(TEST_ITEM),
-                                content_type='application/json',
-                                method='PUT', 
-                                username='test_false@email.com',
-                                password=TEST_USER_WRONG_PSW )
+        resp = self.put_with_auth('/items/{item_id}'.format(item_id=item.item_id),
+                                  data=json.dumps(TEST_ITEM),
+                                  content_type='application/json',
+                                  method='PUT',
+                                  username='test_false@email.com',
+                                  password=TEST_USER_WRONG_PSW)
         assert resp.status_code == client.UNAUTHORIZED
 
     def test_put_item_valid_values_wrong_place(self):
         item = Item.create(**TEST_ITEM)
-        resp = self.put_with_auth('/items/{item_id}'.
-                                format(item_id=item.item_id), 
-                                data=json.dumps(TEST_ITEM),
-                                content_type='application/json',
-                                method='PUT', 
-                                username=TEST_USER_PSW,
-                                password='test_false@email.com')
+        resp = self.put_with_auth('/items/{item_id}'.format(item_id=item.item_id),
+                                  data=json.dumps(TEST_ITEM),
+                                  content_type='application/json',
+                                  method='PUT',
+                                  username=TEST_USER_PSW,
+                                  password='test_false@email.com')
         assert resp.status_code == client.UNAUTHORIZED
 
     def test_delete_item__success(self):
         item = Item.create(**TEST_ITEM2)
-        resp = self.delete_with_auth('/items/{item_id}'.
-                format(item_id=item.item_id), 'DELETE', 
-                'test@email.com', TEST_USER_PSW)
+        resp = self.delete_with_auth('/items/{item_id}'.format(item_id=item.item_id),
+                                     'DELETE', 'test@email.com', TEST_USER_PSW)
         assert resp.status_code == client.NO_CONTENT
         assert not Item.select().exists()
 
     def test_delete_item__failed(self):
-        resp = self.delete_with_auth('/items/{item_id}'.
-                format(item_id=WRONG_UUID), 'DELETE', 
-                'test@email.com', TEST_USER_PSW)
+        resp = self.delete_with_auth('/items/{item_id}'.format(item_id=WRONG_UUID),
+                                     'DELETE', 'test@email.com', TEST_USER_PSW)
         assert resp.status_code == client.NOT_FOUND
