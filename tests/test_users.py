@@ -156,9 +156,9 @@ class Testuser:
     def test_delete_user__success(self):
         # TODO: refactor for auth implementation
         email = 'mail@email.it'
-        _add_user(email)
+        user = _add_user(email)
 
-        user_path = 'users/{}'.format(email)
+        user_path = 'users/{}'.format(user.user_id)
         resp = self.open_with_auth(API_ENDPOINT.format(user_path), 'DELETE',
                                    email, TEST_USER_PSW)
 
@@ -167,8 +167,8 @@ class Testuser:
 
     def test_delete_user_dont_exists__fail(self):
         user = _add_user()
-
-        user_path = 'users/{}'.format('hi@email.it')
+        wrong_uuid = uuid.UUID(int=user.user_id.int + 1)
+        user_path = 'users/{}'.format(wrong_uuid)
         resp = self.open_with_auth(API_ENDPOINT.format(user_path), 'DELETE',
                                    user.email, TEST_USER_PSW)
 
@@ -179,18 +179,19 @@ class Testuser:
         user_A = _add_user('user.a@users.com')
         user_B = _add_user('user.b@users.com')
 
-        path = 'users/{}'.format(user_A.email)
+        path = 'users/{}'.format(user_A.user_id)
         resp = self.open_with_auth(API_ENDPOINT.format(path), 'DELETE',
-                                   user_B.email, TEST_USER_PSW)
+                                   user_B.user_id, TEST_USER_PSW)
 
         assert resp.status_code == UNAUTHORIZED
+        assert User.get(User.email == user_A.email)
         assert User.exists(user_A.email)
         assert User.select().count() == 2
 
     def test_delete_user_auth_does_not_exists__fail(self):
         user = _add_user()
 
-        path = 'users/{}'.format(user.email)
+        path = 'users/{}'.format(user.user_id)
         resp = self.open_with_auth(API_ENDPOINT.format(path), 'DELETE',
                                    'donot@exists.com', 'unused_psw')
 
