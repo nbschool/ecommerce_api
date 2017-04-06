@@ -5,11 +5,11 @@ with items resources
 
 import uuid
 
-from flask import request, g
+from flask import request
 from flask_restful import Resource
 import http.client as client
 
-from models import Item, User
+from models import Item
 from utils import check_required_fields
 from auth import auth
 
@@ -25,7 +25,7 @@ class ItemsHandler(Resource):
     def post(self):
         """
         Insert a new item only if the pair email/password
-        is validated by Authorization. 
+        is validated by Authorization.
         The item_id identifier is forwarded
         from the one generated from the database
         """
@@ -57,7 +57,7 @@ class ItemHandler(Resource):
     @auth.login_required
     def put(self, item_id):
         """
-        Edit the item specified by item_id only 
+        Edit the item specified by item_id only
         if the pair email/password is validated by
         Authorization.
         """

@@ -10,6 +10,7 @@ from http.client import (OK, NOT_FOUND, NO_CONTENT, BAD_REQUEST,
                          CREATED, CONFLICT, UNAUTHORIZED)
 import json
 import random
+import uuid
 
 # main endpoint for API
 API_ENDPOINT = '/{}'
