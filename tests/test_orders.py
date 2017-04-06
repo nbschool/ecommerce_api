@@ -21,19 +21,19 @@ TEST_USER_PSW = 'my_password123@'
 
 
 class TestOrders:
- 	@classmethod
-	def setup_class(cls):
-		test_db = SqliteDatabase(':memory:')
-		Order._meta.database = test_db
-		Item._meta.database = test_db
-		OrderItem._meta.database = test_db
-		User._meta.database = test_db
-		test_db.connect()
-		Order.create_table()
-		Item.create_table()
-		OrderItem.create_table()
-		User.create_table()
-		cls.app = app.test_client()
+    @classmethod 
+    def setup_class(cls):
+        test_db = SqliteDatabase(':memory:')
+        Order._meta.database = test_db
+        Item._meta.database = test_db
+        OrderItem._meta.database = test_db
+        User._meta.database = test_db
+        test_db.connect()
+        Order.create_table()
+        Item.create_table()
+        OrderItem.create_table()
+        User.create_table()
+        cls.app = app.test_client()
 
     def setup_method(self):
         Order.delete().execute()
@@ -52,8 +52,8 @@ class TestOrders:
             price=20.20,
             description='svariati mariii'
         )
-		user_A = add_user(None, TEST_USER_PSW)        
-        order_id = uuid.uuid4()
+        user_A = add_user(None, TEST_USER_PSW)
+        order_id =  uuid.uuid4()
         dt = datetime.datetime.now().isoformat()
         order1 = Order.create(
             order_id=order_id,
@@ -94,7 +94,6 @@ class TestOrders:
             total_price=100,
             delivery_address='Via Rossi 12',
             user=user_A
-
         )
         resp = self.app.get('/orders/{}'.format(uuid.uuid4()))
         assert resp.status_code == NOT_FOUND
@@ -106,7 +105,7 @@ class TestOrders:
             price=20.20,
             description='svariati mariii'
         )
-		user_A = add_user(None, TEST_USER_PSW)
+        user_A = add_user(None, TEST_USER_PSW)
         order_id = uuid.uuid4()
         dt = datetime.datetime.now().isoformat()
         order1 = Order.create(
@@ -166,7 +165,7 @@ class TestOrders:
             price=30.20,
             description='svariati GINIIIII'
         )
-		user_A = add_user(None, TEST_USER_PSW)
+        user_A = add_user(None, TEST_USER_PSW)
         order = {
             'order': {
                 'items': [
@@ -265,7 +264,7 @@ class TestOrders:
             description='svariati GINIIIII'
         )
 
-		user_A = add_user(None, TEST_USER_PSW)
+        user_A = add_user(None, TEST_USER_PSW)
 
         order1 = Order.create(
             order_id=uuid.uuid4(),

@@ -45,10 +45,10 @@ class OrdersHandler(Resource):
             })
         return list(orders.values()), OK
 
-	@auth.login_required
+    @auth.login_required
     def post(self):
         """ Insert a new order."""
-		user = g.user
+        user = g.user
         res = request.get_json()
         try:
             item_names = [e['name'] for e in res['order']['items']]
@@ -117,10 +117,10 @@ class OrderHandler(Resource):
                                    })
         return list(order.values()), OK
 
-	@auth.login_required
+    @auth.login_required
     def put(self, order_id):
         """ Modify a specific order. """
-		user = g.user
+        user = g.user
         res = request.get_json()
 
         try:
@@ -156,7 +156,7 @@ class OrderHandler(Resource):
 
         return order_to_modify.json(), OK
 
-	@auth.login_required
+    @auth.login_required
     def delete(self, order_id):
         """ Delete a specific order. """
         try:
