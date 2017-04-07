@@ -129,8 +129,7 @@ class Order(BaseModel):
 
         query = (
             OrderItem
-            .select(OrderItem, Order, Item)
-            .join(Item)
+            .select(OrderItem, Order)
             .join(Order)
             .where(Order.order_id == self.order_id)
         )
