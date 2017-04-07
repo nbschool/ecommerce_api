@@ -122,19 +122,20 @@ class Order(BaseModel):
         order_by = ('date',)
 
     @property
-    def items(self):
+    def order_items(self):
         """
-        Returns the list of Item contained in the order.
+        Returns the list of OrderItem related to the order.
         """
+
         query = (
-            Item
-            .select(Item, OrderItem, Order)
-            .join(OrderItem)
+            OrderItem
+            .select(OrderItem, Order, Item)
+            .join(Item)
             .join(Order)
             .where(Order.order_id == self.order_id)
         )
 
-        return [item for item in query]
+        return [orderitem for orderitem in query]
 
     def json(self):
         return {
