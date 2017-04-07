@@ -1,15 +1,4 @@
 import click
-
-########################################
-# workaround to import a module from its parent directory.
-########################################
-import os
-import sys
-sys.path.insert(0, os.getcwd())
-########################################
-# workaround to import a module from its parent directory
-########################################
-
 import json
 import uuid
 from models import User
