@@ -15,3 +15,5 @@ pytest-mock==1.6.0
 jsonschema==2.6.0
 marshmallow==2.13.4
 marshmallow-jsonschema==0.3.0
+marshmallow-jsonapi==0.11.0
+jsonschema==2.6.0
