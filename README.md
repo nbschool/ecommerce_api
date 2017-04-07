@@ -8,7 +8,7 @@
 * **app.py** opens and closes the database and carry out the post and put methods of the three elements which can be seen on the server by adding /items/,/orders/ or /users/.
 * **schemas.py** checks if the user input data is valid
 
-## Setup
+## Installing
  
  What things you need to install (can be found in the file **requirements.txt**)
  
