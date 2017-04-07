@@ -2,6 +2,7 @@ from flask import request, abort, g
 from flask_restful import Resource
 from http.client import (CREATED, NO_CONTENT, NOT_FOUND, OK,
                          BAD_REQUEST, CONFLICT, UNAUTHORIZED)
+import uuid
 
 from auth import auth
 from models import User
@@ -45,6 +46,7 @@ class UsersHandler(Resource):
             return msg, CONFLICT
 
         new_user = User.create(
+            user_id=uuid.uuid4(),
             first_name=request_data['first_name'],
             last_name=request_data['last_name'],
             email=request_data['email'],
@@ -64,17 +66,16 @@ class UserHandler(Resource):
     """
 
     @auth.login_required
-    def delete(self, email):
+    def delete(self, user_id):
         """
-        Delete an existing user from the database, looking up by email.
-        If the email does not exists return NOT_FOUND.
+        Delete an existing user from the database, looking up by user_id.
+        If the user_id does not exists return NOT_FOUND.
         """
-
-        if not User.exists(email):
-            return ({'message': 'user `{}` not found'.format(email)},
+        try:
+            user = User.get(User.user_id == user_id)
+        except User.DoesNotExist:
+            return ({'message': 'user `{}` not found'.format(user_id)},
                     NOT_FOUND)
-
-        user = User.get(User.email == email)
 
         # get the user from the flask.g global object registered inside the
         # auth.py::verify() function, called by @auth.login_required decorator
