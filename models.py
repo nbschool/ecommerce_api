@@ -7,7 +7,6 @@ from passlib.hash import pbkdf2_sha256
 from peewee import DateTimeField, TextField, CharField
 from peewee import Model, SqliteDatabase, DecimalField
 from peewee import UUIDField, ForeignKeyField, IntegerField
-from peewee import FloatField
 
 database = SqliteDatabase('database.db')
 
