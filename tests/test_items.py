@@ -15,26 +15,39 @@ TEST_ITEM = {
     "item_id": "429994bf-784e-47cc-a823-e0c394b823e8",
     "name": "mario",
     "price": 20.20,
-    "description": "svariati mariii"
+    "description": "svariati mariii",
+    "availability": 1,
 }
 TEST_ITEM2 = {
     "item_id": "577ad826-a79d-41e9-a5b2-7955bcf03499",
     "name": "GINO",
     "price": 30.20,
-    "description": "svariati GINIIIII"
+    "description": "svariati GINIIIII",
+    "availability": 2,
 }
 TEST_ITEM_WRONG = {
     "item_id": "19b4c6dc-e393-4e76-bf0f-72559dd5d32e",
     "name": "",
     "price": 30.20,
-    "description": "svariati GINIIIII"
+    "description": "svariati GINIIIII",
+    "availability": 3,
 }
 TEST_ITEM_PRECISION = {
     "item_id": "68e587f7-3982-4b6a-a882-dd43b89134fe",
     "name": "Anna Pannocchia",
     "price": 30.222222,
-    "description": "lorem ipsum"
+    "description": "lorem ipsum",
+    "availability": 1,
 }
+
+TEST_ITEM_AVAILABILITY = {
+    "item_id": "68e587f7-3982-4b6a-a882-dd43b89134fe",
+    "name": "Anna Pannocchia",
+    "price": 30.00,
+    "description": "lorem ipsum",
+    "availability": -1,
+}
+
 WRONG_UUID = '04f2f213-1a0f-443d-a5ab-79097ba725ba'
 
 
@@ -57,6 +70,7 @@ class TestItems:
         assert item['name'] == TEST_ITEM['name']
         assert item['price'] == TEST_ITEM['price']
         assert item['description'] == TEST_ITEM['description']
+        assert item['availability'] == TEST_ITEM['availability']
         try:
             uuid.UUID(item['item_id'], version=4)
         except ValueError:
@@ -76,6 +90,14 @@ class TestItems:
         assert not TEST_ITEM_PRECISION['price'] == item.price
         assert TEST_ITEM_PRECISION['name'] == item.name
         assert TEST_ITEM_PRECISION['description'] == item.description
+        assert TEST_ITEM_PRECISION['availability'] == item.availability
+
+    def test_post_item__availability(self):
+        resp = self.app.post('/items/',
+                             data=json.dumps(TEST_ITEM_AVAILABILITY),
+                             content_type='application/json')
+        assert resp.status_code == client.BAD_REQUEST
+        assert not Item.select().exists()
 
     def test_get_items__success(self):
         Item.create(**TEST_ITEM)
@@ -108,6 +130,7 @@ class TestItems:
         assert json_item['name'] == TEST_ITEM2['name']
         assert json_item['price'] == TEST_ITEM2['price']
         assert json_item['description'] == TEST_ITEM2['description']
+        assert json_item['availability'] == TEST_ITEM2['availability']
         assert json_item['item_id'] == item.item_id
 
     def test_put_item__wrong_id(self):

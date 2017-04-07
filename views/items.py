@@ -28,13 +28,17 @@ class ItemsHandler(Resource):
         request_data = request.get_json()
         check_required_fields(
             request_data=request_data,
-            required_fields=['name', 'price', 'description'])
+            required_fields=['name', 'price', 'description', 'availability'])
+
+        if int(request_data['availability']) < 0:
+            return None, client.BAD_REQUEST
 
         obj = Item.create(
             item_id=uuid.uuid4(),
             name=request_data['name'],
             price=float(request_data['price']),
-            description=request_data['description'])
+            description=request_data['description'],
+            availability=int(request_data['availability']))
         item = obj.json()
 
         return item, client.CREATED
@@ -60,11 +64,12 @@ class ItemHandler(Resource):
         request_data = request.get_json()
         check_required_fields(
             request_data=request_data,
-            required_fields=['name', 'price', 'description'])
+            required_fields=['name', 'price', 'description', 'availability'])
 
         obj.name = request_data['name']
         obj.price = request_data['price']
         obj.description = request_data['description']
+        obj.availability = request_data['availability']
         obj.save()
 
         return obj.json(), client.OK
