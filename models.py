@@ -121,6 +121,21 @@ class Order(BaseModel):
     class Meta:
         order_by = ('date',)
 
+    @property
+    def items(self):
+        """
+        Returns the list of Item contained in the order.
+        """
+        query = (
+            Item
+            .select(Item, OrderItem, Order)
+            .join(OrderItem)
+            .join(Order)
+            .where(Order.order_id == self.order_id)
+        )
+
+        return [item for item in query]
+
     def json(self):
         return {
             'order_id': str(self.order_id),
