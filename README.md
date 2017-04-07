@@ -21,11 +21,11 @@
 
 ## Running the tests
 
- ### To perform the test of the project simultaneously:
+> To perform the test of the project simultaneously:
 
    **pytest**
 
- ### To perform a test at a time:
+> To perform a test at a time:
 
    **pytest test_items.py**
    **pytest test_orders.py**
