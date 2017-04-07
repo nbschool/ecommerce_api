@@ -39,6 +39,7 @@ class TestOrders:
         Order.delete().execute()
         Item.delete().execute()
         OrderItem.delete().execute()
+        User.delete().execute()
 
     def test_get_orders__empty(self):
         resp = self.app.get('/orders/')
@@ -176,6 +177,7 @@ class TestOrders:
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
         }
+        path = 'orders/'
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'POST',
                                    user_A.email, TEST_USER_PSW, 'application/json',
                             	   json.dumps(order))
