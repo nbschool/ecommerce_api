@@ -1,7 +1,5 @@
 from marshmallow import Schema, fields
-from marshmallow import pprint
 
-from models import User
 
 class BaseSchema(Schema):
     @classmethod
