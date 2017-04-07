@@ -57,7 +57,8 @@ class Testuser:
             'first_name': 'Mario',
             'last_name': 'Rossi',
             'email': 'asddjkasdjhv',
-            'password': 'aksdg'
+            'password': 'aksdg',
+            'admin': False
         }
         resp = self.app.post(API_ENDPOINT.format('users/'),
                              data=json.dumps(user),
@@ -79,7 +80,8 @@ class Testuser:
             'first_name': 'Mario',
             'last_name': 'Rossi',
             'email': 'asddjkasdjhv',
-            'password': 'aksdg'
+            'password': 'aksdg',
+            'admin': False
         }
         resp = self.app.post(API_ENDPOINT.format('users/'),
                              data=json.dumps(user))
@@ -92,7 +94,8 @@ class Testuser:
             'first_name': 'Mario',
             'last_name': 'Rossi',
             'email': 'mail@gmail.com',
-            'password': 'aksdg'
+            'password': 'aksdg',
+            'admin': False
         }
         resp = self.app.post(API_ENDPOINT.format('users/'),
                              data=json.dumps(user),
@@ -106,7 +109,8 @@ class Testuser:
         user = {
             'first_name': 'Mario',
             'last_name': 'Rossi',
-            'password': 'aksdg'
+            'password': 'aksdg',
+            'admin': False
         }
         resp = self.app.post(API_ENDPOINT.format('users/'),
                              data=json.dumps(user),
@@ -120,7 +124,8 @@ class Testuser:
             'first_name': '',
             'last_name': 'Rossi',
             'email': 'mario@email.com',
-            'password': 'akjsgdf'
+            'password': 'akjsgdf',
+            'admin': False
         }
 
         resp = self.app.post(API_ENDPOINT.format('users/'),
