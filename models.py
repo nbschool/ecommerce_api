@@ -272,6 +272,7 @@ class Address(BaseModel):
     """ The model Address represent a user address.
         Each address is releated to one user, but one user can have
         more addresses."""
+    address_id = UUIDField(unique=True)
     user = ForeignKeyField(User)
     country = CharField()
     city = CharField()
@@ -281,6 +282,7 @@ class Address(BaseModel):
 
     def json(self):
         return {
+            'address_id': str(self.address_id),
             'user_first_name': self.user.first_name,
             'user_last_name': self.user.last_name,
             'country': self.country,
