@@ -11,7 +11,7 @@ import datetime
 import uuid
 from models import Order, OrderItem, Item, User
 from flask import abort, request, g
-
+from auth import auth
 
 
 class OrdersHandler(Resource):
@@ -83,7 +83,9 @@ class OrdersHandler(Resource):
             )
             order1.total_price += subtotal
 
-        return order1.json(), CREATED
+        serialized = order1.json()
+        # serialized['user'] = order1.user.json()
+        return serialized, CREATED
 
 
 class OrderHandler(Resource):
