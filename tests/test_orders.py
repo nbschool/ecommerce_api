@@ -166,7 +166,7 @@ class TestOrders:
             price=30.20,
             description='svariati GINIIIII'
         )
-        user_A = add_user(None, TEST_USER_PSW)
+        user_A = add_user('123@email.com', TEST_USER_PSW)
         order = {
             'order': {
                 'items': [
@@ -179,7 +179,7 @@ class TestOrders:
         }
         path = 'orders/'
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'POST',
-                                   user_A.email, TEST_USER_PSW, 'application/json',
+                                   '123@email.com', TEST_USER_PSW, 'application/json',
                             	   json.dumps(order))
 
         assert resp.status_code == CREATED
@@ -210,16 +210,20 @@ class TestOrders:
             price=30.20,
             description='svariati GINIIIII'
         )
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
         order = {
             'order': {
                 'items': [
-                    {'name': 'item1', 'price': 50.0, 'quantity': 4},
-                    {'name': 'item2', 'price': 20.0, 'quantity': 10}
-                ]
-            }
+                    { 'name': 'item1', 'price': 50.0, 'quantity': 4 },
+                    { 'name': 'item2', 'price': 20.0, 'quantity': 10 }
+                ],
+                    'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+                }
         }
-        resp = self.app.post('/orders/', data=json.dumps(order),
-                             content_type='application/json')
+        path = 'orders/'
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'POST',
+                                   '12345@email.com', TEST_USER_PSW, 'application/json',
+                            	   json.dumps(order))
         assert resp.status_code == BAD_REQUEST
         assert len(Order.select()) == 0
 
@@ -236,7 +240,7 @@ class TestOrders:
             price=30.20,
             description='svariati GINIIIII'
         )
-
+        user_A = add_user('12345@email.com', TEST_USER_PSW)        
         order = {
             'order': {
                 'items': [
@@ -247,8 +251,10 @@ class TestOrders:
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
         }
-        resp = self.app.post('/orders/', data=json.dumps(order),
-                             content_type='application/json')
+        path = 'orders/'
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'POST',
+                                   '12345@email.com', TEST_USER_PSW, 'application/json',
+                            	   json.dumps(order))
         assert resp.status_code == BAD_REQUEST
         assert len(Order.select()) == 0
 
@@ -266,8 +272,7 @@ class TestOrders:
             description='svariati GINIIIII'
         )
 
-        user_A = add_user(None, TEST_USER_PSW)
-
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
         order1 = Order.create(
             order_id=uuid.uuid4(),
             date=datetime.datetime.now().isoformat(),
@@ -310,11 +315,14 @@ class TestOrders:
                 ],
                 'delivery_address': 'Via Verdi 20',
 				'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+                
             }
         }
-        resp = self.app.put('/orders/{}'.format(order1.order_id),
-                            data=json.dumps(order),
-                            content_type='application/json')
+        path = 'orders/{}'.format(order1.order_id)
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PUT',
+                                   '12345@email.com', TEST_USER_PSW, 'application/json',
+                            	   json.dumps(order))
+
         assert resp.status_code == OK
         modified_order = Order.get(order_id=order1.order_id).json()
         assert modified_order['order_id'] == order['order']['order_id']
@@ -326,8 +334,10 @@ class TestOrders:
             order_id=uuid.uuid4(),
             date=datetime.datetime.now().isoformat(),
             total_price=100,
-            delivery_address='Via Rossi 12'
+            delivery_address='Via Rossi 12',
+            user=user_A
         )
+
         order_id = str(uuid.uuid4())
         order = {
             "order": {
@@ -340,9 +350,10 @@ class TestOrders:
             }
         }
 
-        resp = self.app.put('/orders/{}'.format(order_id),
-                            data=json.dumps(order),
-                            content_type='application/json')
+        path = 'orders/{}'.format(order_id)
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PUT',
+                                   '12345@email.com', TEST_USER_PSW, 'application/json',
+                            	   json.dumps(order))
         assert resp.status_code == NOT_FOUND
 
     def test_update_order__failure_non_existing_empty_orders(self):
@@ -362,6 +373,7 @@ class TestOrders:
                      data=json.dumps(order), content_type='application/json')
 
     def test_delete_order__success(self):
+        user_A = add_user('12345@email.com', TEST_USER_PSW)                
         item1 = Item.create(
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
@@ -374,7 +386,8 @@ class TestOrders:
             order_id=order_id,
             date=dt,
             total_price=100,
-            delivery_address='Via Rossi 12'
+            delivery_address='Via Rossi 12',
+            user=user_A 
         )
         OrderItem.create(
             order=order1,
@@ -386,20 +399,30 @@ class TestOrders:
             order_id=uuid.uuid4(),
             date=datetime.datetime.now().isoformat(),
             total_price=200,
-            delivery_address='Via Verdi 12'
+            delivery_address='Via Verdi 12',
+            user=user_A
         )
-        resp = self.app.delete('/orders/{}'.format(str(order_id)))
+
+        path = 'orders/{}'.format(order_id)
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'DELETE',
+                                   '12345@email.com', TEST_USER_PSW, None,
+                                   None)
         assert resp.status_code == NO_CONTENT
         assert len(Order.select()) == 1
         assert len(OrderItem.select()) == 0
         assert Order.get(order_id=order2.order_id)
 
     def test_delete_order__failure_non_existing_empty_orders(self):
-        resp = self.app.delete('/orders/{}'.format(str(uuid.uuid4())))
+        user_A = add_user('12345@email.com', TEST_USER_PSW)  
+        path = 'orders/{}'.format(str(uuid.uuid4()))
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'DELETE',
+                                   '12345@email.com', TEST_USER_PSW, None,
+                                   None)
+        #resp = self.app.delete('/orders/{}'.format(str(uuid.uuid4())))
         assert resp.status_code == NOT_FOUND
 
     def test_delete_order__failure__failure_non_existing(self):
-        user_A = add_user(None, TEST_USER_PSW)  
+        user_A = add_user('12345@email.com', TEST_USER_PSW)  
         Order.create(
             order_id=uuid.uuid4(),
             date=datetime.datetime.now().isoformat(),
@@ -407,6 +430,9 @@ class TestOrders:
             delivery_address='Via Rossi 12',
             user=user_A
         )
-        resp = self.app.delete('/orders/{}'.format(str(uuid.uuid4())))
+        path = 'orders/{}'.format(str(uuid.uuid4()))
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'DELETE',
+                                   '12345@email.com', TEST_USER_PSW, None,
+                                   None)
         assert resp.status_code == NOT_FOUND
         assert len(Order.select()) == 1
