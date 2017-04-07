@@ -128,7 +128,7 @@ class Order(BaseModel):
             'date': self.date,
             'total_price': float(self.total_price),
             'delivery_address': self.delivery_address,
-            'user_id': self.user.user_id
+            'user_id': str(self.user.user_id)
         }
 
 
