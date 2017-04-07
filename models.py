@@ -268,9 +268,33 @@ class OrderItem(BaseModel):
         self.subtotal = self.item.price * self.quantity
 
 
+class Address(BaseModel):
+    """ The model Address represent a user address.
+        Each address is releated to one user, but one user can have
+        more addresses."""
+    user = ForeignKeyField(User)
+    country = CharField()
+    city = CharField()
+    post_code = CharField()
+    address = CharField()
+    phone = CharField()
+
+    def json(self):
+        return {
+            'user_first_name': self.user.first_name,
+            'user_last_name': self.user.last_name,
+            'country': self.country,
+            'city': self.city,
+            'post_code': self.post_code,
+            'address': self.address,
+            'phone': self.phone
+        }
+
+
 # Check if the table exists in the database; if not create it.
 # TODO: Use database migration
 User.create_table(fail_silently=True)
 Item.create_table(fail_silently=True)
 Order.create_table(fail_silently=True)
 OrderItem.create_table(fail_silently=True)
+Address.create_table(fail_silently=True)
