@@ -6,7 +6,6 @@ from app import app
 from models import Order, OrderItem, Item
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
 from peewee import SqliteDatabase
-import datetime
 import json
 import uuid
 
