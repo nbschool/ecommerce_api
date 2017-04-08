@@ -4,8 +4,7 @@ Orders-view: this module contains functions for the interaction with the orders.
 
 from flask_restful import Resource
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
-from datetime import datetime
-from models import Order, OrderItem, Item
+from models import Order, Item
 from flask import abort, request
 
 
@@ -58,7 +57,7 @@ class OrdersHandler(Resource):
         except Item.DoesNotExist:
             abort(BAD_REQUEST)
 
-        # Check that the order has an 'items' and 'delivery_address' attributes,
+        # Check that the order has an 'items' and 'delivery_address' attributes
         # otherwise it's useless to continue.
         for i in ('items', 'delivery_address'):
             if i not in res['order']:

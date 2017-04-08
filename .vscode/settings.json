@@ -1,0 +1,10 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+    "python.pythonPath": "../venv/Scripts/python",
+    "python.venvPath": "../venv",
+    // "python.envFile": "../venv/pyenv.cfg",
+    "python.linting.pylintPath": "../venv/scripts/pylint",
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Path": "../venv/scripts/flake8",
+    "python.linting.flake8Enabled": true
+}
