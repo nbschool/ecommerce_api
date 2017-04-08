@@ -373,6 +373,6 @@ class TestOrders:
 
         # remove non existing item3 from order
         res = order.remove_item(item3)
-        assert res == False
+        assert res is False
         assert count_items(order) == 2
         assert len(order.order_items) == 1
