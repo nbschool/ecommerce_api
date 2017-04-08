@@ -115,13 +115,10 @@ class Order(BaseModel):
     is the total price of the order. Finally, there is the delivery address,
     if it's different from the customers address from their record.
     """
-    order_id = UUIDField(unique=True)
-    date = DateTimeField()
     total_price = DecimalField(default=0)
     delivery_address = CharField()
 
     class Meta:
-        order_by = ('date',)
 
     def __init__(self, *args, **kwargs):
 
@@ -129,6 +126,7 @@ class Order(BaseModel):
             order_id=uuid4(),
             date=datetime.datetime.now(),
             *args, **kwargs)
+        order_by = ('created_at',)
 
     @property
     def order_items(self):
@@ -208,7 +206,7 @@ class Order(BaseModel):
     def json(self):
         return {
             'order_id': str(self.order_id),
-            'date': str(self.date),
+            'date': str(self.created_at),
             'total_price': float(self.total_price),
             'delivery_address': self.delivery_address
         }

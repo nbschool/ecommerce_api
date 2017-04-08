@@ -49,7 +49,7 @@ class TestOrders:
 
         expected_data = [{
             "order_id": str(order.order_id),
-            "date": str(order.date),
+            "date": str(order.created_at),
             "total_price": 40.40,
             "delivery_address": 'Via Rossi 12',
             "items": [{
@@ -100,7 +100,7 @@ class TestOrders:
 
         expected_data = {
             'order_id': str(order1.order_id),
-            'date': str(order1.date),
+            'date': str(order1.created_at),
             'total_price': 40.40,
             'delivery_address': 'Via Rossi 12',
             'items': [{
