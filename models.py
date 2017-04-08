@@ -185,7 +185,6 @@ class Order(BaseModel):
         for orderitem in self.order_items:
             if orderitem.item == item:
                 orderitem.remove_item()
-
                 self.total_price -= item.price
                 self.save()
                 return True
