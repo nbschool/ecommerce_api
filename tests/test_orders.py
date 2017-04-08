@@ -91,7 +91,7 @@ class TestOrders:
             description='svariati mariii'
         )
         order_id = uuid.uuid4()
-        dt = datetime.datetime.now().isoformat()
+        dt = datetime.datetime.now()
         order1 = Order.create(
             order_id=order_id,
             date=dt,
@@ -112,7 +112,7 @@ class TestOrders:
         )
         order2 = Order.create(
             order_id=uuid.uuid4(),
-            date=datetime.datetime.now().isoformat(),
+            date=datetime.datetime.now(),
             total_price=200,
             delivery_address='Via Verdi 12'
         )
@@ -125,14 +125,17 @@ class TestOrders:
 
         resp = self.app.get('/orders/{}'.format(order_id))
         assert resp.status_code == OK
-        assert json.loads(resp.data) == [
-            str(order_id), dt, 100.0, 'Via Rossi 12', [{
-                "quantity": 2,
-                "subtotal": 50.0,
-                "item_name": "mario",
-                "item_description":
-                "svariati mariii"}]
-        ]
+        assert json.loads(resp.data) == {
+            'order_id': str(order_id),
+            'date': str(dt),
+            'total_price': 100.0,
+            'delivery_address': 'Via Rossi 12',
+            'items': [{
+                'quantity': 2,
+                'subtotal': 50.0,
+                'name': 'mario',
+                'description': 'svariati mariii'
+            }]}
 
     def test_create_order__success(self):
         Item.create(

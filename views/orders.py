@@ -84,31 +84,23 @@ class OrderHandler(Resource):
 
     def get(self, order_id):
         """ Get a specific order. """
-        res = (
-            Order
-            .select(Order, OrderItem, Item)
-            .join(OrderItem)
-            .join(Item)
-            .where(Order.order_id == order_id)
-        )
-
-        if not res:
+        try:
+            order = Order.get(Order.order_id == order_id)
+        except Order.DoesNotExist:
             return None, NOT_FOUND
 
-        order = {
-            'order_id': str(res[0].order_id),
-            'date': res[0].date,
-            'total_price': float(res[0].total_price),
-            'delivery_address': res[0].delivery_address,
-            'items': []
-        }
-        for row in res:
-            order['items'].append({'quantity': row.orderitem.quantity,
-                                   'subtotal': float(row.orderitem.subtotal),
-                                   'item_name': row.orderitem.item.name,
-                                   'item_description': row.orderitem.item.description
-                                   })
-        return list(order.values()), OK
+        retval = order.json()
+        retval['items'] = []
+
+        for orderitem in order.order_items:
+            retval['items'].append({
+                'quantity': orderitem.quantity,
+                'subtotal': float(orderitem.subtotal),
+                'name': orderitem.item.name,
+                'description': orderitem.item.description
+            })
+
+        return retval, OK
 
     def put(self, order_id):
         """ Modify a specific order. """
