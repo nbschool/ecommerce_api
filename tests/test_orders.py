@@ -7,7 +7,7 @@ from models import Order, OrderItem, Item
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
 from peewee import SqliteDatabase
 import json
-import uuid
+from uuid import uuid4
 
 
 class TestOrders:
@@ -65,13 +65,13 @@ class TestOrders:
         assert json.loads(resp.data) == expected_data
 
     def test_get_order__non_existing_empty_orders(self):
-        resp = self.app.get('/orders/{}'.format(uuid.uuid4()))
+        resp = self.app.get('/orders/{}'.format(uuid4()))
         assert resp.status_code == NOT_FOUND
 
     def test_get_order__non_existing(self):
         Order.create(delivery_address='Via Rossi 12')
 
-        resp = self.app.get('/orders/{}'.format(uuid.uuid4()))
+        resp = self.app.get('/orders/{}'.format(uuid4()))
         assert resp.status_code == NOT_FOUND
 
     def test_get_order(self):
@@ -248,15 +248,14 @@ class TestOrders:
                             data=json.dumps(order),
                             content_type='application/json')
         assert resp.status_code == OK
-        modified_order = Order.get(order_id=order1.order_id).json()
-        assert modified_order['order_id'] == order['order']['order_id']
-        assert modified_order['delivery_address'] == order[
-            'order']['delivery_address']
+        resp_order = Order.get(order_id=order1.order_id).json()
+        assert resp_order['order_id'] == order['order']['order_id']
+        assert resp_order['delivery_address'] == order['order']['delivery_address']
 
     def test_update_order__failure_non_existing(self):
         Order.create(delivery_address='Via Rossi 12')
 
-        order_id = str(uuid.uuid4())
+        order_id = str(uuid4())
 
         order = {
             "order": {
@@ -275,7 +274,7 @@ class TestOrders:
         assert resp.status_code == NOT_FOUND
 
     def test_update_order__failure_non_existing_empty_orders(self):
-        order_id = str(uuid.uuid4())
+        order_id = str(uuid4())
         order = {
             "order": {
                 "order_id": order_id,
@@ -306,19 +305,19 @@ class TestOrders:
 
         order2 = Order.create(delivery_address='Via Verdi 12')
 
-        resp = self.app.delete('/orders/{}'.format(str(order1.order_id)))
+        resp = self.app.delete('/orders/{}'.format(order1.order_id))
         assert resp.status_code == NO_CONTENT
         assert len(Order.select()) == 1
         assert len(OrderItem.select()) == 0
         assert Order.get(order_id=order2.order_id)
 
     def test_delete_order__failure_non_existing_empty_orders(self):
-        resp = self.app.delete('/orders/{}'.format(str(uuid.uuid4())))
+        resp = self.app.delete('/orders/{}'.format(uuid4()))
         assert resp.status_code == NOT_FOUND
 
     def test_delete_order__failure__failure_non_existing(self):
         Order.create(delivery_address='Via Rossi 12')
 
-        resp = self.app.delete('/orders/{}'.format(str(uuid.uuid4())))
+        resp = self.app.delete('/orders/{}'.format(uuid4()))
         assert resp.status_code == NOT_FOUND
         assert len(Order.select()) == 1
