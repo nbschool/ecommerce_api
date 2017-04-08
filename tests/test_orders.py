@@ -35,51 +35,43 @@ class TestOrders:
         assert json.loads(resp.data) == []
 
     def test_get_orders(self):
-        item1 = Item.create(
+        item = Item.create(
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii'
         )
-        order_id = uuid.uuid4()
-        dt = datetime.datetime.now().isoformat()
-        order1 = Order.create(
-            order_id=order_id,
-            date=dt,
-            total_price=100.00,
-            delivery_address='Via Rossi 12'
-        )
-        OrderItem.create(
-            order=order1,
-            item=item1,
-            quantity=2,
-            subtotal=50.00
-        )
+
+        order = Order.create(delivery_address='Via Rossi 12')
+        order.add_item(item)
+        order.add_item(item)
+
         resp = self.app.get('/orders/')
 
+        expected_data = [{
+            "order_id": str(order.order_id),
+            "date": str(order.date),
+            "total_price": 40.40,
+            "delivery_address": 'Via Rossi 12',
+            "items": [{
+                "quantity": 2,
+                "subtotal": 40.40,
+                "price": 20.20,
+                "name": "mario",
+                "description": "svariati mariii"
+            }]
+        }]
+
         assert resp.status_code == OK
-        assert json.loads(resp.data) == [
-            {
-                "order_id": str(order_id), "date": dt, "total_price": 100.00,
-                "delivery_address": 'Via Rossi 12',
-                "items": [{
-                    "quantity": 2, "subtotal": 50.00, "item_name": "mario", "item_description":
-                    "svariati mariii"
-                }]
-            }
-        ]
+        assert json.loads(resp.data) == expected_data
 
     def test_get_order__non_existing_empty_orders(self):
         resp = self.app.get('/orders/{}'.format(uuid.uuid4()))
         assert resp.status_code == NOT_FOUND
 
     def test_get_order__non_existing(self):
-        Order.create(
-            order_id=uuid.uuid4(),
-            date=datetime.datetime.now().isoformat(),
-            total_price=100,
-            delivery_address='Via Rossi 12'
-        )
+        Order.create(delivery_address='Via Rossi 12')
+
         resp = self.app.get('/orders/{}'.format(uuid.uuid4()))
         assert resp.status_code == NOT_FOUND
 
@@ -90,52 +82,40 @@ class TestOrders:
             price=20.20,
             description='svariati mariii'
         )
-        order_id = uuid.uuid4()
-        dt = datetime.datetime.now()
-        order1 = Order.create(
-            order_id=order_id,
-            date=dt,
-            total_price=100,
-            delivery_address='Via Rossi 12'
-        )
-        OrderItem.create(
-            order=order1,
-            item=item1,
-            quantity=2,
-            subtotal=50.00
-        )
+
         item2 = Item.create(
             item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
             description='svariati GINIIIII'
         )
-        order2 = Order.create(
-            order_id=uuid.uuid4(),
-            date=datetime.datetime.now(),
-            total_price=200,
-            delivery_address='Via Verdi 12'
-        )
-        OrderItem.create(
-            order=order2,
-            item=item2,
-            quantity=3,
-            subtotal=100.00
-        )
 
-        resp = self.app.get('/orders/{}'.format(order_id))
-        assert resp.status_code == OK
-        assert json.loads(resp.data) == {
-            'order_id': str(order_id),
-            'date': str(dt),
-            'total_price': 100.0,
+        order1 = Order.create(delivery_address='Via Rossi 12')
+        order1.add_item(item1)
+        order1.add_item(item1)
+
+        order2 = Order.create(delivery_address='Via Verdi 12')
+        order2.add_item(item2)
+        order2.add_item(item2)
+        order2.add_item(item2)
+
+        expected_data = {
+            'order_id': str(order1.order_id),
+            'date': str(order1.date),
+            'total_price': 40.40,
             'delivery_address': 'Via Rossi 12',
             'items': [{
                 'quantity': 2,
-                'subtotal': 50.0,
+                'subtotal': 40.40,
+                "price": 20.20,
                 'name': 'mario',
                 'description': 'svariati mariii'
-            }]}
+            }]
+        }
+
+        resp = self.app.get('/orders/{}'.format(order1.order_id))
+        assert resp.status_code == OK
+        assert json.loads(resp.data) == expected_data
 
     def test_create_order__success(self):
         Item.create(
@@ -162,20 +142,21 @@ class TestOrders:
         }
         resp = self.app.post('/orders/', data=json.dumps(order),
                              content_type='application/json')
+
         assert resp.status_code == CREATED
         assert len(Order.select()) == 1
         assert len(OrderItem.select()) == 2
+        # assert
 
         total_price = 0
         for p in order['order']['items']:
             total_price += (p['price'] * p['quantity'])
 
-        assert json.loads(resp.data)['total_price'] == total_price
-        assert json.loads(resp.data)['delivery_address'] == order[
-            'order']['delivery_address']
-        assert json.loads(resp.data)['order_id']
-        assert Order.get().json()['order_id'] == json.loads(
-            resp.data)['order_id']
+        data = json.loads(resp.data)
+
+        assert data['total_price'] == total_price
+        assert data['delivery_address'] == order['order']['delivery_address']
+        assert Order.get().json()['order_id'] == data['order_id']
 
     def test_create_order__failure_missing_field(self):
         Item.create(
@@ -244,37 +225,16 @@ class TestOrders:
             price=30.20,
             description='svariati GINIIIII'
         )
-        order1 = Order.create(
-            order_id=uuid.uuid4(),
-            date=datetime.datetime.now().isoformat(),
-            total_price=100,
-            delivery_address='Via Rossi 12'
-        )
-        OrderItem.create(
-            order=order1,
-            item=item1,
-            quantity=2,
-            subtotal=40.00
-        )
-        OrderItem.create(
-            order=order1,
-            item=item2,
-            quantity=1,
-            subtotal=60
-        )
-        order2 = Order.create(
-            order_id=uuid.uuid4(),
-            date=datetime.datetime.now().isoformat(),
-            total_price=60,
-            delivery_address='Via Bianchi 10'
-        )
-        OrderItem.create(
-            order=order2,
-            item=item2,
-            quantity=1,
-            subtotal=60
-        )
+        order1 = Order.create(delivery_address='Via Rossi 12')
+        order1.add_item(item1)
+        order1.add_item(item1)
+        order1.add_item(item2)
+
+        order2 = Order.create(delivery_address='Via Bianchi 10')
+        order2.add_item(item2)
+
         order_id = str(order1.order_id)
+
         order = {
             "order": {
                 "order_id": order_id,
@@ -295,13 +255,10 @@ class TestOrders:
             'order']['delivery_address']
 
     def test_update_order__failure_non_existing(self):
-        Order.create(
-            order_id=uuid.uuid4(),
-            date=datetime.datetime.now().isoformat(),
-            total_price=100,
-            delivery_address='Via Rossi 12'
-        )
+        Order.create(delivery_address='Via Rossi 12')
+
         order_id = str(uuid.uuid4())
+
         order = {
             "order": {
                 "order_id": order_id,
@@ -340,27 +297,14 @@ class TestOrders:
             price=20.20,
             description='svariati mariii'
         )
-        order_id = uuid.uuid4()
-        dt = datetime.datetime.now().isoformat()
-        order1 = Order.create(
-            order_id=order_id,
-            date=dt,
-            total_price=100,
-            delivery_address='Via Rossi 12'
-        )
-        OrderItem.create(
-            order=order1,
-            item=item1,
-            quantity=2,
-            subtotal=50.00
-        )
-        order2 = Order.create(
-            order_id=uuid.uuid4(),
-            date=datetime.datetime.now().isoformat(),
-            total_price=200,
-            delivery_address='Via Verdi 12'
-        )
-        resp = self.app.delete('/orders/{}'.format(str(order_id)))
+
+        order1 = Order.create(delivery_address='Via Rossi 12')
+        order1.add_item(item1)
+        order1.add_item(item1)
+
+        order2 = Order.create(delivery_address='Via Verdi 12')
+
+        resp = self.app.delete('/orders/{}'.format(str(order1.order_id)))
         assert resp.status_code == NO_CONTENT
         assert len(Order.select()) == 1
         assert len(OrderItem.select()) == 0
@@ -371,12 +315,8 @@ class TestOrders:
         assert resp.status_code == NOT_FOUND
 
     def test_delete_order__failure__failure_non_existing(self):
-        Order.create(
-            order_id=uuid.uuid4(),
-            date=datetime.datetime.now().isoformat(),
-            total_price=100,
-            delivery_address='Via Rossi 12'
-        )
+        Order.create(delivery_address='Via Rossi 12')
+
         resp = self.app.delete('/orders/{}'.format(str(uuid.uuid4())))
         assert resp.status_code == NOT_FOUND
         assert len(Order.select()) == 1
