@@ -117,7 +117,7 @@ class Order(BaseModel):
     """
     order_id = UUIDField(unique=True)
     date = DateTimeField()
-    total_price = DecimalField()
+    total_price = DecimalField(default=0)
     delivery_address = CharField()
 
     class Meta:
@@ -125,11 +125,10 @@ class Order(BaseModel):
 
     def __init__(self, *args, **kwargs):
 
-        super(Order, self).__init__(*args, **kwargs)
-
-        self.order_id = uuid4()
-        self.date = datetime.datetime.now()
-        self.total_price = 0.0
+        super(Order, self).__init__(
+            order_id=uuid4(),
+            date=datetime.datetime.now(),
+            *args, **kwargs)
 
     @property
     def order_items(self):
