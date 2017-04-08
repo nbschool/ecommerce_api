@@ -286,8 +286,11 @@ class TestOrders:
                 'delivery_address': 'Via Verdi 20'
             }
         }
-        self.app.put('/orders/{}'.format(order_id),
-                     data=json.dumps(order), content_type='application/json')
+        resp = self.app.put('/orders/{}'.format(order_id),
+                            data=json.dumps(order),
+                            content_type='application/json')
+
+        assert resp.status_code == NOT_FOUND
 
     def test_delete_order__success(self):
         item1 = Item.create(
