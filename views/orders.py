@@ -92,7 +92,7 @@ class OrderHandler(Resource):
         res = request.get_json()
 
         try:
-            order_to_modify = Order.get(order_id=str(order_id))
+            order = Order.get(order_id=str(order_id))
         except Order.DoesNotExist:
             return None, NOT_FOUND
 
@@ -100,29 +100,21 @@ class OrderHandler(Resource):
             if i not in res['order']:
                 return None, BAD_REQUEST
 
-        try:
-            (OrderItem
-             .delete()
-             .where(OrderItem.order == order_to_modify)
-             .execute())
+        # Delete all the order's related OrderItem before adding the new items
+        # that came with the PUT request
+        for orderitem in order.order_items:
+            orderitem.delete_instance()
 
-        except OrderItem.DoesNotExist:
-            return None, NOT_FOUND
+        order.total_price = 0
 
-        order_to_modify.total_price = 0
         for item in res['order']['items']:
-            OrderItem.create(
-                order=order_to_modify,
-                item=Item.get(name=(item['name'])),
-                quantity=item['quantity'],
-                subtotal=item['price'] * item['quantity']
-            )
-            order_to_modify.total_price += item['price']
-        order_to_modify.date = datetime.now()
-        order_to_modify.delivery_address = res['order']['delivery_address']
-        order_to_modify.save()
+            order.add_item(
+                Item.get(Item.name == item['name']), item['quantity'])
 
-        return order_to_modify.json(), OK
+        order.delivery_address = res['order']['delivery_address']
+        order.save()
+
+        return serialize_order(order), OK
 
     def delete(self, order_id):
         """ Delete a specific order. """
