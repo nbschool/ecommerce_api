@@ -321,3 +321,58 @@ class TestOrders:
         resp = self.app.delete('/orders/{}'.format(uuid4()))
         assert resp.status_code == NOT_FOUND
         assert len(Order.select()) == 1
+
+    def test_order_items_management(self):
+        """
+        Test add_item and remove_item function from Order and OrderItem
+        models.
+        """
+
+        def count_items(order):
+            tot = 0
+            for oi in order.order_items:
+                tot += oi.quantity
+            return tot
+
+        item1 = Item.create(
+            item_id=uuid4(),
+            name='Item',
+            description='Item description',
+            price=10
+        )
+        item2 = Item.create(
+            item_id=uuid4(),
+            name='Item 2',
+            description='Item 2 description',
+            price=15
+        )
+        item3 = Item.create(
+            item_id=uuid4(),
+            name='Item 2',
+            description='Item 2 description',
+            price=15
+        )
+        order = Order.create(delivery_address='My address')
+        order.add_item(item1, 2)
+        order.add_item(item2, 2)
+
+        assert len(order.order_items) == 2
+        assert OrderItem.select().count() == 2
+        assert count_items(order) == 4
+
+        # test removing one of two item1
+        order.remove_item(item1)
+        assert len(order.order_items) == 2
+        assert count_items(order) == 3
+
+        # remove more item1 than existing in order
+        order.remove_item(item1, 2)
+        assert len(order.order_items) == 1
+        assert OrderItem.select().count() == 1
+        assert count_items(order) == 2
+
+        # remove non existing item3 from order
+        res = order.remove_item(item3)
+        assert res == False
+        assert count_items(order) == 2
+        assert len(order.order_items) == 1
