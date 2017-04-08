@@ -99,12 +99,9 @@ class OrderHandler(Resource):
             if i not in res['order']:
                 return None, BAD_REQUEST
 
-        # Delete all the order's related OrderItem before adding the new items
+        # Clear the order of all items before adding the new items
         # that came with the PUT request
-        for orderitem in order.order_items:
-            orderitem.delete_instance()
-
-        order.total_price = 0
+        order.empty_order()
 
         for item in res['order']['items']:
             order.add_item(

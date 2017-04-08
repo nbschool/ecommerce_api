@@ -145,6 +145,17 @@ class Order(BaseModel):
 
         return [orderitem for orderitem in query]
 
+    def empty_order(self):
+        """
+        Remove all the items from the order.
+        Delete all OrderItem related to this order and reset the total_price
+        value to 0.
+        """
+
+        self.total_price = 0
+        OrderItem.delete().where(OrderItem.order == self).execute()
+        self.save()
+
     def add_item(self, item, quantity=1):
         """
         Add one item to the order.
