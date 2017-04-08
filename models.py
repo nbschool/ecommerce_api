@@ -7,6 +7,8 @@ from passlib.hash import pbkdf2_sha256
 from peewee import DateTimeField, TextField, CharField
 from peewee import Model, SqliteDatabase, DecimalField
 from peewee import UUIDField, ForeignKeyField, IntegerField
+from uuid import uuid4
+
 
 database = SqliteDatabase('database.db')
 
@@ -121,6 +123,14 @@ class Order(BaseModel):
     class Meta:
         order_by = ('date',)
 
+    def __init__(self, *args, **kwargs):
+
+        super(Order, self).__init__(*args, **kwargs)
+
+        self.order_id = uuid4()
+        self.date = datetime.datetime.now()
+        self.total_price = 0.0
+
     @property
     def order_items(self):
         """
@@ -136,10 +146,58 @@ class Order(BaseModel):
 
         return [orderitem for orderitem in query]
 
+    def add_item(self, item):
+        """
+        Add one item to the order.
+        Creates one OrderItem row if the item is not present in the order yet,
+        or increasing the count of the existing OrderItem.
+
+        :param item Item: instance of models.Item
+        """
+
+        for orderitem in self.order_items:
+            # Looping all the OrderItem related to this order, if one with the
+            # same item is found we update that row.
+            if orderitem.item == item:
+                orderitem.add_item()
+                return True
+
+        # if no existing OrderItem is found with this order and this Item,
+        # create a new row in the OrderItem table
+        OrderItem.create(
+            order=self,
+            item=item,
+            quantity=1,
+            subtotal=item.price
+        )
+
+        self.total_price += item.price
+        self.save()
+        return True
+
+    def remove_item(self, item):
+        """
+        Remove the given item from the order, reducing quantity of the relative
+        OrderItem entity or deleting it if removing the last item
+        (OrderItem.quantity == 0)
+        """
+
+        for orderitem in self.order_items:
+            if orderitem.item == item:
+                orderitem.remove_item()
+
+                self.total_price -= item.price
+                self.save()
+                return True
+
+        # No OrderItem found for this item
+        # TODO: Raise or return something more explicit
+        return False
+
     def json(self):
         return {
             'order_id': str(self.order_id),
-            'date': self.date,
+            'date': str(self.date),
             'total_price': float(self.total_price),
             'delivery_address': self.delivery_address
         }
@@ -166,6 +224,32 @@ class OrderItem(BaseModel):
             'quantity': str(self.quantity),
             'subtotal': float(self.subtotal)
         }
+
+    def add_item(self):
+        """
+        Add one item to the OrderItem, increasing the quantity count and
+        recalculating the subtotal value for this item(s)
+        """
+        self.quantity += 1
+        self._calculate_subtotal()
+        self.save()
+
+    def remove_item(self):
+        """
+        Remove one item from the OrderItem, decreasing the quantity count and
+        recalculating the subtotal value for this item(s)
+        """
+        if self.quantity <= 1:
+            self.delete_instance()
+            return True
+
+        self.quantity -= 1
+        self._calculate_subtotal()
+        self.save()
+
+    def _calculate_subtotal(self):
+        """Calculate the subtotal value of the item(s) in the order."""
+        self.subtotal = self.item.price * self.quantity
 
 
 # Check if the table exists in the database; if not create it.
