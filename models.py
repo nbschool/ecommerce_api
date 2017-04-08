@@ -145,7 +145,7 @@ class Order(BaseModel):
 
         return [orderitem for orderitem in query]
 
-    def add_item(self, item):
+    def add_item(self, item, quantity=1):
         """
         Add one item to the order.
         Creates one OrderItem row if the item is not present in the order yet,
@@ -158,7 +158,9 @@ class Order(BaseModel):
             # Looping all the OrderItem related to this order, if one with the
             # same item is found we update that row.
             if orderitem.item == item:
-                orderitem.add_item()
+                orderitem.add_item(quantity)
+                self.total_price += (item.price * quantity)
+                self.save()
                 return True
 
         # if no existing OrderItem is found with this order and this Item,
@@ -166,15 +168,15 @@ class Order(BaseModel):
         OrderItem.create(
             order=self,
             item=item,
-            quantity=1,
-            subtotal=item.price
+            quantity=quantity,
+            subtotal=item.price * quantity
         )
 
-        self.total_price += item.price
+        self.total_price += (item.price * quantity)
         self.save()
         return True
 
-    def remove_item(self, item):
+    def remove_item(self, item, quantity=1):
         """
         Remove the given item from the order, reducing quantity of the relative
         OrderItem entity or deleting it if removing the last item
@@ -183,8 +185,8 @@ class Order(BaseModel):
 
         for orderitem in self.order_items:
             if orderitem.item == item:
-                orderitem.remove_item()
-                self.total_price -= item.price
+                orderitem.remove_item(quantity)
+                self.total_price -= (item.price * quantity)
                 self.save()
                 return True
 
@@ -223,25 +225,25 @@ class OrderItem(BaseModel):
             'subtotal': float(self.subtotal)
         }
 
-    def add_item(self):
+    def add_item(self, quantity=1):
         """
         Add one item to the OrderItem, increasing the quantity count and
         recalculating the subtotal value for this item(s)
         """
-        self.quantity += 1
+        self.quantity += quantity
         self._calculate_subtotal()
         self.save()
 
-    def remove_item(self):
+    def remove_item(self, quantity=1):
         """
         Remove one item from the OrderItem, decreasing the quantity count and
         recalculating the subtotal value for this item(s)
         """
-        if self.quantity <= 1:
+        if self.quantity <= quantity:
             self.delete_instance()
             return True
 
-        self.quantity -= 1
+        self.quantity -= quantity
         self._calculate_subtotal()
         self.save()
 
