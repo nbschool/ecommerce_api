@@ -21,12 +21,14 @@ USER_TEST_DICT = {
 }
 
 USER_SCHEMA = {
-    'properties': {'email': {'title': 'email', 'type': 'string'},
-                    'first_name': {'title': 'first_name', 'type': 'string'},
-                    'last_name': {'title': 'last_name', 'type': 'string'},
-                    'password': {'title': 'password', 'type': 'string'}},
-     'required': ['email', 'first_name', 'last_name', 'password'],
-     'type': 'object'
+    'properties': {
+        'email': {'title': 'email', 'type': 'string'},
+        'first_name': {'title': 'first_name', 'type': 'string'},
+        'last_name': {'title': 'last_name', 'type': 'string'},
+        'password': {'title': 'password', 'type': 'string'}
+    },
+    'required': ['email', 'first_name', 'last_name', 'password'],
+    'type': 'object'
 }
 
 
