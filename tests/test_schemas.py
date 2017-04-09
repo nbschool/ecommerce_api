@@ -14,9 +14,7 @@ TODO:
 from peewee import SqliteDatabase
 from models import User
 from schemas import UserSchema
-from marshmallow_jsonschema import JSONSchema
-
-from marshmallow import pprint
+from uuid import uuid4
 # tests are run in temp database in memory
 TEST_DB = SqliteDatabase(':memory:')
 
@@ -40,6 +38,22 @@ USER_SCHEMA = {
 }
 
 
+def get_expected_serialized_user(user):
+    """
+    From USER_TEST_DICT and a generated User, get a dict that should match
+    the return value of the JSONApi serialization for that user.
+    """
+
+    user_data = USER_TEST_DICT.copy()
+    del user_data['password']
+    return {
+        'data': {
+            'type': 'user',
+            'id': str(user.user_id),
+            'attributes': user_data
+        }
+    }
+
 
 class TestUserSchema:
     @classmethod
@@ -51,16 +65,17 @@ class TestUserSchema:
         User.delete().execute()
 
     def test_user_json__success(self):
-        user = User(**USER_TEST_DICT)
-        parsed_user = UserSchema.json(user)
+        user = User(**USER_TEST_DICT, user_id=uuid4())
+        parsed_user, errors = UserSchema.json(user)
 
-        # expected serialized dict must hide the password field
-        expected_result = USER_TEST_DICT.copy()
-        del expected_result['password']
+        expected_result = get_expected_serialized_user(user)
 
         assert parsed_user == expected_result
 
     def test_user_json__fail(self):
+        # FIXME: What does this test do?
+        assert False
+
         expected_result = USER_TEST_DICT.copy()
         del expected_result['password']
 
@@ -68,22 +83,20 @@ class TestUserSchema:
         assert 'password' not in expected_result
 
     def test_user_json_schema__success(self):
-        user_schema = JSONSchema().dump(UserSchema()).data
-        expected_result = USER_SCHEMA
-
-        assert user_schema == expected_result
+        assert UserSchema.json_schema() == USER_SCHEMA
 
     def test_user_validate_input__success(self):
-        parsed_user = UserSchema.validate_input(USER_TEST_DICT)
+        valid_user = UserSchema.validate_input(USER_TEST_DICT)
 
-        assert parsed_user == True
+        assert valid_user is True
 
     def test_user_validate_input__fail(self):
-        expected_result = USER_TEST_DICT.copy()
-        del expected_result['password']
+        wrong_user_data = USER_TEST_DICT.copy()
+        # password field is required on input
+        del wrong_user_data['password']
 
-        parsed_user = UserSchema.validate_input(expected_result)
+        validated = UserSchema.validate_input(wrong_user_data)
 
-        assert parsed_user is not True
-        assert 'password' in parsed_user
-        assert parsed_user['password'] == ['Missing data for required field.']
+        assert validated is not True
+        assert 'password' in validated
+        assert validated['password'] == ['Missing data for required field.']
