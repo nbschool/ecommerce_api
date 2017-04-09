@@ -1,7 +1,15 @@
-# test json method
-# test get class Schema
-# test request input validation
-# test jsonAPI schema output
+"""
+Testing module for Marshmallow-JSONApi implementation on Peewee Models.
+Tests run with no flask involvment and are used to check validation
+of inputs (post/put request data) and output from the Schemas dump method, that
+will be used as return value for Flask-Restful endpoint handlers.
+
+TODO:
+* test json method
+* test get class Schema
+* test request input validation
+* test jsonAPI schema output
+"""
 
 from peewee import SqliteDatabase
 from models import User
