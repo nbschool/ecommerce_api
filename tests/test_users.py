@@ -57,7 +57,7 @@ class Testuser:
             'first_name': 'Mario',
             'last_name': 'Rossi',
             'email': 'asddjkasdjhv',
-            'password': 'aksdg'
+            'password': 'aksdg',
         }
         resp = self.app.post(API_ENDPOINT.format('users/'),
                              data=json.dumps(user),
@@ -73,13 +73,15 @@ class Testuser:
         del resp_user['user_id']  # sent user data does not have the id field
         assert resp_user == user
         assert User.select().count() == 1
+        for user in User.select():
+            assert user.admin is False
 
     def test_post_new_user_no_json__fail(self):
         user = {
             'first_name': 'Mario',
             'last_name': 'Rossi',
             'email': 'asddjkasdjhv',
-            'password': 'aksdg'
+            'password': 'aksdg',
         }
         resp = self.app.post(API_ENDPOINT.format('users/'),
                              data=json.dumps(user))
@@ -92,7 +94,7 @@ class Testuser:
             'first_name': 'Mario',
             'last_name': 'Rossi',
             'email': 'mail@gmail.com',
-            'password': 'aksdg'
+            'password': 'aksdg',
         }
         resp = self.app.post(API_ENDPOINT.format('users/'),
                              data=json.dumps(user),
@@ -106,7 +108,7 @@ class Testuser:
         user = {
             'first_name': 'Mario',
             'last_name': 'Rossi',
-            'password': 'aksdg'
+            'password': 'aksdg',
         }
         resp = self.app.post(API_ENDPOINT.format('users/'),
                              data=json.dumps(user),
@@ -120,7 +122,7 @@ class Testuser:
             'first_name': '',
             'last_name': 'Rossi',
             'email': 'mario@email.com',
-            'password': 'akjsgdf'
+            'password': 'akjsgdf',
         }
 
         resp = self.app.post(API_ENDPOINT.format('users/'),

@@ -4,7 +4,7 @@ Models contains the database models for the application.
 import datetime
 
 from passlib.hash import pbkdf2_sha256
-from peewee import DateTimeField, TextField, CharField
+from peewee import DateTimeField, TextField, CharField, BooleanField
 from peewee import Model, SqliteDatabase, DecimalField
 from peewee import UUIDField, ForeignKeyField, IntegerField
 
@@ -57,12 +57,14 @@ class Item(BaseModel):
 class User(BaseModel):
     """
     User represents an user for the application.
+    Users created are always as role "normal" (admin field = False)
     """
     user_id = UUIDField(unique=True)
     first_name = CharField()
     last_name = CharField()
     email = CharField(unique=True)
     password = CharField()
+    admin = BooleanField(default=False)
 
     @staticmethod
     def exists(email):
