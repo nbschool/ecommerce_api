@@ -39,7 +39,8 @@ class TestOrders:
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
-            description='svariati mariii'
+            description='svariati mariii',
+            availability=2
         )
         order_id = uuid.uuid4()
         dt = datetime.datetime.now().isoformat()
@@ -63,8 +64,8 @@ class TestOrders:
                 "order_id": str(order_id), "date": dt, "total_price": 100.00,
                 "delivery_address": 'Via Rossi 12',
                 "items": [{
-                    "quantity": 2, "subtotal": 50.00, "item_name": "mario", "item_description":
-                    "svariati mariii"
+                    "quantity": 2, "subtotal": 50.00, "item_name": "mario",
+                    "item_description": "svariati mariii"
                 }]
             }
         ]
@@ -88,7 +89,8 @@ class TestOrders:
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
-            description='svariati mariii'
+            description='svariati mariii',
+            availability=2
         )
         order_id = uuid.uuid4()
         dt = datetime.datetime.now().isoformat()
@@ -108,7 +110,8 @@ class TestOrders:
             item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
-            description='svariati GINIIIII'
+            description='svariati GINIIIII',
+            availability=3
         )
         order2 = Order.create(
             order_id=uuid.uuid4(),
@@ -130,8 +133,8 @@ class TestOrders:
                 "quantity": 2,
                 "subtotal": 50.0,
                 "item_name": "mario",
-                "item_description":
-                "svariati mariii"}]
+                "item_description": "svariati mariii"
+            }]
         ]
 
     def test_create_order__success(self):
@@ -139,21 +142,23 @@ class TestOrders:
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
-            description='svariati mariii'
+            description='svariati mariii',
+            availability=4
         )
         Item.create(
             item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
-            description='svariati GINIIIII'
+            description='svariati GINIIIII',
+            availability=10
         )
 
         order = {
             'order': {
-                'items': [
-                    {'name': 'mario', 'price': 20.20, 'quantity': 4},
-                    {'name': 'GINO', 'price': 30.20, 'quantity': 10}
-                ],
+                'items': {
+                    'mario': {'price': 20.20, 'quantity': 4},
+                    'GINO': {'price': 30.20, 'quantity': 10}
+                },
                 'delivery_address': 'Via Rossi 12'
             }
         }
@@ -164,8 +169,8 @@ class TestOrders:
         assert len(OrderItem.select()) == 2
 
         total_price = 0
-        for p in order['order']['items']:
-            total_price += (p['price'] * p['quantity'])
+        for _, values in order['order']['items'].items():
+            total_price += (values['price'] * values['quantity'])
 
         assert json.loads(resp.data)['total_price'] == total_price
         assert json.loads(resp.data)['delivery_address'] == order[
@@ -179,20 +184,22 @@ class TestOrders:
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
-            description='svariati mariii'
+            description='svariati mariii',
+            availability=4
         )
         Item.create(
             item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
-            description='svariati GINIIIII'
+            description='svariati GINIIIII',
+            availability=10
         )
         order = {
             'order': {
-                'items': [
-                    {'name': 'item1', 'price': 50.0, 'quantity': 4},
-                    {'name': 'item2', 'price': 20.0, 'quantity': 10}
-                ]
+                'items': {
+                    'item1': {'price': 50.0, 'quantity': 4},
+                    'item2': {'price': 20.0, 'quantity': 10}
+                }
             }
         }
         resp = self.app.post('/orders/', data=json.dumps(order),
@@ -205,21 +212,23 @@ class TestOrders:
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
-            description='svariati mariii'
+            description='svariati mariii',
+            availability=4
         )
         Item.create(
             item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
-            description='svariati GINIIIII'
+            description='svariati GINIIIII',
+            availability=10
         )
 
         order = {
             'order': {
-                'items': [
-                    {'name': 'item1', 'price': 50.0, 'quantity': 4},
-                    {'name': 'item2', 'price': 20.0, 'quantity': 10}
-                ],
+                'items': {
+                    'item1': {'price': 50.0, 'quantity': 4},
+                    'item2': {'price': 20.0, 'quantity': 10}
+                },
                 'delivery_address': ''
             }
         }
@@ -233,13 +242,15 @@ class TestOrders:
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
-            description='svariati mariii'
+            description='svariati mariii',
+            availability=5
         )
         item2 = Item.create(
             item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
-            description='svariati GINIIIII'
+            description='svariati GINIIIII',
+            availability=1
         )
         order1 = Order.create(
             order_id=uuid.uuid4(),
@@ -275,10 +286,10 @@ class TestOrders:
         order = {
             "order": {
                 "order_id": order_id,
-                'items': [
-                    {'name': 'mario', 'price': 20.0, 'quantity': 5},
-                    {'name': 'GINO', 'price': 30.20, 'quantity': 1}
-                ],
+                'items': {
+                    'mario': {'price': 20.0, 'quantity': 5},
+                    'GINO': {'price': 30.20, 'quantity': 1}
+                },
                 'delivery_address': 'Via Verdi 20'
             }
         }
@@ -302,10 +313,10 @@ class TestOrders:
         order = {
             "order": {
                 "order_id": order_id,
-                'items': [
-                    {'name': 'item1', 'price': 100.0, 'quantity': 5},
-                    {'name': 'item2', 'price': 2222.0, 'quantity': 1}
-                ],
+                'items': {
+                    'item1': {'price': 100.0, 'quantity': 5},
+                    'item2': {'price': 2222.0, 'quantity': 1}
+                },
                 'delivery_address': 'Via Verdi 20'
             }
         }
@@ -320,10 +331,10 @@ class TestOrders:
         order = {
             "order": {
                 "order_id": order_id,
-                'items': [
-                    {'name': 'item1', 'price': 100.0, 'quantity': 5},
-                    {'name': 'item2', 'price': 2222.0, 'quantity': 1}
-                ],
+                'items': {
+                    'item1': {'price': 100.0, 'quantity': 5},
+                    'item2': {'price': 2222.0, 'quantity': 1}
+                },
                 'delivery_address': 'Via Verdi 20'
             }
         }
@@ -335,7 +346,8 @@ class TestOrders:
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
-            description='svariati mariii'
+            description='svariati mariii',
+            availability=2
         )
         order_id = uuid.uuid4()
         dt = datetime.datetime.now().isoformat()

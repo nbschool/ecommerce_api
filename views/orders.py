@@ -44,11 +44,11 @@ class OrdersHandler(Resource):
     def post(self):
         """ Insert a new order."""
         res = request.get_json()
-        try:
-            item_names = [e['name'] for e in res['order']['items']]
-            Item.get(Item.name << item_names)
+        res_items = res['order']['items']
 
-        except Item.DoesNotExist:
+        item_names = [e for e in res_items]
+        items = Item.select().where(Item.name << item_names)
+        if not items.exists():
             abort(BAD_REQUEST)
 
         for i in ('items', 'delivery_address'):
@@ -59,24 +59,37 @@ class OrdersHandler(Resource):
             if not res['order'][i]:
                 return None, BAD_REQUEST
 
-        order1 = Order.create(
+        # check whether availabilities allow orders
+        if any(item.availability < res_items[item.name]['quantity']
+                for item in items):
+            return None, BAD_REQUEST
+
+        order = Order.create(
             order_id=uuid.uuid4(),
             date=datetime.datetime.now().isoformat(),
             total_price=0,
             delivery_address=res['order']['delivery_address'],
         )
 
-        for item in res['order']['items']:
-            subtotal = item['price'] * item['quantity']
+        partial_sum = 0
+        for item in items:
+            
+            subtotal = item.price * res_items[item.name]['quantity']
             OrderItem.create(
-                order=order1,
-                item=Item.get(name=(item['name'])),
-                quantity=item['quantity'],
+                order=order,
+                item=item,
+                quantity=res_items[item.name]['quantity'],
                 subtotal=subtotal
             )
-            order1.total_price += subtotal
+            partial_sum += subtotal
 
-        return order1.json(), CREATED
+            item.availability -= res_items[item.name]['quantity']
+            item.save()
+        
+        order.total_price = partial_sum
+        order.save()
+
+        return order.json(), CREATED
 
 
 class OrderHandler(Resource):
@@ -133,10 +146,10 @@ class OrderHandler(Resource):
             return None, NOT_FOUND
 
         order_to_modify.total_price = 0
-        for item in res['order']['items']:
+        for name, item in res['order']['items'].items():
             OrderItem.create(
                 order=order_to_modify,
-                item=Item.get(name=(item['name'])),
+                item=Item.get(name=name),
                 quantity=item['quantity'],
                 subtotal=item['price'] * item['quantity']
             )
