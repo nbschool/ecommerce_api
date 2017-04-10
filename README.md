@@ -21,7 +21,7 @@
 
  To start the server locally on Heroku `heroku local`
 
- To use a different Procfile on Heroku, use the -f flag: : `heroku local -f Procfile.dev`
+ To use the development Procfile (without gunicorn) use the -f flag: : `heroku local -f Procfile.dev`
 
 ## Running the tests
 
@@ -47,4 +47,4 @@
 
 ## License
 
- This project is licensed under Free Software Foundation, Inc. <http://fsf.org/> - see https://github.com/nbschool/ecommerce_api/blob/master/LICENSE for details
+ This project is licensed under [GNU GENERAL PUBLIC LICENSE Version 3](/LICENSE).
