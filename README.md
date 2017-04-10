@@ -1,7 +1,7 @@
 # ecommerce_api
 ## Getting Started
 
-> This information serve to explain our an e-commerce API. The API structure:
+> This document explains our an e-commerce API. The API structure:
 * **/views** directory contains the three main elements(item, order and user)
 * **/tests** directory contains the test of the main elements
 * **models.py** contains the database models for the application
@@ -10,19 +10,37 @@
 
 ## Installing
  
- What things you need to install (can be found in the file **requirements.txt**)
+ What you need to install (can be found in the file **requirements.txt**)
  
 ## Running the server
 
- Run the server in normal mode `FLASK_APP=app.py flask run`
+ To start the server in normal mode `FLASK_APP=app.py flask run`
 
- Run the server in debug mode `FLASK_DEBUG=1  FLASK_APP=app.py flask run`
+ To start the server in debug mode `FLASK_DEBUG=1  FLASK_APP=app.py flask run`
+
+ To start the server locally on Heroku `heroku local`
 
 ## Running the tests
 
 > To perform the test of the project:
 
    `pytest`
+
+## Built With
+
+ Python - Used to create the back-end of API
+
+## Authors
+
+* **Gianni Valdambrini**
+* **Daniele Maccioni**
+* **Alessandro Brugioni**
+* **German Lugo**
+* **Daniele Calcinai**
+* **Eugenio Minissale**
+* **Francesco Mirabelli**
+* **Marco Tinacci**
+* **Simone Motta**
 
 ## License
 
