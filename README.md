@@ -7,6 +7,7 @@
 * **models.py** contains the database models for the application
 * **app.py** opens and closes the database and carry out the post and put methods of the three elements which can be seen on the server by adding /items/,/orders/ or /users/.
 * **schemas.py** checks if the user input data is valid
+* **.env** it contains all the environment variables that we use, the content of which is a list of variables = value
 
 ## Installing
  
@@ -19,6 +20,8 @@
  To start the server in debug mode `FLASK_DEBUG=1  FLASK_APP=app.py flask run`
 
  To start the server locally on Heroku `heroku local`
+
+ To use a different Procfile on Heroku, use the -f flag: : `heroku local -f Procfile.dev`
 
 ## Running the tests
 
@@ -44,6 +47,4 @@
 
 ## License
 
- Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
- Everyone is permitted to copy and distribute verbatim copies
- of this license document, but changing it is not allowed.
+ This project is licensed under Free Software Foundation, Inc. <http://fsf.org/> - see https://github.com/nbschool/ecommerce_api/blob/master/LICENSE for details
