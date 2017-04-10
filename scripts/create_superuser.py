@@ -18,7 +18,6 @@ def main():
 
     if click.confirm('Do you want to continue and insert the admin user?'):
 
-        required_fields = ['first_name', 'last_name', 'email', 'password']
         request_data = {
             'first_name': first_name,
             'last_name': last_name,
@@ -26,19 +25,17 @@ def main():
             'password': password
         }
 
-        for field in required_fields:
+        for field in request_data:
             try:
                 value = request_data[field]
                 non_empty_str(value, field)
-            except (KeyError, ValueError):
-                msg = 'ERROR! Some fields are empty or required'
-                print(msg)
+            except (ValueError):
+                print('ERROR! Some fields are empty or required')
                 return
 
-        # If email is present in the database return a BAD_REQUEST response.
+        # If email is present in the database return a ERROR and close the program.
         if User.exists(request_data['email']):
-            msg = 'ERROR! email already present'
-            print(msg)
+            print('ERROR! email already present')
             return
 
         User.create(
@@ -50,8 +47,6 @@ def main():
             admin=True
         )
         print("Great! Insert successfully")
-        # for user in User.select():
-        #     print(user.json())
 
 
 if __name__ == '__main__':
