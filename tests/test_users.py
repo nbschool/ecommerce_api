@@ -73,7 +73,9 @@ class Testuser:
         del resp_user['user_id']  # sent user data does not have the id field
         assert resp_user == user
         assert User.select().count() == 1
-
+        for user in User.select():
+            assert user.admin == False
+            
     def test_post_new_user_no_json__fail(self):
         user = {
             'first_name': 'Mario',
