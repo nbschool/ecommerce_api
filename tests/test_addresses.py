@@ -49,7 +49,19 @@ class TestAddresses:
                              user.email, TEST_USER_PSW, None,
                              None)
 
-        resp = self.app.get('/addresses/')
-        import pdb; pdb.set_trace()
         assert resp.status_code == OK
         assert json.loads(resp.data) == []
+
+    def test_get_addresses__success(self):
+
+        user = add_user('mariorossi@gmail.com', '123')
+        addr = Address.create(**get_test_addr_dict(user))
+        user1 = add_user('giovanniverdi@gmail.com', '456')
+        addr1 = Address.create(**get_test_addr_dict(user))
+
+        resp = open_with_auth(self.app, '/addresses/', 'GET',
+                             user.email, TEST_USER_PSW, None,
+                             None)
+
+        assert resp.status_code == OK
+        assert json.loads(resp.data) == [addr.json(), addr1.json()]
