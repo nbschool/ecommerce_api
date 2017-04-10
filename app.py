@@ -23,6 +23,7 @@ from models import database
 from views.orders import OrdersHandler, OrderHandler
 from views.items import ItemHandler, ItemsHandler
 from views.user import UsersHandler, UserHandler
+from views.address import AddressesHandler, AddressHandler
 
 app = Flask(__name__)
 api = Api(app)
@@ -56,7 +57,8 @@ def database_disconnect(response):
         database.close()
     return response
 
-
+api.add_resource(AddressesHandler, "/addresses/")
+api.add_resource(AddressHandler, "/addresses/<uuid:item_id>")
 api.add_resource(ItemsHandler, "/items/")
 api.add_resource(ItemHandler, "/items/<uuid:item_id>")
 api.add_resource(OrdersHandler, '/orders/')
