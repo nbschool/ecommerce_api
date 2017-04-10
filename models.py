@@ -107,7 +107,6 @@ class User(BaseModel):
         }
 
 
-
 class Order(BaseModel):
     """ The model Order contains a list of orders - one row per order.
     Each order will be place by one client.

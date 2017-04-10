@@ -1,13 +1,15 @@
 import click
-import json
 import uuid
 from models import User
 from utils import non_empty_str
 
+
 @click.command()
 def main():
-    click.echo('####################\n####################\nADMIN USER SCRIPT\n####################\n####################\n')
-    click.echo('Hi. Here you can create an admin user. For eachone you have to insert:\nfirst name\n-last name\n-email\n-password')
+    click.echo('####################\n####################\nADMIN USER SCRIPT\n')
+    click.echo('####################\n####################\n')
+    click.echo('Here you can create an admin user. For eachone you have to insert:\n')
+    click.echo('first name\n-last name\n-email\n-password')
 
     first_name = click.prompt('Please enter your first name')
     last_name = click.prompt('Please enter your last name')
@@ -39,8 +41,7 @@ def main():
             print(msg)
             return
 
-
-        new_user = User.create(
+        User.create(
             user_id=uuid.uuid4(),
             first_name=first_name,
             last_name=last_name,
@@ -51,7 +52,6 @@ def main():
         print("Great! Insert successfully")
         # for user in User.select():
         #     print(user.json())
-
 
 
 if __name__ == '__main__':
