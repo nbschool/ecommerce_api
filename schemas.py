@@ -36,7 +36,7 @@ class BaseSchema(Schema):
         """
 
         # TODO: Remove after refactoring
-        raise NotImplementedError('Refactor before using.')
+        # raise NotImplementedError('Refactor before using.')
 
         return JSONSchema().dump(cls()).data
 
@@ -53,8 +53,8 @@ class BaseSchema(Schema):
 
         errors = cls().validate(jsondata)
         if not errors:
-            return True
-        return errors
+            return True, {}
+        return False, errors
 
 
 class ItemSchema(BaseSchema):
@@ -118,25 +118,9 @@ class UserSchema(BaseSchema):
     email = fields.Email(required=True)
     password = fields.Str(required=True, load_only=True)
 
-    orders = fields.Relationship(
-        many=True, include_resource_linkage=True,
-        type_='order', schema=OrderSchema,
-        dump_only=True, id_field='order_id',
-    )
-
-    @classmethod
-    def json(cls, obj, include_data=['orders']):
-        """
-        Override BaseSchema.json to automatically include the `orders` of
-        the user.
-        """
-        return super(UserSchema, cls).json(obj, include_data)
-
 
 def main():
-    import uuid
     from uuid import uuid4
-    from datetime import datetime
 
     User.delete().execute()
     Item.delete().execute()
