@@ -188,8 +188,8 @@ class Order(BaseModel):
 
         for orderitem in self.order_items:
             if orderitem.item == item:
-                orderitem.remove_item(quantity)
-                self.total_price -= (item.price * quantity)
+                removed_items = orderitem.remove_item(quantity)
+                self.total_price -= (item.price * removed_items)
                 self.save()
                 return True
 
@@ -241,14 +241,20 @@ class OrderItem(BaseModel):
         """
         Remove one item from the OrderItem, decreasing the quantity count and
         recalculating the subtotal value for this item(s)
+
+        :returns: int - quantity of items really removed.
         """
         if self.quantity <= quantity:
+            # If asked to remove more items than existing, set `quantity` as
+            # the total count of items before deleting the row.
+            quantity = self.quantity
             self.delete_instance()
-            return True
+        else:
+            self.quantity -= quantity
+            self._calculate_subtotal()
+            self.save()
 
-        self.quantity -= quantity
-        self._calculate_subtotal()
-        self.save()
+        return quantity
 
     def _calculate_subtotal(self):
         """Calculate the subtotal value of the item(s) in the order."""
