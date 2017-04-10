@@ -135,6 +135,7 @@ class UserSchema(BaseSchema):
 
 def main():
     import uuid
+    from uuid import uuid4
     from datetime import datetime
 
     User.delete().execute()
@@ -172,24 +173,15 @@ def main():
         'price': 30.20,
         'description': 'svariati GINIIIII'
     }
-    item = Item.create(**TEST_ITEM)
+    item1 = Item.create(**TEST_ITEM)
     item2 = Item.create(**TEST_ITEM2)
 
-    order1 = Order.create(
-        order_id=uuid.uuid4(),
-        date=datetime.now(),
-        total_price=100.00,
-        delivery_address='Via Rossi 12'
-    )
+    user = User.create(**TEST_USER, user_id=uuid4())
 
-    order2 = Order.create(
-        order_id=uuid.uuid4(),
-        date=datetime.now(),
-        total_price=50,
-        delivery_address='Via Rossi 12'
-    )
-
-    user = User(**TEST_USER, user_id=uuid.uuid4())
+    order1 = Order.create(delivery_address='Via Rossi 12', user=user)
+    order2 = Order.create(delivery_address='Via Rossi 12', user=user)
+    order1.add_item(item1).add_item(item2, 3)
+    order1.add_item(item2).add_item(item1)
 
     # Assign the items to the orders and the orders to the user inside a list,
     # so that the Schema can access and serialize the objects into a json
@@ -200,8 +192,8 @@ def main():
     #         * `items` that returns the list of items
     #         * `owner` (or similar) to retrieve the user that created it
     #       This could be achieved executing a query inside the property getter
-    order1.items = [item, item2]
-    order2.items = [item2, item]
+    order1.items = [item1, item2]
+    order2.items = [item2, item1]
     user.orders = [order1, order2]
 
     print('\nSerializing `order1` into JSONAPI with OrderSchema')
@@ -219,14 +211,6 @@ def main():
             'attributes': TEST_USER
         }
     }
-    TEST_ITEM2 = {
-        'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
-        'name': 'GINO',
-        'price': 30.20,
-        'description': 'svariati GINIIIII'
-    }
-    item = Item.create(**TEST_ITEM)
-    item2 = Item.create(**TEST_ITEM2)
 
     print('\nUser jsonapi validation (True or dict with errors if any)')
     pprint(UserSchema.validate_input(post_data))
