@@ -5,11 +5,10 @@ Test suite for ItemHandler and ItemListHandler
 import json
 import uuid
 
-from peewee import SqliteDatabase
 import http.client as client
 
-from app import app
 from models import Item
+from tests.test_case import TestCase
 
 TEST_ITEM = {
     'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
@@ -38,15 +37,7 @@ TEST_ITEM_PRECISION = {
 WRONG_UUID = '04f2f213-1a0f-443d-a5ab-79097ba725ba'
 
 
-class TestItems:
-    @classmethod
-    def setup_class(cls):
-        Item._meta.database = SqliteDatabase(':memory:')
-        Item.create_table()
-        cls.app = app.test_client()
-
-    def setup_method(self):
-        Item.delete().execute()
+class TestItems(TestCase):
 
     def test_post_item__success(self):
         resp = self.app.post('/items/', data=json.dumps(TEST_ITEM),

@@ -2,10 +2,9 @@
 Test suite for User(s) resources.
 """
 
-from app import app
 from models import User
 from tests.test_utils import open_with_auth, add_user
-from peewee import SqliteDatabase
+from tests.test_case import TestCase
 from http.client import (OK, NOT_FOUND, NO_CONTENT, BAD_REQUEST,
                          CREATED, CONFLICT, UNAUTHORIZED)
 import json
@@ -13,27 +12,14 @@ import uuid
 
 # main endpoint for API
 API_ENDPOINT = '/{}'
-# tests are run in temp database in memory
-TEST_DB = SqliteDatabase(':memory:')
 # correct password used for all test users.
 TEST_USER_PSW = 'my_password123@'
 
 
-class Testuser:
+class TestUser(TestCase):
     """
     Implements py.test suite for User Resource endpoints.
     """
-
-    @classmethod
-    def setup_class(cls):
-        User._meta.database = TEST_DB
-        User.create_table()
-
-        # Setup the Flask test client
-        cls.app = app.test_client()
-
-    def setup_method(self, test_method):
-        User.delete().execute()
 
     def test_get_empty_list__success(self):
         resp = self.app.get(API_ENDPOINT.format('users/'))
