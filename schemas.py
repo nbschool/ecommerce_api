@@ -97,8 +97,14 @@ class OrderSchema(BaseSchema):
         attribute='order_items',
     )
 
+    user = fields.Relationship(
+        include_resource_linkage=True,
+        type_='user', schema='UserSchema',
+        dump_only=True, id_field='user_id',
+    )
+
     @classmethod
-    def json(cls, obj, include_data=['items']):
+    def json(cls, obj, include_data=['items', 'user']):
         """
         Override BaseSchema.json to automatically include the `items` field
         of the order.
@@ -137,12 +143,20 @@ class UserSchema(BaseSchema):
     class Meta:
         type_ = 'user'
         self_url_many = '/users/'
+        self_url = '/users/{id}'
+        self_url_kwargs = {'id': '<id>'}
 
     id = fields.Str(dump_only=True, attribute='user_id')
     first_name = fields.Str(required=True)
     last_name = fields.Str(required=True)
     email = fields.Email(required=True)
     password = fields.Str(required=True, load_only=True)
+
+    orders = fields.Relationship(
+        many=True, include_resource_linkage=True,
+        type_='order', schema='OrderSchema',
+        dump_only=True, id_field='order_id',
+    )
 
 
 def main():
