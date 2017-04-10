@@ -1,6 +1,7 @@
 from models import User
 from base64 import b64encode
-import uuid, random
+import uuid
+import random
 
 
 def add_user(email, psw):
@@ -18,6 +19,7 @@ def add_user(email, psw):
         password=User.hash_password(psw),
         user_id=uuid.uuid4()
     )
+
 
 def open_with_auth(app, url, method, username, password, content_type, data):
     """Generic call to app for http request. """

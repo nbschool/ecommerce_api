@@ -3,14 +3,12 @@ Test suite for User(s) resources.
 """
 
 from app import app
-from base64 import b64encode
 from models import User
 from tests.test_utils import open_with_auth, add_user
 from peewee import SqliteDatabase
 from http.client import (OK, NOT_FOUND, NO_CONTENT, BAD_REQUEST,
                          CREATED, CONFLICT, UNAUTHORIZED)
 import json
-import random
 import uuid
 
 # main endpoint for API
@@ -19,8 +17,6 @@ API_ENDPOINT = '/{}'
 TEST_DB = SqliteDatabase(':memory:')
 # correct password used for all test users.
 TEST_USER_PSW = 'my_password123@'
-
-
 
 
 class Testuser:
@@ -48,7 +44,7 @@ class Testuser:
 
     def test_get_users_list__success(self):
         user1 = add_user(None, TEST_USER_PSW)
-        user2 = add_user(None,TEST_USER_PSW)
+        user2 = add_user(None, TEST_USER_PSW)
 
         resp = self.app.get(API_ENDPOINT.format('users/'))
 
@@ -141,7 +137,7 @@ class Testuser:
 
         user_path = 'users/{}'.format(user.user_id)
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
-                                   email, TEST_USER_PSW, None, None)
+                              email, TEST_USER_PSW, None, None)
         assert resp.status_code == NO_CONTENT
         assert User.select().count() == 0
 
@@ -152,7 +148,7 @@ class Testuser:
         user_path = 'users/{}'.format(wrong_uuid)
 
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
-                                   user.email, TEST_USER_PSW, None, None)
+                              user.email, TEST_USER_PSW, None, None)
 
         assert resp.status_code == NOT_FOUND
         assert User.select().count() == 1
@@ -163,7 +159,7 @@ class Testuser:
 
         path = 'users/{}'.format(user_A.user_id)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'DELETE',
-                                   user_B.user_id, TEST_USER_PSW, None, None)
+                              user_B.user_id, TEST_USER_PSW, None, None)
 
         assert resp.status_code == UNAUTHORIZED
         assert User.get(User.email == user_A.email)
@@ -173,10 +169,9 @@ class Testuser:
     def test_delete_user_auth_does_not_exists__fail(self):
         user = add_user(None, TEST_USER_PSW)
 
-
         path = 'users/{}'.format(user.user_id)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'DELETE',
-                                   'donot@exists.com', 'unused_psw', None, None)
+                              'donot@exists.com', 'unused_psw', None, None)
 
         assert resp.status_code == UNAUTHORIZED
         assert User.exists(user.email)

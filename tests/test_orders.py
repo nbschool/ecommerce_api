@@ -9,7 +9,6 @@ from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
 from peewee import SqliteDatabase
 import datetime
 import json
-import random
 import uuid
 
 # main endpoint for API
@@ -180,7 +179,7 @@ class TestOrders:
         }
         path = 'orders/'
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'POST',
-                              '123@email.com', TEST_USER_PSW, 'application/json',
+                              user_A.email, TEST_USER_PSW, 'application/json',
                               json.dumps(order))
 
         assert resp.status_code == CREATED
@@ -223,7 +222,7 @@ class TestOrders:
         }
         path = 'orders/'
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'POST',
-                              '12345@email.com', TEST_USER_PSW, 'application/json',
+                              user_A.email, TEST_USER_PSW, 'application/json',
                               json.dumps(order))
         assert resp.status_code == BAD_REQUEST
         assert len(Order.select()) == 0
@@ -254,7 +253,7 @@ class TestOrders:
         }
         path = 'orders/'
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'POST',
-                              '12345@email.com', TEST_USER_PSW, 'application/json',
+                              user_A.email, TEST_USER_PSW, 'application/json',
                               json.dumps(order))
         assert resp.status_code == BAD_REQUEST
         assert len(Order.select()) == 0
@@ -418,9 +417,8 @@ class TestOrders:
         user_A = add_user('12345@email.com', TEST_USER_PSW)
         path = 'orders/{}'.format(str(uuid.uuid4()))
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'DELETE',
-                              '12345@email.com', TEST_USER_PSW, None,
+                              user_A.email, TEST_USER_PSW, None,
                               None)
-        #resp = self.app.delete('/orders/{}'.format(str(uuid.uuid4())))
         assert resp.status_code == NOT_FOUND
 
     def test_delete_order__failure__failure_non_existing(self):

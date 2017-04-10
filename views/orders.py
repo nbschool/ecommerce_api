@@ -2,14 +2,11 @@
 Orders-view: this module contains functions for the interaction with the orders.
 """
 
-import random
 from flask_restful import Resource
-from flask_httpauth import HTTPBasicAuth
-from base64 import b64encode
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
 import datetime
 import uuid
-from models import Order, OrderItem, Item, User
+from models import Order, OrderItem, Item
 from flask import abort, request, g
 from auth import auth
 
@@ -84,7 +81,6 @@ class OrdersHandler(Resource):
             order1.total_price += subtotal
 
         serialized = order1.json()
-        # serialized['user'] = order1.user.json()
         return serialized, CREATED
 
 
@@ -122,7 +118,6 @@ class OrderHandler(Resource):
     @auth.login_required
     def put(self, order_id):
         """ Modify a specific order. """
-        user = g.user
         res = request.get_json()
 
         try:
