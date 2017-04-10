@@ -44,6 +44,7 @@ def get_expected_serialized_user(user):
     """
     From USER_TEST_DICT and a generated User, get a dict that should match
     the return value of the JSONApi serialization for that user.
+    TODO: Implement expected orders/data serialization if user has orders.
     """
 
     user_data = USER_TEST_DICT.copy()
@@ -53,6 +54,17 @@ def get_expected_serialized_user(user):
             'type': 'user',
             'id': str(user.user_id),
             'attributes': user_data,
+            'links': {
+                'self': '/users/{}'.format(user.user_id)
+            },
+            'relationships': {
+                'orders': {
+                    'data': []
+                }
+            },
+        },
+        'links': {
+            'self': '/users/{}'.format(user.user_id)
         }
     }
 
