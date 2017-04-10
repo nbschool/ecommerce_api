@@ -11,6 +11,7 @@ from tests.test_utils import add_user, open_with_auth
 
 TEST_USER_PSW = '123'
 
+
 def get_test_addr_dict(user, country='Italy', city='Pistoia', post_code='51100',
                        address='Via Verdi 12', phone='3294882773'):
     return {
@@ -45,9 +46,7 @@ class TestAddresses:
 
         user = add_user('mariorossi@gmail.com', TEST_USER_PSW)
 
-        resp = open_with_auth(self.app, '/addresses/', 'GET',
-                             user.email, TEST_USER_PSW, None,
-                             None)
+        resp = open_with_auth(self.app, '/addresses/', 'GET', user.email, TEST_USER_PSW, None, None)
 
         assert resp.status_code == OK
         assert json.loads(resp.data) == []
@@ -59,9 +58,7 @@ class TestAddresses:
         user1 = add_user('giovanniverdi@gmail.com', '456')
         addr1 = Address.create(**get_test_addr_dict(user))
 
-        resp = open_with_auth(self.app, '/addresses/', 'GET',
-                             user.email, TEST_USER_PSW, None,
-                             None)
+        resp = open_with_auth(self.app, '/addresses/', 'GET', user.email, TEST_USER_PSW, None, None)
 
         assert resp.status_code == OK
         assert json.loads(resp.data) == [addr.json(), addr1.json()]
