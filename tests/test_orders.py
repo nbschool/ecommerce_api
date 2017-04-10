@@ -179,6 +179,26 @@ class TestOrders:
         assert Order.get().json()['order_id'] == json.loads(
             resp.data)['order_id']
 
+    def test_create_order__failure_availability(self):
+        Item.create(
+            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii',
+            availability=2
+        )
+        order = {
+            'order': {
+                'items': {
+                    'item1': {'price': 10.10, 'quantity': 3}
+                }
+            }
+        }
+        resp = self.app.post('/orders/', data=json.dumps(order),
+                             content_type='application/json')
+        assert resp.status_code == BAD_REQUEST
+        assert len(Order.select()) == 0
+
     def test_create_order__failure_missing_field(self):
         Item.create(
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
@@ -325,6 +345,43 @@ class TestOrders:
                             data=json.dumps(order),
                             content_type='application/json')
         assert resp.status_code == NOT_FOUND
+
+    def test_update_order__failure_availability(self):
+        item = Item.create(
+            item_id=uuid.uuid4(),
+            name='mario',
+            price=20.20,
+            description='svariati mariii',
+            availability=2
+        )
+        order = Order.create(
+            order_id=uuid.uuid4(),
+            date=datetime.datetime.now().isoformat(),
+            total_price=100,
+            delivery_address='Via Rossi 12'
+        )
+        OrderItem.create(
+            order=order,
+            item=item,
+            quantity=2,
+            subtotal=50.00
+        )
+
+        update_order = {
+            "order": {
+                "order_id": str(order.order_id),
+                'items': {
+                    'mario': {'price': 30.30, 'quantity': 3},
+                },
+                'delivery_address': 'Via Verdi 20'
+            }
+        }
+
+        resp = self.app.put('/orders/{}'.format(order.order_id),
+                            data=json.dumps(update_order),
+                            content_type='application/json')
+
+        assert resp.status_code == BAD_REQUEST
 
     def test_update_order__failure_non_existing_empty_orders(self):
         order_id = str(uuid.uuid4())

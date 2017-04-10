@@ -126,6 +126,9 @@ class OrderHandler(Resource):
     def put(self, order_id):
         """ Modify a specific order. """
         res = request.get_json()
+        res_items = res['order']['items']
+        item_names = [e for e in res_items]
+        items = Item.select().where(Item.name << item_names)
 
         try:
             order_to_modify = Order.get(order_id=str(order_id))
@@ -139,6 +142,11 @@ class OrderHandler(Resource):
         for i in ('items', 'delivery_address', 'order_id'):
             if not res['order'][i]:
                 return None, BAD_REQUEST
+
+        # check whether availabilities allow order update
+        if any(item.availability < res_items[item.name]['quantity']
+                for item in items):
+            return None, BAD_REQUEST
 
         try:
             OrderItem.delete().where(OrderItem.order == order_to_modify).execute()
