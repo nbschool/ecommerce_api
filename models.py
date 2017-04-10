@@ -142,11 +142,13 @@ class Order(BaseModel):
         Remove all the items from the order.
         Delete all OrderItem related to this order and reset the total_price
         value to 0.
+
         """
 
         self.total_price = 0
         OrderItem.delete().where(OrderItem.order == self).execute()
         self.save()
+        return self
 
     def add_item(self, item, quantity=1):
         """
@@ -162,9 +164,10 @@ class Order(BaseModel):
             # same item is found we update that row.
             if orderitem.item == item:
                 orderitem.add_item(quantity)
+
                 self.total_price += (item.price * quantity)
                 self.save()
-                return True
+                return self
 
         # if no existing OrderItem is found with this order and this Item,
         # create a new row in the OrderItem table
@@ -177,7 +180,7 @@ class Order(BaseModel):
 
         self.total_price += (item.price * quantity)
         self.save()
-        return True
+        return self
 
     def remove_item(self, item, quantity=1):
         """
@@ -191,11 +194,11 @@ class Order(BaseModel):
                 removed_items = orderitem.remove_item(quantity)
                 self.total_price -= (item.price * removed_items)
                 self.save()
-                return True
+                return self
 
         # No OrderItem found for this item
         # TODO: Raise or return something more explicit
-        return False
+        return self
 
     def json(self):
         return {
