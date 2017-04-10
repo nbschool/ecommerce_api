@@ -330,6 +330,7 @@ class TestOrders:
             'order']['delivery_address']
 
     def test_update_order__failure_non_existing(self):
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
         Order.create(
             order_id=uuid.uuid4(),
             date=datetime.datetime.now().isoformat(),
