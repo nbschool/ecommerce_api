@@ -1,7 +1,7 @@
 # ecommerce_api
 ## Getting Started
 
-> This document explains our an e-commerce API. The API structure:
+This document explains our an e-commerce API. The API structure:
 * **/views** directory contains the three main elements(item, order and user)
 * **/tests** directory contains the test of the main elements
 * **models.py** contains the database models for the application
@@ -11,23 +11,44 @@
 
 ## Installing
  
- What you need to install (can be found in the file **requirements.txt**)
+What you need to install (can be found in the file **requirements.txt**)
  
 ## Running the server
 
- To start the server in normal mode `FLASK_APP=app.py flask run`
+To start the server in normal mode:
+```
+FLASK_APP=app.py flask run
+```
 
- To start the server in debug mode `FLASK_DEBUG=1  FLASK_APP=app.py flask run`
+To start the server in debug mode:
+```
+FLASK_DEBUG=1  FLASK_APP=app.py flask run
+```
 
- To start the server locally on Heroku `heroku local`
+### Heroku
+All the env variables should be put in the ```.env``` file, in the root folder. The syntax is, for example:
+```
+FLASK_APP=app.py
+FLASK_DEBUG=1
+```
 
- To use the development Procfile (without gunicorn) use the -f flag: : `heroku local -f Procfile.dev`
+To start the server locally on Heroku:
+```
+heroku local
+```
+
+To use the development Procfile (without gunicorn) use the -f flag:
+```
+heroku local -f Procfile.dev
+```
 
 ## Running the tests
 
-> To perform the test of the project:
+To perform the test of the project:
 
-   `pytest`
+```
+pytest
+```
 
 ## Built With
 
