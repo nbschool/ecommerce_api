@@ -8,6 +8,7 @@ from models import Order, Item
 from flask import abort, request, g
 from auth import auth
 
+
 def serialize_order(order_obj):
     """
     From a Order object create a json-serializable dict with all the order
@@ -73,7 +74,6 @@ class OrdersHandler(Resource):
         for i in res['order']['items']:
             item = Item.get(Item.name == i['name'])
             order.add_item(item, i['quantity'])
-
 
         return serialize_order(order), CREATED
 

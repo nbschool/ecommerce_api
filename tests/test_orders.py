@@ -303,7 +303,7 @@ class TestOrders:
         assert resp.status_code == NOT_FOUND
 
     def test_update_order__failure_non_existing_empty_orders(self):
-        user = add_user('user@email.com', TEST_USER_PSW)
+        add_user('user@email.com', TEST_USER_PSW)
         order_id = str(uuid4())
         order = {
             "order": {
