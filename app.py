@@ -1,3 +1,4 @@
+
 """
 Module contains the route handlers for the user part of the RESTful part of the
 flask application.
@@ -23,7 +24,6 @@ from models import database
 from views.orders import OrdersHandler, OrderHandler
 from views.items import ItemHandler, ItemsHandler
 from views.user import UsersHandler, UserHandler
-from views.pictures import PicturesHandler, PictureHandler
 
 app = Flask(__name__)
 api = Api(app)
