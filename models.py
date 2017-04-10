@@ -63,35 +63,6 @@ class Item(BaseModel):
         }
 
 
-class Picture(BaseModel):
-    """
-    Picture model
-        picture_id: picture identifier and file name stored
-        extension: picture type
-    """
-    picture_id = UUIDField(unique=True)
-    extension = CharField()
-
-    def json(self):
-        return {
-            'picture_id': str(self.picture_id),
-            'extension': self.extension
-        }
-
-    def __str__(self):
-        return '{}.{}'.format(self.picture_id, self.extension)
-
-
-class ItemPicture(BaseModel):
-    """
-    Item-Picture cross-table
-        item: foreign key to Item
-        picture: foreign key to Picture
-    """
-    item = ForeignKeyField(Item)
-    picture = ForeignKeyField(Picture)
-
-
 class User(BaseModel):
     """
     User represents an user for the application.
