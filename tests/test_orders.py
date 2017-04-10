@@ -367,7 +367,7 @@ class TestOrders:
         assert order.total_price == item2.price * 2
 
         # remove non existing item3 from order
-        res = order.remove_item(item3)
+        order.remove_item(item3)
         assert count_items(order) == 2
         assert len(order.order_items) == 1
 
