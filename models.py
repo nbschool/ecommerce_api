@@ -4,9 +4,11 @@ Models contains the database models for the application.
 import datetime
 
 from passlib.hash import pbkdf2_sha256
-from peewee import DateTimeField, TextField, CharField
+from peewee import DateTimeField, TextField, CharField, BooleanField
 from peewee import Model, SqliteDatabase, DecimalField
 from peewee import UUIDField, ForeignKeyField, IntegerField
+from uuid import uuid4
+
 
 database = SqliteDatabase('database.db')
 
@@ -86,12 +88,14 @@ class ItemPicture(BaseModel):
 class User(BaseModel):
     """
     User represents an user for the application.
+    Users created are always as role "normal" (admin field = False)
     """
     user_id = UUIDField(unique=True)
     first_name = CharField()
     last_name = CharField()
     email = CharField(unique=True)
     password = CharField()
+    admin = BooleanField(default=False)
 
     @staticmethod
     def exists(email):
@@ -130,7 +134,7 @@ class User(BaseModel):
             'user_id': str(self.user_id),
             'first_name': self.first_name,
             'last_name': self.last_name,
-            'email': self.email
+            'email': self.email,
         }
 
 
@@ -142,20 +146,99 @@ class Order(BaseModel):
     is the total price of the order. Finally, there is the delivery address,
     if it's different from the customers address from their record.
     """
-    order_id = UUIDField(unique=True)
-    date = DateTimeField()
-    total_price = DecimalField()
+    order_id = UUIDField(unique=True, default=uuid4)
+    total_price = DecimalField(default=0)
     delivery_address = CharField()
+    user = ForeignKeyField(User, related_name="orders")
 
     class Meta:
-        order_by = ('date',)
+        order_by = ('created_at',)
+
+    @property
+    def order_items(self):
+        """
+        Returns the list of OrderItem related to the order.
+        """
+
+        query = (
+            OrderItem
+            .select(OrderItem, Order)
+            .join(Order)
+            .where(Order.order_id == self.order_id)
+        )
+
+        return [orderitem for orderitem in query]
+
+    def empty_order(self):
+        """
+        Remove all the items from the order.
+        Delete all OrderItem related to this order and reset the total_price
+        value to 0.
+
+        """
+
+        self.total_price = 0
+        OrderItem.delete().where(OrderItem.order == self).execute()
+        self.save()
+        return self
+
+    def add_item(self, item, quantity=1):
+        """
+        Add one item to the order.
+        Creates one OrderItem row if the item is not present in the order yet,
+        or increasing the count of the existing OrderItem.
+
+        :param item Item: instance of models.Item
+        """
+
+        for orderitem in self.order_items:
+            # Looping all the OrderItem related to this order, if one with the
+            # same item is found we update that row.
+            if orderitem.item == item:
+                orderitem.add_item(quantity)
+
+                self.total_price += (item.price * quantity)
+                self.save()
+                return self
+
+        # if no existing OrderItem is found with this order and this Item,
+        # create a new row in the OrderItem table
+        OrderItem.create(
+            order=self,
+            item=item,
+            quantity=quantity,
+            subtotal=item.price * quantity
+        )
+
+        self.total_price += (item.price * quantity)
+        self.save()
+        return self
+
+    def remove_item(self, item, quantity=1):
+        """
+        Remove the given item from the order, reducing quantity of the relative
+        OrderItem entity or deleting it if removing the last item
+        (OrderItem.quantity == 0)
+        """
+
+        for orderitem in self.order_items:
+            if orderitem.item == item:
+                removed_items = orderitem.remove_item(quantity)
+                self.total_price -= (item.price * removed_items)
+                self.save()
+                return self
+
+        # No OrderItem found for this item
+        # TODO: Raise or return something more explicit
+        return self
 
     def json(self):
         return {
             'order_id': str(self.order_id),
-            'date': self.date,
+            'date': str(self.created_at),
             'total_price': float(self.total_price),
-            'delivery_address': self.delivery_address
+            'delivery_address': self.delivery_address,
+            'user_id': str(self.user.user_id)
         }
 
 
@@ -180,6 +263,38 @@ class OrderItem(BaseModel):
             'quantity': str(self.quantity),
             'subtotal': float(self.subtotal)
         }
+
+    def add_item(self, quantity=1):
+        """
+        Add one item to the OrderItem, increasing the quantity count and
+        recalculating the subtotal value for this item(s)
+        """
+        self.quantity += quantity
+        self._calculate_subtotal()
+        self.save()
+
+    def remove_item(self, quantity=1):
+        """
+        Remove one item from the OrderItem, decreasing the quantity count and
+        recalculating the subtotal value for this item(s)
+
+        :returns: int - quantity of items really removed.
+        """
+        if self.quantity <= quantity:
+            # If asked to remove more items than existing, set `quantity` as
+            # the total count of items before deleting the row.
+            quantity = self.quantity
+            self.delete_instance()
+        else:
+            self.quantity -= quantity
+            self._calculate_subtotal()
+            self.save()
+
+        return quantity
+
+    def _calculate_subtotal(self):
+        """Calculate the subtotal value of the item(s) in the order."""
+        self.subtotal = self.item.price * self.quantity
 
 
 # Check if the table exists in the database; if not create it.
