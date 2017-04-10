@@ -91,7 +91,7 @@ class OrderSchema(BaseSchema):
     items = fields.Relationship(
         many=True, include_resource_linkage=True,
         type_='item', schema=ItemSchema,
-        dump_only=True
+        dump_only=True, id_field='item_id',
     )
 
     @classmethod
@@ -121,7 +121,7 @@ class UserSchema(BaseSchema):
     orders = fields.Relationship(
         many=True, include_resource_linkage=True,
         type_='order', schema=OrderSchema,
-        dump_only=True
+        dump_only=True, id_field='order_id',
     )
 
     @classmethod
