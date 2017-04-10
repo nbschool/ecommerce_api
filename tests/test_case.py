@@ -7,10 +7,10 @@ from models import Item, Order, OrderItem, User
 from peewee import SqliteDatabase
 
 
-# tests are run in temp database in memory
-
-
 class TestCase:
+    """
+    Created TestCase to avoid duplicated code in the other tests
+    """
     TEST_DB = SqliteDatabase(':memory:')
 
     @classmethod
