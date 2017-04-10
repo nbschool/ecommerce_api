@@ -1,4 +1,3 @@
-
 """
 Module contains the route handlers for the user part of the RESTful part of the
 flask application.
