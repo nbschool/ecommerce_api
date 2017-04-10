@@ -4,11 +4,33 @@ Orders-view: this module contains functions for the interaction with the orders.
 
 from flask_restful import Resource
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
-import datetime
-import uuid
-from models import Order, OrderItem, Item
+from models import Order, Item
 from flask import abort, request, g
 from auth import auth
+
+
+def serialize_order(order_obj):
+    """
+    From a Order object create a json-serializable dict with all the order
+    information, including all the OrderItem(s) - and related Item(s) -
+    properties.
+    """
+
+    order = order_obj.json()
+    order['items'] = []
+
+    for orderitem in order_obj.order_items:
+        # serialize the Item(s) for the order, adding the info stored into
+        # the OrderItem table related to the order/item, into the 'items'
+        # property of the return value
+        order['items'].append({
+            'quantity': orderitem.quantity,
+            'price': float(orderitem.item.price),
+            'subtotal': float(orderitem.subtotal),
+            'name': orderitem.item.name,
+            'description': orderitem.item.description
+        })
+    return order
 
 
 class OrdersHandler(Resource):
@@ -16,37 +38,21 @@ class OrdersHandler(Resource):
 
     def get(self):
         """ Get all the orders."""
-        orders = {}
+        retval = []
 
-        res = (
-            Order
-            .select(Order, OrderItem, Item)
-            .join(OrderItem)
-            .join(Item)
-        )
+        for order in Order.select():
+            retval.append(serialize_order(order))
 
-        for row in res:
-            if row.order_id not in orders:
-                orders[row.order_id] = {
-                    'order_id': str(row.order_id),
-                    'date': row.date,
-                    'total_price': float(row.total_price),
-                    'delivery_address': row.delivery_address,
-                    'items': []
-                }
-            orders[row.order_id]['items'].append({
-                'quantity': row.orderitem.quantity,
-                'subtotal': float(row.orderitem.subtotal),
-                'item_name': row.orderitem.item.name,
-                'item_description': row.orderitem.item.description
-            })
-        return list(orders.values()), OK
+        return retval, OK
 
     @auth.login_required
     def post(self):
         """ Insert a new order."""
         user = g.user
         res = request.get_json()
+
+        # Check that the items exist by getting all the item names from the
+        # request and executing a get() request with Peewee
         try:
             item_names = [e['name'] for e in res['order']['items']]
             Item.get(Item.name << item_names)
@@ -54,66 +60,35 @@ class OrdersHandler(Resource):
         except Item.DoesNotExist:
             abort(BAD_REQUEST)
 
+        # Check that the order has an 'items' and 'delivery_address' attributes
+        # otherwise it's useless to continue.
         for i in ('items', 'delivery_address'):
             if i not in res['order']:
                 return None, BAD_REQUEST
 
-        for i in ('items', 'delivery_address'):
-            if not res['order'][i]:
-                return None, BAD_REQUEST
-
-        order1 = Order.create(
-            order_id=uuid.uuid4(),
-            date=datetime.datetime.now().isoformat(),
-            total_price=0,
+        order = Order.create(
             delivery_address=res['order']['delivery_address'],
-            user=user
+            user=user,
         )
 
-        for item in res['order']['items']:
-            subtotal = item['price'] * item['quantity']
-            OrderItem.create(
-                order=order1,
-                item=Item.get(name=(item['name'])),
-                quantity=item['quantity'],
-                subtotal=subtotal
-            )
-            order1.total_price += subtotal
+        for i in res['order']['items']:
+            item = Item.get(Item.name == i['name'])
+            order.add_item(item, i['quantity'])
 
-        serialized = order1.json()
-        return serialized, CREATED
+        return serialize_order(order), CREATED
 
 
 class OrderHandler(Resource):
     """ Single order endpoints."""
 
     def get(self, order_id):
-        """ Get a specific order. """
-        res = (
-            Order
-            .select(Order, OrderItem, Item)
-            .join(OrderItem)
-            .join(Item)
-            .where(Order.order_id == order_id)
-        )
-
-        if not res:
+        """ Get a specific order, including all the related Item(s)."""
+        try:
+            order = Order.get(Order.order_id == order_id)
+        except Order.DoesNotExist:
             return None, NOT_FOUND
 
-        order = {
-            'order_id': str(res[0].order_id),
-            'date': res[0].date,
-            'total_price': float(res[0].total_price),
-            'delivery_address': res[0].delivery_address,
-            'items': []
-        }
-        for row in res:
-            order['items'].append({'quantity': row.orderitem.quantity,
-                                   'subtotal': float(row.orderitem.subtotal),
-                                   'item_name': row.orderitem.item.name,
-                                   'item_description': row.orderitem.item.description
-                                   })
-        return list(order.values()), OK
+        return serialize_order(order), OK
 
     @auth.login_required
     def put(self, order_id):
@@ -121,7 +96,7 @@ class OrderHandler(Resource):
         res = request.get_json()
 
         try:
-            order_to_modify = Order.get(order_id=str(order_id))
+            order = Order.get(order_id=str(order_id))
         except Order.DoesNotExist:
             return None, NOT_FOUND
 
@@ -129,29 +104,18 @@ class OrderHandler(Resource):
             if i not in res['order']:
                 return None, BAD_REQUEST
 
-        for i in ('items', 'delivery_address', 'order_id'):
-            if not res['order'][i]:
-                return None, BAD_REQUEST
+        # Clear the order of all items before adding the new items
+        # that came with the PUT request
+        order.empty_order()
 
-        try:
-            OrderItem.delete().where(OrderItem.order == order_to_modify).execute()
-        except OrderItem.DoesNotExist:
-            return None, NOT_FOUND
-
-        order_to_modify.total_price = 0
         for item in res['order']['items']:
-            OrderItem.create(
-                order=order_to_modify,
-                item=Item.get(name=(item['name'])),
-                quantity=item['quantity'],
-                subtotal=item['price'] * item['quantity']
-            )
-            order_to_modify.total_price += item['price']
-        order_to_modify.date = datetime.datetime.now().isoformat()
-        order_to_modify.delivery_address = res['order']['delivery_address']
-        order_to_modify.save()
+            order.add_item(
+                Item.get(Item.name == item['name']), item['quantity'])
 
-        return order_to_modify.json(), OK
+        order.delivery_address = res['order']['delivery_address']
+        order.save()
+
+        return serialize_order(order), OK
 
     @auth.login_required
     def delete(self, order_id):
