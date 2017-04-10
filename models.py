@@ -103,7 +103,7 @@ class User(BaseModel):
             'user_id': str(self.user_id),
             'first_name': self.first_name,
             'last_name': self.last_name,
-            'email': self.email
+            'email': self.email,
         }
 
 
@@ -118,6 +118,7 @@ class Order(BaseModel):
     order_id = UUIDField(unique=True, default=uuid4)
     total_price = DecimalField(default=0)
     delivery_address = CharField()
+    user = ForeignKeyField(User, related_name="orders")
 
     class Meta:
         order_by = ('created_at',)
@@ -205,7 +206,8 @@ class Order(BaseModel):
             'order_id': str(self.order_id),
             'date': str(self.created_at),
             'total_price': float(self.total_price),
-            'delivery_address': self.delivery_address
+            'delivery_address': self.delivery_address,
+            'user_id': str(self.user.user_id)
         }
 
 

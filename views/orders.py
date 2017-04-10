@@ -5,8 +5,8 @@ Orders-view: this module contains functions for the interaction with the orders.
 from flask_restful import Resource
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
 from models import Order, Item
-from flask import abort, request
-
+from flask import abort, request, g
+from auth import auth
 
 def serialize_order(order_obj):
     """
@@ -44,8 +44,10 @@ class OrdersHandler(Resource):
 
         return retval, OK
 
+    @auth.login_required
     def post(self):
         """ Insert a new order."""
+        user = g.user
         res = request.get_json()
 
         # Check that the items exist by getting all the item names from the
@@ -64,12 +66,14 @@ class OrdersHandler(Resource):
                 return None, BAD_REQUEST
 
         order = Order.create(
-            delivery_address=res['order']['delivery_address']
+            delivery_address=res['order']['delivery_address'],
+            user=user,
         )
 
         for i in res['order']['items']:
             item = Item.get(Item.name == i['name'])
             order.add_item(item, i['quantity'])
+
 
         return serialize_order(order), CREATED
 
@@ -86,6 +90,7 @@ class OrderHandler(Resource):
 
         return serialize_order(order), OK
 
+    @auth.login_required
     def put(self, order_id):
         """ Modify a specific order. """
         res = request.get_json()
@@ -112,6 +117,7 @@ class OrderHandler(Resource):
 
         return serialize_order(order), OK
 
+    @auth.login_required
     def delete(self, order_id):
         """ Delete a specific order. """
         try:
