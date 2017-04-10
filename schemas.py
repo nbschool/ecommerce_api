@@ -84,14 +84,17 @@ class OrderSchema(BaseSchema):
         self_url_many = '/orders/'
 
     id = fields.Str(dump_only=True, attribute='order_id')
-    date = fields.DateTime()
+    date = fields.DateTime(attribute='created_at')
     total_price = fields.Float()
     delivery_address = fields.Str()
 
+    # Uses the OrderItem table and OrderItemSchema to serialize a json object
+    # representing each item in the order
     items = fields.Relationship(
         many=True, include_resource_linkage=True,
-        type_='item', schema=ItemSchema,
-        dump_only=True, id_field='item_id',
+        type_='item', schema='OrderItemSchema',
+        dump_only=True, id_field='item.item_id',
+        attribute='order_items',
     )
 
     @classmethod
@@ -101,6 +104,29 @@ class OrderSchema(BaseSchema):
         of the order.
         """
         return super(OrderSchema, cls).json(obj, include_data)
+
+
+class OrderItemSchema(BaseSchema):
+    """
+    Schema for representing OrderItem instances, uses data from the given
+    OrderItem and its pointed Item to represent the relation between the
+    Item and the Order that the OrderItem row links.
+
+    Links generated from the Schema Meta class point to the Item resource.
+    """
+
+    class Meta:
+        type_ = 'order_item'
+        self_url = '/items/{item_id}'
+        self_url_kwargs = {'item_id': '<id>'}
+        self_url_many = '/items/'
+
+    id = fields.Str(dump_only=True, attribute='item.item_id')
+    name = fields.Str(attribute='item.name')
+    description = fields.Str(attribute='item.description')
+    price = fields.Float(attribute='item.price')
+    quantity = fields.Int()
+    subtotal = fields.Float()
 
 
 class UserSchema(BaseSchema):
