@@ -42,8 +42,7 @@ class TestOrders:
         )
 
         order = Order.create(delivery_address='Via Rossi 12')
-        order.add_item(item)
-        order.add_item(item)
+        order.add_item(item, 2)
 
         resp = self.app.get('/orders/')
 
@@ -90,13 +89,10 @@ class TestOrders:
         )
 
         order1 = Order.create(delivery_address='Via Rossi 12')
-        order1.add_item(item1)
-        order1.add_item(item1)
+        order1.add_item(item1, 2)
 
         order2 = Order.create(delivery_address='Via Verdi 12')
-        order2.add_item(item2)
-        order2.add_item(item2)
-        order2.add_item(item2)
+        order2.add_item(item1).add_item(item2, 2)
 
         expected_data = {
             'order_id': str(order1.order_id),
@@ -225,9 +221,7 @@ class TestOrders:
             description='svariati GINIIIII'
         )
         order1 = Order.create(delivery_address='Via Rossi 12')
-        order1.add_item(item1)
-        order1.add_item(item1)
-        order1.add_item(item2)
+        order1.add_item(item1, 2).add_item(item2)
 
         order2 = Order.create(delivery_address='Via Bianchi 10')
         order2.add_item(item2)
@@ -300,8 +294,7 @@ class TestOrders:
         )
 
         order1 = Order.create(delivery_address='Via Rossi 12')
-        order1.add_item(item1)
-        order1.add_item(item1)
+        order1.add_item(item1, 2)
 
         order2 = Order.create(delivery_address='Via Verdi 12')
 
@@ -353,8 +346,7 @@ class TestOrders:
             price=15
         )
         order = Order.create(delivery_address='My address')
-        order.add_item(item1, 2)
-        order.add_item(item2, 2)
+        order.add_item(item1, 2).add_item(item2, 2)
 
         assert len(order.order_items) == 2
         assert OrderItem.select().count() == 2
@@ -366,13 +358,19 @@ class TestOrders:
         assert count_items(order) == 3
 
         # remove more item1 than existing in order
-        order.remove_item(item1, 2)
+        order.remove_item(item1, 5)
         assert len(order.order_items) == 1
         assert OrderItem.select().count() == 1
         assert count_items(order) == 2
 
+        # Check that the total price is correctly updated
+        assert order.total_price == item2.price * 2
+
         # remove non existing item3 from order
         res = order.remove_item(item3)
-        assert res is False
         assert count_items(order) == 2
         assert len(order.order_items) == 1
+
+        order.empty_order()
+        assert len(order.order_items) == 0
+        assert OrderItem.select().count() == 0
