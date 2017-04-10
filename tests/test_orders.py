@@ -60,16 +60,17 @@ class TestOrders:
         resp = self.app.get('/orders/')
 
         expected_data = [{
-            "order_id": str(order.order_id),
-            "date": str(order.created_at),
-            "total_price": 40.40,
-            "delivery_address": 'Via Rossi 12',
-            "items": [{
-                "quantity": 2,
-                "subtotal": 40.40,
-                "price": 20.20,
-                "name": "mario",
-                "description": "svariati mariii"
+            'order_id': str(order.order_id),
+            'date': str(order.created_at),
+            'total_price': 40.40,
+            'user_id': str(user_A.user_id),
+            'delivery_address': 'Via Rossi 12',
+            'items': [{
+                'quantity': 2,
+                'subtotal': 40.40,
+                'price': 20.20,
+                'name': 'mario',
+                'description': 'svariati mariii'
             }]
         }]
 
@@ -112,6 +113,7 @@ class TestOrders:
         expected_data = {
             'order_id': str(order1.order_id),
             'date': str(order1.created_at),
+            'user_id': str(user.user_id),
             'total_price': 40.40,
             'delivery_address': 'Via Rossi 12',
             'items': [{
@@ -301,6 +303,7 @@ class TestOrders:
         assert resp.status_code == NOT_FOUND
 
     def test_update_order__failure_non_existing_empty_orders(self):
+        user = add_user('user@email.com', TEST_USER_PSW)
         order_id = str(uuid4())
         order = {
             "order": {
@@ -313,9 +316,10 @@ class TestOrders:
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
         }
-        resp = self.app.put('/orders/{}'.format(order_id),
-                            data=json.dumps(order),
-                            content_type='application/json')
+        path = '/orders/{}'.format(order_id)
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PUT',
+                              'user@email.com', TEST_USER_PSW, 'application/json',
+                              json.dumps(order))
 
         assert resp.status_code == NOT_FOUND
 
@@ -365,13 +369,14 @@ class TestOrders:
                               user_A.email, TEST_USER_PSW, None,
                               None)
         assert resp.status_code == NOT_FOUND
-        assert Order.select().count() ==1
+        assert Order.select().count() == 1
 
     def test_order_items_management(self):
         """
         Test add_item and remove_item function from Order and OrderItem
         models.
         """
+        user = add_user(None, TEST_USER_PSW)
 
         def count_items(order):
             tot = 0
@@ -397,7 +402,7 @@ class TestOrders:
             description='Item 2 description',
             price=15
         )
-        order = Order.create(delivery_address='My address')
+        order = Order.create(delivery_address='My address', user=user)
         order.add_item(item1, 2).add_item(item2, 2)
 
         assert len(order.order_items) == 2
