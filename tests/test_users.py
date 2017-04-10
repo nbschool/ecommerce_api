@@ -74,8 +74,8 @@ class Testuser:
         assert resp_user == user
         assert User.select().count() == 1
         for user in User.select():
-            assert user.admin == False
-            
+            assert user.admin is False
+
     def test_post_new_user_no_json__fail(self):
         user = {
             'first_name': 'Mario',
