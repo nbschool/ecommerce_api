@@ -186,16 +186,16 @@ def main():
         "email": "john.doe@email.com"
     }
     TEST_ITEM = {
-        'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
-        'name': 'mario',
-        'price': 20.20,
-        'description': 'svariati mariii'
+        'item_id': uuid4(),
+        'name': 'Item 1',
+        'price': 20.21,
+        'description': 'Item 1 description.'
     }
     TEST_ITEM2 = {
-        'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
-        'name': 'GINO',
-        'price': 30.20,
-        'description': 'svariati GINIIIII'
+        'item_id': uuid4(),
+        'name': 'Item 2',
+        'price': 30.17,
+        'description': 'Item 2 awesome description.'
     }
     item1 = Item.create(**TEST_ITEM)
     item2 = Item.create(**TEST_ITEM2)
@@ -205,26 +205,19 @@ def main():
     order1 = Order.create(delivery_address='Via Rossi 12', user=user)
     order2 = Order.create(delivery_address='Via Rossi 12', user=user)
     order1.add_item(item1).add_item(item2, 3)
-    order1.add_item(item2).add_item(item1)
+    order2.add_item(item2).add_item(item1)
 
-    # Assign the items to the orders and the orders to the user inside a list,
-    # so that the Schema can access and serialize the objects into a json
-    # NOTE: This should be implemented as @property of the models.
-    #       * User should have a property `orders` returning a list of orders
-    #         created by the user
-    #       * Orders should have
-    #         * `items` that returns the list of items
-    #         * `owner` (or similar) to retrieve the user that created it
-    #       This could be achieved executing a query inside the property getter
-    order1.items = [item1, item2]
-    order2.items = [item2, item1]
-    user.orders = [order1, order2]
+    print('\nSerializing `item1` into JSONAPI with ItemSchema')
+    print_serialized(*ItemSchema.json(item1))
 
     print('\nSerializing `order1` into JSONAPI with OrderSchema')
     print_serialized(*OrderSchema.json(order1))
 
+    print('\nSerializing `order2` into JSONAPI with OrderSchema')
+    print_serialized(*OrderSchema.json(order2))
+
     print('\nSerializing `user` into JSONAPI with UserSchema')
-    print_serialized(*UserSchema.json(user))
+    print_serialized(*UserSchema.json(user, include_data=['orders']))
 
     # This simulates what needs to be present inside a POST/PUT request for
     # the User endpoints, where `attributes` are the actual data needed to
@@ -238,16 +231,6 @@ def main():
 
     print('\nUser jsonapi validation (True or dict with errors if any)')
     pprint(UserSchema.validate_input(post_data))
-
-    # # This simulates what needs to be present inside a POST/PUT request for the
-    # # User endpoints, where `attributes` are the actual data needed to create
-    # # the new user
-    # post_data = {
-    #     'data': {
-    #         'type': 'user',
-    #         'attributes': user_data
-    #     }
-    # }
 
 
 if __name__ == '__main__':
