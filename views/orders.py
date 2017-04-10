@@ -7,7 +7,8 @@ from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
 import datetime
 import uuid
 from models import Order, OrderItem, Item
-from flask import abort, request
+from flask import abort, request, g
+from auth import auth
 
 
 class OrdersHandler(Resource):
@@ -41,8 +42,10 @@ class OrdersHandler(Resource):
             })
         return list(orders.values()), OK
 
+    @auth.login_required
     def post(self):
         """ Insert a new order."""
+        user = g.user
         res = request.get_json()
         try:
             item_names = [e['name'] for e in res['order']['items']]
@@ -64,6 +67,7 @@ class OrdersHandler(Resource):
             date=datetime.datetime.now().isoformat(),
             total_price=0,
             delivery_address=res['order']['delivery_address'],
+            user=user
         )
 
         for item in res['order']['items']:
@@ -76,7 +80,8 @@ class OrdersHandler(Resource):
             )
             order1.total_price += subtotal
 
-        return order1.json(), CREATED
+        serialized = order1.json()
+        return serialized, CREATED
 
 
 class OrderHandler(Resource):
@@ -110,6 +115,7 @@ class OrderHandler(Resource):
                                    })
         return list(order.values()), OK
 
+    @auth.login_required
     def put(self, order_id):
         """ Modify a specific order. """
         res = request.get_json()
@@ -147,6 +153,7 @@ class OrderHandler(Resource):
 
         return order_to_modify.json(), OK
 
+    @auth.login_required
     def delete(self, order_id):
         """ Delete a specific order. """
         try:
