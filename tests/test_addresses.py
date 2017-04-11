@@ -26,6 +26,17 @@ def get_test_addr_dict(user, country='Italy', city='Pistoia', post_code='51100',
         'phone': phone
     }
 
+def  new_addr(user, country='Italy', city='Pistoia', post_code='51100',
+                       address='Via Verdi 12', phone='3294882773'):
+    return {
+        'user_id': str(user.user_id),
+        'country': country,
+        'city': city,
+        'post_code': post_code,
+        'address': address,
+        'phone': phone
+    }
+
 
 class TestAddresses:
     @classmethod
@@ -43,7 +54,6 @@ class TestAddresses:
         User.delete().execute()
 
     def test_get_addresses__empty(self):
-
         user = add_user('mariorossi@gmail.com', TEST_USER_PSW)
 
         resp = open_with_auth(self.app, '/addresses/', 'GET', user.email, TEST_USER_PSW, None, None)
@@ -52,7 +62,6 @@ class TestAddresses:
         assert json.loads(resp.data) == []
 
     def test_get_addresses__success(self):
-
         user = add_user('mariorossi@gmail.com', '123')
         addr = Address.create(**get_test_addr_dict(user))
         user1 = add_user('giovanniverdi@gmail.com', '456')
@@ -62,3 +71,21 @@ class TestAddresses:
 
         assert resp.status_code == OK
         assert json.loads(resp.data) == [addr.json(), addr1.json()]
+
+    def test_create_address__success(self):
+        user = add_user('mariorossi@gmail.com', '123')
+        addr = new_addr(user)
+
+        resp = open_with_auth(self.app, '/addresses/', 'POST',
+                              user.email, TEST_USER_PSW, 'application/json',
+                              json.dumps(addr))
+
+        assert resp.status_code == CREATED
+        assert len(Address.select()) == 1
+        assert str(Address.get().user.user_id) == addr['user_id']
+        address = Address.get().json()
+        assert address['country'] == addr['country']
+        assert address['city'] == addr['city']
+        assert address['address'] == addr['address']
+        assert address['phone'] == addr['phone']
+
