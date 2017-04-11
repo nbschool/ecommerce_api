@@ -6,7 +6,7 @@ import http.client as client
 
 from app import app
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
-from models import Item, Address, User
+from models import Address, User
 from tests.test_utils import add_user, open_with_auth
 
 TEST_USER_PSW = '123'
@@ -26,8 +26,8 @@ def get_test_addr_dict(user, country='Italy', city='Pistoia', post_code='51100',
         'phone': phone
     }
 
-def  new_addr(user, country='Italy', city='Pistoia', post_code='51100',
-                       address='Via Verdi 12', phone='3294882773'):
+def new_addr(user, country='Italy', city='Pistoia', post_code='51100',
+             address='Via Verdi 12', phone='3294882773'):
     return {
         'user_id': str(user.user_id),
         'country': country,
@@ -63,12 +63,11 @@ class TestAddresses:
 
     def test_get_addresses__success(self):
         user = add_user('mariorossi@gmail.com', '123')
-        addr = Address.create(**get_test_addr_dict(user))
-        user1 = add_user('giovanniverdi@gmail.com', '456')
+        addr = Address.create(**get_test_addr_dict(user, city="Firenze",
+                              post_code='50132', address="Via Rossi 10"))
         addr1 = Address.create(**get_test_addr_dict(user))
 
         resp = open_with_auth(self.app, '/addresses/', 'GET', user.email, TEST_USER_PSW, None, None)
-
         assert resp.status_code == OK
         assert json.loads(resp.data) == [addr.json(), addr1.json()]
 
@@ -89,3 +88,26 @@ class TestAddresses:
         assert address['address'] == addr['address']
         assert address['phone'] == addr['phone']
 
+    def test_create_address__failure_missing_field(self):
+        user = add_user('mariorossi@gmail.com', '123')
+        addr = new_addr(user)
+        del addr['country']
+
+        resp = open_with_auth(self.app, '/addresses/', 'POST',
+                              user.email, TEST_USER_PSW, 'application/json',
+                              json.dumps(addr))
+
+        assert resp.status_code == BAD_REQUEST
+        assert len(Address.select()) == 0
+
+    def test_create_address__failure_empty_field(self):
+        user = add_user('mariorossi@gmail.com', '123')
+        addr = new_addr(user)
+        addr['country'] = ""
+
+        resp = open_with_auth(self.app, '/addresses/', 'POST',
+                              user.email, TEST_USER_PSW, 'application/json',
+                              json.dumps(addr))
+
+        assert resp.status_code == BAD_REQUEST
+        assert len(Address.select()) == 0
