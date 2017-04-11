@@ -22,13 +22,6 @@ class TestCase:
             table.create_table(fail_silently=True)
         cls.app = app.test_client()
 
-    # @classmethod
-    # def teardown_class(cls):
-    #     User.drop_table()
-    #     Item.drop_table()
-    #     Order.drop_table()
-    #     OrderItem.drop_table()
-
     def setup_method(self):
         for table in TABLES:
             table.delete().execute()
