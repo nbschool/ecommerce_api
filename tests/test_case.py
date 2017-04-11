@@ -6,6 +6,8 @@ from app import app
 from models import Item, Order, OrderItem, User
 from peewee import SqliteDatabase
 
+TABLES = [Order, Item, OrderItem, User]
+
 
 class TestCase:
     """
@@ -15,25 +17,18 @@ class TestCase:
 
     @classmethod
     def setup_class(cls):
-        Order._meta.database = cls.TEST_DB
-        Item._meta.database = cls.TEST_DB
-        OrderItem._meta.database = cls.TEST_DB
-        User._meta.database = cls.TEST_DB
-        Order.create_table()
-        Item.create_table()
-        OrderItem.create_table()
-        User.create_table()
+        for table in TABLES:
+            table._meta.database = cls.TEST_DB
+            table.create_table(fail_silently=True)
         cls.app = app.test_client()
 
-    @classmethod
-    def teardown_class(cls):
-        User.drop_table()
-        Item.drop_table()
-        Order.drop_table()
-        OrderItem.drop_table()
+    # @classmethod
+    # def teardown_class(cls):
+    #     User.drop_table()
+    #     Item.drop_table()
+    #     Order.drop_table()
+    #     OrderItem.drop_table()
 
     def setup_method(self):
-        Order.delete().execute()
-        Item.delete().execute()
-        OrderItem.delete().execute()
-        User.delete().execute()
+        for table in TABLES:
+            table.delete().execute()
