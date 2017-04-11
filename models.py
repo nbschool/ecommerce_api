@@ -61,28 +61,24 @@ class Picture(BaseModel):
     Picture model
         picture_id: picture identifier and file name stored
         extension: picture type
+        item: referenced item
     """
     picture_id = UUIDField(unique=True)
     extension = CharField()
+    item = ForeignKeyField(Item, related_name='pictures')
 
     def json(self):
         return {
             'picture_id': str(self.picture_id),
-            'extension': self.extension
+            'extension': self.extension,
+            'item_id': str(self.item.item_id)
         }
 
     def __str__(self):
-        return '{}.{}'.format(self.picture_id, self.extension)
-
-
-class ItemPicture(BaseModel):
-    """
-    Item-Picture cross-table
-        item: foreign key to Item
-        picture: foreign key to Picture
-    """
-    item = ForeignKeyField(Item)
-    picture = ForeignKeyField(Picture)
+        return '{}.{} -> item: {}'.format(
+            self.picture_id,
+            self.extension,
+            self.item.item_id)
 
 
 class User(BaseModel):
@@ -303,3 +299,4 @@ class OrderItem(BaseModel):
 Item.create_table(fail_silently=True)
 Order.create_table(fail_silently=True)
 OrderItem.create_table(fail_silently=True)
+Picture.create_table(fail_silently=True)
