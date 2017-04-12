@@ -8,6 +8,7 @@ from app import app
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
 from models import Address, User
 from tests.test_utils import add_user, open_with_auth
+from uuid import uuid4
 
 TEST_USER_PSW = '123'
 
@@ -25,6 +26,7 @@ def get_test_addr_dict(user, country='Italy', city='Pistoia', post_code='51100',
         'address': address,
         'phone': phone
     }
+
 
 def new_addr(user, country='Italy', city='Pistoia', post_code='51100',
              address='Via Verdi 12', phone='3294882773'):
@@ -111,3 +113,21 @@ class TestAddresses:
 
         assert resp.status_code == BAD_REQUEST
         assert len(Address.select()) == 0
+
+    def test_get_address(self):
+        user = add_user('mariorossi@gmail.com', '123')
+        addr = Address.create(**get_test_addr_dict(user, city="Firenze",
+                              post_code='50132', address="Via Rossi 10"))
+        Address.create(**get_test_addr_dict(user))
+
+        resp = open_with_auth(self.app, '/addresses/{}'.format(addr.address_id), 'GET',
+                              user.email, TEST_USER_PSW, None, None)
+
+        assert resp.status_code == OK
+        assert json.loads(resp.data) == addr.json()
+
+    def test_get_address__failed(self):
+        user = add_user('mariorossi@gmail.com', '123')
+        resp = open_with_auth(self.app, '/addresses/{}'.format(uuid4()), 'GET',
+                              user.email, TEST_USER_PSW, None, None)
+        assert resp.status_code == NOT_FOUND

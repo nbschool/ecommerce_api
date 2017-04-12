@@ -12,7 +12,6 @@ class AddressesHandler(Resource):
     """ Addresses endpoint. """
     @auth.login_required
     def get(self):
-
         addresses = {}
         user = g.user
 
@@ -44,5 +43,14 @@ class AddressesHandler(Resource):
 
         return addr.json(), CREATED
 
+
 class AddressHandler(Resource):
     """ Address endpoint. """
+    @auth.login_required
+    def get(self, address_id):
+        user = g.user
+
+        try:
+            return Address.get(Address.user == user, Address.address_id == address_id).json(), OK
+        except Address.DoesNotExist:
+            return None, NOT_FOUND
