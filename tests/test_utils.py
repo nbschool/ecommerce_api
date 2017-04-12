@@ -66,3 +66,11 @@ def open_with_auth(app, url, method, username, password, content_type, data):
                     headers={'Authorization': auth_str},
                     content_type=content_type,
                     data=data)
+
+
+def count_order_items(order):
+    """ Given an Order instance count the total items in the order. """
+    tot = 0
+    for oi in order.order_items:
+        tot += oi.quantity
+    return tot

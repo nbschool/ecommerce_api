@@ -3,7 +3,8 @@ Test suite.
 """
 
 from models import Order, OrderItem, Item
-from tests.test_utils import open_with_auth, add_user, add_address, add_admin_user
+from tests.test_utils import (open_with_auth, add_user, count_order_items,
+                              add_address, add_admin_user)
 from tests.test_case import TestCase
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST, UNAUTHORIZED
 from peewee import SqliteDatabase
@@ -73,7 +74,8 @@ class TestOrders(TestCase):
     def test_get_order(self):
         user = add_user(None, TEST_USER_PSW)
         addr_A = add_address(user=user)
-        addr_B = add_address(user=user, city='Firenze', post_code='50132', address='Via Rossi 10',
+        addr_B = add_address(user=user, city='Firenze',
+                             post_code='50132', address='Via Rossi 10',
                              phone='055432433')
 
         item1 = Item.create(
@@ -657,12 +659,6 @@ class TestOrders(TestCase):
         user = add_user(None, TEST_USER_PSW)
         addr = add_address(user=user)
 
-        def count_items(order):
-            tot = 0
-            for oi in order.order_items:
-                tot += oi.quantity
-            return tot
-
         item1 = Item.create(
             item_id=uuid4(),
             name='Item',
@@ -686,25 +682,25 @@ class TestOrders(TestCase):
 
         assert len(order.order_items) == 2
         assert OrderItem.select().count() == 2
-        assert count_items(order) == 4
+        assert count_order_items(order) == 4
 
         # test removing one of two item1
         order.remove_item(item1)
         assert len(order.order_items) == 2
-        assert count_items(order) == 3
+        assert count_order_items(order) == 3
 
         # remove more item1 than existing in order
         order.remove_item(item1, 5)
         assert len(order.order_items) == 1
         assert OrderItem.select().count() == 1
-        assert count_items(order) == 2
+        assert count_order_items(order) == 2
 
         # Check that the total price is correctly updated
         assert order.total_price == item2.price * 2
 
         # remove non existing item3 from order
         order.remove_item(item3)
-        assert count_items(order) == 2
+        assert count_order_items(order) == 2
         assert len(order.order_items) == 1
 
         order.empty_order()
