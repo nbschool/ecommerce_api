@@ -60,7 +60,7 @@ class ItemSchema(BaseSchema):
 class OrderSchema(BaseSchema):
     """
     Schema for models.Order.
-    Include an include relationship with the items included in the order and 
+    Include an include relationship with the items included in the order and
     the user that created it.
     """
 
