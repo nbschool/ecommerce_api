@@ -1,8 +1,4 @@
-from marshmallow import pprint
-from marshmallow_jsonschema import JSONSchema
 from marshmallow_jsonapi import Schema, fields
-
-from models import User, Item, Order, OrderItem
 
 
 class BaseSchema(Schema):
@@ -26,19 +22,6 @@ class BaseSchema(Schema):
 
         serialized = cls(include_data=include_data).dump(obj)
         return serialized.data, serialized.errors
-
-    @classmethod
-    def json_schema(cls):
-        """"
-        convert a marhsmallow object to a json schema
-        TODO: This fails after adding `Relationship`s fields to schemas.
-              Fix before usage.
-        """
-
-        # TODO: Remove after refactoring
-        # raise NotImplementedError('Refactor before using.')
-
-        return JSONSchema().dump(cls()).data
 
     @classmethod
     def validate_input(cls, jsondata):
@@ -77,6 +60,8 @@ class ItemSchema(BaseSchema):
 class OrderSchema(BaseSchema):
     """
     Schema for models.Order.
+    Include an include relationship with the items included in the order and 
+    the user that created it.
     """
 
     class Meta:
@@ -137,7 +122,7 @@ class OrderItemSchema(BaseSchema):
 
 class UserSchema(BaseSchema):
     """
-    Schema for models.User
+    Schema for models.User, include relationship with user orders
     """
 
     class Meta:
@@ -157,81 +142,3 @@ class UserSchema(BaseSchema):
         type_='order', schema='OrderSchema',
         dump_only=True, id_field='order_id',
     )
-
-
-def main():
-    from uuid import uuid4
-
-    User.delete().execute()
-    Item.delete().execute()
-    Order.delete().execute()
-    OrderItem.delete().execute()
-
-    def print_serialized(data, errors):
-        """
-        Utility to print the result of a `BaseSchema.json()` call.
-        """
-        if errors:
-            print('\nErrors:')
-            pprint(errors)
-        else:
-            print('\nData:')
-            pprint(data)
-
-    # # data for a test user
-    TEST_USER = {
-        "first_name": "John",
-        "last_name": "Doe",
-        "password": "antani",
-        "email": "john.doe@email.com"
-    }
-    TEST_ITEM = {
-        'item_id': uuid4(),
-        'name': 'Item 1',
-        'price': 20.21,
-        'description': 'Item 1 description.'
-    }
-    TEST_ITEM2 = {
-        'item_id': uuid4(),
-        'name': 'Item 2',
-        'price': 30.17,
-        'description': 'Item 2 awesome description.'
-    }
-    item1 = Item.create(**TEST_ITEM)
-    item2 = Item.create(**TEST_ITEM2)
-
-    user = User.create(**TEST_USER, user_id=uuid4())
-
-    order1 = Order.create(delivery_address='Via Rossi 12', user=user)
-    order2 = Order.create(delivery_address='Via Rossi 12', user=user)
-    order1.add_item(item1).add_item(item2, 3)
-    order2.add_item(item2).add_item(item1)
-
-    print('\nSerializing `item1` into JSONAPI with ItemSchema')
-    print_serialized(*ItemSchema.json(item1))
-
-    print('\nSerializing `order1` into JSONAPI with OrderSchema')
-    print_serialized(*OrderSchema.json(order1))
-
-    print('\nSerializing `order2` into JSONAPI with OrderSchema')
-    print_serialized(*OrderSchema.json(order2))
-
-    print('\nSerializing `user` into JSONAPI with UserSchema')
-    print_serialized(*UserSchema.json(user, include_data=['orders']))
-
-    # This simulates what needs to be present inside a POST/PUT request for
-    # the User endpoints, where `attributes` are the actual data needed to
-    # create the new user
-    post_data = {
-        'data': {
-            'type': 'user',
-            'attributes': TEST_USER
-        }
-    }
-
-    print('\nUser jsonapi validation (True or dict with errors if any)')
-    pprint(UserSchema.validate_input(post_data))
-
-
-if __name__ == '__main__':
-    main()
