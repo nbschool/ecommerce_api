@@ -23,7 +23,7 @@ from models import database
 from views.orders import OrdersHandler, OrderHandler
 from views.items import ItemHandler, ItemsHandler
 from views.user import UsersHandler, UserHandler
-from views.pictures import PicturesHandler, PictureHandler
+from views.pictures import PicturesHandler, PictureHandler, ItemPictureHandler
 
 app = Flask(__name__)
 api = Api(app)
@@ -35,7 +35,7 @@ def bad_content_type():
 
     # In case of POST of a picture a "multipart/form-data" has to be specified
     # in the content-type of the request header
-    if request.endpoint == 'pictureshandler' and request.method == 'POST':
+    if request.endpoint == 'itempicturehandler' and request.method == 'POST':
         ct = dict(request.headers).get('Content-Type', '')
         if "multipart/form-data" not in ct:
             abort(BAD_REQUEST)
@@ -64,6 +64,7 @@ def database_disconnect(response):
 
 api.add_resource(ItemsHandler, "/items/")
 api.add_resource(ItemHandler, "/items/<uuid:item_id>")
+api.add_resource(ItemPictureHandler, '/items/<uuid:item_id>/pictures/')
 api.add_resource(OrdersHandler, '/orders/')
 api.add_resource(OrderHandler, '/orders/<uuid:order_id>')
 api.add_resource(UsersHandler, '/users/')
