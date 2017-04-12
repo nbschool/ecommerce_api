@@ -55,6 +55,10 @@ class OrdersHandler(Resource):
         # request and executing a get() request with Peewee
         try:
             item_names = [e['name'] for e in res['order']['items']]
+            # FIXME: This look up just one item, not all of them, so it does
+            # not work for testing that ALL the requested items exist
+            # TODO: Use a query to get all the items and use the result to
+            # add the items to the order instead of querying again below
             Item.get(Item.name << item_names)
 
         except Item.DoesNotExist:
