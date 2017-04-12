@@ -100,8 +100,8 @@ class TestItems:
     def test_patch_item__success(self):
         item = Item.create(**TEST_ITEM)
         resp = self.app.patch('/items/{item_id}'.format(item_id=item.item_id),
-                            data=json.dumps(TEST_ITEM2),
-                            content_type='application/json')
+                              data=json.dumps(TEST_ITEM2),
+                              content_type='application/json')
         assert resp.status_code == client.OK
         json_item = Item.select().where(
             Item.item_id == item.item_id).get().json()
@@ -113,14 +113,14 @@ class TestItems:
     def test_patch_item__wrong_id(self):
         Item.create(**TEST_ITEM)
         resp = self.app.patch('/items/{item_id}'.format(item_id=WRONG_UUID),
-                            data=json.dumps(TEST_ITEM2),
-                            content_type='application/json')
+                              data=json.dumps(TEST_ITEM2),
+                              content_type='application/json')
         assert resp.status_code == client.NOT_FOUND
 
     def test_patch_item__failed(self):
         resp = self.app.patch('/items/{item_id}'.format(item_id=WRONG_UUID),
-                            data=json.dumps(TEST_ITEM),
-                            content_type='application/json')
+                              data=json.dumps(TEST_ITEM),
+                              content_type='application/json')
         assert resp.status_code == client.NOT_FOUND
 
     def test_delete_item__success(self):
