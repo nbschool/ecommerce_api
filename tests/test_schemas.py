@@ -5,16 +5,11 @@ of inputs (post/put request data) and output from the Schemas dump method, that
 will be used as return value for Flask-Restful endpoint handlers.
 """
 
-from peewee import SqliteDatabase
 from models import User
 from schemas import UserSchema
 from uuid import uuid4
 from tests.test_case import TestCase
 
-# tests are run in temp database in memory
-TEST_DB = SqliteDatabase(':memory:')
-
-# dictionary containing a test user data
 USER_TEST_DICT = {
     "first_name": "Monty",
     "last_name": "Python",
