@@ -3,8 +3,6 @@ from marshmallow import pprint
 from marshmallow_jsonschema import JSONSchema
 from marshmallow_jsonapi import Schema
 
-from models import User
-
 
 class BaseSchema(Schema):
     """

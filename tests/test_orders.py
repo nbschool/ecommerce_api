@@ -2,378 +2,412 @@
 Test suite.
 """
 
-from app import app
-from models import  Order, OrderItem, Item, database
-from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, INTERNAL_SERVER_ERROR, BAD_REQUEST
+from models import Order, OrderItem, Item
+from tests.test_utils import open_with_auth, add_user
+from tests.test_case import TestCase
+from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
 from peewee import SqliteDatabase
-import datetime, json, sys, uuid
+import json
+from uuid import uuid4
 
-class TestOrders:
-	@classmethod
-	def setup_class(cls):
-		test_db = SqliteDatabase(':memory:')
-		Order._meta.database = test_db
-		Item._meta.database = test_db
-		OrderItem._meta.database = test_db
-		test_db.connect()
-		Order.create_table()
-		Item.create_table()
-		OrderItem.create_table()
-		cls.app = app.test_client()
+# main endpoint for API
+API_ENDPOINT = '/{}'
+# tests are run in temp database in memory
+TEST_DB = SqliteDatabase(':memory:')
+# correct password used for all test users.
+TEST_USER_PSW = 'my_password123@'
 
-	def setup_method(self):
-		Order.delete().execute()
-		Item.delete().execute()
-		OrderItem.delete().execute()
 
-	def test_get_orders__empty(self):
-		resp = self.app.get('/orders/')
-		assert resp.status_code == OK
-		assert json.loads(resp.data) == []
+class TestOrders(TestCase):
 
-	def test_get_orders(self):
-		item1 = Item.create(
-			item_id = '429994bf-784e-47cc-a823-e0c394b823e8',
-    		name = 'mario',
-    		price = 20.20,
-		    description = 'svariati mariii'
-		)
-		order_id =  uuid.uuid4()
-		dt = datetime.datetime.now().isoformat()
-		order1 = Order.create(
-			order_id = order_id,
-			date = dt,
-			total_price = 100.00,
-			delivery_address = 'Via Rossi 12'
-		)
-		orderitem1 = OrderItem.create(
-			order = order1,
-			item = item1,
-			quantity = 2,
-			subtotal = 50.00
-		)
-		resp = self.app.get('/orders/')
+    def test_get_orders__empty(self):
+        resp = self.app.get('/orders/')
+        assert resp.status_code == OK
+        assert json.loads(resp.data) == []
 
-		assert resp.status_code == OK
-		assert json.loads(resp.data) == [{ "order_id": str(order_id), "date": dt, \
-							"total_price": 100.00, "delivery_address": 'Via Rossi 12', \
-							"items": [{"quantity": 2, "subtotal": 50.00, "item_name": \
-							"mario", "item_description": "svariati mariii"}]}]
+    def test_get_orders(self):
+        item = Item.create(
+            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii'
+        )
 
-	def test_get_order__non_existing_empty_orders(self):
-		resp = self.app.get('/orders/{}'.format(uuid.uuid4()))
-		assert resp.status_code == NOT_FOUND
+        user_A = add_user(None, TEST_USER_PSW)
+        order = Order.create(delivery_address='Via Rossi 12', user=user_A)
+        order.add_item(item, 2)
 
-	def test_get_order__non_existing(self):
-		item1 = Item.create(
-			item_id = '429994bf-784e-47cc-a823-e0c394b823e8',
-    		name = 'mario',
-    		price = 20.20,
-		    description = 'svariati mariii'
-		)
-		order1 = Order.create(
-			order_id = uuid.uuid4(),
-			date = datetime.datetime.now().isoformat(),
-			total_price = 100,
-			delivery_address = 'Via Rossi 12'
-		)
-		orderitem1 = OrderItem.create(
-			order = order1,
-			item = item1,
-			quantity = 2,
-			subtotal = 40.00
-		)
-		resp = self.app.get('/orders/{}'.format(uuid.uuid4()))
-		assert resp.status_code == NOT_FOUND
+        resp = self.app.get('/orders/')
 
-	def test_get_order(self):
-		item1 = Item.create(
-			item_id = '429994bf-784e-47cc-a823-e0c394b823e8',
-    		name = 'mario',
-    		price = 20.20,
-		    description = 'svariati mariii'
-		)
-		order_id = uuid.uuid4()
-		dt = datetime.datetime.now().isoformat()
-		order1 = Order.create(
-			order_id = order_id,
-			date = dt,
-			total_price = 100,
-			delivery_address = 'Via Rossi 12'
-		)
-		orderitem1 = OrderItem.create(
-			order = order1,
-			item = item1,
-			quantity = 2,
-			subtotal = 50.00
-		)
-		item2 = Item.create(
-			item_id = '577ad826-a79d-41e9-a5b2-7955bcf03499',
-    		name = 'GINO',
-    		price = 30.20,
-    		description = 'svariati GINIIIII'
-		)
-		order2 = Order.create(
-			order_id = uuid.uuid4(),
-			date = datetime.datetime.now().isoformat(),
-			total_price = 200,
-			delivery_address = 'Via Verdi 12'
-		)
-		orderitem1 = OrderItem.create(
-			order = order2,
-			item = item2,
-			quantity = 3,
-			subtotal = 100.00
-		)
+        expected_data = [{
+            'order_id': str(order.order_id),
+            'date': str(order.created_at),
+            'total_price': 40.40,
+            'user_id': str(user_A.user_id),
+            'delivery_address': 'Via Rossi 12',
+            'items': [{
+                'quantity': 2,
+                'subtotal': 40.40,
+                'price': 20.20,
+                'name': 'mario',
+                'description': 'svariati mariii'
+            }]
+        }]
 
-		resp = self.app.get('/orders/{}'.format(order_id))
-		assert resp.status_code == OK
-		assert json.loads(resp.data) == [str(order_id), dt, 100.0, 'Via Rossi 12', \
-										[{"quantity": 2, "subtotal": 50.0, "item_name": \
-										"mario", "item_description": "svariati mariii"}]]
+        assert resp.status_code == OK
+        assert json.loads(resp.data) == expected_data
 
-	def test_create_order__success(self):
-		item1 = Item.create(
-			item_id = '429994bf-784e-47cc-a823-e0c394b823e8',
-    		name = 'mario',
-    		price = 20.20,
-		    description = 'svariati mariii'
-		)
-		item2 = Item.create(
-			item_id = '577ad826-a79d-41e9-a5b2-7955bcf03499',
-    		name = 'GINO',
-    		price = 30.20,
-    		description = 'svariati GINIIIII'
-		)
+    def test_get_order__non_existing_empty_orders(self):
+        resp = self.app.get('/orders/{}'.format(uuid4()))
+        assert resp.status_code == NOT_FOUND
 
-		order = {
-			'order': {
-				'items': [
-					{ 'name': 'mario', 'price': 20.20, 'quantity': 4 },
-					{ 'name': 'GINO', 'price': 30.20, 'quantity': 10 }
-				],
-					'delivery_address': 'Via Rossi 12'
-				}
-		}
-		resp = self.app.post('/orders/', data=json.dumps(order), content_type='application/json')
-		assert resp.status_code == CREATED
-		assert len(Order.select()) == 1
-		assert len(OrderItem.select()) == 2
+    def test_get_order__non_existing(self):
+        user_A = add_user(None, TEST_USER_PSW)
+        Order.create(delivery_address='Via Rossi 12', user=user_A)
 
-		total_price = 0
-		for p in order['order']['items']:
-			total_price += (p['price'] * p['quantity'])
+        resp = self.app.get('/orders/{}'.format(uuid4()))
+        assert resp.status_code == NOT_FOUND
 
-		assert json.loads(resp.data)['total_price'] == total_price
-		assert json.loads(resp.data)['delivery_address'] == order['order']['delivery_address']
-		assert json.loads(resp.data)['order_id']
-		assert Order.get().json()['order_id'] == json.loads(resp.data)['order_id']
+    def test_get_order(self):
+        user = add_user(None, TEST_USER_PSW)
 
-	def test_create_order__failure_missing_field(self):
-		item1 = Item.create(
-			item_id = '429994bf-784e-47cc-a823-e0c394b823e8',
-    		name = 'mario',
-    		price = 20.20,
-		    description = 'svariati mariii'
-		)
-		item2 = Item.create(
-			item_id = '577ad826-a79d-41e9-a5b2-7955bcf03499',
-    		name = 'GINO',
-    		price = 30.20,
-    		description = 'svariati GINIIIII'
-		)
-		order = {
-			'order': {
-				'items': [
-					{ 'name': 'item1', 'price': 50.0, 'quantity': 4 },
-					{ 'name': 'item2', 'price': 20.0, 'quantity': 10 }
-				]
-				}
-		}
-		resp = self.app.post('/orders/', data=json.dumps(order), content_type='application/json')
-		assert resp.status_code == BAD_REQUEST
-		assert len(Order.select()) == 0
+        item1 = Item.create(
+            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii'
+        )
+        item2 = Item.create(
+            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            name='GINO',
+            price=30.20,
+            description='svariati GINIIIII'
+        )
 
-	def test_create_order__failure_empty_field(self):
-		item1 = Item.create(
-			item_id = '429994bf-784e-47cc-a823-e0c394b823e8',
-    		name = 'mario',
-    		price = 20.20,
-		    description = 'svariati mariii'
-		)
-		item2 = Item.create(
-			item_id = '577ad826-a79d-41e9-a5b2-7955bcf03499',
-    		name = 'GINO',
-    		price = 30.20,
-    		description = 'svariati GINIIIII'
-		)
+        order1 = Order.create(delivery_address='Via Rossi 12', user=user)
+        order1.add_item(item1, 2)
 
-		order = {
-			'order': {
-				'items': [
-					{ 'name': 'item1', 'price': 50.0, 'quantity': 4 },
-					{ 'name': 'item2', 'price': 20.0, 'quantity': 10 }
-				],
-					'delivery_address': ''
-				}
-		}
-		resp = self.app.post('/orders/', data=json.dumps(order), content_type='application/json')
-		assert resp.status_code == BAD_REQUEST
-		assert len(Order.select()) == 0
+        order2 = Order.create(delivery_address='Via Verdi 12', user=user)
+        order2.add_item(item1).add_item(item2, 2)
 
-	def test_update_order__success(self):
-		item1 = Item.create(
-			item_id = '429994bf-784e-47cc-a823-e0c394b823e8',
-    		name = 'mario',
-    		price = 20.20,
-		    description = 'svariati mariii'
-		)
-		item2 = Item.create(
-			item_id = '577ad826-a79d-41e9-a5b2-7955bcf03499',
-    		name = 'GINO',
-    		price = 30.20,
-    		description = 'svariati GINIIIII'
-		)
-		order1 = Order.create(
-			order_id = uuid.uuid4(),
-			date = datetime.datetime.now().isoformat(),
-			total_price = 100,
-			delivery_address = 'Via Rossi 12'
-		)
-		orderitem1 = OrderItem.create(
-			order = order1,
-			item = item1,
-			quantity = 2,
-			subtotal = 40.00
-		)
-		orderitem2 = OrderItem.create(
-			order = order1,
-			item = item2,
-			quantity = 1,
-			subtotal = 60
-		)
-		order2 = Order.create(
-			order_id = uuid.uuid4(),
-			date = datetime.datetime.now().isoformat(),
-			total_price = 60,
-			delivery_address = 'Via Bianchi 10'
-		)
-		orderitem3 = OrderItem.create(
-			order = order2,
-			item = item2,
-			quantity = 1,
-			subtotal = 60
-		)
-		order_id = str(order1.order_id)
-		order = {
-			"order": {
-				"order_id": order_id,
-				'items': [
-					{ 'name': 'mario', 'price': 20.0, 'quantity': 5 },
-					{ 'name': 'GINO', 'price': 30.20, 'quantity': 1 }
-				],
-				'delivery_address': 'Via Verdi 20'
-			}
-		}
-		resp = self.app.put('/orders/{}'.format(order1.order_id), data=json.dumps(order), content_type='application/json')
-		assert resp.status_code == OK
-		modified_order = Order.get(order_id=order1.order_id).json()
-		assert modified_order['order_id'] == order['order']['order_id']
-		assert modified_order['delivery_address'] == order['order']['delivery_address']
+        expected_data = {
+            'order_id': str(order1.order_id),
+            'date': str(order1.created_at),
+            'user_id': str(user.user_id),
+            'total_price': 40.40,
+            'delivery_address': 'Via Rossi 12',
+            'items': [{
+                'quantity': 2,
+                'subtotal': 40.40,
+                "price": 20.20,
+                'name': 'mario',
+                'description': 'svariati mariii'
+            }]
+        }
 
-	def test_update_order__failure_non_existing(self):
-		item1 = Item.create(
-			item_id = '429994bf-784e-47cc-a823-e0c394b823e8',
-    		name = 'mario',
-    		price = 20.20,
-		    description = 'svariati mariii'
-		)
-		order1 = Order.create(
-			order_id = uuid.uuid4(),
-			date = datetime.datetime.now().isoformat(),
-			total_price = 100,
-			delivery_address = 'Via Rossi 12'
-		)
-		orderitem1 = OrderItem.create(
-			order = order1,
-			item = item1,
-			quantity = 2,
-			subtotal = 40.00
-		)
+        resp = self.app.get('/orders/{}'.format(order1.order_id))
+        assert resp.status_code == OK
+        assert json.loads(resp.data) == expected_data
 
-		order_id = str(uuid.uuid4())
-		order = {
-			"order": {
-				"order_id": order_id,
-				'items': [
-					{ 'name': 'item1', 'price': 100.0, 'quantity': 5 },
-					{ 'name': 'item2', 'price': 2222.0, 'quantity': 1 }
-				],
-				'delivery_address': 'Via Verdi 20'
-			}
-		}
+    def test_create_order__success(self):
+        Item.create(
+            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii'
+        )
+        Item.create(
+            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            name='GINO',
+            price=30.20,
+            description='svariati GINIIIII'
+        )
+        user_A = add_user('123@email.com', TEST_USER_PSW)
+        order = {
+            'order': {
+                'items': [
+                    {'name': 'mario', 'price': 20.20, 'quantity': 4},
+                    {'name': 'GINO', 'price': 30.20, 'quantity': 10}
+                ],
+                'delivery_address': 'Via Rossi 12',
+                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+            }
+        }
 
-		resp = self.app.put('/orders/{}'.format(order_id), data=json.dumps(order), content_type='application/json')
-		assert resp.status_code == NOT_FOUND
+        path = 'orders/'
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'POST',
+                              user_A.email, TEST_USER_PSW, 'application/json',
+                              json.dumps(order))
 
-	def test_update_order__failure_non_existing_empty_orders(self):
-		order_id = str(uuid.uuid4())
-		order = {
-			"order": {
-				"order_id": order_id,
-				'items': [
-					{ 'name': 'item1', 'price': 100.0, 'quantity': 5 },
-					{ 'name': 'item2', 'price': 2222.0, 'quantity': 1 }
-				],
-				'delivery_address': 'Via Verdi 20'
-			}
-		}
-		resp = self.app.put('/orders/{}'.format(order_id), data=json.dumps(order), content_type='application/json')
+        assert resp.status_code == CREATED
+        assert len(Order.select()) == 1
+        assert len(OrderItem.select()) == 2
 
-	def test_delete_order__success(self):
-		item1 = Item.create(
-			item_id = '429994bf-784e-47cc-a823-e0c394b823e8',
-    		name = 'mario',
-    		price = 20.20,
-		    description = 'svariati mariii'
-		)
-		order_id =  uuid.uuid4()
-		dt = datetime.datetime.now().isoformat()
-		order1 = Order.create(
-			order_id = order_id,
-			date = dt,
-			total_price = 100,
-			delivery_address = 'Via Rossi 12'
-		)
-		orderitem1 = OrderItem.create(
-			order = order1,
-			item = item1,
-			quantity = 2,
-			subtotal = 50.00
-		)
-		order2 = Order.create(
-			order_id = uuid.uuid4(),
-			date = datetime.datetime.now().isoformat(),
-			total_price = 200,
-			delivery_address = 'Via Verdi 12'
-		)
-		resp = self.app.delete('/orders/{}'.format(str(order_id)))
-		assert resp.status_code == NO_CONTENT
-		assert len(Order.select()) == 1
-		assert len(OrderItem.select()) == 0
-		assert Order.get(order_id = order2.order_id)
+        total_price = 0
+        for p in order['order']['items']:
+            total_price += (p['price'] * p['quantity'])
 
-	def test_delete_order__failure_non_existing_empty_orders(self):
-		resp = self.app.delete('/orders/{}'.format(str(uuid.uuid4())))
-		assert resp.status_code == NOT_FOUND
+        data = json.loads(resp.data)
 
-	def test_delete_order__failure__failure_non_existing(self):
-		order1 = Order.create(
-			order_id = uuid.uuid4(),
-			date = datetime.datetime.now().isoformat(),
-			total_price = 100,
-			delivery_address = 'Via Rossi 12'
-		)
-		resp = self.app.delete('/orders/{}'.format(str(uuid.uuid4())))
-		assert resp.status_code == NOT_FOUND
-		assert len(Order.select()) == 1
+        assert data['total_price'] == total_price
+        assert data['delivery_address'] == order['order']['delivery_address']
+        assert Order.get().json()['order_id'] == data['order_id']
+
+    def test_create_order__failure_missing_field(self):
+        Item.create(
+            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii'
+        )
+        Item.create(
+            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            name='GINO',
+            price=30.20,
+            description='svariati GINIIIII'
+        )
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
+        order = {
+            'order': {
+                'items': [
+                    {'name': 'item1', 'price': 50.0, 'quantity': 4},
+                    {'name': 'item2', 'price': 20.0, 'quantity': 10}
+                ],
+                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+            }
+        }
+        path = 'orders/'
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'POST',
+                              user_A.email, TEST_USER_PSW, 'application/json',
+                              json.dumps(order))
+        assert resp.status_code == BAD_REQUEST
+        assert len(Order.select()) == 0
+
+    def test_create_order__failure_empty_field(self):
+        Item.create(
+            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii'
+        )
+        Item.create(
+            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            name='GINO',
+            price=30.20,
+            description='svariati GINIIIII'
+        )
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
+        order = {
+            'order': {
+                'items': [
+                    {'name': 'item1', 'price': 50.0, 'quantity': 4},
+                    {'name': 'item2', 'price': 20.0, 'quantity': 10}
+                ],
+                'delivery_address': '',
+                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+            }
+        }
+        path = 'orders/'
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'POST',
+                              user_A.email, TEST_USER_PSW, 'application/json',
+                              json.dumps(order))
+        assert resp.status_code == BAD_REQUEST
+        assert len(Order.select()) == 0
+
+    def test_update_order__success(self):
+        item1 = Item.create(
+            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii'
+        )
+        item2 = Item.create(
+            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            name='GINO',
+            price=30.20,
+            description='svariati GINIIIII'
+        )
+
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
+        order1 = Order.create(delivery_address='Via Rossi 12', user=user_A)
+        order1.add_item(item1, 2).add_item(item2)
+
+        order2 = Order.create(delivery_address='Via Bianchi 10', user=user_A)
+        order2.add_item(item2)
+
+        order_id = str(order1.order_id)
+
+        order = {
+            "order": {
+                "order_id": order_id,
+                'items': [
+                    {'name': 'mario', 'price': 20.0, 'quantity': 5},
+                    {'name': 'GINO', 'price': 30.20, 'quantity': 1}
+                ],
+                'delivery_address': 'Via Verdi 20',
+                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+
+            }
+        }
+        path = 'orders/{}'.format(order1.order_id)
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
+                              '12345@email.com', TEST_USER_PSW, 'application/json',
+                              json.dumps(order))
+
+        assert resp.status_code == OK
+        resp_order = Order.get(order_id=order1.order_id).json()
+        assert resp_order['order_id'] == order['order']['order_id']
+        assert resp_order['delivery_address'] == order['order']['delivery_address']
+
+    def test_update_order__failure_non_existing(self):
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
+        Order.create(delivery_address='Via Rossi 12', user=user_A)
+
+        order_id = str(uuid4())
+
+        order = {
+            "order": {
+                "order_id": order_id,
+                'items': [
+                    {'name': 'item1', 'price': 100.0, 'quantity': 5},
+                    {'name': 'item2', 'price': 2222.0, 'quantity': 1}
+                ],
+                'delivery_address': 'Via Verdi 20'
+            }
+        }
+
+        path = 'orders/{}'.format(order_id)
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
+                              '12345@email.com', TEST_USER_PSW, 'application/json',
+                              json.dumps(order))
+        assert resp.status_code == NOT_FOUND
+
+    def test_update_order__failure_non_existing_empty_orders(self):
+        add_user('user@email.com', TEST_USER_PSW)
+        order_id = str(uuid4())
+        order = {
+            "order": {
+                "order_id": order_id,
+                'items': [
+                    {'name': 'item1', 'price': 100.0, 'quantity': 5},
+                    {'name': 'item2', 'price': 2222.0, 'quantity': 1}
+                ],
+                'delivery_address': 'Via Verdi 20',
+                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+            }
+        }
+        path = '/orders/{}'.format(order_id)
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PUT',
+                              'user@email.com', TEST_USER_PSW, 'application/json',
+                              json.dumps(order))
+
+        assert resp.status_code == NOT_FOUND
+
+    def test_delete_order__success(self):
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
+        item1 = Item.create(
+            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii'
+        )
+        order1 = Order.create(delivery_address='Via Rossi 12', user=user_A)
+        order1.add_item(item1, 2)
+
+        order2 = Order.create(delivery_address='Via Verdi 12', user=user_A)
+
+        resp = self.app.delete('/orders/{}'.format(order1.order_id))
+
+        path = 'orders/{}'.format(order1.order_id)
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'DELETE',
+                              '12345@email.com', TEST_USER_PSW, None,
+                              None)
+
+        assert resp.status_code == NO_CONTENT
+        assert len(Order.select()) == 1
+        assert len(OrderItem.select()) == 0
+        assert Order.get(order_id=order2.order_id)
+
+    def test_delete_order__failure_non_existing_empty_orders(self):
+
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
+
+        path = 'orders/{}'.format(str(uuid4()))
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'DELETE',
+                              user_A.email, TEST_USER_PSW, None,
+                              None)
+        assert resp.status_code == NOT_FOUND
+
+    def test_delete_order__failure__failure_non_existing(self):
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
+        Order.create(delivery_address='Via Rossi 12', user=user_A)
+
+        resp = self.app.delete('/orders/{}'.format(uuid4()))
+
+        path = 'orders/{}'.format(str(uuid4()))
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'DELETE',
+                              user_A.email, TEST_USER_PSW, None,
+                              None)
+        assert resp.status_code == NOT_FOUND
+        assert Order.select().count() == 1
+
+    def test_order_items_management(self):
+        """
+        Test add_item and remove_item function from Order and OrderItem
+        models.
+        """
+        user = add_user(None, TEST_USER_PSW)
+
+        def count_items(order):
+            tot = 0
+            for oi in order.order_items:
+                tot += oi.quantity
+            return tot
+
+        item1 = Item.create(
+            item_id=uuid4(),
+            name='Item',
+            description='Item description',
+            price=10
+        )
+        item2 = Item.create(
+            item_id=uuid4(),
+            name='Item 2',
+            description='Item 2 description',
+            price=15
+        )
+        item3 = Item.create(
+            item_id=uuid4(),
+            name='Item 2',
+            description='Item 2 description',
+            price=15
+        )
+        order = Order.create(delivery_address='My address', user=user)
+        order.add_item(item1, 2).add_item(item2, 2)
+
+        assert len(order.order_items) == 2
+        assert OrderItem.select().count() == 2
+        assert count_items(order) == 4
+
+        # test removing one of two item1
+        order.remove_item(item1)
+        assert len(order.order_items) == 2
+        assert count_items(order) == 3
+
+        # remove more item1 than existing in order
+        order.remove_item(item1, 5)
+        assert len(order.order_items) == 1
+        assert OrderItem.select().count() == 1
+        assert count_items(order) == 2
+
+        # Check that the total price is correctly updated
+        assert order.total_price == item2.price * 2
+
+        # remove non existing item3 from order
+        order.remove_item(item3)
+        assert count_items(order) == 2
+        assert len(order.order_items) == 1
+
+        order.empty_order()
+        assert len(order.order_items) == 0
+        assert OrderItem.select().count() == 0

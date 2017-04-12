@@ -94,3 +94,5 @@ database.db
 
 # Heroku Files
 .env
+
+\.vscode/

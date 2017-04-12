@@ -31,12 +31,12 @@ class ItemsHandler(Resource):
             required_fields=['name', 'price', 'description'])
 
         obj = Item.create(
-            item_id=str(uuid.uuid4()),
+            item_id=uuid.uuid4(),
             name=request_data['name'],
             price=float(request_data['price']),
             description=request_data['description'])
         item = obj.json()
-        item.update({'item_id': obj.id})
+
         return item, client.CREATED
 
 
@@ -50,7 +50,7 @@ class ItemHandler(Resource):
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
 
-    def put(self, item_id):
+    def patch(self, item_id):
         """Edit the item specified by item_id"""
         try:
             obj = Item.get(Item.item_id == item_id)

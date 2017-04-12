@@ -3,155 +3,127 @@ Orders-view: this module contains functions for the interaction with the orders.
 """
 
 from flask_restful import Resource
-from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, INTERNAL_SERVER_ERROR, BAD_REQUEST
-import sys, uuid, datetime
-from models import Order, OrderItem, Item
-from flask import abort, request
+from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
+from models import Order, Item
+from flask import abort, request, g
+from auth import auth
+
+
+def serialize_order(order_obj):
+    """
+    From a Order object create a json-serializable dict with all the order
+    information, including all the OrderItem(s) - and related Item(s) -
+    properties.
+    """
+
+    order = order_obj.json()
+    order['items'] = []
+
+    for orderitem in order_obj.order_items:
+        # serialize the Item(s) for the order, adding the info stored into
+        # the OrderItem table related to the order/item, into the 'items'
+        # property of the return value
+        order['items'].append({
+            'quantity': orderitem.quantity,
+            'price': float(orderitem.item.price),
+            'subtotal': float(orderitem.subtotal),
+            'name': orderitem.item.name,
+            'description': orderitem.item.description
+        })
+    return order
+
 
 class OrdersHandler(Resource):
-	""" Orders endpoint. """
-	def get(self):
-		""" Get all the orders."""
-		orders = {}
+    """ Orders endpoint. """
 
-		res = (
-			Order
-			.select(Order, OrderItem, Item)
-			.join(OrderItem)
-			.join(Item)
-		)
+    def get(self):
+        """ Get all the orders."""
+        retval = []
 
-		for row in res:
-			if row.order_id not in orders:
-				orders[row.order_id] = {
-					'order_id': str(row.order_id),
-					'date': row.date,
-					'total_price': float(row.total_price),
-					'delivery_address': row.delivery_address,
-					'items': []
-				}
-			orders[row.order_id]['items'].append({
-				'quantity': row.orderitem.quantity,
-				'subtotal': float(row.orderitem.subtotal),
-				'item_name': row.orderitem.item.name,
-				'item_description': row.orderitem.item.description
-			})
-		return list(orders.values()), OK
+        for order in Order.select():
+            retval.append(serialize_order(order))
 
-	def post(self):
-		""" Insert a new order."""
-		res = request.get_json()
-		try:
-			for item in res['order']['items']:
-				Item.get(name=item['name'])
+        return retval, OK
 
-		except Item.DoesNotExist:
-			abort(BAD_REQUEST)
+    @auth.login_required
+    def post(self):
+        """ Insert a new order."""
+        user = g.user
+        res = request.get_json()
 
-		if not ('items' in res['order']) or not ('delivery_address' in res['order']):
-			return None, BAD_REQUEST
+        # Check that the items exist by getting all the item names from the
+        # request and executing a get() request with Peewee
+        try:
+            item_names = [e['name'] for e in res['order']['items']]
+            Item.get(Item.name << item_names)
 
-		if not (res['order']['items']) or not (res['order']['delivery_address']):
-		 	return None, BAD_REQUEST
+        except Item.DoesNotExist:
+            abort(BAD_REQUEST)
 
-		order1 = Order.create(
-			order_id = uuid.uuid4(),
-			date = datetime.datetime.now().isoformat(),
-			total_price = 0,
-			delivery_address = res['order']['delivery_address'],
-		)
+        # Check that the order has an 'items' and 'delivery_address' attributes
+        # otherwise it's useless to continue.
+        for i in ('items', 'delivery_address'):
+            if i not in res['order']:
+                return None, BAD_REQUEST
 
-		total_price = 0
-		for item in res['order']['items']:
-			subtotal = item['price'] * item['quantity']
-			obj = OrderItem.create(
-				order = order1,
-				item = Item.get(name=(item['name'])),
-				quantity = item['quantity'],
-				subtotal = subtotal
-			)
-			order1.total_price += subtotal
+        order = Order.create(
+            delivery_address=res['order']['delivery_address'],
+            user=user,
+        )
 
-		return order1.json(), CREATED
+        for i in res['order']['items']:
+            item = Item.get(Item.name == i['name'])
+            order.add_item(item, i['quantity'])
+
+        return serialize_order(order), CREATED
+
 
 class OrderHandler(Resource):
-	""" Single order endpoints."""
-	def get(self, order_id):
-		""" Get a specific order. """
-		order = {}
+    """ Single order endpoints."""
 
-		try:
-			Order.get(order_id=str(order_id))
-		except Order.DoesNotExist:
-			return None, NOT_FOUND
+    def get(self, order_id):
+        """ Get a specific order, including all the related Item(s)."""
+        try:
+            order = Order.get(Order.order_id == order_id)
+        except Order.DoesNotExist:
+            return None, NOT_FOUND
 
-		res = (
-			Order
-			.select(Order, OrderItem, Item)
-			.join(OrderItem)
-			.join(Item)
-			.where(Order.order_id == str(order_id))
-		)
+        return serialize_order(order), OK
 
-		order = {
-			'order_id': str(res[0].order_id),
-			'date': res[0].date,
-			'total_price': float(res[0].total_price),
-			'delivery_address': res[0].delivery_address,
-			'items': []
-		}
-		for row in res:
-			order['items'].append({'quantity': row.orderitem.quantity,
-			'subtotal': float(row.orderitem.subtotal),
-			'item_name': row.orderitem.item.name,
-			'item_description': row.orderitem.item.description
-			})
-		return list(order.values()), OK
+    @auth.login_required
+    def patch(self, order_id):
+        """ Modify a specific order. """
+        res = request.get_json()
 
+        try:
+            order = Order.get(order_id=str(order_id))
+        except Order.DoesNotExist:
+            return None, NOT_FOUND
 
-	def put(self, order_id):
-		""" Modify a specific order. """
-		res = request.get_json()
+        for i in ('items', 'delivery_address', 'order_id'):
+            if i not in res['order']:
+                return None, BAD_REQUEST
 
-		try:
-			order_to_modify = Order.get(order_id=str(order_id))
-		except Order.DoesNotExist:
-			return None, NOT_FOUND
+        # Clear the order of all items before adding the new items
+        # that came with the PATCH request
+        order.empty_order()
 
-		if not ('items' in res['order']) or not ('delivery_address' in res['order']) or not ('order_id' in res['order']):
-			return None, BAD_REQUEST
+        for item in res['order']['items']:
+            order.add_item(
+                Item.get(Item.name == item['name']), item['quantity'])
 
-		if not (res['order']['items']) or not (res['order']['delivery_address']) or not (res['order']['order_id']):
-		 	return None, BAD_REQUEST
+        order.delivery_address = res['order']['delivery_address']
+        order.save()
 
-		try:
-		 	OrderItem.delete().where(OrderItem.order == order_to_modify).execute()
-		except OrderItem.DoesNotExist:
-		 	return None, NOT_FOUND
+        return serialize_order(order), OK
 
-		order_to_modify.total_price = 0
-		for item in res['order']['items']:
-			obj = OrderItem.create(
-				order = order_to_modify,
-				item = Item.get(name=(item['name'])),
-				quantity = item['quantity'],
-				subtotal = item['price'] * item['quantity']
-			)
-			order_to_modify.total_price += item['price']
-		order_to_modify.date = datetime.datetime.now().isoformat()
-		order_to_modify.delivery_address = res['order']['delivery_address']
-		order_to_modify.save()
+    @auth.login_required
+    def delete(self, order_id):
+        """ Delete a specific order. """
+        try:
+            obj = Order.get(order_id=str(order_id))
+        except Order.DoesNotExist:
+            return None, NOT_FOUND
 
-		return order_to_modify.json(), OK
-
-	def delete(self, order_id):
-		""" Delete a specific order. """
-		try:
-			obj = Order.get(order_id=str(order_id))
-			OrderItem.delete().where(OrderItem.order == obj).execute()
-
-		except Order.DoesNotExist:
-			return None, NOT_FOUND
-
-		obj.delete_instance()
-		return None, NO_CONTENT
+        obj.delete_instance(recursive=True)
+        return None, NO_CONTENT
