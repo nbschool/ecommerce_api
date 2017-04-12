@@ -50,7 +50,7 @@ class ItemHandler(Resource):
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
 
-    def put(self, item_id):
+    def patch(self, item_id):
         """Edit the item specified by item_id"""
         try:
             obj = Item.get(Item.item_id == item_id)

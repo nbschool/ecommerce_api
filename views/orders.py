@@ -91,7 +91,7 @@ class OrderHandler(Resource):
         return serialize_order(order), OK
 
     @auth.login_required
-    def put(self, order_id):
+    def patch(self, order_id):
         """ Modify a specific order. """
         res = request.get_json()
 
@@ -105,7 +105,7 @@ class OrderHandler(Resource):
                 return None, BAD_REQUEST
 
         # Clear the order of all items before adding the new items
-        # that came with the PUT request
+        # that came with the PATCH request
         order.empty_order()
 
         for item in res['order']['items']:
