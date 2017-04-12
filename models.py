@@ -178,6 +178,22 @@ class Order(BaseModel):
         self.save()
         return self
 
+    def add_items(self, items):
+        """
+        Add items to the order in bulk.
+        :param dict items: {<Item>: <quantity:int>}
+        """
+        for (item, quantity) in items.items():
+            self.add_item(item, quantity)
+
+    def remove_items(self, items):
+        """
+        Remove items to the order in bulk.
+        :param dict items: {<Item>: <quantity:int>}
+        """
+        for item, quantity in items.items():
+            self.remove_item(item, quantity)
+
     def add_item(self, item, quantity=1):
         """
         Add one item to the order.
@@ -207,6 +223,7 @@ class Order(BaseModel):
         )
 
         self.total_price += (item.price * quantity)
+
         self.save()
         return self
 

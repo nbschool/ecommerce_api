@@ -651,7 +651,7 @@ class TestOrders(TestCase):
         assert resp.status_code == NOT_FOUND
         assert Order.select().count() == 1
 
-    def test_order_items_management(self):
+    def test_order_add_remove_item_management(self):
         """
         Test add_item and remove_item function from Order and OrderItem
         models.
@@ -706,3 +706,43 @@ class TestOrders(TestCase):
         order.empty_order()
         assert len(order.order_items) == 0
         assert OrderItem.select().count() == 0
+
+    def test_order_add_remove_items(self):
+        """
+        Test Order.add_items and remove_items for handling add/remove in
+        bulk
+        """
+        user = add_user(None, TEST_USER_PSW)
+
+        item1 = Item.create(
+            item_id=uuid4(),
+            name='Item',
+            description='Item description',
+            price=10
+        )
+        item2 = Item.create(
+            item_id=uuid4(),
+            name='Item 2',
+            description='Item 2 description',
+            price=15
+        )
+        item3 = Item.create(
+            item_id=uuid4(),
+            name='Item 2',
+            description='Item 2 description',
+            price=15
+        )
+
+        order = Order.create(delivery_address='My address', user=user)
+
+        # add some items in the order
+        order.add_items({item1: 3, item2: 5})
+        assert count_order_items(order) == 8
+
+        # remove arbitatry number of items from the order
+        order.remove_items({item1: 2, item2: 1})
+        assert count_order_items(order) == 5
+
+        # test removing item that does not exist in the order
+        order.remove_items({item3: 1, item2: 2})
+        assert count_order_items(order) == 3
