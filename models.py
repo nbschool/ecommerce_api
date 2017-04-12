@@ -185,6 +185,7 @@ class Order(BaseModel):
         """
         for (item, quantity) in items.items():
             self.add_item(item, quantity)
+        return self
 
     def remove_items(self, items):
         """
@@ -193,6 +194,7 @@ class Order(BaseModel):
         """
         for item, quantity in items.items():
             self.remove_item(item, quantity)
+        return self
 
     def add_item(self, item, quantity=1):
         """
