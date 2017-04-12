@@ -67,7 +67,7 @@ class OrdersHandler(Resource):
         # Check that the order has an 'items' and 'delivery_address' attributes
         # otherwise it's useless to continue.
         for i in ('items', 'delivery_address'):
-            if not res['order'][i]:
+            if not res['order'].get(i):
                 return None, BAD_REQUEST
 
         order = Order.create(
@@ -105,7 +105,7 @@ class OrderHandler(Resource):
             return None, NOT_FOUND
 
         for i in ('items', 'delivery_address', 'order_id'):
-            if not res['order'][i]:
+            if not res['order'].get(i):
                 return None, BAD_REQUEST
 
         # Clear the order of all items before adding the new items
