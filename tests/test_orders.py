@@ -270,7 +270,7 @@ class TestOrders:
             }
         }
         path = 'orders/{}'.format(order1.order_id)
-        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PUT',
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order))
 
@@ -297,7 +297,7 @@ class TestOrders:
         }
 
         path = 'orders/{}'.format(order_id)
-        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PUT',
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order))
         assert resp.status_code == NOT_FOUND
