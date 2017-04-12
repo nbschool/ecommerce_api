@@ -131,3 +131,31 @@ class TestAddresses:
         resp = open_with_auth(self.app, '/addresses/{}'.format(uuid4()), 'GET',
                               user.email, TEST_USER_PSW, None, None)
         assert resp.status_code == NOT_FOUND
+
+    def test_put_address__success(self):
+        user = add_user('mariorossi@gmail.com', '123')
+        addr = Address.create(**get_test_addr_dict(user, city="Firenze",
+                              post_code='50132', address="Via Rossi 10"))
+        addr1 = new_addr(user, city="Roma", post_code="10000", address="Via Bianchi 20")
+
+        resp = open_with_auth(self.app, '/addresses/{}'.format(addr.address_id), 'PUT',
+                              user.email, TEST_USER_PSW, data=json.dumps(addr1),
+                              content_type='application/json')
+        assert resp.status_code == OK
+
+        address = Address.get(Address.address_id == addr.address_id).json()
+
+        assert address['country'] == addr1['country']
+        assert address['city'] == addr1['city']
+        assert address['address'] == addr1['address']
+        assert address['phone'] == addr1['phone']
+
+    def test_put_address__wrong_id(self):
+        user = add_user('mariorossi@gmail.com', '123')
+        Address.create(**get_test_addr_dict(user, city="Firenze",
+                       post_code='50132', address="Via Rossi 10"))
+        addr1 = new_addr(user, city="Roma", post_code="10000", address="Via Bianchi 20")
+        resp = open_with_auth(self.app, '/addresses/{}'.format(uuid4()), 'PUT',
+                              user.email, TEST_USER_PSW, data=json.dumps(addr1),
+                              content_type='application/json')
+        assert resp.status_code == NOT_FOUND

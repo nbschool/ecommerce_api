@@ -2,7 +2,7 @@ from auth import auth
 from flask import abort, g, request
 from flask_restful import Resource
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
-from models import Address, User
+from models import Address
 from utils import check_required_fields
 
 import uuid
@@ -12,7 +12,6 @@ class AddressesHandler(Resource):
     """ Addresses endpoint. """
     @auth.login_required
     def get(self):
-        addresses = {}
         user = g.user
 
         res = (
@@ -54,3 +53,27 @@ class AddressHandler(Resource):
             return Address.get(Address.user == user, Address.address_id == address_id).json(), OK
         except Address.DoesNotExist:
             return None, NOT_FOUND
+
+    @auth.login_required
+    def put(self, address_id):
+        user = g.user
+
+        try:
+            obj = Address.get(Address.user == user, Address.address_id == address_id)
+        except Address.DoesNotExist:
+            return None, NOT_FOUND
+
+        res = request.get_json()
+
+        check_required_fields(
+            request_data=res,
+            required_fields=['country', 'city', 'post_code', 'address', 'phone'])
+
+        obj.country = res['country']
+        obj.city = res['city']
+        obj.post_code = res['post_code']
+        obj.address = res['address']
+        obj.phone = res['phone']
+        obj.save()
+
+        return obj.json(), OK
