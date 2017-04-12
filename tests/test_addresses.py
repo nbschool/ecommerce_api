@@ -2,7 +2,6 @@ import json
 import uuid
 
 from peewee import SqliteDatabase
-import http.client as client
 
 from app import app
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
@@ -155,7 +154,24 @@ class TestAddresses:
         Address.create(**get_test_addr_dict(user, city="Firenze",
                        post_code='50132', address="Via Rossi 10"))
         addr1 = new_addr(user, city="Roma", post_code="10000", address="Via Bianchi 20")
+
         resp = open_with_auth(self.app, '/addresses/{}'.format(uuid4()), 'PUT',
                               user.email, TEST_USER_PSW, data=json.dumps(addr1),
                               content_type='application/json')
+        assert resp.status_code == NOT_FOUND
+
+    def test_delete_address__success(self):
+        user = add_user('mariorossi@gmail.com', '123')
+        addr = Address.create(**get_test_addr_dict(user, city="Firenze",
+                              post_code='50132', address="Via Rossi 10"))
+
+        resp = open_with_auth(self.app, '/addresses/{}'.format(addr.address_id), 'DELETE',
+                              user.email, TEST_USER_PSW, None, None)
+        assert resp.status_code == NO_CONTENT
+        assert not Address.select().exists()
+
+    def test_delete_address__failed(self):
+        user = add_user('mariorossi@gmail.com', '123')
+        resp = open_with_auth(self.app, '/addresses/{}'.format(uuid4()), 'DELETE',
+                              user.email, TEST_USER_PSW, None, None)
         assert resp.status_code == NOT_FOUND

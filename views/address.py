@@ -1,7 +1,7 @@
 from auth import auth
-from flask import abort, g, request
+from flask import g, request
 from flask_restful import Resource
-from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
+from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK
 from models import Address
 from utils import check_required_fields
 
@@ -77,3 +77,14 @@ class AddressHandler(Resource):
         obj.save()
 
         return obj.json(), OK
+
+    @auth.login_required
+    def delete(self, address_id):
+        user = g.user
+
+        try:
+            obj = Address.get(Address.user == user, Address.address_id == address_id)
+        except Address.DoesNotExist:
+            return None, NOT_FOUND
+        obj.delete_instance()
+        return None, NO_CONTENT
