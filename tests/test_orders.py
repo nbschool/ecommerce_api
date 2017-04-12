@@ -651,7 +651,7 @@ class TestOrders(TestCase):
         assert resp.status_code == NOT_FOUND
         assert Order.select().count() == 1
 
-    def test_order_add_remove_item_management(self):
+    def test_order_add_remove_item(self):
         """
         Test add_item and remove_item function from Order and OrderItem
         models.
@@ -746,3 +746,6 @@ class TestOrders(TestCase):
         # test removing item that does not exist in the order
         order.remove_items({item3: 1, item2: 2})
         assert count_order_items(order) == 3
+        # check assumed total price. there is 1 item1 and 2 item2 left
+        total_price = item1.price + (item2.price * 2)
+        assert order.total_price == total_price
