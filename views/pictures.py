@@ -1,6 +1,7 @@
 import os
 import uuid
 
+from models import Item
 from models import Picture
 import utils
 
@@ -18,11 +19,25 @@ class PicturesHandler(Resource):
         """Retrieve every picture"""
         return [o.json() for o in Picture.select()], client.OK
 
-    def post(self):
-        """Insert a new picture"""
+
+class ItemPictureHandler(Resource):
+
+    def get(self, item_id):
+        """Retrieve every picture of an item"""
+        return [o.json() for o in Picture.select().join(Item).where(
+            Item.item_id == item_id)], client.OK
+
+    def post(self, item_id):
+        """Insert a new picture for the specified item"""
+
         if 'image' not in request.files:
             return {"message": "No image received"},\
                 client.BAD_REQUEST
+
+        try:
+            item = Item.get(Item.item_id == item_id)
+        except Picture.DoesNotExist:
+            return None, client.NOT_FOUND
 
         file = request.files['image']
         picture_id = uuid.uuid4()
@@ -36,7 +51,8 @@ class PicturesHandler(Resource):
 
         return Picture.create(
             picture_id=picture_id,
-            extension=extension
+            extension=extension,
+            item=item
         ).json(), client.CREATED
 
 
