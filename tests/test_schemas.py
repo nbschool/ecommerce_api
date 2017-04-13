@@ -5,7 +5,7 @@ of inputs (post/put request data) and output from the Schemas dump method, that
 will be used as return value for Flask-Restful endpoint handlers.
 """
 
-from models import User
+from models import User, Order
 from schemas import UserSchema
 from uuid import uuid4
 from tests.test_case import TestCase
@@ -49,12 +49,27 @@ def get_expected_serialized_user(user):
 
 class TestUserSchema(TestCase):
     def test_user_json__success(self):
-        user = User(**USER_TEST_DICT, user_id=uuid4())
+        user = User.create(**USER_TEST_DICT, user_id=uuid4())
         parsed_user, errors = UserSchema.jsonapi(user)
 
         expected_result = get_expected_serialized_user(user)
-
         assert parsed_user == expected_result
+        assert errors == {}
+
+    def test_user_json_wrong_obj__fail(self):
+        user = User.create(**USER_TEST_DICT, user_id=uuid4())
+        order = Order.create(delivery_address='Address', user=user)
+        user.first_name = 1
+        parsed_user, errors = UserSchema.jsonapi(order)
+
+        # FIXME: .jsonapi() should generate an errors dict since we pass an
+        #        Order instead of an User. it does not.
+        raise ValueError(
+            'Check https://github.com/marshmallow-code/marshmallow/issues/45',
+            'erorrs should have stuff inside'
+        )
+
+        assert errors != {}
 
     def test_user_validate_input__success(self):
         # Simulate what should come from the http POST request
