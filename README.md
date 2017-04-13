@@ -1,3 +1,5 @@
+[![Build Status](https://api.travis-ci.org/repositories/nbschool/ecommerce_api.svg)](https://travis-ci.org/nbschool/ecommerce_api)
+
 # ecommerce_api
 ## Getting Started
 
@@ -54,17 +56,6 @@ pytest
 
  Python - Used to create the back-end of API
 
-## Authors
-
-* **Gianni Valdambrini**
-* **Daniele Maccioni**
-* **Alessandro Brugioni**
-* **German Lugo**
-* **Daniele Calcinai**
-* **Eugenio Minissale**
-* **Francesco Mirabelli**
-* **Marco Tinacci**
-* **Simone Motta**
 
 ## License
 
