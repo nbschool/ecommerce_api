@@ -214,6 +214,22 @@ class TestOrders(TestCase):
         assert resp.status_code == BAD_REQUEST
         assert len(Order.select()) == 0
 
+    def test_create_order_no_items__fail(self):
+        user = add_user('12345@email.com', TEST_USER_PSW)
+        order = {
+            'order': {
+                'items': [],
+                'delivery_address': 'Via Antani 2',
+                'user': str(user.user_id)
+            }
+        }
+        path = 'orders/'
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'POST',
+                              user.email, TEST_USER_PSW, 'application/json',
+                              json.dumps(order))
+        assert resp.status_code == BAD_REQUEST
+        assert len(Order.select()) == 0
+
     def test_update_order__success(self):
         item1 = Item.create(
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
@@ -258,6 +274,39 @@ class TestOrders(TestCase):
         resp_order = Order.get(order_id=order1.order_id).json()
         assert resp_order['order_id'] == order['order']['order_id']
         assert resp_order['delivery_address'] == order['order']['delivery_address']
+
+    def test_update_order_empty_items_list__fail(self):
+        item1 = Item.create(
+            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii'
+        )
+        user = add_user('12345@email.com', TEST_USER_PSW)
+
+        order = Order.create(
+            delivery_address='Via Rossi 12',
+            user=user
+        ).add_item(item1, 2)
+
+        order_id = str(order.order_id)
+
+        order_data = {
+            "order": {
+                "order_id": order_id,
+                'items': [],
+                'delivery_address': 'Via Verdi 20',
+                'user': str(user.user_id)
+
+            }
+        }
+        path = 'orders/{}'.format(order_id)
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
+                              '12345@email.com', TEST_USER_PSW, 'application/json',
+                              json.dumps(order_data))
+
+        assert resp.status_code == BAD_REQUEST
+        assert len(order.order_items) == 1
 
     def test_update_order__failure_non_existing(self):
         user_A = add_user('12345@email.com', TEST_USER_PSW)
