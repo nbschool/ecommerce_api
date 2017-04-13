@@ -50,7 +50,7 @@ def get_expected_serialized_user(user):
 class TestUserSchema(TestCase):
     def test_user_json__success(self):
         user = User(**USER_TEST_DICT, user_id=uuid4())
-        parsed_user, errors = UserSchema.json(user)
+        parsed_user, errors = UserSchema.jsonapi(user)
 
         expected_result = get_expected_serialized_user(user)
 

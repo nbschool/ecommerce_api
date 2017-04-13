@@ -8,7 +8,7 @@ class BaseSchema(Schema):
     inputs for the classes, to get schemas and serialize models data.
     """
     @classmethod
-    def json(cls, obj, include_data=[]):
+    def jsonapi(cls, obj, include_data=[]):
         """
         http://marshmallow.readthedocs.io/en/latest/quickstart.html#serializing-objects-dumping
         Serialize obj by passing it to schema's dump method, which returns
@@ -89,12 +89,12 @@ class OrderSchema(BaseSchema):
     )
 
     @classmethod
-    def json(cls, obj, include_data=['items', 'user']):
+    def jsonapi(cls, obj, include_data=['items', 'user']):
         """
         Override BaseSchema.json to automatically include the `items` field
         of the order.
         """
-        return super(OrderSchema, cls).json(obj, include_data)
+        return super(OrderSchema, cls).jsonapi(obj, include_data)
 
 
 class OrderItemSchema(BaseSchema):
