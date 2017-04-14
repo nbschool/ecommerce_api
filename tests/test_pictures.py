@@ -46,10 +46,6 @@ class TestPictures(TestCase):
 
     def clean_images(self):
         shutil.rmtree(IMAGE_FOLDER, onerror=None)
-        # filelist = [ f for f in os.listdir(IMAGE_FOLDER) ]
-        # for f in filelist:
-        #     os.remove(f)
-        # os.rmdir()
 
     def test_get_picture__success(self):
         item = Item.create(**TEST_ITEM)
