@@ -4,12 +4,15 @@ Test suite for PictureHandler, ItemPictureHandler and PicturesHandler
 
 import json
 from io import BytesIO
+import os
+import shutil
 import uuid
 
 import http.client as client
 
 from models import Item, Picture
 from tests.test_case import TestCase
+from utils import IMAGE_FOLDER
 
 
 TEST_ITEM = {
@@ -39,7 +42,14 @@ TEST_PICTURE2 = {
 WRONG_UUID = 'e8e42371-46de-4f5e-8927-e2cc34826269'
 
 
-class TestItems(TestCase):
+class TestPictures(TestCase):
+
+    def clean_images(self):
+        shutil.rmtree(IMAGE_FOLDER, onerror=None)
+        # filelist = [ f for f in os.listdir(IMAGE_FOLDER) ]
+        # for f in filelist:
+        #     os.remove(f)
+        # os.rmdir()
 
     def test_get_picture__success(self):
         item = Item.create(**TEST_ITEM)
@@ -126,15 +136,65 @@ class TestItems(TestCase):
             data={'image': (BytesIO(b'my file contents'), 'testimage.jpg')},
             content_type='multipart/form-data')
         assert resp.status_code == client.NOT_FOUND
+        assert Picture.select().count() == 0
+
+    def test_post_item_pictures__wrong_extension(self):
+        item = Item.create(**TEST_ITEM)
+        resp = self.app.post('/items/{item_id}/pictures/'.format(
+            item_id=item.item_id),
+            data={'image': (BytesIO(b'my file contents'), 'testimage.txt')},
+            content_type='multipart/form-data')
+        assert resp.status_code == client.BAD_REQUEST
+        assert Picture.select().count() == 0
 
     def test_post_picture__no_image(self):
-        pass
+        item = Item.create(**TEST_ITEM)
+        resp = self.app.post('/items/{item_id}/pictures/'.format(
+            item_id=item.item_id),
+            data={},
+            content_type='multipart/form-data')
+        assert resp.status_code == client.BAD_REQUEST
+        assert Picture.select().count() == 0
 
     def test_delete_picture__success(self):
-        pass
+        item = Item.create(**TEST_ITEM)
+        picture = Picture.create(item=item, **TEST_PICTURE)
+        image = open("{path}/{picture_id}.jpg".format(
+            path=IMAGE_FOLDER,
+            picture_id=picture.picture_id), "wb")
+        another_image = open("{path}/{picture_id}.jpg".format(
+            path=IMAGE_FOLDER,
+            picture_id=WRONG_UUID), "wb")
+
+        resp = self.app.delete('/pictures/{picture_id}'.format(
+            picture_id=picture.picture_id))
+
+        assert resp.status_code == client.NO_CONTENT
+        assert Picture.select().count() == 0
+        assert Item.select().count() == 1
+        item2 = Item.get()
+        assert str(item2.item_id) == TEST_ITEM['item_id']
+        assert item2.name == TEST_ITEM['name']
+        assert float(item2.price) == TEST_ITEM['price']
+        assert item2.description == TEST_ITEM['description']
+        assert os.path.isfile("{path}/{picture_id}.jpg".format(
+            path=IMAGE_FOLDER,
+            picture_id=WRONG_UUID))
+        assert not os.path.isfile("{path}/{picture_id}.jpg".format(
+            path=IMAGE_FOLDER,
+            picture_id=picture.picture_id))
+        self.clean_images()
 
     def test_delete_picture__wrong_id(self):
-        pass
+        resp = self.app.delete('/pictures/{picture_id}'.format(
+            picture_id=WRONG_UUID))
+
+        assert resp.status_code == client.NOT_FOUND
 
     def test_delete_pictures__missing_file(self):
-        pass
+        item = Item.create(**TEST_ITEM)
+        picture = Picture.create(item=item, **TEST_PICTURE)
+        resp = self.app.delete('/pictures/{picture_id}'.format(
+            picture_id=picture.picture_id))
+
+        assert resp.status_code == client.INTERNAL_SERVER_ERROR
