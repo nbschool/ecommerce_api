@@ -159,10 +159,10 @@ class TestPictures(TestCase):
     def test_delete_picture__success(self):
         item = Item.create(**TEST_ITEM)
         picture = Picture.create(item=item, **TEST_PICTURE)
-        image = open("{path}/{picture_id}.jpg".format(
+        open("{path}/{picture_id}.jpg".format(
             path=IMAGE_FOLDER,
             picture_id=picture.picture_id), "wb")
-        another_image = open("{path}/{picture_id}.jpg".format(
+        open("{path}/{picture_id}.jpg".format(
             path=IMAGE_FOLDER,
             picture_id=WRONG_UUID), "wb")
 
