@@ -79,6 +79,15 @@ class User(BaseModel):
             return False
         return True
 
+    @property
+    def addresses(self):
+        res = (
+            Address
+            .select()
+            .where(Address.user == self)
+        )
+        return [addr for addr in res]
+
     @staticmethod
     def hash_password(password):
         """Use passlib to get a crypted password.
@@ -109,6 +118,31 @@ class User(BaseModel):
         }
 
 
+class Address(BaseModel):
+    """ The model Address represent a user address.
+        Each address is releated to one user, but one user can have
+        more addresses."""
+    address_id = UUIDField(unique=True)
+    user = ForeignKeyField(User)
+    country = CharField()
+    city = CharField()
+    post_code = CharField()
+    address = CharField()
+    phone = CharField()
+
+    def json(self):
+        return {
+            'address_id': str(self.address_id),
+            'user_first_name': self.user.first_name,
+            'user_last_name': self.user.last_name,
+            'country': self.country,
+            'city': self.city,
+            'post_code': self.post_code,
+            'address': self.address,
+            'phone': self.phone
+        }
+
+
 class Order(BaseModel):
     """ The model Order contains a list of orders - one row per order.
     Each order will be place by one client.
@@ -119,7 +153,7 @@ class Order(BaseModel):
     """
     order_id = UUIDField(unique=True, default=uuid4)
     total_price = DecimalField(default=0)
-    delivery_address = CharField()
+    delivery_address = ForeignKeyField(Address, related_name="orders")
     user = ForeignKeyField(User, related_name="orders")
 
     class Meta:
@@ -212,6 +246,17 @@ class Order(BaseModel):
             'user_id': str(self.user.user_id)
         }
 
+    def set_address(self, id):
+        try:
+            addr = Address.get(Address.address_id == id)
+        except Address.DoesNotExist:
+            return False
+
+        if addr not in self.user.address:
+            return False
+        self.delivery_address = addr
+        return True
+
 
 class OrderItem(BaseModel):
     """ The model OrderItem is a cross table that contains the order
@@ -266,31 +311,6 @@ class OrderItem(BaseModel):
     def _calculate_subtotal(self):
         """Calculate the subtotal value of the item(s) in the order."""
         self.subtotal = self.item.price * self.quantity
-
-
-class Address(BaseModel):
-    """ The model Address represent a user address.
-        Each address is releated to one user, but one user can have
-        more addresses."""
-    address_id = UUIDField(unique=True)
-    user = ForeignKeyField(User)
-    country = CharField()
-    city = CharField()
-    post_code = CharField()
-    address = CharField()
-    phone = CharField()
-
-    def json(self):
-        return {
-            'address_id': str(self.address_id),
-            'user_first_name': self.user.first_name,
-            'user_last_name': self.user.last_name,
-            'country': self.country,
-            'city': self.city,
-            'post_code': self.post_code,
-            'address': self.address,
-            'phone': self.phone
-        }
 
 
 # Check if the table exists in the database; if not create it.
