@@ -56,20 +56,16 @@ class TestUserSchema(TestCase):
         assert parsed_user == expected_result
         assert errors == {}
 
-    def test_user_json_wrong_obj__fail(self):
+    def test_user_include_orders__success(self):
         user = User.create(**USER_TEST_DICT, user_id=uuid4())
-        order = Order.create(delivery_address='Address', user=user)
-        user.first_name = 1
-        parsed_user, errors = UserSchema.jsonapi(order)
+        o1 = Order.create(delivery_address='Address', user=user)
+        o2 = Order.create(delivery_address='Address', user=user)
 
-        # FIXME: .jsonapi() should generate an errors dict since we pass an
-        #        Order instead of an User. it does not.
-        raise ValueError(
-            'Check https://github.com/marshmallow-code/marshmallow/issues/45',
-            'erorrs should have stuff inside'
-        )
+        parsed_user, errors = UserSchema.jsonapi(user, include_data=['orders'])
 
-        assert errors != {}
+        assert type(parsed_user['included']) == list
+        assert len(parsed_user['included']) == 2
+        assert parsed_user['included'][0]['id'] == str(o1.order_id)
 
     def test_user_validate_input__success(self):
         # Simulate what should come from the http POST request
