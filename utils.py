@@ -27,16 +27,28 @@ def non_empty_str(val, name):
 
 
 def save_image(file, picture_id, extension):
+    """
+    Create a path images/ if not exist 
+    and then save in the folder the image passed with 
+    its extension 
+    """
     if not os.path.exists(IMAGE_FOLDER):
         os.makedirs(IMAGE_FOLDER)
     file.save(image_fullpath(picture_id, extension))
 
 
 def remove_image(picture_id, extension):
+    """ 
+    Remove a specified picture by picture_id from folder
+    """
     os.remove(image_fullpath(picture_id, extension))
 
 
 def image_fullpath(picture_id, extension):
+    """
+    Return a path for the image with IMAGE_FOLDER
+    picture_id and extension 
+    """
     return os.path.join(
         IMAGE_FOLDER,
         '{}.{}'.format(str(picture_id), extension))
