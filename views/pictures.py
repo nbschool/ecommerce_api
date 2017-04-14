@@ -34,14 +34,13 @@ class ItemPictureHandler(Resource):
 
     def post(self, item_id):
         """Insert a new picture for the specified item"""
-
         if 'image' not in request.files:
             return {"message": "No image received"},\
                 client.BAD_REQUEST
 
         try:
             item = Item.get(Item.item_id == item_id)
-        except Picture.DoesNotExist:
+        except Item.DoesNotExist:
             return None, client.NOT_FOUND
 
         file = request.files['image']
