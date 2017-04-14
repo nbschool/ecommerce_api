@@ -24,6 +24,11 @@ class ItemPictureHandler(Resource):
 
     def get(self, item_id):
         """Retrieve every picture of an item"""
+        try:
+            Item.get(Item.item_id == item_id)
+        except Item.DoesNotExist:
+            return None, client.NOT_FOUND
+
         return [o.json() for o in Picture.select().join(Item).where(
             Item.item_id == item_id)], client.OK
 
