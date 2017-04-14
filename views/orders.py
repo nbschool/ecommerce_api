@@ -61,16 +61,22 @@ class OrdersHandler(Resource):
 
         # Check that the items exist by getting all the item names from the
         # request and executing a get() request with Peewee
-        try:
-            item_names = [e for e in res_items]
-            items = Item.select().where(Item.name << item_names)
-        except Item.DoesNotExist:
+        item_names = [e for e in res_items]
+        items = Item.select().where(Item.name << item_names)
+
+        if items.count() != len(res_items):
             abort(BAD_REQUEST)
 
         # check whether availabilities allow orders
         if any(item.availability < res_items[item.name]['quantity']
                 for item in items):
             return None, BAD_REQUEST
+        
+        # Check that the order has an 'items' and 'delivery_address' attributes
+        # otherwise it's useless to continue.
+        for i in ('items', 'delivery_address'):
+            if not res['order'].get(i):
+                return None, BAD_REQUEST
 
         order = Order.create(
             delivery_address=res['order']['delivery_address'],
@@ -96,7 +102,7 @@ class OrderHandler(Resource):
         return serialize_order(order), OK
 
     @auth.login_required
-    def put(self, order_id):
+    def patch(self, order_id):
         """ Modify a specific order. """
         res = request.get_json()
         res_items = res['order']['items']
@@ -109,7 +115,7 @@ class OrderHandler(Resource):
             return None, NOT_FOUND
 
         for i in ('items', 'delivery_address', 'order_id'):
-            if i not in res['order']:
+            if not res['order'].get(i):
                 return None, BAD_REQUEST
 
         # check whether availabilities allow order update
@@ -118,7 +124,7 @@ class OrderHandler(Resource):
             return None, BAD_REQUEST
 
         # Clear the order of all items before adding the new items
-        # that came with the PUT request
+        # that came with the PATCH request
         order.empty_order()
 
         for name, item in res_items.items():

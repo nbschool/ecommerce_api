@@ -32,17 +32,11 @@ api = Api(app)
 def bad_content_type():
     """Checks for a correct request"""
 
-    # In case of POST of a picture a "multipart/form-data" has to be specified
-    # in the content-type of the request header
-    if request.endpoint == 'pictureshandler' and request.method == 'POST':
-        ct = dict(request.headers).get('Content-Type', '')
-        if "multipart/form-data" not in ct:
-            abort(BAD_REQUEST)
     # Force POST and PUT methods to have `Content-Type` as 'application/json'
     # before proceeding inside the method handlers, that use `request.get_json`
     # from `flask.request` that require the header to be set in order to return
     # the content of the request.
-    elif request.method in ('POST', 'PUT'):
+    if request.method in ('POST', 'PUT'):
         ct = dict(request.headers).get('Content-Type', '')
         if ct != 'application/json':
             abort(BAD_REQUEST)

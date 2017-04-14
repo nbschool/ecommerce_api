@@ -5,11 +5,10 @@ Test suite for ItemHandler and ItemListHandler
 import json
 import uuid
 
-from peewee import SqliteDatabase
 import http.client as client
 
-from app import app
 from models import Item
+from tests.test_case import TestCase
 
 TEST_ITEM = {
     "item_id": "429994bf-784e-47cc-a823-e0c394b823e8",
@@ -51,15 +50,7 @@ TEST_ITEM_AVAILABILITY = {
 WRONG_UUID = '04f2f213-1a0f-443d-a5ab-79097ba725ba'
 
 
-class TestItems:
-    @classmethod
-    def setup_class(cls):
-        Item._meta.database = SqliteDatabase(':memory:')
-        Item.create_table()
-        cls.app = app.test_client()
-
-    def setup_method(self):
-        Item.delete().execute()
+class TestItems(TestCase):
 
     def test_post_item__success(self):
         resp = self.app.post('/items/', data=json.dumps(TEST_ITEM),
@@ -119,11 +110,11 @@ class TestItems:
         resp = self.app.get('/items/{item_id}'.format(item_id=WRONG_UUID))
         assert resp.status_code == client.NOT_FOUND
 
-    def test_put_item__success(self):
+    def test_patch_item__success(self):
         item = Item.create(**TEST_ITEM)
-        resp = self.app.put('/items/{item_id}'.format(item_id=item.item_id),
-                            data=json.dumps(TEST_ITEM2),
-                            content_type='application/json')
+        resp = self.app.patch('/items/{item_id}'.format(item_id=item.item_id),
+                              data=json.dumps(TEST_ITEM2),
+                              content_type='application/json')
         assert resp.status_code == client.OK
         json_item = Item.select().where(
             Item.item_id == item.item_id).get().json()
@@ -133,17 +124,17 @@ class TestItems:
         assert json_item['availability'] == TEST_ITEM2['availability']
         assert json_item['item_id'] == item.item_id
 
-    def test_put_item__wrong_id(self):
+    def test_patch_item__wrong_id(self):
         Item.create(**TEST_ITEM)
-        resp = self.app.put('/items/{item_id}'.format(item_id=WRONG_UUID),
-                            data=json.dumps(TEST_ITEM2),
-                            content_type='application/json')
+        resp = self.app.patch('/items/{item_id}'.format(item_id=WRONG_UUID),
+                              data=json.dumps(TEST_ITEM2),
+                              content_type='application/json')
         assert resp.status_code == client.NOT_FOUND
 
-    def test_put_item__failed(self):
-        resp = self.app.put('/items/{item_id}'.format(item_id=WRONG_UUID),
-                            data=json.dumps(TEST_ITEM),
-                            content_type='application/json')
+    def test_patch_item__failed(self):
+        resp = self.app.patch('/items/{item_id}'.format(item_id=WRONG_UUID),
+                              data=json.dumps(TEST_ITEM),
+                              content_type='application/json')
         assert resp.status_code == client.NOT_FOUND
 
     def test_delete_item__success(self):
