@@ -75,5 +75,6 @@ class ItemHandler(Resource):
             obj = Item.get(Item.item_id == item_id)
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
+        # TODO on cascade delete pictures and files
         obj.delete_instance()
         return None, client.NO_CONTENT
