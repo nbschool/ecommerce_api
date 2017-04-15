@@ -4,13 +4,14 @@ Test suite for ItemHandler and ItemListHandler
 
 import json
 import os
-import uuid
+
 
 import http.client as client
 
 from models import Item, Picture
 from tests.test_case import TestCase
 from tests import test_utils
+from tests.test_utils import format_jsonapi_request
 import utils
 
 TEST_IMAGE_FOLDER = 'test_images'
@@ -77,19 +78,14 @@ class TestItems(TestCase):
         test_utils.get_image_folder = utils.get_image_folder
 
     def test_post_item__success(self):
-        resp = self.app.post('/items/', data=json.dumps(TEST_ITEM),
+        data = format_jsonapi_request('item', TEST_ITEM)
+        resp = self.app.post('/items/', data=json.dumps(data),
                              content_type='application/json')
+
+        resp_item = json.loads(resp.data)
+
         assert resp.status_code == client.CREATED
         assert len(Item.select()) == 1
-        item = Item.select()[0].json()
-        assert item['name'] == TEST_ITEM['name']
-        assert item['price'] == TEST_ITEM['price']
-        assert item['description'] == TEST_ITEM['description']
-        assert item['availability'] == TEST_ITEM['availability']
-        try:
-            uuid.UUID(item['uuid'], version=4)
-        except ValueError:
-            assert False
 
     def test_post_item__not_json_failure(self):
         resp = self.app.post('/items/', data=test_utils.wrong_dump(TEST_ITEM),
@@ -97,13 +93,27 @@ class TestItems(TestCase):
         assert resp.status_code == client.BAD_REQUEST
         assert len(Item.select()) == 0
 
+        # check for the item id and get the object
+        item = Item.get(Item.item_id == resp_item['data']['id'])
+        assert item is not None
+
+        # validate new Item properties
+        assert item.name == TEST_ITEM['name']
+        assert float(item.price) == TEST_ITEM['price']
+        assert item.description == TEST_ITEM['description']
+        # validate response item properties
+        test_item = TEST_ITEM.copy()
+        del test_item['item_id']
+        assert item.json()['data']['attributes'] == test_item
+
     def test_post_item__failed(self):
         resp = self.app.post('/items/', data=json.dumps(TEST_ITEM_WRONG),
                              content_type='application/json')
         assert resp.status_code == client.BAD_REQUEST
 
     def test_post_item__round_price(self):
-        resp = self.app.post('/items/', data=json.dumps(TEST_ITEM_PRECISION),
+        data = format_jsonapi_request('item', TEST_ITEM_PRECISION)
+        resp = self.app.post('/items/', data=json.dumps(data),
                              content_type='application/json')
         assert resp.status_code == client.CREATED
         item = Item.select().get()
@@ -123,18 +133,29 @@ class TestItems(TestCase):
     def test_get_items__success(self):
         Item.create(**TEST_ITEM)
         Item.create(**TEST_ITEM2)
+
         resp = self.app.get('/items/')
         items = json.loads(resp.data)
+
         assert resp.status_code == client.OK
         assert len(items) == 2
-        assert TEST_ITEM in items
-        assert TEST_ITEM2 in items
+
+        for (i, item) in enumerate([TEST_ITEM, TEST_ITEM2]):
+            test_item = item.copy()
+            del test_item['item_id']
+            assert items[i]['data']['attributes'] == test_item
 
     def test_get_item__success(self):
         item = Item.create(**TEST_ITEM)
         resp = self.app.get('/items/{item_uuid}'.format(item_uuid=item.uuid))
         assert resp.status_code == client.OK
-        assert json.loads(resp.data) == TEST_ITEM
+
+        item = TEST_ITEM.copy()
+        data = json.loads(resp.data)['data']
+        assert data['id'] == item['item_id']
+
+        del item['item_id']
+        assert data['attributes'] == item
 
     def test_get_item__failed(self):
         resp = self.app.get('/items/{item_uuid}'.format(item_uuid=WRONG_UUID))
@@ -146,6 +167,7 @@ class TestItems(TestCase):
                               data=json.dumps({'name': 'new-name'}),
                               content_type='application/json')
         assert resp.status_code == client.OK
+
         json_item = Item.get(Item.uuid == item.uuid).json()
         assert json_item['name'] == 'new-name'
         assert json_item['price'] == TEST_ITEM['price']
