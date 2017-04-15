@@ -1,4 +1,13 @@
 from marshmallow_jsonapi import Schema, fields
+from marshmallow import validate
+
+"""
+Validation object for strings that cannot be empty such as User names, emails
+and passwords.
+
+Documentation can be found at https://goo.gl/pVvryk
+"""
+NOT_BLANK = validate.Length(min=1, error='Field cannot be blank')
 
 
 class BaseSchema(Schema):
@@ -132,10 +141,10 @@ class UserSchema(BaseSchema):
         self_url_kwargs = {'id': '<id>'}
 
     id = fields.Str(dump_only=True, attribute='user_id')
-    first_name = fields.Str(required=True)
-    last_name = fields.Str(required=True)
-    email = fields.Email(required=True)
-    password = fields.Str(required=True, load_only=True)
+    first_name = fields.Str(required=True, validate=NOT_BLANK)
+    last_name = fields.Str(required=True, validate=NOT_BLANK)
+    email = fields.Email(required=True, validate=NOT_BLANK)
+    password = fields.Str(required=True, validate=NOT_BLANK, load_only=True)
 
     orders = fields.Relationship(
         many=True, include_resource_linkage=True,
