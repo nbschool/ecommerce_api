@@ -10,7 +10,6 @@ from flask_restful import Resource
 import http.client as client
 
 from models import Item
-from utils import check_required_fields
 
 
 class ItemsHandler(Resource):
@@ -26,22 +25,25 @@ class ItemsHandler(Resource):
         from the one generated from the database
         """
         request_data = request.get_json(force=True)
-        check_required_fields(
-            request_data=request_data,
-            required_fields=['name', 'price', 'description', 'availability'])
 
-        if int(request_data['availability']) < 0:
+        isValid, errors = Item.validate_input(request_data)
+        if not isValid:
+            return errors, client.BAD_REQUEST
+
+        data = request_data['data']['attributes']
+
+        if int(data['availability']) < 0:
             return None, client.BAD_REQUEST
 
-        obj = Item.create(
+        item = Item.create(
             uuid=uuid.uuid4(),
-            name=request_data['name'],
-            price=float(request_data['price']),
-            description=request_data['description'],
-            availability=int(request_data['availability']))
-        item = obj.json()
+            name=data['name'],
+            price=float(data['price']),
+            description=data['description'],
+            availability=int(data['availability']),
+        )
 
-        return item, client.CREATED
+        return item.json(), client.CREATED
 
 
 class ItemHandler(Resource):

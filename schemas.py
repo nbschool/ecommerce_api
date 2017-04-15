@@ -67,6 +67,7 @@ class ItemSchema(BaseSchema):
     name = fields.Str()
     price = fields.Float()
     description = fields.Str()
+    availability = fields.Int()
 
 
 class OrderSchema(BaseSchema):
