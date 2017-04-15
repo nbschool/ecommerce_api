@@ -1,4 +1,4 @@
-from flask import request, abort, g
+from flask import request, g
 from flask_restful import Resource
 from http.client import (CREATED, NO_CONTENT, NOT_FOUND, OK,
                          BAD_REQUEST, CONFLICT, UNAUTHORIZED)
@@ -6,7 +6,6 @@ import uuid
 
 from auth import auth
 from models import User
-from utils import non_empty_str
 
 
 class UsersHandler(Resource):
@@ -23,37 +22,31 @@ class UsersHandler(Resource):
 
     def post(self):
         """ Add an user to the database."""
-        # required fields for an User. All fields must be inside the post
-        # request and not be empty strings.
-        required_fields = ['first_name', 'last_name', 'email', 'password']
+        data = request.get_json(force=True)
 
-        request_data = request.get_json(force=True)
+        isValid, errors = User.validate_input(data)
+        if not isValid:
+            return errors, BAD_REQUEST
 
-        # For every field required for creating a new user try to get the
-        # value from the json data of the request.
-        # If the field is missing (KeyError) or the value is an empty
-        # string (ValueError) return a BAD_REQUEST
-        for field in required_fields:
-            try:
-                value = request_data[field]
-                non_empty_str(value, field)
-            except (KeyError, ValueError):
-                abort(BAD_REQUEST)
+        # Extract the user attributes to check and generate the User row
+        data = data['data']['attributes']
 
         # If email is present in the database return a BAD_REQUEST response.
-        if User.exists(request_data['email']):
+        if User.exists(data['email']):
             msg = {'message': 'email already present.'}
             return msg, CONFLICT
 
         new_user = User.create(
             uuid=uuid.uuid4(),
-            first_name=request_data['first_name'],
-            last_name=request_data['last_name'],
-            email=request_data['email'],
-            password=User.hash_password(request_data['password'])
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            email=data['email'],
+            password=User.hash_password(data['password'])
         )
 
         # If everything went OK return the newly created user and CREATED code
+        # TODO: Handle json() return value (data, errors) and handle errors not
+        # empty
         return new_user.json(), CREATED
 
 
