@@ -3,7 +3,8 @@ Test suite for User(s) resources.
 """
 
 from models import User, Address, Item, Order
-from tests.test_utils import open_with_auth, add_user, add_address, wrong_dump
+from tests.test_utils import (open_with_auth, add_address, add_user,
+                              format_jsonapi_request,  wrong_dump)
 from tests.test_case import TestCase
 from http.client import (OK, NOT_FOUND, NO_CONTENT, BAD_REQUEST,
                          CREATED, CONFLICT, UNAUTHORIZED)
@@ -14,19 +15,6 @@ import uuid
 API_ENDPOINT = '/{}'
 # correct password used for all test users.
 TEST_USER_PSW = 'my_password123@'
-
-
-def format_user_data(user_data):
-    """
-    Given the attributes of a new user, compile the jsonapi post data for
-    the request.
-    """
-    return {
-        'data': {
-            'type': 'user',
-            'attributes': user_data
-        }
-    }
 
 
 class TestUser(TestCase):
@@ -52,7 +40,7 @@ class TestUser(TestCase):
         assert User.select().count() == 2
 
     def test_post_new_user__success(self):
-        user = format_user_data({
+        user = format_jsonapi_request('user', {
             'first_name': 'Mario',
             'last_name': 'Rossi',
             'email': 'rossi@email.com',
@@ -74,7 +62,7 @@ class TestUser(TestCase):
         assert User.get().admin is False
 
     def test_post_new_user__not_json_failure(self):
-        user = format_user_data({
+        user = format_jsonapi_request('user', {
             'first_name': 'Mario',
             'last_name': 'Rossi',
             'email': 'asddjkasdjhv',
@@ -89,7 +77,7 @@ class TestUser(TestCase):
 
     def test_post_new_user_email_exists__fail(self):
         add_user('mail@gmail.com', TEST_USER_PSW)
-        user = format_user_data({
+        user = format_jsonapi_request('user', {
             'first_name': 'Mario',
             'last_name': 'Rossi',
             'email': 'mail@gmail.com',
@@ -104,7 +92,7 @@ class TestUser(TestCase):
         assert User.select().count() == 1
 
     def test_post_new_user_no_email__fail(self):
-        user = format_user_data({
+        user = format_jsonapi_request('user', {
             'first_name': 'Mario',
             'last_name': 'Rossi',
             'password': 'aksdg',
@@ -127,7 +115,7 @@ class TestUser(TestCase):
         assert User.select().count() == 0
 
     def test_post_new_user_empty_str_field__fail(self):
-        user = format_user_data({
+        user = format_jsonapi_request('user', {
             'first_name': '',
             'last_name': 'Rossi',
             'email': 'mario@email.com',

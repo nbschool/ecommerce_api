@@ -93,3 +93,16 @@ def setup_images():
     """
     if not os.path.exists(get_image_folder()):
         os.makedirs(get_image_folder())
+
+
+def format_jsonapi_request(type_, data):
+    """
+    Given the attributes of a new user, compile the jsonapi post data for
+    the request.
+    """
+    return {
+        'data': {
+            'type': type_,
+            'attributes': data
+        }
+    }
