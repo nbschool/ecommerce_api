@@ -19,9 +19,10 @@ class BaseSchema(Schema):
     @classmethod
     def jsonapi(cls, obj, include_data=[]):
         """
-        http://marshmallow.readthedocs.io/en/latest/quickstart.html#serializing-objects-dumping
         Serialize obj by passing it to schema's dump method, which returns
         the formatted result.
+
+        documentation at https://goo.gl/1GXhbR
 
         :param obj object: The object to serialize
         :param include_data list: a list of fields inside the object to include
@@ -35,12 +36,14 @@ class BaseSchema(Schema):
     @classmethod
     def validate_input(cls, jsondata):
         """"
-        http://marshmallow.readthedocs.io/en/latest/quickstart.html#schema-validate
         validate an input json data against the schema of its relative object
         schema
+
+        documentation at https://goo.gl/0ZW1OW
+
         :returns:
         * True if validation is ok
-        * Errors dict {<key>: <error>} if validation does not pass
+        * Errors dict with validation errors if any
         """
 
         errors = cls().validate(jsondata)
