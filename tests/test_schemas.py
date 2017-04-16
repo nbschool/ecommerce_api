@@ -9,6 +9,7 @@ from models import User, Order
 from schemas import UserSchema
 from uuid import uuid4
 from tests.test_case import TestCase
+from tests.test_utils import format_jsonapi_request
 
 USER_TEST_DICT = {
     "first_name": "Monty",
@@ -66,15 +67,11 @@ class TestUserSchema(TestCase):
         assert type(parsed_user['included']) == list
         assert len(parsed_user['included']) == 2
         assert parsed_user['included'][0]['id'] == str(o1.order_id)
+        assert parsed_user['included'][1]['id'] == str(o2.order_id)
 
     def test_user_validate_input__success(self):
-        # Simulate what should come from the http POST request
-        post_data = {
-            'data': {
-                'type': 'user',
-                'attributes': USER_TEST_DICT
-            }
-        }
+        post_data = format_jsonapi_request('user', USER_TEST_DICT)
+
         valid_user, errors = UserSchema.validate_input(post_data)
 
         assert valid_user is True
@@ -84,13 +81,7 @@ class TestUserSchema(TestCase):
         wrong_user_data = USER_TEST_DICT.copy()
         # password field is required on input
         del wrong_user_data['password']
-        # Simulate what should come from the http POST request
-        post_data = {
-            'data': {
-                'type': 'user',
-                'attributes': wrong_user_data
-            }
-        }
+        post_data = format_jsonapi_request('user', wrong_user_data)
 
         validated, errors = UserSchema.validate_input(post_data)
 
