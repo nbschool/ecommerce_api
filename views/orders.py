@@ -4,7 +4,7 @@ Orders-view: this module contains functions for the interaction with the orders.
 
 from flask_restful import Resource
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
-from models import Order, Item
+from models import Address, Order, Item
 from flask import abort, request, g
 from auth import auth
 
@@ -71,7 +71,7 @@ class OrdersHandler(Resource):
                 return None, BAD_REQUEST
 
         order = Order.create(
-            delivery_address=res['order']['delivery_address'],
+            delivery_address=Address.get(Address.address_id == res['order']['delivery_address']),
             user=user,
         )
 
