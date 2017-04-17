@@ -88,13 +88,16 @@ class TestOrders(TestCase):
 
     def test_get_order__non_existing(self):
         user_A = add_user(None, TEST_USER_PSW)
-        Order.create(delivery_address='Via Rossi 12', user=user_A)
+        addr_A = add_address(user=user_A)
+        Order.create(delivery_address=addr_A, user=user_A)
 
         resp = self.app.get('/orders/{}'.format(uuid4()))
         assert resp.status_code == NOT_FOUND
 
     def test_get_order(self):
         user = add_user(None, TEST_USER_PSW)
+        addr_A = add_address(user=user)
+        addr_B = add_address(user=user, city='Firenze', post_code='50132', address='Via Rossi 10', phone='055432433')
 
         item1 = Item.create(
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
@@ -109,10 +112,10 @@ class TestOrders(TestCase):
             description='svariati GINIIIII'
         )
 
-        order1 = Order.create(delivery_address='Via Rossi 12', user=user)
+        order1 = Order.create(delivery_address=addr_A, user=user)
         order1.add_item(item1, 2)
 
-        order2 = Order.create(delivery_address='Via Verdi 12', user=user)
+        order2 = Order.create(delivery_address=addr_B, user=user)
         order2.add_item(item1).add_item(item2, 2)
 
         expected_data = {
@@ -120,7 +123,7 @@ class TestOrders(TestCase):
             'date': str(order1.created_at),
             'user_id': str(user.user_id),
             'total_price': 40.40,
-            'delivery_address': 'Via Rossi 12',
+            'delivery_address': addr_A.json(),
             'items': [{
                 'quantity': 2,
                 'subtotal': 40.40,
@@ -148,13 +151,14 @@ class TestOrders(TestCase):
             description='svariati GINIIIII'
         )
         user_A = add_user('123@email.com', TEST_USER_PSW)
+        addr_A = add_address(user=user_A)
         order = {
             'order': {
                 'items': [
                     {'name': 'mario', 'price': 20.20, 'quantity': 4},
                     {'name': 'GINO', 'price': 30.20, 'quantity': 10}
                 ],
-                'delivery_address': 'Via Rossi 12',
+                'delivery_address': addr_A.json()["address_id"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
         }
@@ -175,7 +179,7 @@ class TestOrders(TestCase):
         data = json.loads(resp.data)
 
         assert data['total_price'] == total_price
-        assert data['delivery_address'] == order['order']['delivery_address']
+        assert data['delivery_address']['address_id'] == order['order']['delivery_address']
         assert Order.get().json()['order_id'] == data['order_id']
 
     def test_create_order__failure_missing_field(self):
@@ -241,10 +245,11 @@ class TestOrders(TestCase):
 
     def test_create_order_no_items__fail(self):
         user = add_user('12345@email.com', TEST_USER_PSW)
+        addr = add_address(user=user)
         order = {
             'order': {
                 'items': [],
-                'delivery_address': 'Via Antani 2',
+                'delivery_address': addr.json()["address_id"],
                 'user': str(user.user_id)
             }
         }
