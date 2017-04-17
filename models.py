@@ -83,8 +83,9 @@ class User(BaseModel):
     def addresses(self):
         res = (
             Address
-            .select()
-            .where(Address.user == self)
+            .select(Address, User)
+            .join(User)
+            .where(User.user_id == self.user_id)
         )
         return [addr for addr in res]
 
@@ -242,7 +243,7 @@ class Order(BaseModel):
             'order_id': str(self.order_id),
             'date': str(self.created_at),
             'total_price': float(self.total_price),
-            'delivery_address': self.delivery_address,
+            'delivery_address': self.delivery_address.json(),
             'user_id': str(self.user.user_id)
         }
 
@@ -252,9 +253,10 @@ class Order(BaseModel):
         except Address.DoesNotExist:
             return False
 
-        if addr not in self.user.address:
+        if addr not in self.user.addresses:
             return False
         self.delivery_address = addr
+
         return True
 
 
