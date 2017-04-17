@@ -3,7 +3,7 @@ Test suite.
 """
 
 from models import Order, OrderItem, Item
-from tests.test_utils import open_with_auth, add_user
+from tests.test_utils import open_with_auth, add_user, add_address
 from tests.test_case import TestCase
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
 from peewee import SqliteDatabase
@@ -20,6 +20,30 @@ TEST_USER_PSW = 'my_password123@'
 
 class TestOrders(TestCase):
 
+    def test_set_address__success(self):
+        user = add_user('12345@email.com', TEST_USER_PSW)
+        addr_A = add_address(user=user)
+        addr_B = add_address(user=user, city='Firenze', post_code='50132', address='Via Rossi 10', phone='055432433')
+        order_A = Order.create(delivery_address=addr_A, user=user)
+
+        is_set = order_A.set_address(addr_B.address_id)
+
+        assert is_set == True
+
+    def test_set_address__failed(self):
+        user = add_user('12345@email.com', TEST_USER_PSW)
+        addr_A = add_address(user=user)
+        addr_B = add_address(user=user, city='Firenze', post_code='50132', address='Via Rossi 10', phone='055432433')
+
+        user2 = add_user('123456@email.com', TEST_USER_PSW)
+        addr_C  = add_address(user=user2, city='Firenze', post_code='50132', address='Via Rossi 10', phone='055432433')
+
+        order_A = Order.create(delivery_address=addr_A, user=user)
+
+        is_set = order_A.set_address(addr_C.address_id)
+
+        assert is_set == False
+
     def test_get_orders__empty(self):
         resp = self.app.get('/orders/')
         assert resp.status_code == OK
@@ -34,7 +58,8 @@ class TestOrders(TestCase):
         )
 
         user_A = add_user(None, TEST_USER_PSW)
-        order = Order.create(delivery_address='Via Rossi 12', user=user_A)
+        addr_A = add_address(user=user_A)
+        order = Order.create(delivery_address=addr_A, user=user_A)
         order.add_item(item, 2)
 
         resp = self.app.get('/orders/')
@@ -44,7 +69,7 @@ class TestOrders(TestCase):
             'date': str(order.created_at),
             'total_price': 40.40,
             'user_id': str(user_A.user_id),
-            'delivery_address': 'Via Rossi 12',
+            'delivery_address': addr_A.json(),
             'items': [{
                 'quantity': 2,
                 'subtotal': 40.40,
@@ -305,6 +330,7 @@ class TestOrders(TestCase):
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order_data))
 
+
         assert resp.status_code == BAD_REQUEST
         assert len(order.order_items) == 1
 
@@ -378,7 +404,6 @@ class TestOrders(TestCase):
         assert Order.get(order_id=order2.order_id)
 
     def test_delete_order__failure_non_existing_empty_orders(self):
-
         user_A = add_user('12345@email.com', TEST_USER_PSW)
 
         path = 'orders/{}'.format(str(uuid4()))
