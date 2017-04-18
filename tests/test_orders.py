@@ -26,10 +26,9 @@ class TestOrders(TestCase):
         addr_B = add_address(user=user, city='Firenze', post_code='50132', address='Via Rossi 10',
                              phone='055432433')
         order_A = Order.create(delivery_address=addr_A, user=user)
+        order_A.set_address(addr_B.address_id)
 
-        is_set = order_A.set_address(addr_B.address_id)
-
-        assert is_set == True
+        assert order_A.delivery_address.address_id == addr_B.address_id
 
     def test_set_address__failed(self):
         user = add_user('12345@email.com', TEST_USER_PSW)
@@ -45,7 +44,7 @@ class TestOrders(TestCase):
 
         is_set = order_A.set_address(addr_C.address_id)
 
-        assert is_set == False
+        assert not is_set
 
     def test_get_orders__empty(self):
         resp = self.app.get('/orders/')
