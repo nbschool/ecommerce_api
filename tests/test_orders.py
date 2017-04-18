@@ -382,8 +382,7 @@ class TestOrders(TestCase):
 
         user_A = add_user('12345@email.com', TEST_USER_PSW)
         order1 = Order.create(
-            order_id=uuid.uuid4(),
-            date=datetime.datetime.now().isoformat(),
+            order_id=uuid4(),
             total_price=100,
             delivery_address='Via Rossi 12',
             user=user_A
@@ -417,7 +416,7 @@ class TestOrders(TestCase):
         path = 'orders/{}'.format(order1.order_id)
         user_B = add_user('wrong_user@email.com', TEST_USER_PSW)
 
-        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PUT',
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               user_B.email, TEST_USER_PSW, 'application/json',
                               json.dumps(order))
 
@@ -453,11 +452,9 @@ class TestOrders(TestCase):
 
     def test_delete_order__fail_not_own_order(self):
         user_A = add_user('12345@email.com', TEST_USER_PSW)
-        order_id = uuid.uuid4()
-        dt = datetime.datetime.now().isoformat()
+        order_id = uuid4()
         Order.create(
             order_id=order_id,
-            date=dt,
             total_price=100,
             delivery_address='Via Rossi 12',
             user=user_A
