@@ -20,6 +20,7 @@ def add_user(email, psw):
         user_id=uuid.uuid4()
     )
 
+
 def add_admin_user(email, psw):
     """
     Create a single user in the test database.
