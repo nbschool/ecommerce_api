@@ -52,8 +52,8 @@ class OrdersHandler(Resource):
         res = request.get_json()
         # Check that the order has an 'items' and 'delivery_address' attributes
         # otherwise it's useless to continue.
-        for i in ('items', 'delivery_address'):
-            if not res['order'].get(i):
+        for key in ('items', 'delivery_address'):
+            if not res['order'].get(key):
                 return None, BAD_REQUEST
 
         # Check that the address exist and check that the items exist by getting all the item names
@@ -74,9 +74,9 @@ class OrdersHandler(Resource):
             user=user,
         )
 
-        for i in res['order']['items']:
-            item = Item.get(Item.name == i['name'])
-            order.add_item(item, i['quantity'])
+        for items in res['order']['items']:
+            item = Item.get(Item.name == items['name'])
+            order.add_item(item, items['quantity'])
 
         return serialize_order(order), CREATED
 
@@ -98,8 +98,8 @@ class OrderHandler(Resource):
         """ Modify a specific order. """
         res = request.get_json()
 
-        for i in ('items', 'delivery_address', 'order_id'):
-            if not res['order'].get(i):
+        for key in ('items', 'delivery_address', 'order_id'):
+            if not res['order'].get(key):
                 return None, BAD_REQUEST
 
         try:
