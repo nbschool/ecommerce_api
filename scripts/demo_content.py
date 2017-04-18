@@ -8,6 +8,7 @@ from models import User, Item, Order, OrderItem
 import os
 import sys
 import sqlite3
+import glob
 
 TEXT_DISPLAY = '\033[95m'+'\033[1m'+"""
                       WELCOME TO DEMO CONTENT CREATOR.
@@ -412,12 +413,10 @@ def write_db():
     )
 
 
-def look_and_list_db(list_of):
+def look_and_list_db():
     """create a list with the name of each .db file from the main folder."""
-    list_of_db = list_of
-    for filename in os.listdir('.'):
-        if filename.endswith('.db'):
-            list_of.append(filename)
+    list_of_db = []
+    list_of_db = glob.glob('*.db')
     return list_of_db
 
 
@@ -482,29 +481,6 @@ def good_bye(word, default='has'):
     sys.exit()
 
 
-def overwrite_unique_db():
-    list_of_db = []
-    look_and_list_db(list_of_db)
-    print(WARNING_OVERWRITE)
-    for index, name_db in enumerate(list_of_db, start=1):
-        print('('+str(index)+')'+'.-', name_db+' |', end=' ')
-    print(' ')
-    print('Are you sure to overwrite?'.format())
-    selct = input('(1)Yes or [ENTER] exit without change. > ')
-    if selct is '1':
-        db = SqliteDatabase(list_of_db[0], autocommit=False)
-        set_db(db)
-        drops_all_tables(db)
-        create_my_tables()
-        write_db()
-        good_bye('written')
-    if selct is '':
-        good_bye('change', default='hasn\'t')
-    else:
-        print('ERRORRRR! :p')
-        good_bye('ERROR')
-
-
 def remove_unique_db():
     path = []
     look_and_list_db(path)
@@ -542,8 +518,30 @@ def remove_chosen_db(list_of):
             os.remove(path)
 
 
-def overwrite_chosen_db(list_of):
-    list_of_db = list_of
+def overwrite_unique_db():
+    list_of_db = look_and_list_db()
+    print(WARNING_OVERWRITE)
+    for index, name_db in enumerate(list_of_db, start=1):
+        print('('+str(index)+')'+'.-', name_db, end=' ')
+    print(' ')
+    print('Are you sure to overwrite?'.format())
+    selct = input('if Yes press(1) or [ENTER] to exit without change. > ')
+    if selct is '1':
+        db = SqliteDatabase(list_of_db[0], autocommit=False)
+        set_db(db)
+        drops_all_tables(db)
+        create_my_tables()
+        write_db()
+        good_bye('written')
+    if selct is '':
+        good_bye('change', default='hasn\'t')
+    else:
+        print('ERRORRRR! :p')
+        good_bye('ERROR')
+
+
+def overwrite_chosen_db():
+    list_of_db = look_and_list_db()
     lenght_of_list = len(list_of_db)
     print(WARNING_OVERWRITE)
     for index, name_db in enumerate(list_of_db, start=1):
@@ -573,7 +571,7 @@ def overwrite_chosen_db(list_of):
             write_db()
             good_bye('written')
         else:
-            overwrite_chosen_db(list_of)
+            overwrite_chosen_db()
 
 
 def main():
@@ -583,15 +581,16 @@ def main():
     print(TEXT_DISPLAY)
     while interaction is True:
             list_of_db = []
+            list_of_db = look_and_list_db()
+            lenght_of_list = len(list_of_db)
             print(MENU_TEXT)
             selct = input('Press your choice > ')
             if selct == '1':
-                look_and_list_db(list_of_db)
-                lenght_of_list = len(list_of_db)
-                if lenght_of_list is 1:
+                if lenght_of_list == 1:
+                    print('You\'ve already 1 database in your folder :')
                     overwrite_unique_db()
                 else:
-                    overwrite_chosen_db(list_of_db)
+                    overwrite_chosen_db()
             if selct == '2':
                 name_new_db = input('Write the name of the new db. > ')
                 sqlite3.connect(name_new_db+'.db')
