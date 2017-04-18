@@ -11,13 +11,16 @@ import http.client as client
 
 from models import Item
 
+from utils import generate_response
+
 
 class ItemsHandler(Resource):
     """Handler of the collection of items"""
 
     def get(self):
         """Retrieve every item"""
-        return [o.json() for o in Item.select()], client.OK
+        data = Item.json_list(Item.get_all())
+        return generate_response(data, client.OK)
 
     def post(self):
         """
@@ -43,7 +46,7 @@ class ItemsHandler(Resource):
             availability=int(data['availability']),
         )
 
-        return item.json(), client.CREATED
+        return generate_response(item.json(), client.CREATED)
 
 
 class ItemHandler(Resource):
@@ -52,7 +55,8 @@ class ItemHandler(Resource):
     def get(self, item_uuid):
         """Retrieve the item specified by item_uuid"""
         try:
-            return Item.get(Item.uuid == item_uuid).json(), client.OK
+            item = Item.get(Item.uuid == item_uuid)
+            return generate_response(item.json(), client.OK)
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
 
@@ -83,7 +87,7 @@ class ItemHandler(Resource):
 
         obj.save()
 
-        return obj.json(), client.OK
+        return generate_response(obj.json(), client.OK)
 
     def delete(self, item_uuid):
         """Remove the item specified by item_uuid"""
