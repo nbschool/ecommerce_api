@@ -2,9 +2,9 @@
 Test suite for ItemHandler and ItemListHandler
 """
 
-import json
 import os
 
+import simplejson as json
 
 import http.client as client
 
@@ -97,11 +97,7 @@ class TestItems(TestCase):
         item = Item.get(Item.item_id == resp_item['data']['id'])
         assert item is not None
 
-        # validate new Item properties
-        assert item.name == TEST_ITEM['name']
-        assert float(item.price) == TEST_ITEM['price']
-        assert item.description == TEST_ITEM['description']
-        # validate response item properties
+        # validate response data attributes
         test_item = TEST_ITEM.copy()
         del test_item['item_id']
         assert item.json()['data']['attributes'] == test_item
