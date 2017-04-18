@@ -57,6 +57,7 @@ def database_disconnect(response):
         database.close()
     return response
 
+
 api.add_resource(AddressesHandler, "/addresses/")
 api.add_resource(AddressHandler, "/addresses/<uuid:address_id>")
 api.add_resource(ItemsHandler, "/items/")

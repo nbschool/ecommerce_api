@@ -56,8 +56,8 @@ class OrdersHandler(Resource):
             if not res['order'].get(i):
                 return None, BAD_REQUEST
 
-        # Check that the address exist and check that the items exist by getting all the item names from the
-        # request and executing a get() request with Peewee
+        # Check that the address exist and check that the items exist by getting all the item names
+        # from the request and executing a get() request with Peewee
         try:
             item_names = [e['name'] for e in res['order']['items']]
             # FIXME: This look up just one item, not all of them, so it does
