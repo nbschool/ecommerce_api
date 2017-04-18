@@ -82,9 +82,10 @@ class OrderSchema(BaseSchema):
         self_url_many = '/orders/'
 
     id = fields.Str(dump_only=True, attribute='order_id')
-    date = fields.DateTime(attribute='created_at')
-    total_price = fields.Float()
-    delivery_address = fields.Str()
+    date = fields.DateTime(attribute='created_at', dump_only=True)
+    total_price = fields.Decimal(
+        dump_only=True, places=2)  # TODO: jsonify see docs
+    delivery_address = fields.Str(required=True)
 
     # Uses the OrderItem table and OrderItemSchema to serialize a json object
     # representing each item in the order
@@ -100,14 +101,6 @@ class OrderSchema(BaseSchema):
         type_='user', schema='UserSchema',
         dump_only=True, id_field='user_id',
     )
-
-    @classmethod
-    def jsonapi(cls, obj, include_data=['items', 'user']):
-        """
-        Override BaseSchema.json to automatically include the `items` field
-        of the order.
-        """
-        return super(OrderSchema, cls).jsonapi(obj, include_data)
 
 
 class OrderItemSchema(BaseSchema):
