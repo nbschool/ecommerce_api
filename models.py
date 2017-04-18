@@ -67,6 +67,11 @@ class Picture(BaseModel):
     extension = CharField()
     item = ForeignKeyField(Item, related_name='pictures')
 
+    def filename(self):
+        return '{}.{}'.format(
+            self.picture_id,
+            self.extension)
+
     def json(self):
         return {
             'picture_id': str(self.picture_id),
