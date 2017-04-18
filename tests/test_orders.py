@@ -393,16 +393,19 @@ class TestOrders(TestCase):
 
     def test_delete_order__success(self):
         user_A = add_user('12345@email.com', TEST_USER_PSW)
+        addr_A = add_address(user=user_A)
+        addr_B = add_address(user=user_A)
+
         item1 = Item.create(
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii'
         )
-        order1 = Order.create(delivery_address='Via Rossi 12', user=user_A)
+        order1 = Order.create(delivery_address=addr_A, user=user_A)
         order1.add_item(item1, 2)
 
-        order2 = Order.create(delivery_address='Via Verdi 12', user=user_A)
+        order2 = Order.create(delivery_address=addr_B, user=user_A)
 
         resp = self.app.delete('/orders/{}'.format(order1.order_id))
 
@@ -427,7 +430,8 @@ class TestOrders(TestCase):
 
     def test_delete_order__failure__failure_non_existing(self):
         user_A = add_user('12345@email.com', TEST_USER_PSW)
-        Order.create(delivery_address='Via Rossi 12', user=user_A)
+        addr_A = add_address(user=user_A)
+        Order.create(delivery_address=addr_A, user=user_A)
 
         resp = self.app.delete('/orders/{}'.format(uuid4()))
 
@@ -444,6 +448,7 @@ class TestOrders(TestCase):
         models.
         """
         user = add_user(None, TEST_USER_PSW)
+        addr = add_address(user=user)
 
         def count_items(order):
             tot = 0
@@ -469,7 +474,7 @@ class TestOrders(TestCase):
             description='Item 2 description',
             price=15
         )
-        order = Order.create(delivery_address='My address', user=user)
+        order = Order.create(delivery_address=addr, user=user)
         order.add_item(item1, 2).add_item(item2, 2)
 
         assert len(order.order_items) == 2
