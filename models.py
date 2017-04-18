@@ -307,23 +307,9 @@ class Order(BaseModel):
         parsed, errors = OrderSchema.jsonapi(self, include_data)
         return parsed
 
-        return order_json
-
-    def get_order_items(self):
-        """
-        Gets all the OrderItems related to an order.
-        """
-
-        items = []
-        for orderitem in self.order_items:
-            items.append({
-                'quantity': orderitem.quantity,
-                'price': float(orderitem.item.price),
-                'subtotal': float(orderitem.subtotal),
-                'name': orderitem.item.name,
-                'description': orderitem.item.description
-            })
-        return items
+    @staticmethod
+    def validate_input(data):
+        return OrderSchema.validate_input(data)
 
 
 class OrderItem(BaseModel):
