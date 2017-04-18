@@ -21,6 +21,24 @@ def add_user(email, psw):
     )
 
 
+def add_admin_user(email, psw):
+    """
+    Create a single user in the test database.
+    If an email is provided it will be used, otherwise it will be generated
+    by the function before adding the User to the database.
+    """
+    email = email or 'johndoe{}@email.com'.format(int(random.random() * 100))
+
+    return User.create(
+        first_name='John Admin',
+        last_name='Doe',
+        email=email,
+        password=User.hash_password(psw),
+        user_id=uuid.uuid4(),
+        admin=True
+    )
+
+
 def add_address(user, country='Italy', city='Pistoia', post_code='51100',
                 address='Via Verdi 12', phone='3294882773'):
 

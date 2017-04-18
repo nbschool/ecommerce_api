@@ -3,8 +3,8 @@ Orders-view: this module contains functions for the interaction with the orders.
 """
 
 from flask_restful import Resource
-from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
 from models import Address, Order, Item
+from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST, UNAUTHORIZED
 from flask import abort, request, g
 from auth import auth
 
@@ -107,6 +107,15 @@ class OrderHandler(Resource):
             address = Address.get(Address.address_id == res['order']['delivery_address'])
         except (Address.DoesNotExist, Order.DoesNotExist):
             return None, NOT_FOUND
+
+        # get the user from the flask.g global object registered inside the
+        # auth.py::verify() function, called by @auth.login_required decorator
+        # and match it against the found user.
+        # This is to prevent users from modify other users' order.
+        if g.user != order.user and g.user.admin is False:
+            return ({'message': "You can't delete another user's order"},
+                    UNAUTHORIZED)
+
         # Clear the order of all items before adding the new items
         # that came with the PATCH request
         order.empty_order()
@@ -127,6 +136,14 @@ class OrderHandler(Resource):
             obj = Order.get(order_id=str(order_id))
         except Order.DoesNotExist:
             return None, NOT_FOUND
+
+        # get the user from the flask.g global object registered inside the
+        # auth.py::verify() function, called by @auth.login_required decorator
+        # and match it against the found user.
+        # This is to prevent users from deleting other users' account.
+        if g.user != obj.user and g.user.admin is False:
+            return ({'message': "You can't delete another user's order"},
+                    UNAUTHORIZED)
 
         obj.delete_instance(recursive=True)
         return None, NO_CONTENT
