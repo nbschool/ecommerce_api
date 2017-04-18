@@ -20,7 +20,6 @@ TEST_USER_PSW = 'my_password123@'
 
 class TestOrders(TestCase):
 
-
     def test_get_orders__empty(self):
         resp = self.app.get('/orders/')
         assert resp.status_code == OK
