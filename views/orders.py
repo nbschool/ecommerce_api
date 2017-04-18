@@ -112,7 +112,7 @@ class OrderHandler(Resource):
         # auth.py::verify() function, called by @auth.login_required decorator
         # and match it against the found user.
         # This is to prevent users from modify other users' order.
-        if g.user != order.user:
+        if g.user != order.user and g.user.admin == False:
             return ({'message': "You can't delete another user's order"},
                     UNAUTHORIZED)
 
@@ -141,7 +141,7 @@ class OrderHandler(Resource):
         # auth.py::verify() function, called by @auth.login_required decorator
         # and match it against the found user.
         # This is to prevent users from deleting other users' account.
-        if g.user != obj.user:
+        if g.user != obj.user and g.user.admin == False:
             return ({'message': "You can't delete another user's order"},
                     UNAUTHORIZED)
 
