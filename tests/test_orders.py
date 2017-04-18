@@ -297,7 +297,7 @@ class TestOrders(TestCase):
             }
         }
         path = '/orders/{}'.format(order_id)
-        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PUT',
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               'user@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order))
 
