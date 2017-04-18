@@ -20,31 +20,6 @@ TEST_USER_PSW = 'my_password123@'
 
 class TestOrders(TestCase):
 
-    def test_set_address__success(self):
-        user = add_user('12345@email.com', TEST_USER_PSW)
-        addr_A = add_address(user=user)
-        addr_B = add_address(user=user, city='Firenze', post_code='50132', address='Via Rossi 10',
-                             phone='055432433')
-        order_A = Order.create(delivery_address=addr_A, user=user)
-        order_A.set_address(addr_B.address_id)
-
-        assert order_A.delivery_address.address_id == addr_B.address_id
-
-    def test_set_address__failed(self):
-        user = add_user('12345@email.com', TEST_USER_PSW)
-        addr_A = add_address(user=user)
-        add_address(user=user, city='Firenze', post_code='50132', address='Via Rossi 10',
-                    phone='055432433')
-
-        user2 = add_user('123456@email.com', TEST_USER_PSW)
-        addr_C = add_address(user=user2, city='Firenze', post_code='50132', address='Via Rossi 10',
-                             phone='055432433')
-
-        order_A = Order.create(delivery_address=addr_A, user=user)
-
-        is_set = order_A.set_address(addr_C.address_id)
-
-        assert not is_set
 
     def test_get_orders__empty(self):
         resp = self.app.get('/orders/')

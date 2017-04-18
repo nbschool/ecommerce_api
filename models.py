@@ -247,18 +247,6 @@ class Order(BaseModel):
             'user_id': str(self.user.user_id)
         }
 
-    def set_address(self, id):
-        try:
-            addr = Address.get(Address.address_id == id)
-        except Address.DoesNotExist:
-            return False
-
-        if addr not in self.user.addresses:
-            return False
-        self.delivery_address = addr
-
-        return True
-
 
 class OrderItem(BaseModel):
     """ The model OrderItem is a cross table that contains the order
