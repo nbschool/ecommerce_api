@@ -5,7 +5,7 @@ Test suite.
 from models import Order, OrderItem, Item
 from tests.test_utils import open_with_auth, add_user, add_address
 from tests.test_case import TestCase
-from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
+from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST, UNAUTHORIZED
 from peewee import SqliteDatabase
 import json
 from uuid import uuid4
@@ -393,6 +393,27 @@ class TestOrders(TestCase):
         assert len(Order.select()) == 1
         assert len(OrderItem.select()) == 0
         assert Order.get(order_id=order2.order_id)
+
+    def test_delete_order__fail_not_own_order(self):
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
+        order_id = uuid.uuid4()
+        dt = datetime.datetime.now().isoformat()
+        Order.create(
+            order_id=order_id,
+            date=dt,
+            total_price=100,
+            delivery_address='Via Rossi 12',
+            user=user_A
+        )
+
+        user_B = add_user('wrong_user@email.com', TEST_USER_PSW)
+        path = 'orders/{}'.format(order_id)
+
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'DELETE',
+                              user_B.email, TEST_USER_PSW, None,
+                              None)
+
+        assert resp.status_code == UNAUTHORIZED
 
     def test_delete_order__failure_non_existing_empty_orders(self):
         user_A = add_user('12345@email.com', TEST_USER_PSW)
