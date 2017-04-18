@@ -23,7 +23,8 @@ class TestOrders(TestCase):
     def test_set_address__success(self):
         user = add_user('12345@email.com', TEST_USER_PSW)
         addr_A = add_address(user=user)
-        addr_B = add_address(user=user, city='Firenze', post_code='50132', address='Via Rossi 10', phone='055432433')
+        addr_B = add_address(user=user, city='Firenze', post_code='50132', address='Via Rossi 10',
+                             phone='055432433')
         order_A = Order.create(delivery_address=addr_A, user=user)
 
         is_set = order_A.set_address(addr_B.address_id)
@@ -33,10 +34,12 @@ class TestOrders(TestCase):
     def test_set_address__failed(self):
         user = add_user('12345@email.com', TEST_USER_PSW)
         addr_A = add_address(user=user)
-        addr_B = add_address(user=user, city='Firenze', post_code='50132', address='Via Rossi 10', phone='055432433')
+        add_address(user=user, city='Firenze', post_code='50132', address='Via Rossi 10',
+                    phone='055432433')
 
         user2 = add_user('123456@email.com', TEST_USER_PSW)
-        addr_C  = add_address(user=user2, city='Firenze', post_code='50132', address='Via Rossi 10', phone='055432433')
+        addr_C = add_address(user=user2, city='Firenze', post_code='50132', address='Via Rossi 10',
+                             phone='055432433')
 
         order_A = Order.create(delivery_address=addr_A, user=user)
 
@@ -97,7 +100,8 @@ class TestOrders(TestCase):
     def test_get_order(self):
         user = add_user(None, TEST_USER_PSW)
         addr_A = add_address(user=user)
-        addr_B = add_address(user=user, city='Firenze', post_code='50132', address='Via Rossi 10', phone='055432433')
+        addr_B = add_address(user=user, city='Firenze', post_code='50132', address='Via Rossi 10',
+                             phone='055432433')
 
         item1 = Item.create(
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
@@ -339,7 +343,6 @@ class TestOrders(TestCase):
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order_data))
 
-
         assert resp.status_code == BAD_REQUEST
         assert len(order.order_items) == 1
 
@@ -367,7 +370,6 @@ class TestOrders(TestCase):
                               json.dumps(order))
 
         assert resp.status_code == NOT_FOUND
-
 
     def test_update_order__failure_non_existing_empty_orders(self):
         user_A = add_user('user@email.com', TEST_USER_PSW)
