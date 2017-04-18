@@ -1,4 +1,4 @@
-from models import User
+from models import Address, User
 from base64 import b64encode
 import uuid
 import random
@@ -18,6 +18,20 @@ def add_user(email, psw):
         email=email,
         password=User.hash_password(psw),
         user_id=uuid.uuid4()
+    )
+
+
+def add_address(user, country='Italy', city='Pistoia', post_code='51100',
+                address='Via Verdi 12', phone='3294882773'):
+
+    return Address.create(
+        address_id=uuid.uuid4(),
+        user=user,
+        country=country,
+        city=city,
+        post_code=post_code,
+        address=address,
+        phone=phone
     )
 
 
