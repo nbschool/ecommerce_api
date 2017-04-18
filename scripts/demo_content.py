@@ -418,7 +418,7 @@ def main():
         """create a list with the name of each .db file from the main folder."""
         list_of_db = []
         lenght_of_list = len(list_of_db)
-        for filename in os.listdir('../'):
+        for filename in os.listdir('.'):
             if filename.endswith('.db'):
                 list_of.append(filename)
         return list_of
@@ -481,12 +481,27 @@ def main():
         sys.exit()
 
     def overwrite_unique_db():
-        db = SqliteDatabase('database.db', autocommit=False)
-        set_db(db)
-        drops_all_tables(db)
-        create_my_tables()
-        write_db()
-        good_bye('written')
+        list_of_db = []
+        look_and_list_db(list_of_db)
+        lenght_of_list = len(list_of_db)
+        print(WARNING_OVERWRITE)
+        for index, name_db in enumerate(list_of_db, start=1):
+            print('('+str(index)+')'+'.-', name_db+' |', end=' ')
+        print(' ')
+        print('Are you sure to overwrite?'.format())
+        selct = input('(1)Yes | [ENTER] exit without change. > ')
+        if selct is '1':
+            db = SqliteDatabase(list_of_db[0], autocommit=False)
+            set_db(db)
+            drops_all_tables(db)
+            create_my_tables()
+            write_db()
+            good_bye('written')
+        if selct is '':
+            good_bye('nothing')
+        else:
+            print('ERRORRRR! :p')
+            good_bye('ERROR')
 
     def remove_unique_db():
         path = []
