@@ -116,7 +116,7 @@ class OrderHandler(Resource):
             order.add_item(
                 Item.get(Item.name == item['name']), item['quantity'])
 
-        order.delivery_address = res['order']['delivery_address']
+        order.delivery_address = Address.get(Address.address_id == res['order']['delivery_address'])
         order.save()
 
         return serialize_order(order), OK
