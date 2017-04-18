@@ -107,16 +107,20 @@ class TestItems(TestCase):
         assert item.json()['data']['attributes'] == test_item
 
     def test_post_item__failed(self):
-        resp = self.app.post('/items/', data=json.dumps(TEST_ITEM_WRONG),
+        data = format_jsonapi_request('item', TEST_ITEM_WRONG)
+        resp = self.app.post('/items/', data=json.dumps(data),
                              content_type='application/json')
+
         assert resp.status_code == client.BAD_REQUEST
+        assert Item.select().count() == 0
 
     def test_post_item__round_price(self):
         data = format_jsonapi_request('item', TEST_ITEM_PRECISION)
         resp = self.app.post('/items/', data=json.dumps(data),
                              content_type='application/json')
+
         assert resp.status_code == client.CREATED
-        item = Item.select().get()
+        item = Item.select()[0]
         assert round(TEST_ITEM_PRECISION['price'], 5) == float(item.price)
         assert not TEST_ITEM_PRECISION['price'] == item.price
         assert TEST_ITEM_PRECISION['name'] == item.name

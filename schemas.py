@@ -1,13 +1,15 @@
 from marshmallow_jsonapi import Schema, fields
 from marshmallow import validate
 
+import simplejson
 """
-Validation object for strings that cannot be empty such as User names, emails
-and passwords.
-
+Validation rule to avoid empty strings.
 Documentation can be found at https://goo.gl/pVvryk
 """
 NOT_BLANK = validate.Length(min=1, error='Field cannot be blank')
+
+"""Validation rule for prices that must be >= 0"""
+MORE_THAN_ZERO = validate.Range(min=0)
 
 
 class BaseSchema(Schema):
@@ -30,7 +32,7 @@ class BaseSchema(Schema):
         :returns: (data, errors)
         """
 
-        serialized = cls(include_data=include_data).dump(obj)
+        serialized = cls(include_data=include_data).dumps(obj)
         return serialized.data, serialized.errors
 
     @classmethod
@@ -64,10 +66,10 @@ class ItemSchema(BaseSchema):
         self_url_many = '/items/'
 
     id = fields.Str(dump_only=True, attribute='item_id')
-    name = fields.Str()
-    price = fields.Float()
-    description = fields.Str()
-    availability = fields.Int()
+    name = fields.Str(validate=NOT_BLANK)
+    price = fields.Float(validate=MORE_THAN_ZERO)
+    description = fields.Str(validate=NOT_BLANK)
+    availability = fields.Int(MORE_THAN_ZERO)
 
 
 class OrderSchema(BaseSchema):
@@ -80,12 +82,15 @@ class OrderSchema(BaseSchema):
     class Meta:
         type_ = 'order'
         self_url_many = '/orders/'
+        self_url = '/orders/{id}'
+        self_url_kwargs = {'id': '<id>'}
+        json_module = simplejson
 
     id = fields.Str(dump_only=True, attribute='order_id')
     date = fields.DateTime(attribute='created_at', dump_only=True)
-    total_price = fields.Decimal(
-        dump_only=True, places=2)  # TODO: jsonify see docs
-    delivery_address = fields.Str(required=True)
+    total_price = fields.Decimal(dump_only=True, places=2,
+                                 validate=MORE_THAN_ZERO)
+    delivery_address = fields.Str(required=True, validate=NOT_BLANK)
 
     # Uses the OrderItem table and OrderItemSchema to serialize a json object
     # representing each item in the order
