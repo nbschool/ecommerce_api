@@ -48,16 +48,21 @@ class TestPictures(TestCase):
         shutil.rmtree(IMAGE_FOLDER, onerror=None)
 
     def test_get_picture__success(self):
+        if not os.path.exists(IMAGE_FOLDER):
+            os.makedirs(IMAGE_FOLDER)
         item = Item.create(**TEST_ITEM)
         picture = Picture.create(item=item, **TEST_PICTURE)
-
+        open("{path}/{picture_id}.jpg".format(
+            path=IMAGE_FOLDER,
+            picture_id=picture.picture_id), "wb")
         resp = self.app.get('/pictures/{picture_id}'.format(
             picture_id=picture.picture_id))
         assert resp.status_code == client.OK
 
         test_picture = TEST_PICTURE.copy()
         test_picture['item_id'] = item.item_id
-        assert json.loads(resp.data) == test_picture
+        assert resp.data == b''
+        assert resp.headers['Content-Type'] == 'image/jpeg'
 
     def test_get_picture__missing(self):
         resp = self.app.get('/pictures/{picture_id}'.format(
