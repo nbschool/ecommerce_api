@@ -112,7 +112,7 @@ class TestOrderSchema(TestCase):
 
         parsed = order.json(include_data=['items', 'user'])
         assert False
-		# TODO: finish implementing the test
+        # TODO: finish implementing the test
 
     def test_order_validate_input__success(self):
         post_data = format_jsonapi_request('order', {
@@ -125,5 +125,5 @@ class TestOrderSchema(TestCase):
         })
 
         isValid, errors = OrderSchema.validate_input(post_data)
-		assert False
-		# TODO: Finisc implementing the test. check validation
+        assert False
+        # TODO: Finisc implementing the test. check validation
