@@ -91,14 +91,14 @@ class TestItems(TestCase):
     def test_patch_item__success(self):
         item = Item.create(**TEST_ITEM)
         resp = self.app.patch('/items/{item_id}'.format(item_id=item.item_id),
-                              data=json.dumps(TEST_ITEM2),
+                              data=json.dumps({'name': 'new-name'}),
                               content_type='application/json')
         assert resp.status_code == client.OK
         json_item = Item.select().where(
             Item.item_id == item.item_id).get().json()
-        assert json_item['name'] == TEST_ITEM2['name']
-        assert json_item['price'] == TEST_ITEM2['price']
-        assert json_item['description'] == TEST_ITEM2['description']
+        assert json_item['name'] == 'new-name'
+        assert json_item['price'] == TEST_ITEM['price']
+        assert json_item['description'] == TEST_ITEM['description']
         assert json_item['item_id'] == item.item_id
 
     def test_patch_item__wrong_id(self):
