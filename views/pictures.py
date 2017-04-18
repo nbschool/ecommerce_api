@@ -5,7 +5,7 @@ from models import Item
 from models import Picture
 import utils
 
-from flask import request
+from flask import request, send_from_directory
 from flask_restful import Resource
 import http.client as client
 
@@ -65,11 +65,14 @@ class PictureHandler(Resource):
 
     def get(self, picture_id):
         """Retrieve the picture specified by picture_id"""
+
         try:
-            return Picture.get(Picture.picture_id == picture_id).json(),\
-                client.OK
+            picture = Picture.get(Picture.picture_id == picture_id)
         except Picture.DoesNotExist:
             return None, client.NOT_FOUND
+
+        return send_from_directory(utils.IMAGE_FOLDER, picture.filename(),
+                                   as_attachment=True)
 
     def delete(self, picture_id):
         """Remove the picture specified by picture_id"""
