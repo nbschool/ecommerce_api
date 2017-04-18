@@ -36,6 +36,26 @@ class BaseSchema(Schema):
         return serialized.data, serialized.errors
 
     @classmethod
+    def jsonapi_list(cls, obj_list):
+        """
+        Given a list of resource models returns a json array with all
+        the rows of the table.
+        return value is a string `[{resource}, ...]`
+        """
+        json_string = ','.join([o.json() for o in obj_list])
+        json_string = '[{}]'.format(json_string)
+
+        return json_string
+
+    @classmethod
+    def serialize(cls, obj, include_data=[]):
+        """
+        Serialize the given object into a python data structure.
+        """
+        serialized = cls(include_data=include_data).dump(obj)
+        return serialized.data, serialized.errors
+
+    @classmethod
     def validate_input(cls, jsondata):
         """"
         validate an input json data against the schema of its relative object
