@@ -1,5 +1,5 @@
 import os
-from flask import abort
+from flask import abort, Response
 from http.client import BAD_REQUEST
 
 IMAGE_FOLDER = 'images'
@@ -63,3 +63,15 @@ def image_fullpath(picture_uuid, extension):
     return os.path.join(
         get_image_folder(),
         '{}.{}'.format(str(picture_uuid), extension))
+
+
+def generate_response(data, status, mimetype='application/vnd.api+json'):
+    """
+    Given a resource model that extends from `BaseModel` generate a Reponse
+    object to be returned from the application endpoints'
+    """
+    return Response(
+        response=data,
+        status=status,
+        mimetype=mimetype
+    )
