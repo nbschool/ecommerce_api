@@ -366,6 +366,63 @@ class TestOrders(TestCase):
 
         assert resp.status_code == NOT_FOUND
 
+    def test_update_order__failure_not_own_order(self):
+        item1 = Item.create(
+            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii'
+        )
+        item2 = Item.create(
+            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            name='GINO',
+            price=30.20,
+            description='svariati GINIIIII'
+        )
+
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
+        order1 = Order.create(
+            order_id=uuid.uuid4(),
+            date=datetime.datetime.now().isoformat(),
+            total_price=100,
+            delivery_address='Via Rossi 12',
+            user=user_A
+        )
+        OrderItem.create(
+            order=order1,
+            item=item1,
+            quantity=2,
+            subtotal=40.00
+        )
+        OrderItem.create(
+            order=order1,
+            item=item2,
+            quantity=1,
+            subtotal=60
+        )
+
+        order_id = str(order1.order_id)
+        order = {
+            "order": {
+                "order_id": order_id,
+                'items': [
+                    {'name': 'mario', 'price': 20.0, 'quantity': 5},
+                    {'name': 'GINO', 'price': 30.20, 'quantity': 1}
+                ],
+                'delivery_address': 'Via Verdi 20',
+                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+
+            }
+        }
+        path = 'orders/{}'.format(order1.order_id)
+        user_B = add_user('wrong_user@email.com', TEST_USER_PSW)
+
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PUT',
+                              user_B.email, TEST_USER_PSW, 'application/json',
+                              json.dumps(order))
+
+        assert resp.status_code == UNAUTHORIZED
+
     def test_delete_order__success(self):
         user_A = add_user('12345@email.com', TEST_USER_PSW)
         addr_A = add_address(user=user_A)

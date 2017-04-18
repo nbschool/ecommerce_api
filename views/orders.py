@@ -107,6 +107,15 @@ class OrderHandler(Resource):
             address = Address.get(Address.address_id == res['order']['delivery_address'])
         except (Address.DoesNotExist, Order.DoesNotExist):
             return None, NOT_FOUND
+
+        # get the user from the flask.g global object registered inside the
+        # auth.py::verify() function, called by @auth.login_required decorator
+        # and match it against the found user.
+        # This is to prevent users from modify other users' order.
+        if g.user != order.user:
+            return ({'message': "You can't delete another user's order"},
+                    UNAUTHORIZED)
+
         # Clear the order of all items before adding the new items
         # that came with the PATCH request
         order.empty_order()
