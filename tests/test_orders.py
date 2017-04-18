@@ -275,10 +275,13 @@ class TestOrders(TestCase):
         )
 
         user_A = add_user('12345@email.com', TEST_USER_PSW)
-        order1 = Order.create(delivery_address='Via Rossi 12', user=user_A)
+        addr_A = add_address(user=user_A)
+        addr_B = add_address(user=user_A)
+
+        order1 = Order.create(delivery_address=addr_A, user=user_A)
         order1.add_item(item1, 2).add_item(item2)
 
-        order2 = Order.create(delivery_address='Via Bianchi 10', user=user_A)
+        order2 = Order.create(delivery_address=addr_B, user=user_A)
         order2.add_item(item2)
 
         order_id = str(order1.order_id)
@@ -290,7 +293,7 @@ class TestOrders(TestCase):
                     {'name': 'mario', 'price': 20.0, 'quantity': 5},
                     {'name': 'GINO', 'price': 30.20, 'quantity': 1}
                 ],
-                'delivery_address': 'Via Verdi 20',
+                'delivery_address': addr_B.json()["address_id"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
 
             }
@@ -303,7 +306,7 @@ class TestOrders(TestCase):
         assert resp.status_code == OK
         resp_order = Order.get(order_id=order1.order_id).json()
         assert resp_order['order_id'] == order['order']['order_id']
-        assert resp_order['delivery_address'] == order['order']['delivery_address']
+        assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
 
     def test_update_order_empty_items_list__fail(self):
         item1 = Item.create(
@@ -313,9 +316,10 @@ class TestOrders(TestCase):
             description='svariati mariii'
         )
         user = add_user('12345@email.com', TEST_USER_PSW)
+        addr = add_address(user=user)
 
         order = Order.create(
-            delivery_address='Via Rossi 12',
+            delivery_address=addr,
             user=user
         ).add_item(item1, 2)
 
@@ -325,7 +329,7 @@ class TestOrders(TestCase):
             "order": {
                 "order_id": order_id,
                 'items': [],
-                'delivery_address': 'Via Verdi 20',
+                'delivery_address': addr.json()["address_id"],
                 'user': str(user.user_id)
 
             }
@@ -341,7 +345,8 @@ class TestOrders(TestCase):
 
     def test_update_order__failure_non_existing(self):
         user_A = add_user('12345@email.com', TEST_USER_PSW)
-        Order.create(delivery_address='Via Rossi 12', user=user_A)
+        addr_A = add_address(user=user_A)
+        Order.create(delivery_address=addr_A, user=user_A)
 
         order_id = str(uuid4())
 
@@ -352,7 +357,7 @@ class TestOrders(TestCase):
                     {'name': 'item1', 'price': 100.0, 'quantity': 5},
                     {'name': 'item2', 'price': 2222.0, 'quantity': 1}
                 ],
-                'delivery_address': 'Via Verdi 20'
+                'delivery_address': addr_A.json()["address_id"]
             }
         }
 
@@ -360,10 +365,13 @@ class TestOrders(TestCase):
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order))
+
         assert resp.status_code == NOT_FOUND
 
+
     def test_update_order__failure_non_existing_empty_orders(self):
-        add_user('user@email.com', TEST_USER_PSW)
+        user_A = add_user('user@email.com', TEST_USER_PSW)
+        addr = add_address(user=user_A)
         order_id = str(uuid4())
         order = {
             "order": {
@@ -372,7 +380,7 @@ class TestOrders(TestCase):
                     {'name': 'item1', 'price': 100.0, 'quantity': 5},
                     {'name': 'item2', 'price': 2222.0, 'quantity': 1}
                 ],
-                'delivery_address': 'Via Verdi 20',
+                'delivery_address': addr.json()["address_id"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
         }
