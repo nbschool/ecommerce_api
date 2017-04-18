@@ -96,7 +96,7 @@ class TestItems(TestCase):
         assert resp.status_code == client.OK
         json_item = Item.select().where(
             Item.item_id == item.item_id).get().json()
-        assert json_item['name'] == 'new-name'
+        assert json_item['name'] != 'new-name'
         assert json_item['price'] == TEST_ITEM['price']
         assert json_item['description'] == TEST_ITEM['description']
         assert json_item['item_id'] == item.item_id
