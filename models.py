@@ -79,16 +79,6 @@ class User(BaseModel):
             return False
         return True
 
-    @property
-    def addresses(self):
-        res = (
-            Address
-            .select(Address, User)
-            .join(User)
-            .where(User.user_id == self.user_id)
-        )
-        return [addr for addr in res]
-
     @staticmethod
     def hash_password(password):
         """Use passlib to get a crypted password.
@@ -124,7 +114,7 @@ class Address(BaseModel):
         Each address is releated to one user, but one user can have
         more addresses."""
     address_id = UUIDField(unique=True)
-    user = ForeignKeyField(User)
+    user = ForeignKeyField(User, related_name='addresses')
     country = CharField()
     city = CharField()
     post_code = CharField()
