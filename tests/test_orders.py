@@ -713,7 +713,7 @@ class TestOrders(TestCase):
         bulk
         """
         user = add_user(None, TEST_USER_PSW)
-
+        addr = add_address(user=user)
         item1 = Item.create(
             item_id=uuid4(),
             name='Item',
@@ -733,7 +733,7 @@ class TestOrders(TestCase):
             price=15
         )
 
-        order = Order.create(delivery_address='My address', user=user)
+        order = Order.create(delivery_address=addr, user=user)
 
         # add some items in the order
         order.add_items({item1: 3, item2: 5})
