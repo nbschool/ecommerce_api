@@ -18,6 +18,9 @@ class BaseSchema(Schema):
     Extends marshmallow.Schema and Implements utility functions to validate
     inputs for the classes, to get schemas and serialize models data.
     """
+    class Meta:
+        json_module = simplejson
+
     @classmethod
     def jsonapi(cls, obj, include_data=[]):
         """
@@ -110,7 +113,12 @@ class OrderSchema(BaseSchema):
     date = fields.DateTime(attribute='created_at', dump_only=True)
     total_price = fields.Decimal(dump_only=True, places=2,
                                  validate=MORE_THAN_ZERO)
-    delivery_address = fields.Str(required=True, validate=NOT_BLANK)
+
+    delivery_address = fields.Relationship(
+        required=True, include_resource_linkage=True,
+        type_='address', schema='AddressSchema',
+        id_field='address_id',
+    )
 
     # Uses the OrderItem table and OrderItemSchema to serialize a json object
     # representing each item in the order
@@ -142,6 +150,7 @@ class OrderItemSchema(BaseSchema):
         self_url = '/items/{item_id}'
         self_url_kwargs = {'item_id': '<id>'}
         self_url_many = '/items/'
+        json_module = simplejson
 
     id = fields.Str(dump_only=True, attribute='item.item_id')
     name = fields.Str(attribute='item.name')
@@ -161,15 +170,49 @@ class UserSchema(BaseSchema):
         self_url_many = '/users/'
         self_url = '/users/{id}'
         self_url_kwargs = {'id': '<id>'}
+        json_module = simplejson
 
     id = fields.Str(dump_only=True, attribute='user_id')
     first_name = fields.Str(required=True, validate=NOT_BLANK)
     last_name = fields.Str(required=True, validate=NOT_BLANK)
     email = fields.Email(required=True, validate=NOT_BLANK)
     password = fields.Str(required=True, validate=NOT_BLANK, load_only=True)
+    admin = fields.Boolean(dump_only=True)
 
     orders = fields.Relationship(
         many=True, include_resource_linkage=True,
         type_='order', schema='OrderSchema',
         dump_only=True, id_field='order_id',
+    )
+
+    addresses = fields.Relationship(
+        many=True, include_resource_linkage=True,
+        type_='address', schema='AddressSchema',
+        dump_only=True, id_field='address_id',
+    )
+
+
+class AddressSchema(BaseSchema):
+    """
+    Schema for models.Address
+    """
+
+    class Meta:
+        type_ = 'address'
+        self_url_many = '/addresses/'
+        self_url = '/addresses/{id}'
+        self_url_kwargs = {'id': '<id>'}
+        json_module = simplejson
+
+    id = fields.Str(dump_only=True, attribute='address_id')
+    country = fields.Str(required=True, validate=NOT_BLANK)
+    city = fields.Str(required=True, validate=NOT_BLANK)
+    post_code = fields.Str(required=True, validate=NOT_BLANK)
+    address = fields.Str(required=True, validate=NOT_BLANK)
+    phone = fields.Str(required=True, validate=NOT_BLANK)
+
+    user = fields.Relationship(
+        include_resource_linkage=True,
+        type_='user', schema='UserSchema',
+        id_field='user_id',
     )

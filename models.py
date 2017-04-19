@@ -12,7 +12,7 @@ from playhouse.signals import Model, post_delete, pre_delete
 
 from exceptions import InsufficientAvailabilityException, WrongQuantity
 from schemas import (ItemSchema, UserSchema, OrderSchema, OrderItemSchema,
-                     BaseSchema)
+                     BaseSchema, AddressSchema)
 from utils import remove_image
 
 
@@ -177,6 +177,7 @@ class Address(BaseModel):
     post_code = CharField()
     address = CharField()
     phone = CharField()
+    _schema = AddressSchema
 
     def json(self):
         return {

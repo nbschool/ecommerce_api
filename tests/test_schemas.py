@@ -9,7 +9,8 @@ from models import User, Order, Item
 from schemas import UserSchema, OrderSchema
 from uuid import uuid4
 from tests.test_case import TestCase
-from tests.test_utils import format_jsonapi_request
+from tests.test_utils import format_jsonapi_request, add_address
+import simplejson as json
 
 USER_TEST_DICT = {
     "first_name": "Monty",
@@ -25,9 +26,12 @@ def get_expected_serialized_user(user):
     the return value of the JSONApi serialization for that user.
     TODO: Implement expected orders/data serialization if user has orders.
     """
-
+    # Copy and normalize the test user definition with the expected attributes
+    # returned by the API
     user_data = USER_TEST_DICT.copy()
     del user_data['password']
+    user_data['admin'] = user.admin
+
     return {
         'data': {
             'type': 'user',
@@ -38,6 +42,9 @@ def get_expected_serialized_user(user):
             },
             'relationships': {
                 'orders': {
+                    'data': []
+                },
+                'addresses': {
                     'data': []
                 }
             },
@@ -52,17 +59,22 @@ class TestUserSchema(TestCase):
     def test_user_json__success(self):
         user = User.create(**USER_TEST_DICT, user_id=uuid4())
         parsed_user, errors = UserSchema.jsonapi(user)
-
         expected_result = get_expected_serialized_user(user)
-        assert parsed_user == expected_result
+
+        assert type(parsed_user) == str
+
+        assert json.loads(parsed_user) == expected_result
         assert errors == {}
 
     def test_user_include_orders__success(self):
         user = User.create(**USER_TEST_DICT, user_id=uuid4())
-        o1 = Order.create(delivery_address='Address', user=user)
-        o2 = Order.create(delivery_address='Address', user=user)
+        addr = add_address(user)
+        o1 = Order.create(delivery_address=addr, user=user)
+        o2 = Order.create(delivery_address=addr, user=user)
 
         parsed_user, errors = UserSchema.jsonapi(user, include_data=['orders'])
+
+        parsed_user = json.loads(parsed_user)
 
         assert type(parsed_user['included']) == list
         assert len(parsed_user['included']) == 2
@@ -107,10 +119,12 @@ class TestOrderSchema(TestCase):
             description='Item 2 description',
             price=8,
         )
-        order = Order.create(delivery_address='Address', user=user)
+        addr = add_address(user=user)
+        order = Order.create(delivery_address=addr, user=user)
         order.add_item(item1, 2).add_item(item2, 5)
 
-        parsed = order.json(include_data=['items', 'user'])
+        parsed = order.json(include_data=['items', 'user', 'delivery_address'])
+
         assert False
         # TODO: finish implementing the test
 
