@@ -413,17 +413,15 @@ def write_db():
     )
 
 
-def look_and_list_db():
-    """create a list with the name of each .db file from the main folder."""
-    list_of_db = []
+def get_databases():
+    """create a list with the name of each .db file from main folder."""
     list_of_db = glob.glob('*.db')
     return list_of_db
 
 
 def print_any_db():
     """In the case there's any db it prints a list in the CLI."""
-    list_of_db = []
-    look_and_list_db(list_of_db)
+    list_of_db = get_databases()
     lenght_of_list = len(list_of_db)
     if lenght_of_list is 1:
         print('You\'ve already 1 database in your folder :')
@@ -439,8 +437,7 @@ def print_any_db():
 
 def print_any_db_to_delete():
     """In the case there's any db it prints a list in the CLI."""
-    list_of_db = []
-    look_and_list_db(list_of_db)
+    list_of_db = get_databases()
     lenght_of_list = len(list_of_db)
     if lenght_of_list == 1:
         print('You\'ve already 1 database in your folder :')
@@ -483,13 +480,13 @@ def good_bye(word, default='has'):
 
 def remove_unique_db():
     path = []
-    look_and_list_db(path)
+    get_databases(path)
     os.remove('../'+path[0])
     good_bye('deleted')
 
 
 def remove_chosen_db(list_of):
-    list_of_db = list_of
+    list_of_db = get_databases()
     lenght_of_list = len(list_of_db)
     print(WARNING_DELETE)
     for index, name_db in enumerate(list_of_db, start=1):
@@ -519,7 +516,7 @@ def remove_chosen_db(list_of):
 
 
 def overwrite_unique_db():
-    list_of_db = look_and_list_db()
+    list_of_db = get_databases()
     print(WARNING_OVERWRITE)
     for index, name_db in enumerate(list_of_db, start=1):
         print('('+str(index)+')'+'.-', name_db, end=' ')
@@ -541,7 +538,7 @@ def overwrite_unique_db():
 
 
 def overwrite_chosen_db():
-    list_of_db = look_and_list_db()
+    list_of_db = get_databases()
     lenght_of_list = len(list_of_db)
     print(WARNING_OVERWRITE)
     for index, name_db in enumerate(list_of_db, start=1):
@@ -580,8 +577,7 @@ def main():
 
     print(TEXT_DISPLAY)
     while interaction is True:
-            list_of_db = []
-            list_of_db = look_and_list_db()
+            list_of_db = get_databases()
             lenght_of_list = len(list_of_db)
             print(MENU_TEXT)
             selct = input('Press your choice > ')
