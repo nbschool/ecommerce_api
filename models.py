@@ -180,74 +180,65 @@ class Order(BaseModel):
 
     def add_items(self, items):
         """
-        Add items to the order in bulk.
+        Add items to the order from a dict {<Item>: <int:quantity>}. Handles
+        creating or updating the OrderItem cross table and the Order total
         :param dict items: {<Item>: <quantity:int>}
         """
         with database.atomic():
             for (item, quantity) in items.items():
-                self.add_item(item, quantity)
+                for orderitem in self.order_items:
+                    # Looping all the OrderItem related to this order,
+                    # if one with the same item is found we update that row.
+                    if orderitem.item == item:
+                        orderitem.add_item(quantity)
+                        continue
+
+                # if no matching existing OrderItem is found
+                # create a new row in the OrderItem table
+                OrderItem.create(
+                    order=self,
+                    item=item,
+                    quantity=quantity,
+                    subtotal=item.price * quantity
+                )
+
+                self.total_price += (item.price * quantity)
+            self.save()
         return self
 
     def remove_items(self, items):
         """
-        Remove items to the order in bulk.
+        Remove items from an order, handling the relative OrderItem row and
+        the Order total price update.
         :param dict items: {<Item>: <quantity:int>}
         """
         with database.atomic():
             for item, quantity in items.items():
-                self.remove_item(item, quantity)
+                for orderitem in self.order_items:
+                    if orderitem.item == item:
+                        removed_items = orderitem.remove_item(quantity)
+                        self.total_price -= (item.price * removed_items)
+                    else:
+                        pass
+                        # NOTE: We should do something when the item is not
+                        # found
+            self.save()
         return self
 
     def add_item(self, item, quantity=1):
         """
-        Add one item to the order.
-        Creates one OrderItem row if the item is not present in the order yet,
-        or increasing the count of the existing OrderItem.
-
-        :param item Item: instance of models.Item
+        Add one item to the order calling `add_items`.
+        Exists for compatibility.
         """
-
-        for orderitem in self.order_items:
-            # Looping all the OrderItem related to this order, if one with the
-            # same item is found we update that row.
-            if orderitem.item == item:
-                orderitem.add_item(quantity)
-
-                self.total_price += (item.price * quantity)
-                self.save()
-                return self
-
-        # if no existing OrderItem is found with this order and this Item,
-        # create a new row in the OrderItem table
-        OrderItem.create(
-            order=self,
-            item=item,
-            quantity=quantity,
-            subtotal=item.price * quantity
-        )
-
-        self.total_price += (item.price * quantity)
-
-        self.save()
-        return self
+        return self.add_items({item: quantity})
 
     def remove_item(self, item, quantity=1):
         """
-        Remove the given item from the order, reducing quantity of the relative
-        OrderItem entity or deleting it if removing the last item
-        (OrderItem.quantity == 0)
+        Remove one item calling `remove_items`.
+        Exists for compatibility.
         """
 
-        for orderitem in self.order_items:
-            if orderitem.item == item:
-                removed_items = orderitem.remove_item(quantity)
-                self.total_price -= (item.price * removed_items)
-                self.save()
-                return self
-
-        # No OrderItem found for this item
-        # TODO: Raise or return something more explicit
-        return self
+        return self.remove_items({item: quantity})
 
     def json(self):
         return {
