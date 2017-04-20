@@ -516,11 +516,11 @@ def remove_chosen_db(list_of):
 
 def overwrite_unique_db():
     list_of_db = get_databases()
-    print(WARNING_OVERWRITE)
-    for index, name_db in enumerate(list_of_db, start=1):
-        print('('+str(index)+')'+'.-', name_db, end=' ')
-    print(' ')
-    print('Are you sure to overwrite?'.format())
+    name_db = list_of_db[0]
+    print(WARNING_OVERWRITE, '\n')
+    print('You\'ve got only a database')
+    print('(1)'+'.-', name_db, end='\n')
+    print('Are you sure to overwrite {}?'.format(name_db))
     selct = input('if Yes press(1) or [ENTER] to exit without change. > ')
     if selct is '1':
         db = SqliteDatabase(list_of_db[0], autocommit=False)
@@ -532,8 +532,7 @@ def overwrite_unique_db():
     if selct is '':
         good_bye('change', default='hasn\'t')
     else:
-        print('ERRORRRR! :p')
-        good_bye('ERROR')
+        overwrite_unique_db()
 
 
 def overwrite_chosen_db():
@@ -582,7 +581,6 @@ def main():
             selct = input('Press your choice > ')
             if selct == '1':
                 if lenght_of_list == 1:
-                    print('You\'ve already 1 database in your folder :')
                     overwrite_unique_db()
                 if lenght_of_list == 0:
                     print('No database founded. I\'ll create one for you')
