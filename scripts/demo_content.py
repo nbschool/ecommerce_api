@@ -423,24 +423,23 @@ def print_any_db():
     """In the case there's any db it prints a list in the CLI."""
     list_of_db = get_databases()
     lenght_of_list = len(list_of_db)
-    if lenght_of_list is 1:
-        print('You\'ve already 1 database in your folder :')
-        for index, name_db in enumerate(list_of_db, start=1):
-            print(index, '-', name_db)
+    word_db = 'database'
     if lenght_of_list > 1:
-        print('You\'ve already {} databases in your folder :'.format(lenght_of_list))
-        for index, name_db in enumerate(list_of_db, start=1):
-            print(index, '-', name_db)
+        word_db = 'databases'
+    print('You\'ve already {} {} in your folder :'.format(lenght_of_list, word_db))
+    for index, name_db in enumerate(list_of_db, start=1):
+        print(index, '-', name_db)
     else:
-        write_db()
+        good_bye()
 
 
-def print_any_db_to_delete():
+def print_any_db_to_delete(default=1):
     """In the case there's any db it prints a list in the CLI."""
     list_of_db = get_databases()
     lenght_of_list = len(list_of_db)
-    if lenght_of_list == 1:
-        print('You\'ve already 1 database in your folder :')
+    if lenght_of_list > 1:
+        default = lenght_of_list
+        print('You\'ve already {} database in your folder :'.format(default))
         for index, name_db in enumerate(list_of_db, start=1):
             print(index, '-', name_db)
     if lenght_of_list > 1:
@@ -585,6 +584,13 @@ def main():
                 if lenght_of_list == 1:
                     print('You\'ve already 1 database in your folder :')
                     overwrite_unique_db()
+                if lenght_of_list == 0:
+                    print('No database founded. I\'ll create one for you')
+                    db = SqliteDatabase('database.db')
+                    set_db(db)
+                    create_my_tables()
+                    write_db()
+                    good_bye('created')
                 else:
                     overwrite_chosen_db()
             if selct == '2':
