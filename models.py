@@ -406,9 +406,8 @@ class OrderItem(BaseModel):
 # Check if the table exists in the database; if not create it.
 # TODO: Use database migration
 
-User.create_table(fail_silently=True)
-Item.create_table(fail_silently=True)
-Order.create_table(fail_silently=True)
-OrderItem.create_table(fail_silently=True)
-Picture.create_table(fail_silently=True)
-Address.create_table(fail_silently=True)
+#User.create_table(fail_silently=True)
+#Item.create_table(fail_silently=True)
+#Order.create_table(fail_silently=True)
+#OrderItem.create_table(fail_silently=True)
+#Address.create_table(fail_silently=True)
