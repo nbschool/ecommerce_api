@@ -464,7 +464,7 @@ def drops_all_tables(database):
             OrderItem.drop_table()
 
 
-def create_my_tables():
+def create_tables():
     User.create_table(fail_silently=True)
     Item.create_table(fail_silently=True)
     Order.create_table(fail_silently=True)
@@ -478,8 +478,7 @@ def good_bye(word, default='has'):
 
 
 def remove_unique_db():
-    path = []
-    get_databases(path)
+    path = get_databases()
     os.remove('../'+path[0])
     good_bye('deleted')
 
@@ -526,7 +525,7 @@ def overwrite_unique_db():
         db = SqliteDatabase(list_of_db[0], autocommit=False)
         set_db(db)
         drops_all_tables(db)
-        create_my_tables()
+        create_tables()
         write_db()
         good_bye('written')
     if selct is '':
@@ -562,7 +561,7 @@ def overwrite_chosen_db():
             if db.is_closed():
                 db.connect()
             drops_all_tables(db)
-            create_my_tables()
+            create_tables()
             write_db()
             good_bye('written')
         else:
@@ -584,7 +583,7 @@ def main():
                     print('No database founded. I\'ll create one for you')
                     db = SqliteDatabase('database.db')
                     set_db(db)
-                    create_my_tables()
+                    create_tables()
                     write_db()
                     good_bye('created')
                 else:
@@ -597,7 +596,7 @@ def main():
                     db.connect()
                 print(db.database)
                 set_db(db)
-                create_my_tables()
+                create_tables()
                 write_db()
                 good_bye('created')
             if selct == '3':
