@@ -433,21 +433,21 @@ def print_any_db():
         good_bye()
 
 
-def print_any_db_to_delete(default=1):
-    """In the case there's any db it prints a list in the CLI."""
-    list_of_db = get_databases()
-    lenght_of_list = len(list_of_db)
-    if lenght_of_list > 1:
-        default = lenght_of_list
-        print('You\'ve already {} database in your folder :'.format(default))
-        for index, name_db in enumerate(list_of_db, start=1):
-            print(index, '-', name_db)
-    if lenght_of_list > 1:
-        print('You\'ve already {} databases in your folder :'.format(lenght_of_list))
-        for index, name_db in enumerate(list_of_db, start=1):
-            print(index, '-', name_db)
-    else:
-        pass
+# def print_any_db_to_delete(default=1):
+#     """In the case there's any db it prints a list in the CLI."""
+#     list_of_db = get_databases()
+#     lenght_of_list = len(list_of_db)
+#     if lenght_of_list > 1:
+#         default = lenght_of_list
+#         print('You\'ve already {} database in your folder :'.format(default))
+#         for index, name_db in enumerate(list_of_db, start=1):
+#             print(index, '-', name_db)
+#     if lenght_of_list > 1:
+#         print('You\'ve already {} databases in your folder :'.format(lenght_of_list))
+#         for index, name_db in enumerate(list_of_db, start=1):
+#             print(index, '-', name_db)
+#     else:
+#         pass
 
 
 def drops_all_tables(database):
@@ -571,10 +571,8 @@ def overwrite_chosen_db():
 
 def main():
 
-    interaction = True
-
     print(TEXT_DISPLAY)
-    while interaction is True:
+    while True:
             list_of_db = get_databases()
             lenght_of_list = len(list_of_db)
             print(MENU_TEXT)
@@ -604,14 +602,13 @@ def main():
                 good_bye('created')
             if selct == '3':
                 print(WARNING_DELETE)
-                print_any_db_to_delete()
+                print_any_db()
                 if lenght_of_list == 1:
                     remove_unique_db()
                 else:
                     remove_chosen_db(list_of_db)
             if selct == '':
-                interaction = False
-                return interaction
+                good_bye('change', 'hasn\'t')
 
 
 if __name__ == '__main__':
