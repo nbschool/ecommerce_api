@@ -36,7 +36,7 @@ class TestUser(TestCase):
         resp = self.app.get(API_ENDPOINT.format('users/'))
 
         assert resp.status_code == OK
-        assert json.loads(resp.data) == [user1.json(), user2.json()]
+        assert json.loads(resp.data) == [user1.serialize()[0], user2.serialize()[0]]
         assert User.select().count() == 2
 
     def test_post_new_user__success(self):
@@ -52,11 +52,11 @@ class TestUser(TestCase):
 
         resp_user = json.loads(resp.data)
         assert resp.status_code == CREATED
-
         assert 'id' in resp_user['data']
         user = user['data']['attributes']
 
         del user['password']  # user inside response does not have the password
+        user['admin'] = False # server should have added a falsy admin flag
         assert resp_user['data']['attributes'] == user
         assert User.select().count() == 1
         assert User.get().admin is False

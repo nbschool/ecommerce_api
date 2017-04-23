@@ -6,7 +6,7 @@ import uuid
 
 from auth import auth
 from models import User
-
+from utils import generate_response
 
 class UsersHandler(Resource):
     """
@@ -18,7 +18,9 @@ class UsersHandler(Resource):
     """
 
     def get(self):
-        return [user.json() for user in User.select()], OK
+        data = User.json_list(User.get_all())
+        return generate_response(data, OK)
+        # return [user.json() for user in User.select()], OK
 
     def post(self):
         """ Add an user to the database."""
@@ -47,7 +49,7 @@ class UsersHandler(Resource):
         # If everything went OK return the newly created user and CREATED code
         # TODO: Handle json() return value (data, errors) and handle errors not
         # empty
-        return new_user.json(), CREATED
+        return generate_response(new_user.json(), CREATED)
 
 
 class UserHandler(Resource):
