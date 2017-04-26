@@ -11,7 +11,7 @@ from http.client import (CREATED, NO_CONTENT, NOT_FOUND,
                          OK, BAD_REQUEST, UNAUTHORIZED)
 import json
 from uuid import uuid4
-
+from datetime import timezone
 # main endpoint for API
 API_ENDPOINT = '/{}'
 # correct password used for all test users.
@@ -29,6 +29,7 @@ def add_date(result, date):
     # FIXME: date string does not match with response string
     # '2017-04-26T13:02:13.817604+00:00',   --> response
     # '2017-04-26T13:02:13.817604',         --> added date
+    date = date.replace(tzinfo=timezone.utc)
     if type(result) == list:
         for r in result:
             r['data']['attributes']['date'] = date.isoformat()
