@@ -114,7 +114,7 @@ class TestPictures(TestCase):
         resp = self.app.get('/items/{item_id}/pictures/'.format(
             item_id=item.item_id))
         pictures = json.loads(resp.data)
-        assert not len(pictures)
+        assert not pictures
 
     def test_get_item_pictures__wrong_item_id(self):
         resp = self.app.get('/items/{item_id}/pictures/'.format(

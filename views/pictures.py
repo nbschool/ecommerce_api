@@ -24,13 +24,12 @@ class ItemPictureHandler(Resource):
 
     def get(self, item_id):
         """Retrieve every picture of an item"""
-        try:
-            Item.get(Item.item_id == item_id)
-        except Item.DoesNotExist:
-            return None, client.NOT_FOUND
+        items = [o.json() for o in Picture.select().join(Item).where(
+            Item.item_id == item_id)]
 
-        return [o.json() for o in Picture.select().join(Item).where(
-            Item.item_id == item_id)], client.OK
+        if items:
+            return items, client.OK
+        return None, client.NOT_FOUND
 
     def post(self, item_id):
         """Insert a new picture for the specified item"""
