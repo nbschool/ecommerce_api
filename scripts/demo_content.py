@@ -5,10 +5,12 @@ and supply a new one db with new down-to-earth data.
 
 from peewee import SqliteDatabase
 from models import User, Item, Order, OrderItem
+from faker import Factory
 import os
 import sys
 import sqlite3
 import glob
+
 
 TEXT_DISPLAY = '\033[95m'+'\033[1m'+"""
                       WELCOME TO DEMO CONTENT CREATOR.
@@ -46,229 +48,30 @@ def set_db(database):
 
 
 def write_db():
-    User.create(
-        user_id="3f369a56-f561-4a3e-b171-43254746f612",
-        first_name="Andrea",
-        last_name="Santaella",
-        email="andrea.santaella@gmail.com",
-        password=User.hash_password("AndreaSantaella@1234")
-    )
+    def user_creator(num_user=1):
+        """Create users from an Italian-like context."""
+        fake = Factory.create('it_IT')
+        fake.seed(9623954)
+        num_user = num_user
+        for i in range(0, num_user):
+            uuid = fake.uuid4()
+            first_name = fake.first_name()
+            last_name = fake.last_name()
+            email_provider = fake.free_email_domain()
+            email_user = '{}.{}@{}'.format(first_name.lower(), last_name.lower(), email_provider)
+            password = fake.password(length=3, special_chars=False, digits=True,
+                                     upper_case=True, lower_case=False)
+            User.create(
+                user_id=uuid,
+                first_name=first_name,
+                last_name=last_name,
+                email=email_user,
+                password=User.hash_password(password)
+            )
 
-    User.create(
-        user_id="ac0935c4-0d31-4473-ab5a-cd873fe2f40a",
-        first_name="Benedetta",
-        last_name="Forciniti",
-        email="benedetta.forciniti@hotmail.com",
-        password=User.hash_password("BenedettaForciniti@1234")
-    )
+    # start create items
 
-    User.create(
-        user_id="36492bb5-16ef-495b-b026-fc02d3a82abf",
-        first_name="Carlo",
-        last_name="Mazzini",
-        email="carlo_max@yahoo.it",
-        password=User.hash_password("CarloMazzini@1234")
-    )
-
-    User.create(
-        user_id="d6a8bc83-e0a5-4e32-ad06-13e71c76a64a",
-        first_name="Carmela",
-        last_name="Esposito",
-        email="carmencita@gmail.com",
-        password=User.hash_password("CarmelaEsposito2015")
-    )
-
-    User.create(
-        user_id="92ea81b7-f9ff-4ba4-9891-5aaf863b58cb",
-        first_name="Cesare",
-        last_name="Secci",
-        email="cesarone@virgilio.it",
-        password=User.hash_password("salve_cesare34")
-    )
-
-    User.create(
-        user_id="4e97984c-c5d9-4716-af79-faa9078c1eb7",
-        first_name="Cindy",
-        last_name="Gelvez",
-        email="superstar83@hotmail.it",
-        password=User.hash_password("LaCosmica1983")
-    )
-
-    User.create(
-        user_id="dd225eb3-3aec-49a4-95b0-8076dd6d0335",
-        first_name="Daniela",
-        last_name="Cortez",
-        email="danielita_bella@yahoo.es",
-        password=User.hash_password("SupermanVsBatmanNow")
-    )
-
-    User.create(
-        user_id="8c12cc59-92a1-4e0e-afca-538522053d70",
-        first_name="David",
-        last_name="Novarin",
-        email="dnovarin@yahoo.com",
-        password=User.hash_password("125687851")
-    )
-
-    User.create(
-        user_id="7182f4e7-e6b5-417f-b7be-c04885bbc151",
-        first_name="Denimar",
-        last_name="Campos",
-        email="evergreen27@gmail.com",
-        password=User.hash_password("@tYu7jas#12de")
-    )
-
-    User.create(
-        user_id="f2df0ecf-82fd-496f-9173-9f6ca4c1bb08",
-        first_name="Dioclecio",
-        last_name="Lombardi",
-        email="lombardi_milano@virgilio.it",
-        password=User.hash_password("pizzacalda312")
-    )
-
-    User.create(
-        user_id="e370ff79-8046-4c1e-b11d-bbb8063e3fec",
-        first_name="Deucalion",
-        last_name="Bruno",
-        email="deucalion@gmail.com",
-        password=User.hash_password("qPli$sudg2007")
-    )
-
-    User.create(
-        user_id="e0adb5d7-36e3-4d9c-8405-757ffedba796",
-        first_name="Eaco",
-        last_name="Montaner",
-        email="eaco_montaner@gmail.com",
-        password=User.hash_password("FormicaAtomica1989")
-    )
-
-    User.create(
-        user_id="8462c5bf-31c3-4161-9b55-2b7996e9e662",
-        first_name="Ebba",
-        last_name="Sanchez",
-        email="ebbabebe@yahoo.co.uk",
-        password=User.hash_password("LondonILoveYou")
-    )
-
-    User.create(
-        user_id="2e89dad0-41ce-43f2-91f4-28e53a463193",
-        first_name="Zacarías",
-        last_name="Mancini",
-        email="tiromancino88@virgilio.it",
-        password=User.hash_password("#GelatoDiFragola#")
-    )
-
-    User.create(
-        user_id="178ce777-8d63-476d-bf47-9b12fcdc71c4",
-        first_name="Mario",
-        last_name="Rossi",
-        email="eterno_mario@virgilio.it",
-        password=User.hash_password("qwer")
-    )
-
-    User.create(
-        user_id="4877f031-a661-486f-aca5-4cf05f67b2ee",
-        first_name="John",
-        last_name="Simpson",
-        email="j.simpsom@gmail.com",
-        password=User.hash_password("AyCaramba!")
-    )
-
-    User.create(
-        user_id="859515a2-4d56-4003-a99c-a13ec906e9b1",
-        first_name="Brian",
-        last_name="Smith",
-        email="mrsmith@yahoo.com",
-        password=User.hash_password("ThisIsASecret")
-    )
-
-    User.create(
-        user_id="7343ef59-60e4-47f7-8c6a-90728e53e955",
-        first_name="Pedro",
-        last_name="Perez",
-        email="predito@hotmail.com",
-        password=User.hash_password("ElpapaDeLosHelados")
-    )
-
-    User.create(
-        user_id="b2ec03fd-ab2c-4a88-abed-0f381d0f9e56",
-        first_name="Paolo",
-        last_name="Giordano",
-        email="bucanero2008@yahoo.com",
-        password=User.hash_password("###goodkama***")
-    )
-
-    User.create(
-        user_id="a342521d-8643-4ae1-aedb-59a3a0f44a0c",
-        first_name="Naoki",
-        last_name="Fukuyama",
-        email="isawgozilla@yahoo.co.jp",
-        password=User.hash_password("KawaYama")
-    )
-
-    User.create(
-        user_id="72d02f9f-c3db-49a6-887f-4ee09e2e52d7",
-        first_name="Jacopo",
-        last_name="Mancini",
-        email="foza_viola1972@yahoo.com",
-        password=User.hash_password("OhFiorentina!")
-    )
-
-    User.create(
-        user_id="44ee810a-c925-4fa9-aacd-760ad116f166",
-        first_name="Rolan",
-        last_name="Adamoli",
-        email="inesadamoli@yahoo.co.uk",
-        password=User.hash_password("ksdkhgs78¿")
-    )
-
-    User.create(
-        user_id="91838e23-f95b-41b7-ac49-1951354ecfb1",
-        first_name="Livia",
-        last_name="Nunez",
-        email="livianunez@hotmail.com",
-        password=User.hash_password("lisbonaèbona")
-    )
-
-    User.create(
-        user_id="1e181835-bf05-4557-92d6-6415c3da9a9c",
-        first_name="Neve",
-        last_name="Turchi",
-        email="snow_turchi@hotmail.com",
-        password=User.hash_password("biancaneve_dorme")
-    )
-
-    User.create(
-        user_id="77741629-eb3c-4226-9a0b-94c71617052d",
-        first_name="I'timad",
-        last_name="Cuevas",
-        email="lacaverna2001@gmail.com.com",
-        password=User.hash_password("CosmicCromagnon")
-    )
-
-    User.create(
-        user_id="27efd008-e910-4656-b5aa-0214577f580d",
-        first_name="Ziauddin",
-        last_name="O'Brian",
-        email="bigbrother2017@gmail.com",
-        password=User.hash_password("IgnoranceIsPower")
-    )
-
-    User.create(
-        user_id="01357042-214b-4224-8c6f-2d821fc40b37",
-        first_name="Benedita",
-        last_name="Chavarria",
-        email="beneditach@gmail.com",
-        password=User.hash_password("ElChapulinColorado")
-    )
-
-    User.create(
-        user_id="025a0003-e1be-4866-aa74-81947f44b643",
-        first_name="Alejandra",
-        last_name="Texeira",
-        email="alejandratch@gmail.com",
-        password=User.hash_password("allYouNeedIsLove")
-    )
+    user_creator(10)
 
     # start create items
 
@@ -431,6 +234,7 @@ def print_any_db():
         print(index, '-', name_db)
     else:
         good_bye()
+
 
 def drops_all_tables(database):
     """Doesn't drop unknown tables."""
