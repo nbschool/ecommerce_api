@@ -1,0 +1,44 @@
+{
+    "orders": {
+        "get_orders__success": [
+            {
+                "data": {
+                    "attributes": {
+                        "date": "2017-04-26T11:55:32.347008+00:00",
+                        "total_price": 40.4
+                    },
+                    "id": "06451e0a-8fa2-40d2-8c51-1af50d369ca6",
+                    "links": {
+                        "self": "/orders/06451e0a-8fa2-40d2-8c51-1af50d369ca6"
+                    },
+                    "relationships": {
+                        "delivery_address": {
+                            "data": {
+                                "id": "85c6cba6-3ddd-4847-9d07-1337ff4e8506",
+                                "type": "address"
+                            }
+                        },
+                        "items": {
+                            "data": [
+                                {
+                                    "id": "429994bf-784e-47cc-a823-e0c394b823e8",
+                                    "type": "item"
+                                }
+                            ]
+                        },
+                        "user": {
+                            "data": {
+                                "id": "f3f72634-7054-43ef-9119-9e8f54a9531e",
+                                "type": "user"
+                            }
+                        }
+                    },
+                    "type": "order"
+                },
+                "links": {
+                    "self": "/orders/06451e0a-8fa2-40d2-8c51-1af50d369ca6"
+                }
+            }
+        ]
+    }
+}
