@@ -8,3 +8,4 @@ pytest-cov==2.4.0
 flask-httpauth==3.2.2
 passlib==1.7.1
 gunicorn==19.7.1
+Flask-Cors==3.0.2
