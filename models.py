@@ -65,7 +65,7 @@ class Picture(BaseModel):
     """
     picture_id = UUIDField(unique=True)
     extension = CharField()
-    item = ForeignKeyField(Item, related_name='pictures')
+    item = ForeignKeyField(Item, related_name='pictures', on_delete='CASCADE')
 
     def filename(self):
         return '{}.{}'.format(
