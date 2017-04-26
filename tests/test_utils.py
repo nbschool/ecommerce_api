@@ -38,10 +38,11 @@ def open_with_auth(app, url, method, username, password, content_type, data):
                     content_type=content_type,
                     data=data)
 
-def clean_images():
-    shutil.rmtree(IMAGE_FOLDER, onerror=None)
 
-def setup_images():
-    if not os.path.exists(IMAGE_FOLDER):
-        os.makedirs(IMAGE_FOLDER)
+def clean_images(folder=IMAGE_FOLDER):
+    shutil.rmtree(folder, onerror=None)
 
+
+def setup_images(folder=IMAGE_FOLDER):
+    if not os.path.exists(folder):
+        os.makedirs(folder)
