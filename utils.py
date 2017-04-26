@@ -38,16 +38,17 @@ def save_image(file, picture_id, extension):
 
 
 def remove_image(picture_id, extension):
-    """ 
+    """
     Remove a specified picture by picture_id from folder
     """
-    os.remove(image_fullpath(picture_id, extension))
-
+    if(os.path.isdir(IMAGE_FOLDER)):
+        os.remove(image_fullpath(picture_id, extension))
+        #todo log in case folder not found
 
 def image_fullpath(picture_id, extension):
     """
     Return a path for the image with IMAGE_FOLDER
-    picture_id and extension 
+    picture_id and extension
     """
     return os.path.join(
         IMAGE_FOLDER,
