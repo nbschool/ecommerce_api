@@ -9,6 +9,8 @@ from peewee import Model, SqliteDatabase, DecimalField
 from peewee import UUIDField, ForeignKeyField, IntegerField
 from uuid import uuid4
 
+from exceptions import InsufficientAvailabilityException
+
 
 database = SqliteDatabase('database.db')
 
@@ -165,14 +167,14 @@ class Order(BaseModel):
         Add one item to the order.
         Creates one OrderItem row if the item is not present in the order yet,
         or increasing the count of the existing OrderItem. It also updates the
-        item availability counter and raise ValueError if quantity is less than
-        item availability.
+        item availability counter and raise InsufficientAvailability if
+        quantity is less than item availability.
 
         :param item Item: instance of models.Item
         """
 
         if quantity > item.availability:
-            raise ValueError
+            raise InsufficientAvailabilityException(item, quantity)
 
         for orderitem in self.order_items:
             # Looping all the OrderItem related to this order, if one with the
@@ -286,7 +288,7 @@ class OrderItem(BaseModel):
 
 # Check if the table exists in the database; if not create it.
 # TODO: Use database migration
-
+User.create_table(fail_silently=True)
 Item.create_table(fail_silently=True)
 Order.create_table(fail_silently=True)
 OrderItem.create_table(fail_silently=True)
