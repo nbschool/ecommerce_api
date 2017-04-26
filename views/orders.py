@@ -7,6 +7,7 @@ from models import database, Address, Order, Item
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST, UNAUTHORIZED
 from flask import abort, request, g
 from auth import auth
+from utils import generate_response
 
 from exceptions import InsufficientAvailabilityException
 
@@ -16,12 +17,8 @@ class OrdersHandler(Resource):
 
     def get(self):
         """ Get all the orders."""
-        retval = []
-
-        for order in Order.select():
-            retval.append(order.json(include_items=True))
-
-        return retval, OK
+        data = Order.json_list(Order.get_all())
+        return generate_response(data, OK)
 
     @auth.login_required
     def post(self):
@@ -65,7 +62,7 @@ class OrdersHandler(Resource):
                 txn.rollback()
                 return None, BAD_REQUEST
 
-        return order.json(include_items=True), CREATED
+        return generate_response(order.json(), CREATED)
 
 
 class OrderHandler(Resource):
@@ -78,7 +75,7 @@ class OrderHandler(Resource):
         except Order.DoesNotExist:
             return None, NOT_FOUND
 
-        return order.json(include_items=True), OK
+        return generate_response(order.json(), OK)
 
     @auth.login_required
     def patch(self, order_uuid):
@@ -128,7 +125,7 @@ class OrderHandler(Resource):
 
             order.save()
 
-        return order.json(include_items=True), OK
+        return generate_response(order.json(), OK)
 
     @auth.login_required
     def delete(self, order_uuid):
