@@ -132,8 +132,10 @@ class TestOrders(TestCase):
         order = {
             'order': {
                 'items': [
-                    {'name': 'mario', 'price': 20.20, 'quantity': 4},
-                    {'name': 'GINO', 'price': 30.20, 'quantity': 10}
+                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                     'price': 20.20, 'quantity': 4},
+                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                     'price': 30.20, 'quantity': 10}
                 ],
                 'delivery_address': addr_A.json()["address_id"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
@@ -176,8 +178,10 @@ class TestOrders(TestCase):
         order = {
             'order': {
                 'items': [
-                    {'name': 'item1', 'price': 50.0, 'quantity': 4},
-                    {'name': 'item2', 'price': 20.0, 'quantity': 10}
+                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                     'price': 50.0, 'quantity': 4},
+                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                     'price': 20.0, 'quantity': 10}
                 ],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
@@ -206,8 +210,10 @@ class TestOrders(TestCase):
         order = {
             'order': {
                 'items': [
-                    {'name': 'item1', 'price': 50.0, 'quantity': 4},
-                    {'name': 'item2', 'price': 20.0, 'quantity': 10}
+                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                     'price': 50.0, 'quantity': 4},
+                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                     'price': 20.0, 'quantity': 10}
                 ],
                 'delivery_address': '',
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
