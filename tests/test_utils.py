@@ -38,11 +38,13 @@ def open_with_auth(app, url, method, username, password, content_type, data):
                     content_type=content_type,
                     data=data)
 
+
 def clean_images():
     """
     Delete all the images in the IMAGE_FOLDER
     """
     shutil.rmtree(IMAGE_FOLDER, onerror=None)
+
 
 def setup_images():
     """
@@ -50,4 +52,3 @@ def setup_images():
     """
     if not os.path.exists(IMAGE_FOLDER):
         os.makedirs(IMAGE_FOLDER)
-

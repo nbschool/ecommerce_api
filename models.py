@@ -306,4 +306,3 @@ Item.create_table(fail_silently=True)
 Order.create_table(fail_silently=True)
 OrderItem.create_table(fail_silently=True)
 Picture.create_table(fail_silently=True)
-

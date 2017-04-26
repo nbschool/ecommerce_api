@@ -28,9 +28,9 @@ def non_empty_str(val, name):
 
 def save_image(file, picture_id, extension):
     """
-    Create a path images/ if not exist 
-    and then save in the folder the image passed with 
-    its extension 
+    Create a path images/ if not exist
+    and then save in the folder the image passed with
+    its extension
     """
     if not os.path.exists(IMAGE_FOLDER):
         os.makedirs(IMAGE_FOLDER)
@@ -43,7 +43,8 @@ def remove_image(picture_id, extension):
     """
     if(os.path.isdir(IMAGE_FOLDER)):
         os.remove(image_fullpath(picture_id, extension))
-        #todo log in case folder not found
+        # todo log in case folder not found
+
 
 def image_fullpath(picture_id, extension):
     """
