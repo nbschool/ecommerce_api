@@ -5,7 +5,6 @@ Test suite for PictureHandler, ItemPictureHandler and PicturesHandler
 import json
 from io import BytesIO
 import os
-import tempfile
 import uuid
 
 import http.client as client
@@ -13,8 +12,9 @@ import http.client as client
 from models import Item, Picture
 from tests.test_case import TestCase
 from tests.test_utils import clean_images, setup_images
-from utils import IMAGE_FOLDER
+import utils
 
+TEST_IMAGE_FOLDER = 'test_images'
 
 TEST_ITEM = {
     'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
@@ -48,14 +48,14 @@ class TestPictures(TestCase):
     @classmethod
     def setup_class(cls):
         super(TestPictures, cls).setup_class()
-        cls.test_dir = tempfile.mkdtemp()
+        utils.get_image_folder = lambda: TEST_IMAGE_FOLDER
 
     def test_get_picture__success(self):
         setup_images()
         item = Item.create(**TEST_ITEM)
         picture = Picture.create(item=item, **TEST_PICTURE)
         open("{path}/{picture_id}.jpg".format(
-            path=IMAGE_FOLDER,
+            path=utils.get_image_folder(),
             picture_id=picture.picture_id), "wb")
         resp = self.app.get('/pictures/{picture_id}'.format(
             picture_id=picture.picture_id))
@@ -165,15 +165,18 @@ class TestPictures(TestCase):
         item = Item.create(**TEST_ITEM)
         picture = Picture.create(item=item, **TEST_PICTURE)
         picture2 = Picture.create(item=item, **TEST_PICTURE2)
-        open("{path}/{picture_id}.jpg".format(
-            path=IMAGE_FOLDER,
-            picture_id=picture.picture_id), "wb")
-        open("{path}/{picture_id}.jpg".format(
-            path=IMAGE_FOLDER,
-            picture_id=WRONG_UUID), "wb")
-        open("{path}/{picture_id}.jpg".format(
-            path=IMAGE_FOLDER,
-            picture_id=picture2.picture_id), "wb")
+        open("{path}/{picture_id}.{extension}".format(
+            path=utils.get_image_folder(),
+            picture_id=picture.picture_id,
+            extension=picture.extension), "wb")
+        open("{path}/{picture_id}.{extension}".format(
+            path=utils.get_image_folder(),
+            picture_id=WRONG_UUID,
+            extension='jpg'), "wb")
+        open("{path}/{picture_id}.{extension}".format(
+            path=utils.get_image_folder(),
+            picture_id=picture2.picture_id,
+            extension=picture2.extension), "wb")
 
         resp = self.app.delete('/pictures/{picture_id}'.format(
             picture_id=picture.picture_id))
@@ -186,15 +189,18 @@ class TestPictures(TestCase):
         assert item2.name == TEST_ITEM['name']
         assert float(item2.price) == TEST_ITEM['price']
         assert item2.description == TEST_ITEM['description']
-        assert os.path.isfile("{path}/{picture_id}.jpg".format(
-            path=IMAGE_FOLDER,
-            picture_id=WRONG_UUID))
-        assert not os.path.isfile("{path}/{picture_id}.jpg".format(
-            path=IMAGE_FOLDER,
-            picture_id=picture.picture_id))
-        assert os.path.isfile("{path}/{picture_id}.jpg".format(
-            path=IMAGE_FOLDER,
-            picture_id=picture2.picture_id))
+        assert os.path.isfile("{path}/{picture_id}.{extension}".format(
+            path=utils.get_image_folder(),
+            picture_id=WRONG_UUID,
+            extension='jpg'))
+        assert not os.path.isfile("{path}/{picture_id}.{extension}".format(
+            path=utils.get_image_folder(),
+            picture_id=picture.picture_id,
+            extension=picture.extension))
+        assert os.path.isfile("{path}/{picture_id}.{extension}".format(
+            path=utils.get_image_folder(),
+            picture_id=picture2.picture_id,
+            extension=picture2.extension))
         clean_images()
 
     def test_delete_picture__wrong_id(self):

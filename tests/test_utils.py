@@ -4,7 +4,7 @@ import uuid
 import os
 import random
 import shutil
-from utils import IMAGE_FOLDER
+from utils import get_image_folder
 
 
 def add_user(email, psw):
@@ -39,16 +39,16 @@ def open_with_auth(app, url, method, username, password, content_type, data):
                     data=data)
 
 
-def clean_images(folder=IMAGE_FOLDER):
+def clean_images():
     """
     Delete all the images in the IMAGE_FOLDER
     """
-    shutil.rmtree(folder, onerror=None)
+    shutil.rmtree(get_image_folder(), onerror=None)
 
 
-def setup_images(folder=IMAGE_FOLDER):
+def setup_images():
     """
     Create images folder if doesnt exist
     """
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    if not os.path.exists(get_image_folder()):
+        os.makedirs(get_image_folder())

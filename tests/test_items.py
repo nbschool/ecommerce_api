@@ -4,7 +4,6 @@ Test suite for ItemHandler and ItemListHandler
 
 import json
 import os
-import tempfile
 import uuid
 
 import http.client as client
@@ -12,7 +11,9 @@ import http.client as client
 from models import Item, Picture
 from tests.test_case import TestCase
 from tests.test_utils import clean_images, setup_images
-from utils import IMAGE_FOLDER
+import utils
+
+TEST_IMAGE_FOLDER = 'test_images'
 
 TEST_ITEM = {
     "item_id": "429994bf-784e-47cc-a823-e0c394b823e8",
@@ -60,7 +61,7 @@ class TestItems(TestCase):
     @classmethod
     def setup_class(cls):
         super(TestItems, cls).setup_class()
-        cls.test_dir = tempfile.mkdtemp()
+        utils.get_image_folder = lambda: TEST_IMAGE_FOLDER
 
     def test_post_item__success(self):
         resp = self.app.post('/items/', data=json.dumps(TEST_ITEM),
@@ -151,15 +152,15 @@ class TestItems(TestCase):
         picture2 = Picture.create(item=item, **TEST_PICTURE2)
         picture3 = Picture.create(item=item2, **TEST_PICTURE3)
         open("{path}/{picture_id}.{extension}".format(
-            path=IMAGE_FOLDER,
+            path=utils.get_image_folder(),
             picture_id=picture.picture_id,
             extension=picture.extension), "wb")
         open("{path}/{picture_id}.{extension}".format(
-            path=IMAGE_FOLDER,
+            path=utils.get_image_folder(),
             picture_id=picture3.picture_id,
             extension=picture3.extension), "wb")
         open("{path}/{picture_id}.{extension}".format(
-            path=IMAGE_FOLDER,
+            path=utils.get_image_folder(),
             picture_id=picture2.picture_id,
             extension=picture2.extension), "wb")
 
@@ -173,15 +174,15 @@ class TestItems(TestCase):
         pic = Picture.get()
         assert pic == picture3
         assert os.path.isfile("{path}/{picture_id}.{extension}".format(
-            path=IMAGE_FOLDER,
+            path=utils.get_image_folder(),
             picture_id=picture3.picture_id,
             extension=picture3.extension))
         assert not os.path.isfile("{path}/{picture_id}.{extension}".format(
-            path=IMAGE_FOLDER,
+            path=utils.get_image_folder(),
             picture_id=picture.picture_id,
             extension=picture.extension))
         assert not os.path.isfile("{path}/{picture_id}.{extension}".format(
-            path=IMAGE_FOLDER,
+            path=utils.get_image_folder(),
             picture_id=picture2.picture_id,
             extension=picture2.extension))
         clean_images()

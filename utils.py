@@ -5,6 +5,10 @@ from http.client import BAD_REQUEST
 IMAGE_FOLDER = 'images'
 
 
+def get_image_folder():
+    return IMAGE_FOLDER
+
+
 def check_required_fields(required_fields, request_data):
     """
     Check whether request_data provides all fields in
@@ -26,28 +30,31 @@ def non_empty_str(val, name):
     return str(val)
 
 
-def save_image(file, picture_id, extension, folder=IMAGE_FOLDER):
+def save_image(file, picture_id, extension):
     """
     Create an image folder if not exist and then save in the
     folder the image passed with its extension
     """
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    if not os.path.exists(get_image_folder()):
+        os.makedirs(get_image_folder())
     file.save(image_fullpath(picture_id, extension))
 
 
-def remove_image(picture_id, extension, folder=IMAGE_FOLDER):
+def remove_image(picture_id, extension):
     """
     Remove a specified picture by picture_id from folder
     """
-    if(os.path.isdir(folder)):
+    if(os.path.isdir(get_image_folder()) and
+       os.path.isfile(image_fullpath(picture_id, extension))):
         os.remove(image_fullpath(picture_id, extension))
-        # TODO log in case folder not found
+        # TODO log in case file or folder not found
 
 
-def image_fullpath(picture_id, extension, folder=IMAGE_FOLDER):
+def image_fullpath(picture_id, extension):
     """
-    Return a path for the image with IMAGE_FOLDER
-    picture_id and extension
+    Return a path for the image in the image folder,
+    with picture_id and extension
     """
-    return os.path.join(folder, '{}.{}'.format(str(picture_id), extension))
+    return os.path.join(
+        get_image_folder(),
+        '{}.{}'.format(str(picture_id), extension))

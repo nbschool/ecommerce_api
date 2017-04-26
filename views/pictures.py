@@ -71,8 +71,8 @@ class PictureHandler(Resource):
         except Picture.DoesNotExist:
             return None, client.NOT_FOUND
 
-        return send_from_directory(utils.IMAGE_FOLDER, picture.filename(),
-                                   as_attachment=True)
+        return send_from_directory(utils.get_image_folder(),
+                                   picture.filename(), as_attachment=True)
 
     def delete(self, picture_id):
         """Remove the picture specified by picture_id"""
