@@ -5,13 +5,14 @@ Test suite for PictureHandler, ItemPictureHandler and PicturesHandler
 import json
 from io import BytesIO
 import os
-import shutil
+import tempfile
 import uuid
 
 import http.client as client
 
 from models import Item, Picture
 from tests.test_case import TestCase
+from tests.test_utils import clean_images, setup_images
 from utils import IMAGE_FOLDER
 
 
@@ -44,12 +45,13 @@ WRONG_UUID = 'e8e42371-46de-4f5e-8927-e2cc34826269'
 
 class TestPictures(TestCase):
 
-    def clean_images(self):
-        shutil.rmtree(IMAGE_FOLDER, onerror=None)
+    @classmethod
+    def setup_class(cls):
+        super(TestPictures, cls).setup_class()
+        cls.test_dir = tempfile.mkdtemp()  #inprogress
 
     def test_get_picture__success(self):
-        if not os.path.exists(IMAGE_FOLDER):
-            os.makedirs(IMAGE_FOLDER)
+        setup_images()
         item = Item.create(**TEST_ITEM)
         picture = Picture.create(item=item, **TEST_PICTURE)
         open("{path}/{picture_id}.jpg".format(
@@ -63,6 +65,8 @@ class TestPictures(TestCase):
         test_picture['item_id'] = item.item_id
         assert resp.data == b''
         assert resp.headers['Content-Type'] == 'image/jpeg'
+        clean_images()
+
 
     def test_get_picture__missing(self):
         resp = self.app.get('/pictures/{picture_id}'.format(
@@ -158,20 +162,25 @@ class TestPictures(TestCase):
         assert Picture.select().count() == 0
 
     def test_delete_picture__success(self):
-        item = Item.create(**TEST_ITEM)
+        setup_images()
+        item = Item.create(**TEST_ITEM)        
         picture = Picture.create(item=item, **TEST_PICTURE)
+        picture2 = Picture.create(item=item, **TEST_PICTURE2)
         open("{path}/{picture_id}.jpg".format(
             path=IMAGE_FOLDER,
             picture_id=picture.picture_id), "wb")
         open("{path}/{picture_id}.jpg".format(
             path=IMAGE_FOLDER,
             picture_id=WRONG_UUID), "wb")
+        open("{path}/{picture_id}.jpg".format(
+            path=IMAGE_FOLDER,
+            picture_id=picture2.picture_id), "wb")
 
         resp = self.app.delete('/pictures/{picture_id}'.format(
             picture_id=picture.picture_id))
 
         assert resp.status_code == client.NO_CONTENT
-        assert Picture.select().count() == 0
+        assert Picture.select().count() == 1
         assert Item.select().count() == 1
         item2 = Item.get()
         assert str(item2.item_id) == TEST_ITEM['item_id']
@@ -184,7 +193,10 @@ class TestPictures(TestCase):
         assert not os.path.isfile("{path}/{picture_id}.jpg".format(
             path=IMAGE_FOLDER,
             picture_id=picture.picture_id))
-        self.clean_images()
+        assert os.path.isfile("{path}/{picture_id}.jpg".format(
+            path=IMAGE_FOLDER,
+            picture_id=picture2.picture_id))
+        clean_images()
 
     def test_delete_picture__wrong_id(self):
         resp = self.app.delete('/pictures/{picture_id}'.format(
@@ -198,4 +210,8 @@ class TestPictures(TestCase):
         resp = self.app.delete('/pictures/{picture_id}'.format(
             picture_id=picture.picture_id))
 
-        assert resp.status_code == client.INTERNAL_SERVER_ERROR
+        assert resp.status_code == client.NO_CONTENT
+        assert not Picture.select().exists()
+        assert Item.select().exists()
+        assert item.json() == TEST_ITEM
+
