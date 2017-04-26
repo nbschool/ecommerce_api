@@ -1,10 +1,12 @@
 from functools import reduce
-from models import Address, User
-from base64 import b64encode
+import json
 import os
-from uuid import uuid4
 import random
 import shutil
+from base64 import b64encode
+from uuid import uuid4
+
+from models import Address, User
 from utils import get_image_folder
 
 
@@ -106,3 +108,16 @@ def format_jsonapi_request(type_, data):
             'attributes': data
         }
     }
+
+
+def get_expected_results(section):
+    """
+    Returns the given section of the expected results data from
+    `expected_results.json` to validate the response of the flask tests.
+    """
+    path = os.path.abspath(os.path.dirname(__file__))
+    path = os.path.join(path, 'expected_results.json')
+    with open(path) as fo:
+        data = json.load(fo)
+
+    return data[section]
