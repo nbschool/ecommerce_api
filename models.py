@@ -118,6 +118,31 @@ class User(BaseModel):
         }
 
 
+class Address(BaseModel):
+    """ The model Address represent a user address.
+        Each address is releated to one user, but one user can have
+        more addresses."""
+    address_id = UUIDField(unique=True)
+    user = ForeignKeyField(User, related_name='addresses')
+    country = CharField()
+    city = CharField()
+    post_code = CharField()
+    address = CharField()
+    phone = CharField()
+
+    def json(self):
+        return {
+            'address_id': str(self.address_id),
+            'user_first_name': self.user.first_name,
+            'user_last_name': self.user.last_name,
+            'country': self.country,
+            'city': self.city,
+            'post_code': self.post_code,
+            'address': self.address,
+            'phone': self.phone
+        }
+
+
 class Order(BaseModel):
     """ The model Order contains a list of orders - one row per order.
     Each order will be place by one client.
@@ -128,7 +153,7 @@ class Order(BaseModel):
     """
     order_id = UUIDField(unique=True, default=uuid4)
     total_price = DecimalField(default=0)
-    delivery_address = CharField()
+    delivery_address = ForeignKeyField(Address, related_name="orders")
     user = ForeignKeyField(User, related_name="orders")
 
     class Meta:
@@ -226,7 +251,7 @@ class Order(BaseModel):
             'order_id': str(self.order_id),
             'date': str(self.created_at),
             'total_price': float(self.total_price),
-            'delivery_address': self.delivery_address,
+            'delivery_address': self.delivery_address.json(),
             'user_id': str(self.user.user_id)
         }
 
@@ -292,3 +317,4 @@ User.create_table(fail_silently=True)
 Item.create_table(fail_silently=True)
 Order.create_table(fail_silently=True)
 OrderItem.create_table(fail_silently=True)
+Address.create_table(fail_silently=True)

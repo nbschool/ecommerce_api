@@ -3,8 +3,8 @@ Orders-view: this module contains functions for the interaction with the orders.
 """
 
 from flask_restful import Resource
-from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
-from models import Order, Item
+from models import Address, Order, Item
+from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST, UNAUTHORIZED
 from flask import abort, request, g
 from auth import auth
 
@@ -50,11 +50,10 @@ class OrdersHandler(Resource):
         """ Insert a new order."""
         user = g.user
         res = request.get_json()
-
         # Check that the order has an 'items' and 'delivery_address' attributes
         # otherwise it's useless to continue.
-        for i in ('items', 'delivery_address'):
-            if i not in res['order'] or not res['order'][i]:
+        for key in ('items', 'delivery_address'):
+            if not res['order'].get(key):
                 return None, BAD_REQUEST
 
         res_items = res['order']['items']
@@ -78,8 +77,21 @@ class OrdersHandler(Resource):
             if not res['order'].get(i):
                 return None, BAD_REQUEST
 
+        # Check that the address exist and check that the items exist by getting all the item names
+        # from the request and executing a get() request with Peewee
+        try:
+            item_names = [e['name'] for e in res['order']['items']]
+            # FIXME: This look up just one item, not all of them, so it does
+            # not work for testing that ALL the requested items exist
+            # TODO: Use a query to get all the items and use the result to
+            # add the items to the order instead of querying again below
+            address = Address.get(Address.address_id == res['order']['delivery_address'])
+            Item.get(Item.name << item_names)
+        except (Address.DoesNotExist, Item.DoesNotExist):
+            abort(BAD_REQUEST)
+
         order = Order.create(
-            delivery_address=res['order']['delivery_address'],
+            delivery_address=address,
             user=user,
         )
 
@@ -109,14 +121,23 @@ class OrderHandler(Resource):
         item_names = [e for e in res_items]
         items = Item.select().where(Item.name << item_names)
 
+        for key in ('items', 'delivery_address', 'order_id'):
+            if not res['order'].get(key):
+                return None, BAD_REQUEST
+
         try:
             order = Order.get(order_id=str(order_id))
-        except Order.DoesNotExist:
+            address = Address.get(Address.address_id == res['order']['delivery_address'])
+        except (Address.DoesNotExist, Order.DoesNotExist):
             return None, NOT_FOUND
 
-        for i in ('items', 'delivery_address', 'order_id'):
-            if not res['order'].get(i):
-                return None, BAD_REQUEST
+        # get the user from the flask.g global object registered inside the
+        # auth.py::verify() function, called by @auth.login_required decorator
+        # and match it against the found user.
+        # This is to prevent users from modify other users' order.
+        if g.user != order.user and g.user.admin is False:
+            return ({'message': "You can't delete another user's order"},
+                    UNAUTHORIZED)
 
         # check whether availabilities allow order update
         if any(item.availability < res_items[item.name]['quantity']
@@ -131,7 +152,7 @@ class OrderHandler(Resource):
             order.add_item(
                 Item.get(Item.name == name), item['quantity'])
 
-        order.delivery_address = res['order']['delivery_address']
+        order.delivery_address = address
         order.save()
 
         return serialize_order(order), OK
@@ -143,6 +164,14 @@ class OrderHandler(Resource):
             obj = Order.get(order_id=str(order_id))
         except Order.DoesNotExist:
             return None, NOT_FOUND
+
+        # get the user from the flask.g global object registered inside the
+        # auth.py::verify() function, called by @auth.login_required decorator
+        # and match it against the found user.
+        # This is to prevent users from deleting other users' account.
+        if g.user != obj.user and g.user.admin is False:
+            return ({'message': "You can't delete another user's order"},
+                    UNAUTHORIZED)
 
         obj.delete_instance(recursive=True)
         return None, NO_CONTENT
