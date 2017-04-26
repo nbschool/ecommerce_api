@@ -10,7 +10,7 @@ import http.client as client
 
 from models import Item, Picture
 from tests.test_case import TestCase
-from tests.test_utils import clean_images, setup_images
+from tests import test_utils
 import utils
 
 TEST_IMAGE_FOLDER = 'test_images'
@@ -62,6 +62,7 @@ class TestItems(TestCase):
     def setup_class(cls):
         super(TestItems, cls).setup_class()
         utils.get_image_folder = lambda: TEST_IMAGE_FOLDER
+        test_utils.get_image_folder = utils.get_image_folder
 
     def test_post_item__success(self):
         resp = self.app.post('/items/', data=json.dumps(TEST_ITEM),
@@ -145,7 +146,7 @@ class TestItems(TestCase):
         assert not Item.select().exists()
 
     def test_delete_item__pictures_cascade(self):
-        setup_images()
+        test_utils.setup_images()
         item = Item.create(**TEST_ITEM)
         item2 = Item.create(**TEST_ITEM2)
         picture = Picture.create(item=item, **TEST_PICTURE)
@@ -185,7 +186,7 @@ class TestItems(TestCase):
             path=utils.get_image_folder(),
             picture_id=picture2.picture_id,
             extension=picture2.extension))
-        clean_images()
+        test_utils.clean_images()
 
     def test_delete_item__failed(self):
         resp = self.app.delete('/items/{item_id}'.format(item_id=WRONG_UUID))

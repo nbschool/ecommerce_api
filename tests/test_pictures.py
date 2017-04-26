@@ -11,7 +11,7 @@ import http.client as client
 
 from models import Item, Picture
 from tests.test_case import TestCase
-from tests.test_utils import clean_images, setup_images
+from tests import test_utils
 import utils
 
 TEST_IMAGE_FOLDER = 'test_images'
@@ -49,9 +49,10 @@ class TestPictures(TestCase):
     def setup_class(cls):
         super(TestPictures, cls).setup_class()
         utils.get_image_folder = lambda: TEST_IMAGE_FOLDER
+        test_utils.get_image_folder = utils.get_image_folder
 
     def test_get_picture__success(self):
-        setup_images()
+        test_utils.setup_images()
         item = Item.create(**TEST_ITEM)
         picture = Picture.create(item=item, **TEST_PICTURE)
         open("{path}/{picture_id}.jpg".format(
@@ -65,7 +66,7 @@ class TestPictures(TestCase):
         test_picture['item_id'] = item.item_id
         assert resp.data == b''
         assert resp.headers['Content-Type'] == 'image/jpeg'
-        clean_images()
+        test_utils.clean_images()
 
     def test_get_picture__missing(self):
         resp = self.app.get('/pictures/{picture_id}'.format(
@@ -161,7 +162,7 @@ class TestPictures(TestCase):
         assert Picture.select().count() == 0
 
     def test_delete_picture__success(self):
-        setup_images()
+        test_utils.setup_images()
         item = Item.create(**TEST_ITEM)
         picture = Picture.create(item=item, **TEST_PICTURE)
         picture2 = Picture.create(item=item, **TEST_PICTURE2)
@@ -201,7 +202,7 @@ class TestPictures(TestCase):
             path=utils.get_image_folder(),
             picture_id=picture2.picture_id,
             extension=picture2.extension))
-        clean_images()
+        test_utils.clean_images()
 
     def test_delete_picture__wrong_id(self):
         resp = self.app.delete('/pictures/{picture_id}'.format(
