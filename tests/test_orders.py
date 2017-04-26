@@ -348,7 +348,6 @@ class TestOrders(TestCase):
         order1 = Order.create(delivery_address=addr_A, user=user_A)
         order1.add_item(item1, 2).add_item(item2)
         order_item_before = [o.json() for o in OrderItem.select()]
-        import pdb; pdb.set_trace
         order_id = str(order1.order_id)
 
         order = {
@@ -369,8 +368,6 @@ class TestOrders(TestCase):
         order_item_after = [o.json() for o in OrderItem.select()]
         assert resp.status_code == BAD_REQUEST
         assert order_item_before == order_item_after
-
-
 
     def test_update_order__success_admin_not_own_order(self):
         item1 = Item.create(
