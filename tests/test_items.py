@@ -55,11 +55,12 @@ TEST_PICTURE3 = {
 
 WRONG_UUID = '04f2f213-1a0f-443d-a5ab-79097ba725ba'
 
+
 class TestItems(TestCase):
     @classmethod
     def setup_class(cls):
         super(TestItems, cls).setup_class()
-        cls.test_dir = tempfile.mkdtemp()  #inprogress
+        cls.test_dir = tempfile.mkdtemp()
 
     def test_post_item__success(self):
         resp = self.app.post('/items/', data=json.dumps(TEST_ITEM),

@@ -48,7 +48,7 @@ class TestPictures(TestCase):
     @classmethod
     def setup_class(cls):
         super(TestPictures, cls).setup_class()
-        cls.test_dir = tempfile.mkdtemp()  #inprogress
+        cls.test_dir = tempfile.mkdtemp()
 
     def test_get_picture__success(self):
         setup_images()
@@ -66,7 +66,6 @@ class TestPictures(TestCase):
         assert resp.data == b''
         assert resp.headers['Content-Type'] == 'image/jpeg'
         clean_images()
-
 
     def test_get_picture__missing(self):
         resp = self.app.get('/pictures/{picture_id}'.format(
@@ -163,7 +162,7 @@ class TestPictures(TestCase):
 
     def test_delete_picture__success(self):
         setup_images()
-        item = Item.create(**TEST_ITEM)        
+        item = Item.create(**TEST_ITEM)
         picture = Picture.create(item=item, **TEST_PICTURE)
         picture2 = Picture.create(item=item, **TEST_PICTURE2)
         open("{path}/{picture_id}.jpg".format(
@@ -214,4 +213,3 @@ class TestPictures(TestCase):
         assert not Picture.select().exists()
         assert Item.select().exists()
         assert item.json() == TEST_ITEM
-

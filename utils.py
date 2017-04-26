@@ -26,13 +26,13 @@ def non_empty_str(val, name):
     return str(val)
 
 
-def save_image(file, picture_id, extension):
+def save_image(file, picture_id, extension, folder=IMAGE_FOLDER):
     """
-    Create a path images/ if not exist and then save in the folder
-    the image passed with its extension
+    Create an image folder if not exist and then save in the
+    folder the image passed with its extension
     """
-    if not os.path.exists(IMAGE_FOLDER):
-        os.makedirs(IMAGE_FOLDER)
+    if not os.path.exists(folder):
+        os.makedirs(folder)
     file.save(image_fullpath(picture_id, extension))
 
 
