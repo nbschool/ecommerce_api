@@ -9,8 +9,8 @@ from flask import request
 from flask_restful import Resource
 import http.client as client
 
-from models import Item
-from utils import check_required_fields
+from models import Item, Picture
+from utils import check_required_fields, remove_image
 
 
 class ItemsHandler(Resource):
@@ -72,9 +72,12 @@ class ItemHandler(Resource):
     def delete(self, item_id):
         """Remove the item specified by item_id"""
         try:
-            obj = Item.get(Item.item_id == item_id)
+            item = Item.get(Item.item_id == item_id)
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
-        # TODO on cascade delete pictures and files
-        obj.delete_instance()
+        pictures = Picture.select().where(Picture.item == item)
+
+        for pic in pictures:
+            remove_image(pic.picture_id, pic.extension)
+        item.delete_instance(recursive=True)
         return None, client.NO_CONTENT
