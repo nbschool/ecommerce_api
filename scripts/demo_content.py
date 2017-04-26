@@ -48,13 +48,13 @@ def set_db(database):
 
 
 def write_db():
+    fake = Factory.create('it_IT')
+    fake.seed(9623954)
+
     def user_creator(num_user=1):
-        """Create users from an Italian-like context."""
-        fake = Factory.create('it_IT')
-        fake.seed(9623954)
+        """Create users from an Italian-like context. Due to param in factory create 'it_iT'."""
         num_user = num_user
         for i in range(0, num_user):
-            uuid = fake.uuid4()
             first_name = fake.first_name()
             last_name = fake.last_name()
             email_provider = fake.free_email_domain()
@@ -62,11 +62,21 @@ def write_db():
             password = fake.password(length=3, special_chars=False, digits=True,
                                      upper_case=True, lower_case=False)
             User.create(
-                user_id=uuid,
+                user_id=fake.uuid4(),
                 first_name=first_name,
                 last_name=last_name,
                 email=email_user,
                 password=User.hash_password(password)
+            )
+
+    def item_creator(num_item=1):
+        num_item = num_item
+        for i in range(0, num_item):
+            Item.create(
+                item_id=fake.uuid4(),
+                name=fake.sentence(nb_words=3, variable_nb_words=True),
+                price=fake.pyfloat(left_digits=2, right_digits=2, positive=True),
+                description=fake.paragraph(nb_sentences=3, variable_nb_sentences=True)
             )
 
     # start create items
@@ -75,127 +85,7 @@ def write_db():
 
     # start create items
 
-    Item.create(
-        item_id="ccb909e6-26a5-4693-b8a7-a45a6e53b5db",
-        name="Ebony 1Kg Cocoa Mass 96%",
-        price=6.82,
-        description="Belcolade Ebony cocoa mass the absolute\
-                    cocoa experience 96%\ cocoa content."
-    )
-
-    Item.create(
-        item_id="2440111c-a9ea-4556-827e-f17dc7b416ef",
-        name="MO551200-164 25kg CBM183W",
-        price=130.25,
-        description="Barry Callebaut Milk Chocolate, easimelt."
-    )
-
-    Item.create(
-        item_id="51c43fd8-0b90-4b96-84da-076da5b23b76",
-        name="LCVENE 8x1kg Milk 43% Venezuela Easimelt",
-        price=55.44,
-        description="Belcolade Milk venezuelan 44.4%.\
-                     A strong cocoa taste with an overall\
-                     impression of roasted beans. This\
-                     combined with a strong accent of nuts,\
-                     impregnated with vanilla and caramel,\
-                     result in an exclusive milk chocolate."
-    )
-
-    Item.create(
-        item_id="0424ffca-0352-4aa6-b4eb-0a96f66fe30c",
-        name="ZA306/G 15kg milk 41%\ Lait Supreme Easimelt.",
-        price=73.05,
-        description="Belcolade ZA306/G 15 Kg Milk 41%\ Lait\
-                     Supreme Easimelt*\ a dark coloured milk\
-                     chocolate with the bitterness of dark\
-                     chocolate sweetened with milky notes."
-    )
-
-    Item.create(
-        item_id="d367821e-3b29-4d82-9ee6-bce88f3f105d",
-        name="Wooden kids digital Geometry Clock",
-        price=4.50,
-        description="Toy in wood with the several characters\
-                     from the chocosfera universe."
-    )
-
-    Item.create(
-        item_id="3e02cba3-5ed6-443f-aa48-b04922834e84",
-        name="Java-E4-U70 2.5Kg Milk 32% Java Easymelt",
-        price=24.63,
-        description="Callebaut Java-T68 2.5% Milk 32% Java Easimelt\
-                    java milk chocolate 32% 2.5kg has a typical pale\
-                    and reddish colour, typical of the Java cocoa beans\
-                    But what a taste sensation! Explicit flaours of sweet\
-                    caramel and biscuits and refreshigly fruity, with\
-                    slightly acid touches."
-    )
-
-    Item.create(
-        item_id="1931acbf-bb8c-4684-b91c-d56451e58cf7",
-        name="Set mini choco-factory",
-        price=148.60,
-        description="All your family needs to make real\
-                    bean to bar chocolates."
-    )
-
-    Item.create(
-        item_id="25066cbd-d2c8-4733-a2ae-8b08a1e08498",
-        name="Baby Kids Simulator Music Phone Touch Screen.",
-        price=12.38,
-        description="A beautiful toy with the realistic form\
-                    of a smartphone touch screen whit characters\
-                    from the Chocosfera."
-    )
-
-    Item.create(
-        item_id="411c80b0-01db-47e8-a525-1c4c2eaa0fd0",
-        name="The golden Coin Maker",
-        price=19.99,
-        description="Melt, wrap and stamp your own golden foil\
-                    covered chocolate coins and medals with Jhon\
-                    Adams Golden coin maker. The coin make has a\
-                    safe melt chocolate unit for your favoriye brand\
-                    of chocolate."
-    )
-
-    Item.create(
-        item_id="4dc92442-3216-42f0-a613-c82b2599b7af",
-        name="PlayGo Chocolate Money Maker",
-        price=11.48,
-        description="A great activity mini factory set. You can make\
-                    hundreds and hundreds of foil wrapped golden\
-                    chocolate coins."
-    )
-
-    Item.create(
-        item_id="3bf0dd02-c485-4ab1-9cc2-65b05827632a",
-        name="Chococoin miner",
-        price=35.99,
-        description="A miner for chococoins base in the\
-                    famous raspberry Pi Zero. A beautiful way\
-                    to introduce kid in the wonderful world of\
-                    criptocurrencies."
-    )
-
-    Item.create(
-        item_id="773f0a88-fd3b-481b-bb2d-0f05313da781",
-        name="Chocosfera Kaoka Plush",
-        price=15.99,
-        description="A beautiful plush of the Chocosfera's\
-                    character Kaoka, godness of the chocolicious\
-                    universe."
-    )
-
-    Item.create(
-        item_id="8232b148-2a76-4b97-9144-1e21de1b4af4",
-        name="Chocosfera Pipo Plush",
-        price=15.99,
-        description="A beautiful plush of the Chocosfera's\
-                    character Pipo, The best fiend of men in\
-                    the chocolicious universe."
-    )
+    item_creator(100)
 
     # start create OrderItem entries
 
