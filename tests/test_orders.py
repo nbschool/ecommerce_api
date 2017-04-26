@@ -24,7 +24,7 @@ class TestOrders(TestCase):
         assert resp.status_code == OK
         assert json.loads(resp.data) == []
 
-    def test_get_orders(self):
+    def test_get_orders__success(self):
         item = Item.create(
             uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
@@ -70,7 +70,7 @@ class TestOrders(TestCase):
         resp = self.app.get('/orders/{}'.format(uuid4()))
         assert resp.status_code == NOT_FOUND
 
-    def test_get_order(self):
+    def test_get_order__success(self):
         user = add_user(None, TEST_USER_PSW)
         addr_A = add_address(user=user)
         addr_B = add_address(user=user, city='Firenze', post_code='50132',
