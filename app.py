@@ -18,14 +18,18 @@ can be retrieved making a GET to `/api/users/`
 from flask import abort, Flask, request
 from flask_restful import Api
 from http.client import BAD_REQUEST
+from flask_cors import CORS
 
 from models import database
 from views.orders import OrdersHandler, OrderHandler
 from views.items import ItemHandler, ItemsHandler
 from views.user import UsersHandler, UserHandler
+
+from views.address import AddressesHandler, AddressHandler
 from views.pictures import PicturesHandler, PictureHandler, ItemPictureHandler
 
 app = Flask(__name__)
+CORS(app)
 api = Api(app)
 
 
@@ -62,6 +66,8 @@ def database_disconnect(response):
     return response
 
 
+api.add_resource(AddressesHandler, "/addresses/")
+api.add_resource(AddressHandler, "/addresses/<uuid:address_id>")
 api.add_resource(ItemsHandler, "/items/")
 api.add_resource(ItemHandler, "/items/<uuid:item_id>")
 api.add_resource(ItemPictureHandler, '/items/<uuid:item_id>/pictures/')
