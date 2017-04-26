@@ -8,6 +8,7 @@ from auth import auth
 from models import User
 from utils import generate_response
 
+
 class UsersHandler(Resource):
     """
     Handler for main user endpoint.
