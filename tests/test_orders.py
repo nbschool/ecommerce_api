@@ -327,7 +327,7 @@ class TestOrders(TestCase):
         assert resp_order['order_id'] == order['order']['order_id']
         assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
 
-    def test_update_order__non_existing_item(self):
+    def test_update_order__non_existing_items(self):
         item1 = Item.create(
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
@@ -355,7 +355,11 @@ class TestOrders(TestCase):
                 "order_id": order_id,
                 'items': [
                     {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf00000',
-                     'price': 30.20, 'quantity': 1}
+                     'price': 30.20, 'quantity': 1},
+                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf2222',
+                     'price': 50.20, 'quantity': 1},
+                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf9999',
+                     'price': 90.20, 'quantity': 2}
                 ],
                 'delivery_address': addr_B.json()["address_id"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
