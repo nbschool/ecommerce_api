@@ -124,7 +124,7 @@ def print_any_db():
     word_db = 'database'
     if lenght_of_list > 1:
         word_db = 'databases'
-    print(Fore.YELLOW + Style.BRIGHT 
+    print(Fore.YELLOW + Style.BRIGHT
           + 'You\'ve already {} {} in your folder :'.format(lenght_of_list, word_db))
     for index, name_db in enumerate(list_of_db, start=1):
         print(index, '-', name_db)
@@ -193,7 +193,7 @@ def remove_chosen_db(list_of):
             os.remove(path)
             good_bye('deleted')
         else:
-            overwrite_chosen_db(list_of) # MIND THE BUG!!!
+            overwrite_chosen_db(list_of)  # MIND THE BUG!!!
             os.remove(path)
 
 
@@ -264,7 +264,7 @@ def main():
                 if lenght_of_list == 1:
                     overwrite_unique_db()
                 if lenght_of_list == 0:
-                    print(Fore.YELLOW + Style.BRIGHT 
+                    print(Fore.YELLOW + Style.BRIGHT
                           + 'No database founded. I\'ll create one for you')
                     db = SqliteDatabase('database.db')
                     set_db(db)
@@ -274,7 +274,7 @@ def main():
                 else:
                     overwrite_chosen_db()
             if selct == '2':
-                name_new_db = input(Fore.YELLOW + Style.BRIGHT 
+                name_new_db = input(Fore.YELLOW + Style.BRIGHT
                                     + 'Write the name of the new db. > ')
                 sqlite3.connect(name_new_db+'.db')
                 db = SqliteDatabase(name_new_db+'.db', autocommit=True)
