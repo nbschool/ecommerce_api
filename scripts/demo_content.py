@@ -45,6 +45,7 @@ def set_db(database):
         Item._meta.database = database
         OrderItem._meta.database = database
         User._meta.database = database
+        Address._meta.database = database
 
 
 def write_db():
@@ -138,6 +139,8 @@ def drops_all_tables(database):
             User.drop_table()
         if table == 'orderitem':
             OrderItem.drop_table()
+        if table == 'address':
+            Address.drop_table()
 
 
 def create_tables():
@@ -145,6 +148,7 @@ def create_tables():
     Item.create_table(fail_silently=True)
     Order.create_table(fail_silently=True)
     OrderItem.create_table(fail_silently=True)
+    Address.create_table(fail_silently=True)
 
 
 def good_bye(word, default='has'):
