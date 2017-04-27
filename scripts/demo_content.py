@@ -4,20 +4,24 @@ and supply a new one db with new down-to-earth data.
 """
 
 from peewee import SqliteDatabase
-from models import User, Item, Order, OrderItem
+from models import User, Item, Order, OrderItem, Address
 from faker import Factory
+from colorama import init, Fore, Style
 import os
 import sys
 import sqlite3
 import glob
 
+init(autoreset=True)
 
-TEXT_DISPLAY = '\033[95m'+'\033[1m'+"""
+
+TEXT_DISPLAY = Fore.MAGENTA + Style.BRIGHT + """
                       WELCOME TO DEMO CONTENT CREATOR.
                       --------------------------------
+                    """ + Fore.WHITE + Style.DIM + """
                 Here you could create a new simulated database.
                 """
-MENU_TEXT = '\033[92m'+'\033[1m'+"""
+MENU_TEXT = Fore.GREEN + Style.BRIGHT + """
                 ***********************************************
                 *Press:                                       *
                 *(1) To overwrite the database with new data. *
@@ -27,13 +31,13 @@ MENU_TEXT = '\033[92m'+'\033[1m'+"""
                 ***********************************************
             """
 
-WARNING_DELETE = '\033[93m'+'\033[1m'+"""
+WARNING_DELETE = Fore.YELLOW + Style.BRIGHT + """
                 ##################################################
                 #   WARNING: YOU WILL DELETE FILES PERMANENTLY   #
                 ##################################################
                 """
 
-WARNING_OVERWRITE = '\033[93m'+'\033[1m'+"""
+WARNING_OVERWRITE = Fore.YELLOW + Style.BRIGHT + """
                 ##################################################
                 #   WARNING: YOU WILL CHANGE FILES PERMANENTLY   #
                 ##################################################
@@ -99,12 +103,12 @@ def write_db():
 
     # start create order entries
 
-    Order.create(
-        order_id="32e0e4e1-39cc-459b-bcdb-50cd73c95f6f",
-        total_price=31.98,
-        delivery_address="Via dell Albero 56, Firenze. Italia.",
-        user_id=1
-    )
+    # Order.create(
+    #     order_id="32e0e4e1-39cc-459b-bcdb-50cd73c95f6f",
+    #     total_price=31.98,
+    #     delivery_address="Via dell Albero 56, Firenze. Italia.",
+    #     user_id=1
+    # )
 
 
 def get_databases():
@@ -120,7 +124,8 @@ def print_any_db():
     word_db = 'database'
     if lenght_of_list > 1:
         word_db = 'databases'
-    print('You\'ve already {} {} in your folder :'.format(lenght_of_list, word_db))
+    print(Fore.YELLOW + Style.BRIGHT 
+          + 'You\'ve already {} {} in your folder :'.format(lenght_of_list, word_db))
     for index, name_db in enumerate(list_of_db, start=1):
         print(index, '-', name_db)
     else:
@@ -152,8 +157,8 @@ def create_tables():
 
 
 def good_bye(word, default='has'):
-    print('\033[94m'+'\033[1m'+'*-* Your database {1} been {0}. *-*'.format(word, default))
-    print('\033[94m'+'\033[1m'+'*_* Have a nice day! *_*')
+    print(Fore.BLUE + Style.BRIGHT + '*-* Your database {1} been {0}. *-*'.format(word, default))
+    print(Fore.CYAN + Style.BRIGHT + '*_* Have a nice day! *_*')
     sys.exit()
 
 
@@ -169,9 +174,8 @@ def remove_chosen_db(list_of):
     print(WARNING_DELETE)
     for index, name_db in enumerate(list_of_db, start=1):
         print('('+str(index)+')'+'.-', name_db+' |', end=' ')
-    print(' ')
-    print(' ')
-    choice_a_db = input('\033[92m'+'\033[1m'
+    print('\n')
+    choice_a_db = input(Fore.YELLOW + Style.BRIGHT
                         + 'Press the number of database to delete '
                         + 'or hit [ENTER] to exit without changes. > ')
     if choice_a_db is '':
@@ -180,16 +184,16 @@ def remove_chosen_db(list_of):
         try:
             choice_a_db = int(choice_a_db)-1
         except ValueError:
-            print('\033[91m'+'\033[1m'+"Oops! That wasn't a number. Try again...")
+            print(Fore.RED + Style.BRIGHT + "Oops! That wasn't a number. Try again...")
             sys.exit()
     while True:
         path = list_of_db[choice_a_db]
         if choice_a_db <= lenght_of_list:
-            print('You\'ve chosen {}'.format(path))
+            print(Fore.YELLOW + Style.BRIGHT + 'You\'ve chosen {}'.format(path))
             os.remove(path)
             good_bye('deleted')
         else:
-            overwrite_chosen_db(list_of)
+            overwrite_chosen_db(list_of) # MIND THE BUG!!!
             os.remove(path)
 
 
@@ -197,10 +201,11 @@ def overwrite_unique_db():
     list_of_db = get_databases()
     name_db = list_of_db[0]
     print(WARNING_OVERWRITE, '\n')
-    print('You\'ve got only a database')
+    print(Fore.YELLOW + Style.BRIGHT + 'You\'ve got only a database')
     print('(1)'+'.-', name_db, end='\n')
     print('Are you sure to overwrite {}?'.format(name_db))
-    selct = input('if Yes press(1) or [ENTER] to exit without change. > ')
+    selct = input('if Yes press(1) or [ENTER] to exit without change. >'
+                  + Fore.YELLOW + Style.BRIGHT + ' ')
     if selct is '1':
         db = SqliteDatabase(list_of_db[0], autocommit=False)
         set_db(db)
@@ -220,9 +225,8 @@ def overwrite_chosen_db():
     print(WARNING_OVERWRITE)
     for index, name_db in enumerate(list_of_db, start=1):
         print('('+str(index)+')'+'.-', name_db+' |', end=' ')
-    print(' ')
-    print(' ')
-    choice_a_db = input('\033[92m'+'\033[1m'
+    print('\n')
+    choice_a_db = input(Fore.YELLOW + Style.BRIGHT
                         + 'Press the number of database to overwrite '
                         + 'or hit [ENTER] to exit without changes. > ')
     if choice_a_db is '':
@@ -231,7 +235,7 @@ def overwrite_chosen_db():
         try:
             choice_a_db = int(choice_a_db)-1
         except ValueError:
-            print('\033[91m'+'\033[1m'+"Oops! That wasn't a number. Try again...")
+            print(Fore.RED + Style.BRIGHT + "Oops! That wasn't a number. Try again...")
             sys.exit()
     while True:
         if choice_a_db <= lenght_of_list:
@@ -260,7 +264,8 @@ def main():
                 if lenght_of_list == 1:
                     overwrite_unique_db()
                 if lenght_of_list == 0:
-                    print('No database founded. I\'ll create one for you')
+                    print(Fore.YELLOW + Style.BRIGHT 
+                          + 'No database founded. I\'ll create one for you')
                     db = SqliteDatabase('database.db')
                     set_db(db)
                     create_tables()
@@ -269,7 +274,8 @@ def main():
                 else:
                     overwrite_chosen_db()
             if selct == '2':
-                name_new_db = input('Write the name of the new db. > ')
+                name_new_db = input(Fore.YELLOW + Style.BRIGHT 
+                                    + 'Write the name of the new db. > ')
                 sqlite3.connect(name_new_db+'.db')
                 db = SqliteDatabase(name_new_db+'.db', autocommit=True)
                 if db.is_closed():
