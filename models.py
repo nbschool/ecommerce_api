@@ -228,14 +228,30 @@ class Order(BaseModel):
         # TODO: Raise or return something more explicit
         return self
 
-    def json(self):
-        return {
+    def json(self, include_items=False):
+        order_json = {
             'order_id': str(self.order_id),
             'date': str(self.created_at),
             'total_price': float(self.total_price),
             'delivery_address': self.delivery_address.json(),
             'user_id': str(self.user.user_id)
         }
+        if include_items:
+            order_json['items'] = self.get_order_items()
+
+        return order_json
+
+    def get_order_items(self):
+        items = []
+        for orderitem in self.order_items:
+            items.append({
+                'quantity': orderitem.quantity,
+                'price': float(orderitem.item.price),
+                'subtotal': float(orderitem.subtotal),
+                'name': orderitem.item.name,
+                'description': orderitem.item.description
+            })
+        return items
 
 
 class OrderItem(BaseModel):
