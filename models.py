@@ -229,6 +229,13 @@ class Order(BaseModel):
         return self
 
     def json(self, include_items=False):
+        """
+        The order json method is different compared to the others, as long as the OrderItem
+        cross-table exists.
+        With the include_items flag sets to false, the function returns the order json.
+        Otherwise, if include_items is equal to true, all the OrderItems and related items are included.
+        """
+
         order_json = {
             'order_id': str(self.order_id),
             'date': str(self.created_at),
@@ -242,6 +249,9 @@ class Order(BaseModel):
         return order_json
 
     def get_order_items(self):
+        """
+        Gets all the OrderItems related to an order.
+        """
         items = []
         for orderitem in self.order_items:
             items.append({
