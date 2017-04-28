@@ -123,7 +123,7 @@ class TestOrderSchema(TestCase):
         order = Order.create(delivery_address=addr, user=user)
         order.add_item(item1, 2).add_item(item2, 5)
 
-        parsed = order.json(include_data=['items', 'user', 'delivery_address'])
+        # parsed = order.json(include_data=['items', 'user', 'delivery_address'])
 
         assert False
         # TODO: finish implementing the test

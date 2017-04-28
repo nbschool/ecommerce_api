@@ -2,11 +2,14 @@
 Orders-view: this module contains functions for the interaction with the orders.
 """
 
+from http.client import (BAD_REQUEST, CREATED, NO_CONTENT, NOT_FOUND, OK,
+                         UNAUTHORIZED)
+
+from flask import abort, g, request
 from flask_restful import Resource
-from models import database, Address, Order, Item
-from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST, UNAUTHORIZED
-from flask import abort, request, g
+
 from auth import auth
+from models import Address, Item, Order
 from utils import generate_response
 
 from exceptions import InsufficientAvailabilityException
