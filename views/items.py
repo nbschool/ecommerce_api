@@ -64,16 +64,12 @@ class ItemHandler(Resource):
 
         if name and name != obj.name:
             obj.name = request_data['name']
-        else:
-            obj.name
+
         if price and price != obj.price:
             obj.price = request_data['price']
-        else:
-            obj.price
+
         if description and description != obj.description:
             obj.description = request_data['description']
-        else:
-            obj.description
 
         obj.save()
 
