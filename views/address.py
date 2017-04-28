@@ -71,7 +71,6 @@ class AddressHandler(Resource):
         address = res.get('address')
         phone = res.get('phone')
 
-
         if country and country != obj.country:
             obj.country = res['country']
 
