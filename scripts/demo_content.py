@@ -73,6 +73,17 @@ def write_db():
             pick = random.choice(range(1, self.total+1))
             return pick
 
+    class RaffleInsertion:
+        lucky_one = None
+
+        def __init__(self, table):
+            for i in table.select():
+                self.total += 1
+
+        def random_pick(self):
+            pick = random.choice(range(1, self.total+1))
+            return pick
+
     def user_creator(num_user=1):
         """Create users from an Italian-like context. Due to param in factory create 'it_iT'."""
         for i in range(0, num_user):
@@ -112,7 +123,7 @@ def write_db():
     def address_creator(num_addr=1):
         LIST_COUNTRIES = ['Belgium', 'France', 'Germany',
                           'Greece', 'Italy', 'Portugal', 'Spain']
-        for i in range(1, num_addr):
+        for i in range(0, num_addr):
             country = random.choice(LIST_COUNTRIES)
             user_id = CountInsertions(User)
             Address.create(
@@ -126,47 +137,47 @@ def write_db():
             )
 
     def order_creator(num_order=1):
-        for i in range(1, num_order):
+        for i in range(0, num_order):
             user_id = CountInsertions(User)
             order_id = fake.uuid4()
-            address = '{} {}\n{} {}\n{}'.format((fake.random_digit()+1), fake.street_name(),
-                                                  fake.postcode(), fake.city(), country)
+            address = CountInsertions(Address)
             Order.create(
                 order_id=order_id,
+                user_id=user_id.random_pick(),
                 total_price=0,
-                delivery_address=address,
-                user_id=user_id
+                delivery_address=address.random_pick(),
+                items=[]
             )
 
-    def order_item_creator(num_order_item=1):
-        """crei item, poi order, poi orderitem e aggiorni i valori di order"""
-        class ItemRaffle:
-            """Help create orders with a different number of items."""
-            def __init__(self):
-                self.order = [{ 'order_id': None,
-                                'date': None,
-                                'total_price': None,
-                                'user_id': None,
-                                'order': {
-                                        'items': [],
-                                        'delivery_address': None,
-                                        'user': None
-                                        }
-                            }]
-                self.num_item = random.randint(1,5)
-                for i in range(0, self.num_item):
-                    self.order['order']['items'].append(list_item_data[i])
+    # def order_item_creator(num_order_item=1):  **** WORK TO DO!!! ****
+    #     """crei item, poi order, poi orderitem e aggiorni i valori di order"""
+    #     class ItemRaffle:
+    #         """Helps to create orders with a different number of items."""
+    #         def __init__(self):
+    #             self.order = [{ 'order_id': None,
+    #                             'date': None,
+    #                             'total_price': None,
+    #                             'user_id': None,
+    #                             'order': {
+    #                                     'items': [],
+    #                                     'delivery_address': None,
+    #                                     'user': None
+    #                                     }
+    #                         }]
+    #             self.num_item = random.randint(1,5)
+    #             for i in range(0, self.num_item):
+    #                 self.order['order']['items'].append(list_item_data[i])
 
-        winner = ItemRaffle()
-        order_item = winner.order
-        random.shuffle(LIST_COUNTRIES)
-        country = LIST_COUNTRIES[0]
-        random.shuffle(list_users_uuid)
-        used_uuid = list_users_uuid[0]
-        address = '{} {}\n{} {}\n '.format(fake.random_digit(), fake.street_name(),
-                                              fake.city(), fake.postcode(), country[0] )
-        order_item['order']['delivery_address'] = address
-        order_item['order']['user'] = list_users_uuid[0]
+    #     winner = ItemRaffle()
+    #     order_item = winner.order
+    #     random.shuffle(LIST_COUNTRIES)
+    #     country = LIST_COUNTRIES[0]
+    #     random.shuffle(list_users_uuid)
+    #     used_uuid = list_users_uuid[0]
+    #     address = '{} {}\n{} {}\n '.format(fake.random_digit(), fake.street_name(),
+    #                                           fake.city(), fake.postcode(), country[0] )
+    #     order_item['order']['delivery_address'] = address
+    #     order_item['order']['user'] = list_users_uuid[0]
 
     # start create users
 
@@ -182,7 +193,7 @@ def write_db():
 
     # start create orders
     # TODO
-    # order_creator(1)
+    order_creator(10)
 
 
 def get_databases():
