@@ -132,8 +132,10 @@ class TestOrders(TestCase):
         order = {
             'order': {
                 'items': [
-                    {'name': 'mario', 'price': 20.20, 'quantity': 4},
-                    {'name': 'GINO', 'price': 30.20, 'quantity': 10}
+                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                     'price': 20.20, 'quantity': 4},
+                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                     'price': 30.20, 'quantity': 10}
                 ],
                 'delivery_address': addr_A.json()["address_id"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
@@ -176,8 +178,10 @@ class TestOrders(TestCase):
         order = {
             'order': {
                 'items': [
-                    {'name': 'item1', 'price': 50.0, 'quantity': 4},
-                    {'name': 'item2', 'price': 20.0, 'quantity': 10}
+                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                     'price': 50.0, 'quantity': 4},
+                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                     'price': 20.0, 'quantity': 10}
                 ],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
@@ -206,8 +210,10 @@ class TestOrders(TestCase):
         order = {
             'order': {
                 'items': [
-                    {'name': 'item1', 'price': 50.0, 'quantity': 4},
-                    {'name': 'item2', 'price': 20.0, 'quantity': 10}
+                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                     'price': 50.0, 'quantity': 4},
+                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                     'price': 20.0, 'quantity': 10}
                 ],
                 'delivery_address': '',
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
@@ -233,6 +239,34 @@ class TestOrders(TestCase):
         path = 'orders/'
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'POST',
                               user.email, TEST_USER_PSW, 'application/json',
+                              json.dumps(order))
+        assert resp.status_code == BAD_REQUEST
+        assert len(Order.select()) == 0
+
+    def test_create_order__non_existing_item(self):
+        Item.create(
+            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii'
+        )
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
+        addr_A = add_address(user=user_A)
+        order = {
+            'order': {
+                'items': [
+                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                     'price': 50.0, 'quantity': 4},
+                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf034r3',
+                     'price': 20.0, 'quantity': 10}
+                ],
+                'delivery_address': addr_A.json()["address_id"],
+                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+            }
+        }
+        path = 'orders/'
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'POST',
+                              user_A.email, TEST_USER_PSW, 'application/json',
                               json.dumps(order))
         assert resp.status_code == BAD_REQUEST
         assert len(Order.select()) == 0
@@ -267,8 +301,10 @@ class TestOrders(TestCase):
             "order": {
                 "order_id": order_id,
                 'items': [
-                    {'name': 'mario', 'price': 20.0, 'quantity': 5},
-                    {'name': 'GINO', 'price': 30.20, 'quantity': 1}
+                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                     'price': 20.0, 'quantity': 5},
+                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                     'price': 30.20, 'quantity': 1}
                 ],
                 'delivery_address': addr_B.json()["address_id"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
@@ -284,6 +320,52 @@ class TestOrders(TestCase):
         resp_order = Order.get(order_id=order1.order_id).json()
         assert resp_order['order_id'] == order['order']['order_id']
         assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
+
+    def test_update_order__non_existing_items(self):
+        item1 = Item.create(
+            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii'
+        )
+        item2 = Item.create(
+            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            name='GINO',
+            price=30.20,
+            description='svariati GINIIIII'
+        )
+
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
+        addr_A = add_address(user=user_A)
+        addr_B = add_address(user=user_A)
+
+        order1 = Order.create(delivery_address=addr_A, user=user_A)
+        order1.add_item(item1, 2).add_item(item2)
+        order_item_before = [o.json() for o in OrderItem.select()]
+        order_id = str(order1.order_id)
+
+        order = {
+            "order": {
+                "order_id": order_id,
+                'items': [
+                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf00000',
+                     'price': 30.20, 'quantity': 1},
+                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf2222',
+                     'price': 50.20, 'quantity': 1},
+                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf9999',
+                     'price': 90.20, 'quantity': 2}
+                ],
+                'delivery_address': addr_B.json()["address_id"],
+                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+            }
+        }
+        path = 'orders/{}'.format(order1.order_id)
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
+                              '12345@email.com', TEST_USER_PSW, 'application/json',
+                              json.dumps(order))
+        order_item_after = [o.json() for o in OrderItem.select()]
+        assert resp.status_code == BAD_REQUEST
+        assert order_item_before == order_item_after
 
     def test_update_order__success_admin_not_own_order(self):
         item1 = Item.create(
@@ -315,8 +397,10 @@ class TestOrders(TestCase):
             "order": {
                 "order_id": order_id,
                 'items': [
-                    {'name': 'mario', 'price': 20.0, 'quantity': 5},
-                    {'name': 'GINO', 'price': 30.20, 'quantity': 1}
+                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                     'price': 20.0, 'quantity': 5},
+                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                     'price': 30.20, 'quantity': 1}
                 ],
                 'delivery_address': addr_B.json()["address_id"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
@@ -380,8 +464,10 @@ class TestOrders(TestCase):
             "order": {
                 "order_id": order_id,
                 'items': [
-                    {'name': 'item1', 'price': 100.0, 'quantity': 5},
-                    {'name': 'item2', 'price': 2222.0, 'quantity': 1}
+                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                     'price': 100.0, 'quantity': 5},
+                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                     'price': 2222.0, 'quantity': 1}
                 ],
                 'delivery_address': addr_A.json()["address_id"]
             }
@@ -402,8 +488,10 @@ class TestOrders(TestCase):
             "order": {
                 "order_id": order_id,
                 'items': [
-                    {'name': 'item1', 'price': 100.0, 'quantity': 5},
-                    {'name': 'item2', 'price': 2222.0, 'quantity': 1}
+                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                     'price': 100.0, 'quantity': 5},
+                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                     'price': 2222.0, 'quantity': 1}
                 ],
                 'delivery_address': addr.json()["address_id"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
@@ -446,8 +534,10 @@ class TestOrders(TestCase):
             "order": {
                 "order_id": order_id,
                 'items': [
-                    {'name': 'mario', 'price': 20.0, 'quantity': 5},
-                    {'name': 'GINO', 'price': 30.20, 'quantity': 1}
+                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                     'price': 20.0, 'quantity': 5},
+                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                     'price': 30.20, 'quantity': 1}
                 ],
                 'delivery_address': addr_B.json()["address_id"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
