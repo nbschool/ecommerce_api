@@ -58,18 +58,18 @@ class ItemHandler(Resource):
             return None, client.NOT_FOUND
 
         request_data = request.get_json()
-        if 'name' == obj.name and request_data['name'] != obj.name:
+        name = request_data.get('name')
+        price = request_data.get('price')
+        description = request_data.get('description')
+
+        if name and name != obj.name:
             obj.name = request_data['name']
-        else:
-            obj.name
-        if 'price' == obj.price and request_data['price'] != obj.price:
+
+        if price and price != obj.price:
             obj.price = request_data['price']
-        else:
-            obj.price
-        if 'description' == obj.description and request_data['description'] != obj.description:
+
+        if description and description != obj.description:
             obj.description = request_data['description']
-        else:
-            obj.description
 
         obj.save()
 

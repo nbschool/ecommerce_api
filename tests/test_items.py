@@ -88,18 +88,33 @@ class TestItems(TestCase):
         resp = self.app.get('/items/{item_id}'.format(item_id=WRONG_UUID))
         assert resp.status_code == client.NOT_FOUND
 
-    def test_patch_item__success(self):
+    def test_patch_change1item__success(self):
         item = Item.create(**TEST_ITEM)
         resp = self.app.patch('/items/{item_id}'.format(item_id=item.item_id),
                               data=json.dumps({'name': 'new-name'}),
                               content_type='application/json')
         assert resp.status_code == client.OK
-        json_item = Item.select().where(
-            Item.item_id == item.item_id).get().json()
-        assert json_item['name'] != 'new-name'
+        json_item = Item.get(Item.item_id == item.item_id).json()
+        assert json_item['name'] == 'new-name'
         assert json_item['price'] == TEST_ITEM['price']
         assert json_item['description'] == TEST_ITEM['description']
         assert json_item['item_id'] == item.item_id
+        assert json.loads(resp.data) == json_item
+
+    def test_patch_allitems_success(self):
+        item = Item.create(**TEST_ITEM)
+        resp = self.app.patch('/items/{item_id}'.format(item_id=item.item_id),
+                              data=json.dumps(
+                                  {'name': 'new-name', 'price': 40.20,
+                                   'description': 'new-description'}),
+                              content_type='application/json')
+        assert resp.status_code == client.OK
+        json_item = Item.get(Item.item_id == item.item_id).json()
+        assert json_item['name'] == 'new-name'
+        assert json_item['price'] == 40.20
+        assert json_item['description'] == 'new-description'
+        assert json_item['item_id'] == item.item_id
+        assert json.loads(resp.data) == json_item
 
     def test_patch_item__wrong_id(self):
         Item.create(**TEST_ITEM)
