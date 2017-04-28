@@ -2,19 +2,23 @@
 Test suite for User(s) resources.
 """
 
-from models import User, Address, Item, Order
-from tests.test_utils import (open_with_auth, add_address, add_user,
-                              format_jsonapi_request,  wrong_dump)
-from tests.test_case import TestCase
-from http.client import (OK, NOT_FOUND, NO_CONTENT, BAD_REQUEST,
-                         CREATED, CONFLICT, UNAUTHORIZED)
 import json
 import uuid
+from http.client import (BAD_REQUEST, CONFLICT, CREATED, NO_CONTENT, NOT_FOUND,
+                         OK, UNAUTHORIZED)
+
+from models import User, Address, Item, Order
+from tests.test_case import TestCase
+from tests.test_utils import (add_user, format_jsonapi_request, add_address,
+                              get_expected_results, open_with_auth, wrong_dump)
+from tests.test_utils import _test_res_patch_id as patch_id
 
 # main endpoint for API
 API_ENDPOINT = '/{}'
 # correct password used for all test users.
 TEST_USER_PSW = 'my_password123@'
+
+EXPECTED_RESULTS = get_expected_results('users')
 
 
 class TestUser(TestCase):
@@ -27,18 +31,18 @@ class TestUser(TestCase):
 
         assert resp.status_code == OK
         assert json.loads(resp.data) == []
-        assert User.select().count() == 0
 
     def test_get_users_list__success(self):
-        user1 = add_user(None, TEST_USER_PSW)
-        user2 = add_user(None, TEST_USER_PSW)
+        add_user('user1@email.com', TEST_USER_PSW,
+                 id='4373d5d7-cae5-42bc-b218-d6fc6d18626f')
+        add_user('user2@email.com', TEST_USER_PSW,
+                 id='9630b105-ca99-4a27-a51d-ab3430bf52d1')
 
         resp = self.app.get(API_ENDPOINT.format('users/'))
 
         assert resp.status_code == OK
-        assert json.loads(resp.data) == [
-            user1.serialize()[0], user2.serialize()[0]]
-        assert User.select().count() == 2
+        expected_result = EXPECTED_RESULTS['get_users_list__success']
+        assert json.loads(resp.data) == expected_result
 
     def test_post_new_user__success(self):
         user = format_jsonapi_request('user', {
@@ -51,15 +55,15 @@ class TestUser(TestCase):
                              data=json.dumps(user),
                              content_type='application/json')
 
-        resp_user = json.loads(resp.data)
         assert resp.status_code == CREATED
-        assert 'id' in resp_user['data']
-        user = user['data']['attributes']
+        resp_user = json.loads(resp.data)
 
-        # user inside response does not have the password
-        del user['password']
-        user['admin'] = False  # server should have added a falsy admin flag
-        assert resp_user['data']['attributes'] == user
+        expected_result = patch_id(
+            EXPECTED_RESULTS['post_new_user__success'],
+            User.get().user_id)
+
+        assert resp_user == expected_result
+
         assert User.select().count() == 1
         assert User.get().admin is False
 
@@ -107,12 +111,8 @@ class TestUser(TestCase):
         # errors. response.data should contain the error missing required field
         # email
         assert resp.status_code == BAD_REQUEST
-        assert json.loads(resp.data) == {
-            'errors': [
-                {'detail': 'Missing data for required field.',
-                 'source': {'pointer': '/data/attributes/email'}
-                 }
-            ]}
+        expected_result = EXPECTED_RESULTS['post_new_user_no_email__fail']
+        assert json.loads(resp.data) == expected_result
 
         assert User.select().count() == 0
 
