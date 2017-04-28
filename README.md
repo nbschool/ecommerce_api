@@ -42,7 +42,7 @@ To use the development Procfile (without gunicorn) use the -f flag:
 heroku local -f Procfile.dev
 ```
 
-## Create a class Test
+## Create a TestModel
 
 To create a class that tests some model use:
 
@@ -66,7 +66,7 @@ from tests.test_case import TestCase
 ```
 Inherit it in your model:
 ```
-class TestItems(TestCase):
+class TestModel(TestCase):
 ```
 
 ## Running the tests
