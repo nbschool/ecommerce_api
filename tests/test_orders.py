@@ -622,14 +622,19 @@ class TestOrders(TestCase):
             availability=1
         )
 
-        user_A = add_user('12345@email.com', TEST_USER_PSW)
-        addr_A = add_address(user=user_A)
-        addr_B = add_address(user=user_A)
+        user_A = add_user('12345@email.com', TEST_USER_PSW,
+                          id='90c3e1c1-b51c-4224-b69d-17f84f6a8dfc')
+        addr_A = add_address(
+            user=user_A, id='8f3b518e-9c17-4103-9a47-b274740726e7')
+        addr_B = add_address(
+            user=user_A, id='284ac7f6-40c2-4da6-b722-5d8cd248b1cc')
 
-        order1 = Order.create(delivery_address=addr_A, user=user_A)
+        order1 = Order.create(delivery_address=addr_A, user=user_A,
+                              order_id='9d899e2d-66e8-4728-aee5-fee733807b4a')
         order1.add_item(item1, 2).add_item(item2)
 
-        order2 = Order.create(delivery_address=addr_B, user=user_A)
+        order2 = Order.create(delivery_address=addr_B, user=user_A,
+                              order_id='b4b879c6-8f74-4eee-8e18-25c919749828')
         order2.add_item(item2)
 
         order_uuid = str(order1.uuid)
@@ -643,6 +648,9 @@ class TestOrders(TestCase):
                     {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'price': 30.20, 'quantity': 1}
                 ],
+                'delivery_address': str(addr_B.uuid),
+                'user': '90c3e1c1-b51c-4224-b69d-17f84f6a8dfc'
+
             }
         }
         path = 'orders/{}'.format(order1.uuid)
@@ -650,10 +658,10 @@ class TestOrders(TestCase):
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order))
 
+        expected_result = _add_date(EXPECTED_RESULTS['update_order__success'],
+                                    order1.created_at)
         assert resp.status_code == OK
-        resp_order, _ = Order.get(order_id=order1.order_id).serialize()
-        assert resp_order['uuid'] == order['order']['uuid']
-        assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
+        assert json.loads(resp.data) == expected_result
 
     def test_update_order__non_existing_items(self):
         item1 = Item.create(
@@ -764,11 +772,15 @@ class TestOrders(TestCase):
             availability=1
         )
 
-        user_A = add_user('12345@email.com', TEST_USER_PSW)
-        addr_A = add_address(user=user_A)
-        addr_B = add_address(user=user_A)
+        user_A = add_user('12345@email.com', TEST_USER_PSW,
+                          id='35b9d92a-83c4-48c6-bc2a-580d95951f99')
+        addr_A = add_address(
+            user=user_A, id='7f7bc402-469c-4f7b-8918-d4e150469ac7')
+        addr_B = add_address(
+            user=user_A, id='2bac777f-14b6-4a87-8ddb-03a8a1ede076')
 
-        order1 = Order.create(delivery_address=addr_A, user=user_A)
+        order1 = Order.create(delivery_address=addr_A, user=user_A,
+                              order_id='54a2b917-6c21-42b5-b273-39ad6c765187')
         order1.add_item(item1, 2).add_item(item2)
 
         order2 = Order.create(delivery_address=addr_B, user=user_A)
@@ -786,7 +798,7 @@ class TestOrders(TestCase):
                      'price': 30.20, 'quantity': 1}
                 ],
                 'delivery_address': str(addr_B.address_id),
-                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+                'user': '35b9d92a-83c4-48c6-bc2a-580d95951f99'
 
             }
         }
@@ -796,14 +808,13 @@ class TestOrders(TestCase):
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               user_B.email, TEST_USER_PSW, 'application/json',
                               json.dumps(order))
-
         assert resp.status_code == OK
-        updated_order, errors = Order.get(order_id=order1.order_id).serialize()
 
-        order_data = updated_order['data']
-        assert order_data['id'] == order['order']['order_id']
-        rels = order_data['relationships']
-        assert rels['delivery_address']['data']['id'] == order['order']['delivery_address']
+        expected_result = _add_date(
+            EXPECTED_RESULTS['update_order__success_admin_not_owner'],
+            order1.created_at,
+        )
+        assert json.loads(resp.data) == expected_result
 
     def test_update_order_empty_items_list__fail(self):
         item1 = Item.create(
