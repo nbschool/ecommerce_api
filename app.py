@@ -26,7 +26,7 @@ from views.items import ItemHandler, ItemsHandler
 from views.user import UsersHandler, UserHandler
 
 from views.address import AddressesHandler, AddressHandler
-from views.pictures import PicturesHandler, PictureHandler, ItemPictureHandler
+from views.pictures import PictureHandler, ItemPictureHandler
 
 app = Flask(__name__)
 CORS(app)
@@ -75,5 +75,4 @@ api.add_resource(OrdersHandler, '/orders/')
 api.add_resource(OrderHandler, '/orders/<uuid:order_id>')
 api.add_resource(UsersHandler, '/users/')
 api.add_resource(UserHandler, '/users/<uuid:user_id>')
-api.add_resource(PicturesHandler, '/pictures/')
 api.add_resource(PictureHandler, '/pictures/<uuid:picture_id>')
