@@ -138,19 +138,11 @@ class TestOrders(TestCase):
         addr_A = add_address(user=user_A)
         order = {
             'order': {
-<<<<<<< HEAD
                 'items': {
                     'mario': {'price': 20.20, 'quantity': 4},
                     'GINO': {'price': 30.20, 'quantity': 10}
                 },
-                'delivery_address': 'Via Rossi 12',
-=======
-                'items': [
-                    {'name': 'mario', 'price': 20.20, 'quantity': 4},
-                    {'name': 'GINO', 'price': 30.20, 'quantity': 10}
-                ],
                 'delivery_address': addr_A.json()["address_id"],
->>>>>>> 920a570dd563afa0651a29774d3c3bbedf128f62
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
         }
