@@ -9,8 +9,8 @@ from flask import request
 from flask_restful import Resource
 import http.client as client
 
-from models import Item, Picture
-from utils import check_required_fields, remove_image
+from models import Item
+from utils import check_required_fields
 
 
 class ItemsHandler(Resource):
@@ -81,9 +81,6 @@ class ItemHandler(Resource):
             item = Item.get(Item.item_id == item_id)
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
-        pictures = Picture.select().join(Item).where(Item.item_id == item_id)
 
-        for pic in pictures:
-            remove_image(pic.picture_id, pic.extension)
-        item.delete_instance(recursive=True)
+        item.delete_instance()
         return None, client.NO_CONTENT

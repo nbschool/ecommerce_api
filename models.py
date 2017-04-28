@@ -5,9 +5,12 @@ import datetime
 
 from passlib.hash import pbkdf2_sha256
 from peewee import DateTimeField, TextField, CharField, BooleanField
-from peewee import Model, SqliteDatabase, DecimalField
+from peewee import SqliteDatabase, DecimalField
 from peewee import UUIDField, ForeignKeyField, IntegerField
+from playhouse.signals import Model, post_delete, pre_delete
 from uuid import uuid4
+
+from utils import remove_image
 
 
 database = SqliteDatabase('database.db')
@@ -56,6 +59,16 @@ class Item(BaseModel):
         }
 
 
+@database.atomic()
+@pre_delete(sender=Item)
+def on_delete_item_handler(model_class, instance):
+    """Delete item pictures in cascade"""
+    pictures = Picture.select().join(Item).where(
+        Item.item_id == instance.item_id)
+    for pic in pictures:
+        pic.delete_instance()
+
+
 class Picture(BaseModel):
     """
     Picture model
@@ -84,6 +97,13 @@ class Picture(BaseModel):
             self.picture_id,
             self.extension,
             self.item.item_id)
+
+
+@post_delete(sender=Picture)
+def on_delete_picture_handler(model_class, instance):
+    """Delete file picture"""
+    # TODO log eventual inconsistency
+    remove_image(instance.picture_id, instance.extension)
 
 
 class User(BaseModel):

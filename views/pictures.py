@@ -71,10 +71,5 @@ class PictureHandler(Resource):
             obj = Picture.get(Picture.picture_id == picture_id)
         except Picture.DoesNotExist:
             return None, client.NOT_FOUND
-        try:
-            utils.remove_image(obj.picture_id, obj.extension)
-        except OSError:
-            # TODO log inconsistency
-            return None, client.INTERNAL_SERVER_ERROR
-        obj.delete_instance(recursive=True)
+        obj.delete_instance()
         return None, client.NO_CONTENT
