@@ -49,7 +49,7 @@ To create a class that tests some model use:
 ```
 TestCase
 ```
-TestCase is a class that imports all the models and then defines ```sethup_class``` and ```sethup_method```
+TestCase is a class that imports all the models and then defines ```setup_class``` and ```setup_method```
 Import your models in **TestCase.py**:
 ```
 from models import Item, Order, OrderItem, User
