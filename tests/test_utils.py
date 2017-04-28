@@ -100,7 +100,7 @@ def setup_images():
 
 def format_jsonapi_request(type_, data):
     """
-    Given the attributes of a new user, compile the jsonapi post data for
+    Given the attributes of a resource, compile the jsonapi post data for
     the request.
     """
     return {

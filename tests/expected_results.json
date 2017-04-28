@@ -1,4 +1,143 @@
 {
+    "addresses": {
+        "get_addresses__success": [
+            {
+                "data": {
+                    "type": "address",
+                    "attributes": {
+                        "phone": "3294882773",
+                        "address": "Via Rossi 10",
+                        "country": "Italy",
+                        "post_code": "50132",
+                        "city": "Firenze"
+                    },
+                    "id": "f814546c-0dec-45ee-a945-270a7b9cfe2e",
+                    "relationships": {
+                        "user": {
+                            "data": {
+                                "type": "user",
+                                "id": "9630b105-ca99-4a27-a51d-ab3430bf52d1"
+                            }
+                        }
+                    },
+                    "links": {
+                        "self": "/addresses/f814546c-0dec-45ee-a945-270a7b9cfe2e"
+                    }
+                },
+                "links": {
+                    "self": "/addresses/f814546c-0dec-45ee-a945-270a7b9cfe2e"
+                }
+            },
+            {
+                "data": {
+                    "type": "address",
+                    "attributes": {
+                        "phone": "3294882773",
+                        "address": "Via Verdi 12",
+                        "country": "Italy",
+                        "post_code": "51100",
+                        "city": "Pistoia"
+                    },
+                    "id": "943d754e-5826-4d5c-b878-47edc478b789",
+                    "relationships": {
+                        "user": {
+                            "data": {
+                                "type": "user",
+                                "id": "9630b105-ca99-4a27-a51d-ab3430bf52d1"
+                            }
+                        }
+                    },
+                    "links": {
+                        "self": "/addresses/943d754e-5826-4d5c-b878-47edc478b789"
+                    }
+                },
+                "links": {
+                    "self": "/addresses/943d754e-5826-4d5c-b878-47edc478b789"
+                }
+            }
+        ],
+        "create_address__success": {
+            "data": {
+                "type": "address",
+                "id": "5e67e12a-20e9-4bf9-9254-5ef946a1a2e7",
+                "attributes": {
+                    "country": "Italy",
+                    "address": "Via Verdi 12",
+                    "post_code": "51100",
+                    "phone": "3294882773",
+                    "city": "Pistoia"
+                },
+                "relationships": {
+                    "user": {
+                        "data": {
+                            "type": "user",
+                            "id": "1777e816-3051-4faf-bbba-0c8a87baf08f"
+                        }
+                    }
+                },
+                "links": {
+                    "self": "/addresses/5e67e12a-20e9-4bf9-9254-5ef946a1a2e7"
+                }
+            },
+            "links": {
+                "self": "/addresses/5e67e12a-20e9-4bf9-9254-5ef946a1a2e7"
+            }
+        },
+        "get_address": {
+            "data": {
+                "type": "address",
+                "attributes": {
+                    "post_code": "50132",
+                    "phone": "3294882773",
+                    "country": "Italy",
+                    "city": "Firenze",
+                    "address": "Via Rossi 10"
+                },
+                "id": "4dbf5f2b-e164-4967-9a82-022996a17cc9",
+                "relationships": {
+                    "user": {
+                        "data": {
+                            "type": "user",
+                            "id": "74df5166-db94-4738-8209-69aa733e36d1"
+                        }
+                    }
+                },
+                "links": {
+                    "self": "/addresses/4dbf5f2b-e164-4967-9a82-022996a17cc9"
+                }
+            },
+            "links": {
+                "self": "/addresses/4dbf5f2b-e164-4967-9a82-022996a17cc9"
+            }
+        },
+        "put_address__success": {
+            "data": {
+                "type": "address",
+                "attributes": {
+                    "post_code": "10000",
+                    "city": "Roma",
+                    "address": "Via Bianchi 20",
+                    "country": "Italy",
+                    "phone": "3294882773"
+                },
+                "relationships": {
+                    "user": {
+                        "data": {
+                            "type": "user",
+                            "id": "943d754e-5826-4d5c-b878-47edc478b789"
+                        }
+                    }
+                },
+                "id": "943d754e-5826-4d5c-b878-47edc478b789",
+                "links": {
+                    "self": "/addresses/943d754e-5826-4d5c-b878-47edc478b789"
+                }
+            },
+            "links": {
+                "self": "/addresses/943d754e-5826-4d5c-b878-47edc478b789"
+            }
+        }
+    },
     "orders": {
         "get_orders__success": [
             {

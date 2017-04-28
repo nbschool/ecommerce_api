@@ -179,18 +179,6 @@ class Address(BaseModel):
     phone = CharField()
     _schema = AddressSchema
 
-    def json(self):
-        return {
-            'uuid': str(self.uuid),
-            'user_first_name': self.user.first_name,
-            'user_last_name': self.user.last_name,
-            'country': self.country,
-            'city': self.city,
-            'post_code': self.post_code,
-            'address': self.address,
-            'phone': self.phone
-        }
-
 
 class Order(BaseModel):
     """ The model Order contains a list of orders - one row per order.
