@@ -146,6 +146,9 @@ class TestItems(TestCase):
         assert not Item.select().exists()
 
     def test_delete_item__pictures_cascade(self):
+        """
+        delete a selected item and all its binded pictures
+        """
         test_utils.setup_images()
         item = Item.create(**TEST_ITEM)
         item2 = Item.create(**TEST_ITEM2)
