@@ -11,6 +11,7 @@ import os
 import sys
 import sqlite3
 import glob
+import random
 
 init(autoreset=True)
 
@@ -53,13 +54,29 @@ def set_db(database):
 
 
 def write_db():
+    """
+    Given the SEED 9623954 the first user email is
+    'fatima.caputo@tiscali.it', and its password is '9J0.'
+    """
+    SEED = 9623954
     fake = Factory.create('it_IT')
-    fake.seed(9623954)
+    fake.seed(SEED)
+    random.seed(SEED)
+
+    class CountInsertions:
+        def __init__(self, table):
+            self.total = 0
+            for i in table.select():
+                self.total += 1
+
+        def random_pick(self,):
+            pick = random.choice(range(1, self.total+1))
+            return pick
 
     def user_creator(num_user=1):
         """Create users from an Italian-like context. Due to param in factory create 'it_iT'."""
-        num_user = num_user
         for i in range(0, num_user):
+            user_uuid = fake.uuid4()
             first_name = fake.first_name()
             last_name = fake.last_name()
             email_provider = fake.free_email_domain()
@@ -67,7 +84,7 @@ def write_db():
             password = fake.password(length=3, special_chars=False, digits=True,
                                      upper_case=True, lower_case=False)
             User.create(
-                user_id=fake.uuid4(),
+                user_id=user_uuid,
                 first_name=first_name,
                 last_name=last_name,
                 email=email_user,
@@ -75,40 +92,99 @@ def write_db():
             )
 
     def item_creator(num_item=1):
-        num_item = num_item
+        # def item_bundler(item_id, item_price):
+        #     """Create a list of items to be handle by other functions."""
+        #     list_items = []
+        #     temp_pack = {'item_id': item_id, 'item_price': item_price}
+        #     list_item.append(temp_pack)
+        #     return list_items
         for i in range(0, num_item):
+            item_id = fake.uuid4()
+            item_name = fake.sentence(nb_words=3, variable_nb_words=True)
+            item_price = fake.pyfloat(left_digits=2, right_digits=2, positive=True)
             Item.create(
-                item_id=fake.uuid4(),
-                name=fake.sentence(nb_words=3, variable_nb_words=True),
-                price=fake.pyfloat(left_digits=2, right_digits=2, positive=True),
+                item_id=item_id,
+                name=item_name,
+                price=item_price,
                 description=fake.paragraph(nb_sentences=3, variable_nb_sentences=True)
             )
 
-    # start create items
+    def address_creator(num_addr=1):
+        LIST_COUNTRIES = ['Belgium', 'France', 'Germany',
+                          'Greece', 'Italy', 'Portugal', 'Spain']
+        for i in range(1, num_addr):
+            country = random.choice(LIST_COUNTRIES)
+            user_id = CountInsertions(User)
+            Address.create(
+                address_id=fake.uuid4(),
+                user=user_id.random_pick(),
+                country=country,
+                city=fake.city(),
+                post_code=fake.postcode(),
+                address=fake.street_name(),
+                phone=fake.phone_number(),
+            )
+
+    # WORK TO DO!!!!!!
+    # def order_creator(num_order=1):
+    #     for i in range(0, num_order):
+    #         country = random.choice(LIST_COUNTRIES)
+    #         user_id = CountInsertions(User)
+    #         order_id = fake.uuid4()
+    #         address = '{} {}\n{} {}\n{}'.format((fake.random_digit()+1), fake.street_name(),
+    #                                               fake.postcode(), fake.city(), country)
+    #         Order.create(
+    #             order_id=order_id,
+    #             total_price=0,
+    #             delivery_address=address,
+    #             user_id=user_id
+    #         )
+
+    # def order_item_creator(num_order_item=1):
+    #     """crei item, poi order, poi orderitem e aggiorni i valori di order"""
+    #     class ItemRaffle:
+    #         """Help create orders with a different number of items."""
+    #         def __init__(self):
+    #             self.order = [{ 'order_id': None,
+    #                             'date': None,
+    #                             'total_price': None,
+    #                             'user_id': None,
+    #                             'order': {
+    #                                     'items': [],
+    #                                     'delivery_address': None,
+    #                                     'user': None
+    #                                     }
+    #                         }]
+    #             self.num_item = random.randint(1,5)
+    #             for i in range(0, self.num_item):
+    #                 self.order['order']['items'].append(list_item_data[i])
+
+    #     winner = ItemRaffle()
+    #     order_item = winner.order
+    #     random.shuffle(LIST_COUNTRIES)
+    #     country = LIST_COUNTRIES[0]
+    #     random.shuffle(list_users_uuid)
+    #     used_uuid = list_users_uuid[0]
+    #     address = '{} {}\n{} {}\n '.format(fake.random_digit(), fake.street_name(),
+    #                                           fake.city(), fake.postcode(), country[0] )
+    #     order_item['order']['delivery_address'] = address
+    #     order_item['order']['user'] = list_users_uuid[0]
+
+    # start create users
 
     user_creator(10)
 
+    # start create addresses
+
+    address_creator(10)
+
     # start create items
 
-    item_creator(100)
+    item_creator(10)
 
-    # start create OrderItem entries
-
-    OrderItem.create(
-        order_id=1,
-        item_id=1,
-        quantity=2,
-        subtotal=31.98
-    )
-
-    # start create order entries
-
-    # Order.create(
-    #     order_id="32e0e4e1-39cc-459b-bcdb-50cd73c95f6f",
-    #     total_price=31.98,
-    #     delivery_address="Via dell Albero 56, Firenze. Italia.",
-    #     user_id=1
-    # )
+    # start create orders
+    # TODO
+    # order_creator(1)
 
 
 def get_databases():
@@ -129,7 +205,7 @@ def print_any_db():
     for index, name_db in enumerate(list_of_db, start=1):
         print(index, '-', name_db)
     else:
-        good_bye()
+        good_bye('Error')
 
 
 def drops_all_tables(database):
