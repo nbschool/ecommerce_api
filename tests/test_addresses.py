@@ -57,7 +57,8 @@ class TestAddresses:
     def test_get_addresses__empty(self):
         user = add_user('mariorossi@gmail.com', TEST_USER_PSW)
 
-        resp = open_with_auth(self.app, '/addresses/', 'GET', user.email, TEST_USER_PSW, None, None)
+        resp = open_with_auth(self.app, '/addresses/',
+                              'GET', user.email, TEST_USER_PSW, None, None)
 
         assert resp.status_code == OK
         assert json.loads(resp.data) == []
@@ -65,10 +66,11 @@ class TestAddresses:
     def test_get_addresses__success(self):
         user = add_user('mariorossi@gmail.com', '123')
         addr = Address.create(**get_test_addr_dict(user, city="Firenze",
-                              post_code='50132', address="Via Rossi 10"))
+                                                   post_code='50132', address="Via Rossi 10"))
         addr1 = Address.create(**get_test_addr_dict(user))
 
-        resp = open_with_auth(self.app, '/addresses/', 'GET', user.email, TEST_USER_PSW, None, None)
+        resp = open_with_auth(self.app, '/addresses/',
+                              'GET', user.email, TEST_USER_PSW, None, None)
         assert resp.status_code == OK
         assert json.loads(resp.data) == [addr.json(), addr1.json()]
 
@@ -116,7 +118,7 @@ class TestAddresses:
     def test_get_address(self):
         user = add_user('mariorossi@gmail.com', '123')
         addr = Address.create(**get_test_addr_dict(user, city="Firenze",
-                              post_code='50132', address="Via Rossi 10"))
+                                                   post_code='50132', address="Via Rossi 10"))
         Address.create(**get_test_addr_dict(user))
 
         resp = open_with_auth(self.app, '/addresses/{}'.format(addr.address_id), 'GET',
@@ -131,39 +133,69 @@ class TestAddresses:
                               user.email, TEST_USER_PSW, None, None)
         assert resp.status_code == NOT_FOUND
 
-    def test_put_address__success(self):
+    def test_patch_change1valueaddress__success(self):
         user = add_user('mariorossi@gmail.com', '123')
         addr = Address.create(**get_test_addr_dict(user, city="Firenze",
-                              post_code='50132', address="Via Rossi 10"))
-        addr1 = new_addr(user, city="Roma", post_code="10000", address="Via Bianchi 20")
+                                                   post_code='50132', address="Via Rossi 10"))
+        addr1 = new_addr(user, city="Roma", post_code="10000",
+                         address="Via Bianchi 20")
 
-        resp = open_with_auth(self.app, '/addresses/{}'.format(addr.address_id), 'PUT',
-                              user.email, TEST_USER_PSW, data=json.dumps(addr1),
+        resp = open_with_auth(self.app, '/addresses/{}'.format(addr.address_id), 'PATCH',
+                              user.email, TEST_USER_PSW, data=json.dumps(
+                                  {'city': "Genova"}),
                               content_type='application/json')
         assert resp.status_code == OK
 
         address = Address.get(Address.address_id == addr.address_id).json()
 
-        assert address['country'] == addr1['country']
-        assert address['city'] == addr1['city']
-        assert address['address'] == addr1['address']
-        assert address['phone'] == addr1['phone']
+        assert address['country'] == address['country']
+        assert address['city'] == 'Genova'
+        assert address['address'] == address['address']
+        assert address['phone'] == address['phone']
+        assert address['post_code'] == address['post_code']
+        assert json.loads(resp.data) == address
 
-    def test_put_address__wrong_id(self):
+    def test_patch_changeallvalueaddress__success(self):
+        user = add_user('mariorossi@gmail.com', '123')
+        addr = Address.create(**get_test_addr_dict(user, city="Firenze",
+                                                   post_code='50132', address="Via Rossi 10"))
+        addr1 = new_addr(user, city="Roma", post_code="10000",
+                         address="Via Bianchi 20")
+
+        resp = open_with_auth(self.app, '/addresses/{}'.format(addr.address_id), 'PATCH',
+                              user.email, TEST_USER_PSW, data=json.dumps(
+                                  {"country": "Germany", "city": "Genova",
+                                   "address": "Via XX Settembre, 30", "phone": "01050675",
+                                   "post_code": "16100"}),
+                              content_type='application/json')
+        assert resp.status_code == OK
+
+        address = Address.get(Address.address_id == addr.address_id).json()
+
+        assert address['country'] == "Germany"
+        assert address['city'] == "Genova"
+        assert address['address'] == "Via XX Settembre, 30"
+        assert address['phone'] == "01050675"
+        assert address['post_code'] == "16100"
+        assert json.loads(resp.data) == address
+
+    def test_patch_address__wrong_id(self):
         user = add_user('mariorossi@gmail.com', '123')
         Address.create(**get_test_addr_dict(user, city="Firenze",
-                       post_code='50132', address="Via Rossi 10"))
-        addr1 = new_addr(user, city="Roma", post_code="10000", address="Via Bianchi 20")
+                                            post_code='50132', address="Via Rossi 10"))
+        addr1 = new_addr(user, city="Roma", post_code="10000",
+                         address="Via Bianchi 20")
 
-        resp = open_with_auth(self.app, '/addresses/{}'.format(uuid4()), 'PUT',
-                              user.email, TEST_USER_PSW, data=json.dumps(addr1),
+        resp = open_with_auth(self.app, '/addresses/{}'.format(uuid4()), 'PATCH',
+                              user.email, TEST_USER_PSW, data=json.dumps(
+                                  addr1),
                               content_type='application/json')
         assert resp.status_code == NOT_FOUND
 
     def test_delete_address__success(self):
         user = add_user('mariorossi@gmail.com', '123')
         addr = Address.create(**get_test_addr_dict(user, city="Firenze",
-                              post_code='50132', address="Via Rossi 10"))
+                                                   post_code='50132', address="Via Rossi 10"))
 
         resp = open_with_auth(self.app, '/addresses/{}'.format(addr.address_id), 'DELETE',
                               user.email, TEST_USER_PSW, None, None)
