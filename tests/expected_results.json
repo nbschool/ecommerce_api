@@ -343,5 +343,128 @@
                 "self": "/orders/54a2b917-6c21-42b5-b273-39ad6c765187"
             }
         }
+    },
+    "items": {
+        "post_item__success": {
+            "data": {
+                "type": "item",
+                "attributes": {
+                    "name": "mario",
+                    "description": "svariati mariii",
+                    "price": 20.2
+                },
+                "id": "d04cf416-ecee-4698-b47c-d14190f3e0d1",
+                "links": {
+                    "self": "/items/d04cf416-ecee-4698-b47c-d14190f3e0d1"
+                }
+            },
+            "links": {
+                "self": "/items/d04cf416-ecee-4698-b47c-d14190f3e0d1"
+            }
+        },
+        "post_item__round_price": {
+            "data": {
+                "type": "item",
+                "attributes": {
+                    "name": "Anna Pannocchia",
+                    "price": 30.222222,
+                    "description": "lorem ipsum"
+                },
+                "id": "fe7fc533-9af6-487f-97c8-04f7c99b6a32",
+                "links": {
+                    "self": "/items/fe7fc533-9af6-487f-97c8-04f7c99b6a32"
+                }
+            },
+            "links": {
+                "self": "/items/fe7fc533-9af6-487f-97c8-04f7c99b6a32"
+            }
+        },
+        "get_items__success": [
+            {
+                "data": {
+                    "type": "item",
+                    "attributes": {
+                        "description": "svariati mariii",
+                        "price": 20.2,
+                        "name": "mario"
+                    },
+                    "id": "429994bf-784e-47cc-a823-e0c394b823e8",
+                    "links": {
+                        "self": "/items/429994bf-784e-47cc-a823-e0c394b823e8"
+                    }
+                },
+                "links": {
+                    "self": "/items/429994bf-784e-47cc-a823-e0c394b823e8"
+                }
+            },
+            {
+                "data": {
+                    "type": "item",
+                    "attributes": {
+                        "description": "svariati GINIIIII",
+                        "price": 30.2,
+                        "name": "GINO"
+                    },
+                    "id": "577ad826-a79d-41e9-a5b2-7955bcf03499",
+                    "links": {
+                        "self": "/items/577ad826-a79d-41e9-a5b2-7955bcf03499"
+                    }
+                },
+                "links": {
+                    "self": "/items/577ad826-a79d-41e9-a5b2-7955bcf03499"
+                }
+            }
+        ],
+        "get_item__success": {
+            "data": {
+                "type": "item",
+                "attributes": {
+                    "description": "svariati mariii",
+                    "name": "mario",
+                    "price": 20.2
+                },
+                "id": "429994bf-784e-47cc-a823-e0c394b823e8",
+                "links": {
+                    "self": "/items/429994bf-784e-47cc-a823-e0c394b823e8"
+                }
+            },
+            "links": {
+                "self": "/items/429994bf-784e-47cc-a823-e0c394b823e8"
+            }
+        },
+        "patch_change1item__success": {
+            "data": {
+                "type": "item",
+                "attributes": {
+                    "name": "new-name",
+                    "price": 20.2,
+                    "description": "svariati mariii"
+                },
+                "id": "429994bf-784e-47cc-a823-e0c394b823e8",
+                "links": {
+                    "self": "/items/429994bf-784e-47cc-a823-e0c394b823e8"
+                }
+            },
+            "links": {
+                "self": "/items/429994bf-784e-47cc-a823-e0c394b823e8"
+            }
+        },
+        "patch_allitems__success": {
+            "data": {
+                "type": "item",
+                "id": "429994bf-784e-47cc-a823-e0c394b823e8",
+                "attributes": {
+                    "name": "new-name",
+                    "price": 40.2,
+                    "description": "new-description"
+                },
+                "links": {
+                    "self": "/items/429994bf-784e-47cc-a823-e0c394b823e8"
+                }
+            },
+            "links": {
+                "self": "/items/429994bf-784e-47cc-a823-e0c394b823e8"
+            }
+        }
     }
 }

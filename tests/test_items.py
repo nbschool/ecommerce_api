@@ -2,17 +2,17 @@
 Test suite for ItemHandler and ItemListHandler
 """
 
+import http.client as client
 import os
 
 import simplejson as json
 
-import http.client as client
-
-from models import Item, Picture
-from tests.test_case import TestCase
-from tests import test_utils
-from tests.test_utils import format_jsonapi_request
 import utils
+from models import Item, Picture
+from tests import test_utils
+from tests.test_case import TestCase
+from tests.test_utils import _test_res_patch_id as patch_id
+from tests.test_utils import format_jsonapi_request, get_expected_results
 
 TEST_IMAGE_FOLDER = 'test_images'
 
@@ -68,6 +68,8 @@ TEST_PICTURE3 = {
 
 WRONG_UUID = '04f2f213-1a0f-443d-a5ab-79097ba725ba'
 
+EXPECTED_RESULTS = get_expected_results('items')
+
 
 class TestItems(TestCase):
 
@@ -82,10 +84,13 @@ class TestItems(TestCase):
         resp = self.app.post('/items/', data=json.dumps(data),
                              content_type='application/json')
 
-        resp_item = json.loads(resp.data)
         assert resp.status_code == client.CREATED
         assert len(Item.select()) == 1
 
+        expected_result = patch_id(
+            EXPECTED_RESULTS['post_item__success'],
+            Item.get().item_id
+        )
     def test_post_item__not_json_failure(self):
         resp = self.app.post('/items/', data=test_utils.wrong_dump(TEST_ITEM),
                              content_type='application/json')
@@ -96,11 +101,7 @@ class TestItems(TestCase):
         item = Item.get(Item.item_id == resp_item['data']['id'])
         assert item is not None
 
-        # validate response data attributes
-        test_item = TEST_ITEM.copy()
-        del test_item['item_id']
-        item, _ = item.serialize()
-        assert item['data']['attributes'] == test_item
+        assert json.loads(resp.data) == expected_result
 
     def test_post_item__failed(self):
         data = format_jsonapi_request('item', TEST_ITEM_WRONG)
@@ -114,13 +115,16 @@ class TestItems(TestCase):
         data = format_jsonapi_request('item', TEST_ITEM_PRECISION)
         resp = self.app.post('/items/', data=json.dumps(data),
                              content_type='application/json')
-
         assert resp.status_code == client.CREATED
         item = Item.select()[0]
+        expected_result = patch_id(
+            EXPECTED_RESULTS['post_item__round_price'],
+            item.item_id,
+        )
+        assert json.loads(resp.data) == expected_result
+
         assert round(TEST_ITEM_PRECISION['price'], 5) == float(item.price)
         assert not TEST_ITEM_PRECISION['price'] == item.price
-        assert TEST_ITEM_PRECISION['name'] == item.name
-        assert TEST_ITEM_PRECISION['description'] == item.description
         assert TEST_ITEM_PRECISION['availability'] == item.availability
 
     def test_post_item__availability(self):
@@ -135,27 +139,16 @@ class TestItems(TestCase):
         Item.create(**TEST_ITEM2)
 
         resp = self.app.get('/items/')
-        items = json.loads(resp.data)
 
         assert resp.status_code == client.OK
-        assert len(items) == 2
-
-        for (i, item) in enumerate([TEST_ITEM, TEST_ITEM2]):
-            test_item = item.copy()
-            del test_item['item_id']
-            assert items[i]['data']['attributes'] == test_item
+        assert json.loads(resp.data) == EXPECTED_RESULTS['get_items__success']
 
     def test_get_item__success(self):
         item = Item.create(**TEST_ITEM)
         resp = self.app.get('/items/{item_uuid}'.format(item_uuid=item.uuid))
+
         assert resp.status_code == client.OK
-
-        item = TEST_ITEM.copy()
-        data = json.loads(resp.data)['data']
-        assert data['id'] == item['item_id']
-
-        del item['item_id']
-        assert data['attributes'] == item
+        assert json.loads(resp.data) == EXPECTED_RESULTS['get_item__success']
 
     def test_get_item__failed(self):
         resp = self.app.get('/items/{item_uuid}'.format(item_uuid=WRONG_UUID))
@@ -169,8 +162,12 @@ class TestItems(TestCase):
                               content_type='application/json')
 
         assert resp.status_code == client.OK
+        expected_result = EXPECTED_RESULTS['patch_change1item__success']
+        assert json.loads(resp.data) == expected_result
 
-    def test_patch_allitems_success(self):
+        assert Item.get().name == 'new-name'
+
+    def test_patch_allitems__success(self):
         item = Item.create(**TEST_ITEM)
         post_data = format_jsonapi_request('item', {
             'name': 'new-name', 'price': 40.20,
@@ -180,14 +177,17 @@ class TestItems(TestCase):
         resp = self.app.patch('/items/{item_id}'.format(item_id=item.item_id),
                               data=json.dumps(post_data),
                               content_type='application/json')
+
         assert resp.status_code == client.OK
-        json_item = Item.get(Item.item_id == item.item_id).serialize()[0]
-        item_data = json_item['data']
-        assert item_data['attributes']['name'] == 'new-name'
-        assert item_data['attributes']['price'] == 40.20
-        assert item_data['attributes']['description'] == 'new-description'
-        assert item_data['id'] == item.item_id
-        assert json.loads(resp.data) == json_item
+
+        expected_result = EXPECTED_RESULTS['patch_allitems__success']
+        assert json.loads(resp.data) == expected_result
+
+        # validate patch functionality checking for updated values
+        item = Item.get()
+        assert item.name == 'new-name'
+        assert float(item.price) == 40.20
+        assert item.description == 'new-description'
 
     def test_patch_item__wrong_uuid(self):
         Item.create(**TEST_ITEM)
