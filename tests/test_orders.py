@@ -250,12 +250,6 @@ class TestOrders(TestCase):
             price=20.20,
             description='svariati mariii'
         )
-        Item.create(
-            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
-            name='GINO',
-            price=30.20,
-            description='svariati GINIIIII'
-        )
         user_A = add_user('12345@email.com', TEST_USER_PSW)
         addr_A = add_address(user=user_A)
         order = {
