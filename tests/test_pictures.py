@@ -1,5 +1,5 @@
 """
-Test suite for PictureHandler, ItemPictureHandler and PicturesHandler
+Test suite for PictureHandler and ItemPictureHandler
 """
 
 import json
@@ -72,28 +72,6 @@ class TestPictures(TestCase):
         resp = self.app.get('/pictures/{picture_id}'.format(
             picture_id=WRONG_UUID))
         assert resp.status_code == client.NOT_FOUND
-
-    def test_get_pictures__success(self):
-        item = Item.create(**TEST_ITEM)
-        item2 = Item.create(**TEST_ITEM2)
-        Picture.create(item=item, **TEST_PICTURE)
-        Picture.create(item=item2, **TEST_PICTURE2)
-        resp = self.app.get('/pictures/')
-        pictures = json.loads(resp.data)
-        assert resp.status_code == client.OK
-        assert len(pictures) == 2
-
-        test_picture = TEST_PICTURE.copy()
-        test_picture['item_id'] = item.item_id
-        test_picture2 = TEST_PICTURE2.copy()
-        test_picture2['item_id'] = item2.item_id
-        assert test_picture in pictures
-        assert test_picture2 in pictures
-
-    def test_get_pictures__empty(self):
-        resp = self.app.get('/pictures/')
-        pictures = json.loads(resp.data)
-        assert not len(pictures)
 
     def test_get_item_pictures__success(self):
         item = Item.create(**TEST_ITEM)

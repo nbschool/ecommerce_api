@@ -81,7 +81,7 @@ class ItemHandler(Resource):
             item = Item.get(Item.item_id == item_id)
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
-        pictures = Picture.select().where(Picture.item == item)
+        pictures = Picture.select().join(Item).where(Item.item_id == item_id)
 
         for pic in pictures:
             remove_image(pic.picture_id, pic.extension)

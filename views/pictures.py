@@ -12,14 +12,6 @@ import http.client as client
 ALLOWED_EXTENSION = ['jpg', 'jpeg', 'png', 'gif']
 
 
-class PicturesHandler(Resource):
-    """Handler of the collection of pictures"""
-
-    def get(self):
-        """Retrieve every picture"""
-        return [o.json() for o in Picture.select()], client.OK
-
-
 class ItemPictureHandler(Resource):
 
     def get(self, item_id):
