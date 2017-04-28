@@ -12,49 +12,14 @@ from http.client import (CREATED, NO_CONTENT, NOT_FOUND,
 import json
 from uuid import uuid4
 from datetime import timezone
+from tests.test_utils import _test_res_patch_date as patch_date
+from tests.test_utils import _test_res_patch_id as patch_id
 # main endpoint for API
 API_ENDPOINT = '/{}'
 # correct password used for all test users.
 TEST_USER_PSW = 'my_password123@'
 
 EXPECTED_RESULTS = get_expected_results('orders')
-
-
-def _add_date(result, date):
-    """
-    Add the date from a response to an expected result and return it.
-    If the result is a list (i.e. get on all orders), set the date for each
-    item in the list
-    """
-    def patch(r, d):
-        r['data']['attributes']['date'] = d
-    # add timezone info to match the actual response datetime
-    date = date.replace(tzinfo=timezone.utc).isoformat()
-    if type(result) == list:
-        for r in result:
-            patch(r, date)
-    else:
-        patch(result, date)
-    return result
-
-
-def _patch_id(r, _id):
-    """
-    When testing a server-created object, patch the result resource id with
-    the actual object uuid.
-    """
-    _id = str(_id)
-
-    def patch_link(link, _id):
-        # change the in the link string and return it
-        strlist = link.split('/')[:2]
-        strlist.append(_id)
-        return '/'.join(strlist)
-
-    r['data']['id'] = _id
-    r['data']['links']['self'] = patch_link(r['data']['links']['self'], _id)
-    r['links']['self'] = patch_link(r['links']['self'], _id)
-    return r
 
 
 class TestOrders(TestCase):
@@ -84,7 +49,7 @@ class TestOrders(TestCase):
 
         resp = self.app.get('/orders/')
 
-        expected_data = _add_date(
+        expected_data = patch_date(
             EXPECTED_RESULTS['get_orders__success'], order.created_at)
 
         assert resp.status_code == OK
@@ -135,7 +100,7 @@ class TestOrders(TestCase):
 
         resp = self.app.get('/orders/{}'.format(order1.uuid))
 
-        expected_result = _add_date(
+        expected_result = patch_date(
             EXPECTED_RESULTS['get_order__success'], order1.created_at)
         assert resp.status_code == OK
         assert json.loads(resp.data) == expected_result
@@ -182,10 +147,10 @@ class TestOrders(TestCase):
         assert len(Order.select()) == 1
         assert len(OrderItem.select()) == 2
         order = Order.get()
-        expected_result = _add_date(
+        expected_result = patch_date(
             EXPECTED_RESULTS['create_order__success'], order.created_at)
         # inject the order id
-        expected_result = _patch_id(expected_result, order.order_id)
+        expected_result = patch_id(expected_result, order.order_id)
         assert json.loads(resp.data) == expected_result
 
     def test_create_order__not_json_failure(self):
@@ -658,8 +623,8 @@ class TestOrders(TestCase):
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order))
 
-        expected_result = _add_date(EXPECTED_RESULTS['update_order__success'],
-                                    order1.created_at)
+        expected_result = patch_date(EXPECTED_RESULTS['update_order__success'],
+                                     order1.created_at)
         assert resp.status_code == OK
         assert json.loads(resp.data) == expected_result
 
@@ -810,7 +775,7 @@ class TestOrders(TestCase):
                               json.dumps(order))
         assert resp.status_code == OK
 
-        expected_result = _add_date(
+        expected_result = patch_date(
             EXPECTED_RESULTS['update_order__success_admin_not_owner'],
             order1.created_at,
         )

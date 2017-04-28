@@ -4,6 +4,7 @@ import os
 import random
 import shutil
 from base64 import b64encode
+from datetime import timezone
 from uuid import uuid4
 
 from models import Address, User
@@ -121,3 +122,40 @@ def get_expected_results(section):
         data = json.load(fo)
 
     return data[section]
+
+
+def _test_res_patch_id(r, _id):
+    """
+    When testing a server-created object, patch the result resource id with
+    the actual object uuid.
+    """
+    _id = str(_id)
+
+    def patch_link(link, _id):
+        # change the in the link string and return it
+        strlist = link.split('/')[:2]
+        strlist.append(_id)
+        return '/'.join(strlist)
+
+    r['data']['id'] = _id
+    r['data']['links']['self'] = patch_link(r['data']['links']['self'], _id)
+    r['links']['self'] = patch_link(r['links']['self'], _id)
+    return r
+
+
+def _test_res_patch_date(result, date):
+    """
+    Add the date from a response to an expected result and return it.
+    If the result is a list (i.e. get on all orders), set the date for each
+    item in the list
+    """
+    def patch(r, d):
+        r['data']['attributes']['date'] = d
+    # add timezone info to match the actual response datetime
+    date = date.replace(tzinfo=timezone.utc).isoformat()
+    if type(result) == list:
+        for r in result:
+            patch(r, date)
+    else:
+        patch(result, date)
+    return result
