@@ -466,5 +466,97 @@
                 "self": "/items/429994bf-784e-47cc-a823-e0c394b823e8"
             }
         }
+    },
+    "users": {
+        "get_users_list__success": [
+            {
+                "data": {
+                    "type": "user",
+                    "attributes": {
+                        "admin": false,
+                        "first_name": "John",
+                        "email": "user1@email.com",
+                        "last_name": "Doe"
+                    },
+                    "relationships": {
+                        "addresses": {
+                            "data": []
+                        },
+                        "orders": {
+                            "data": []
+                        }
+                    },
+                    "id": "4373d5d7-cae5-42bc-b218-d6fc6d18626f",
+                    "links": {
+                        "self": "/users/4373d5d7-cae5-42bc-b218-d6fc6d18626f"
+                    }
+                },
+                "links": {
+                    "self": "/users/4373d5d7-cae5-42bc-b218-d6fc6d18626f"
+                }
+            },
+            {
+                "data": {
+                    "type": "user",
+                    "attributes": {
+                        "admin": false,
+                        "first_name": "John",
+                        "email": "user2@email.com",
+                        "last_name": "Doe"
+                    },
+                    "relationships": {
+                        "addresses": {
+                            "data": []
+                        },
+                        "orders": {
+                            "data": []
+                        }
+                    },
+                    "id": "9630b105-ca99-4a27-a51d-ab3430bf52d1",
+                    "links": {
+                        "self": "/users/9630b105-ca99-4a27-a51d-ab3430bf52d1"
+                    }
+                },
+                "links": {
+                    "self": "/users/9630b105-ca99-4a27-a51d-ab3430bf52d1"
+                }
+            }
+        ],
+        "post_new_user__success": {
+            "data": {
+                "type": "user",
+                "attributes": {
+                    "email": "rossi@email.com",
+                    "admin": false,
+                    "last_name": "Rossi",
+                    "first_name": "Mario"
+                },
+                "relationships": {
+                    "addresses": {
+                        "data": []
+                    },
+                    "orders": {
+                        "data": []
+                    }
+                },
+                "id": "e86fcf16-15ad-4048-91b4-70b04fdf44e5",
+                "links": {
+                    "self": "/users/e86fcf16-15ad-4048-91b4-70b04fdf44e5"
+                }
+            },
+            "links": {
+                "self": "/users/e86fcf16-15ad-4048-91b4-70b04fdf44e5"
+            }
+        },
+        "post_new_user_no_email__fail": {
+            "errors": [
+                {
+                    "detail": "Missing data for required field.",
+                    "source": {
+                        "pointer": "/data/attributes/email"
+                    }
+                }
+            ]
+        }
     }
 }
