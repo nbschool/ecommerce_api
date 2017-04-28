@@ -119,6 +119,90 @@
             "links": {
                 "self": "/orders/caae3e26-905f-4541-8f90-b2758e449407"
             }
+        },
+        "update_order__success": {
+            "data": {
+                "type": "order",
+                "attributes": {
+                    "total_price": 131.2,
+                    "date": "2017-04-28T11:34:02.731958+00:00"
+                },
+                "relationships": {
+                    "user": {
+                        "data": {
+                            "type": "user",
+                            "id": "90c3e1c1-b51c-4224-b69d-17f84f6a8dfc"
+                        }
+                    },
+                    "delivery_address": {
+                        "data": {
+                            "type": "address",
+                            "id": "284ac7f6-40c2-4da6-b722-5d8cd248b1cc"
+                        }
+                    },
+                    "items": {
+                        "data": [
+                            {
+                                "type": "item",
+                                "id": "429994bf-784e-47cc-a823-e0c394b823e8"
+                            },
+                            {
+                                "type": "item",
+                                "id": "577ad826-a79d-41e9-a5b2-7955bcf03499"
+                            }
+                        ]
+                    }
+                },
+                "id": "9d899e2d-66e8-4728-aee5-fee733807b4a",
+                "links": {
+                    "self": "/orders/9d899e2d-66e8-4728-aee5-fee733807b4a"
+                }
+            },
+            "links": {
+                "self": "/orders/9d899e2d-66e8-4728-aee5-fee733807b4a"
+            }
+        },
+        "update_order__success_admin_not_owner": {
+            "data": {
+                "type": "order",
+                "attributes": {
+                    "date": "2017-04-28T12:01:39.337674+00:00",
+                    "total_price": 131.2
+                },
+                "id": "54a2b917-6c21-42b5-b273-39ad6c765187",
+                "relationships": {
+                    "items": {
+                        "data": [
+                            {
+                                "type": "item",
+                                "id": "429994bf-784e-47cc-a823-e0c394b823e8"
+                            },
+                            {
+                                "type": "item",
+                                "id": "577ad826-a79d-41e9-a5b2-7955bcf03499"
+                            }
+                        ]
+                    },
+                    "user": {
+                        "data": {
+                            "type": "user",
+                            "id": "35b9d92a-83c4-48c6-bc2a-580d95951f99"
+                        }
+                    },
+                    "delivery_address": {
+                        "data": {
+                            "type": "address",
+                            "id": "2bac777f-14b6-4a87-8ddb-03a8a1ede076"
+                        }
+                    }
+                },
+                "links": {
+                    "self": "/orders/54a2b917-6c21-42b5-b273-39ad6c765187"
+                }
+            },
+            "links": {
+                "self": "/orders/54a2b917-6c21-42b5-b273-39ad6c765187"
+            }
         }
     }
 }
