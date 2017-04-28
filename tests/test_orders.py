@@ -10,6 +10,7 @@ from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST, UNAUTHO
 from peewee import SqliteDatabase
 import json
 from uuid import uuid4
+import pytest
 
 # main endpoint for API
 API_ENDPOINT = '/{}'
@@ -699,9 +700,8 @@ class TestOrders(TestCase):
         assert order.total_price == item2.price * 2
 
         # remove non existing item3 from order
-        order.remove_item(item3)
-        assert count_order_items(order) == 2
-        assert len(order.order_items) == 1
+        with pytest.raises(Order.OrderItemNotFound):
+            order.remove_item(item3)
 
         order.empty_order()
         assert len(order.order_items) == 0
@@ -728,8 +728,8 @@ class TestOrders(TestCase):
         )
         item3 = Item.create(
             item_id=uuid4(),
-            name='Item 2',
-            description='Item 2 description',
+            name='Item 3',
+            description='Item 3 description',
             price=15
         )
 
@@ -743,9 +743,11 @@ class TestOrders(TestCase):
         order.remove_items({item1: 2, item2: 1})
         assert count_order_items(order) == 5
 
-        # test removing item that does not exist in the order
-        order.remove_items({item3: 1, item2: 2})
-        assert count_order_items(order) == 3
-        # check assumed total price. there is 1 item1 and 2 item2 left
-        total_price = item1.price + (item2.price * 2)
+        with pytest.raises(Order.OrderItemNotFound):
+            # test removing item that does not exist in the order
+            order.remove_items({item3: 1, item2: 2})
+
+        assert count_order_items(order) == 5
+        # check assumed total price. there should be 1 item1 and 4 item2 left
+        total_price = item1.price + (item2.price * 4)
         assert order.total_price == total_price

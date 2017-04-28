@@ -150,6 +150,13 @@ class Order(BaseModel):
     class Meta:
         order_by = ('created_at',)
 
+    class OrderItemNotFound(Exception):
+        """
+        Exception raised when trying to access an OrderItem related to the
+        order (i.e. in remove_item(s)) but it cannot be found
+        """
+        pass
+
     @property
     def order_items(self):
         """
@@ -184,9 +191,10 @@ class Order(BaseModel):
         creating or updating the OrderItem cross table and the Order total
         :param dict items: {<Item>: <quantity:int>}
         """
+        orderitems = self.order_items
         with database.atomic():
-            for (item, quantity) in items.items():
-                for orderitem in self.order_items:
+            for item, quantity in items.items():
+                for orderitem in orderitems:
                     # Looping all the OrderItem related to this order,
                     # if one with the same item is found we update that row.
                     if orderitem.item == item:
@@ -211,31 +219,44 @@ class Order(BaseModel):
         Remove items from an order, handling the relative OrderItem row and
         the Order total price update.
         :param dict items: {<Item>: <quantity:int>}
+
+        :raises: Order.OrderItemNotFound if one of the items does not exists in
+                 the order.
+                 If the exception is raised all the changes are reverted
         """
+        orderitems = self.order_items
+
         with database.atomic():
             for item, quantity in items.items():
-                for orderitem in self.order_items:
+                removed = False
+                for orderitem in orderitems:
                     if orderitem.item == item:
                         removed_items = orderitem.remove_item(quantity)
                         self.total_price -= (item.price * removed_items)
-                    else:
-                        pass
-                        # NOTE: We should do something when the item is not
-                        # found
+                        removed = True
+                if not removed:
+                    raise Order.OrderItemNotFound(
+                        'Item {} is not in the order'.format(item.item_id))
+
             self.save()
         return self
 
     def add_item(self, item, quantity=1):
         """
-        Add one item to the order calling `add_items`.
-        Exists for compatibility.
+        Legacy method to add just one item to the order.
+
+        :param Item item: the Item to add
+        :param int quantity: how many to add
         """
+
         return self.add_items({item: quantity})
 
     def remove_item(self, item, quantity=1):
         """
-        Remove one item calling `remove_items`.
-        Exists for compatibility.
+        Legacy method to remove one item from the order.
+
+        :param Item item: the Item to remove
+        :param int quantity: how many to remove
         """
 
         return self.remove_items({item: quantity})

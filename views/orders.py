@@ -60,7 +60,8 @@ class OrdersHandler(Resource):
         # from the request and executing a get() request with Peewee
         try:
             items_ids = [e['item_id'] for e in res['order']['items']]
-            address = Address.get(Address.address_id == res['order']['delivery_address'])
+            address = Address.get(Address.address_id ==
+                                  res['order']['delivery_address'])
             items = list(Item.select().where(Item.item_id << items_ids))
             if len(items) != len(items_ids):
                 return None, BAD_REQUEST
@@ -72,9 +73,13 @@ class OrdersHandler(Resource):
             user=user,
         )
 
-        for res_item in res['order']['items']:
-            item = next(i for i in items if str(i.item_id) == res_item['item_id'])
-            order.add_item(item, res_item['quantity'])
+        # Generate the dict of {<Item>: <int:quantity>} to call Order.add_items
+        items_to_add = {}
+        for _i in res['order']['items']:
+            item = next(i for i in items if str(i.item_id) == _i['item_id'])
+            items_to_add[item] = _i['quantity']
+
+        order.add_items(items_to_add)
 
         return serialize_order(order), CREATED
 
@@ -102,7 +107,8 @@ class OrderHandler(Resource):
 
         try:
             order = Order.get(order_id=str(order_id))
-            address = Address.get(Address.address_id == res['order']['delivery_address'])
+            address = Address.get(Address.address_id ==
+                                  res['order']['delivery_address'])
             items_ids = [e['item_id'] for e in res['order']['items']]
             items = list(Item.select().where(Item.item_id << items_ids))
             if len(items) != len(items_ids):
@@ -122,9 +128,13 @@ class OrderHandler(Resource):
         # that came with the PATCH request
         order.empty_order()
 
-        for res_item in res['order']['items']:
-            item = next(i for i in items if str(i.item_id) == res_item['item_id'])
-            order.add_item(item, res_item['quantity'])
+        # Generate the dict of {<Item>: <int:quantity>} to call Order.add_items
+        items_to_add = {}
+        for _i in res['order']['items']:
+            item = next(i for i in items if str(i.item_id) == _i['item_id'])
+            items_to_add[item] = _i['quantity']
+
+        order.add_items(items_to_add)
 
         order.delivery_address = address
         order.save()
