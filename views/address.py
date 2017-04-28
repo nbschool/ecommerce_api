@@ -64,7 +64,6 @@ class AddressHandler(Resource):
             return None, NOT_FOUND
 
         res = request.get_json()
-        request_data = res
 
         country = res.get('country')
         city = res.get('city')

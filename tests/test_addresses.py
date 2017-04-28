@@ -137,8 +137,6 @@ class TestAddresses:
         user = add_user('mariorossi@gmail.com', '123')
         addr = Address.create(**get_test_addr_dict(user, city="Firenze",
                                                    post_code='50132', address="Via Rossi 10"))
-        addr1 = new_addr(user, city="Roma", post_code="10000",
-                         address="Via Bianchi 20")
 
         resp = open_with_auth(self.app, '/addresses/{}'.format(addr.address_id), 'PATCH',
                               user.email, TEST_USER_PSW, data=json.dumps(
@@ -159,8 +157,6 @@ class TestAddresses:
         user = add_user('mariorossi@gmail.com', '123')
         addr = Address.create(**get_test_addr_dict(user, city="Firenze",
                                                    post_code='50132', address="Via Rossi 10"))
-        addr1 = new_addr(user, city="Roma", post_code="10000",
-                         address="Via Bianchi 20")
 
         resp = open_with_auth(self.app, '/addresses/{}'.format(addr.address_id), 'PATCH',
                               user.email, TEST_USER_PSW, data=json.dumps(
