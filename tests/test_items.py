@@ -58,6 +58,7 @@ WRONG_UUID = '04f2f213-1a0f-443d-a5ab-79097ba725ba'
 
 
 class TestItems(TestCase):
+
     @classmethod
     def setup_class(cls):
         super(TestItems, cls).setup_class()
@@ -155,18 +156,18 @@ class TestItems(TestCase):
         picture = Picture.create(item=item, **TEST_PICTURE)
         picture2 = Picture.create(item=item, **TEST_PICTURE2)
         picture3 = Picture.create(item=item2, **TEST_PICTURE3)
-        open("{path}/{picture_id}.{extension}".format(
-            path=utils.get_image_folder(),
+        path_pic = os.path.join(utils.get_image_folder(), "{picture_id}.{extension}".format(
             picture_id=picture.picture_id,
-            extension=picture.extension), "wb")
-        open("{path}/{picture_id}.{extension}".format(
-            path=utils.get_image_folder(),
-            picture_id=picture3.picture_id,
-            extension=picture3.extension), "wb")
-        open("{path}/{picture_id}.{extension}".format(
-            path=utils.get_image_folder(),
+            extension=picture.extension))
+        path_pic2 = os.path.join(utils.get_image_folder(), "{picture_id}.{extension}".format(
             picture_id=picture2.picture_id,
-            extension=picture2.extension), "wb")
+            extension=picture2.extension))
+        path_pic3 = os.path.join(utils.get_image_folder(), "{picture_id}.{extension}".format(
+            picture_id=picture3.picture_id,
+            extension=picture3.extension))
+        open(path_pic, "wb")
+        open(path_pic2, "wb")
+        open(path_pic3, "wb")
 
         resp = self.app.delete('/items/{item_id}'.format(
             item_id=item.item_id))
