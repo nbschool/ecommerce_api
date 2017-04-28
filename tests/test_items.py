@@ -94,8 +94,7 @@ class TestItems(TestCase):
                               data=json.dumps({'name': 'new-name'}),
                               content_type='application/json')
         assert resp.status_code == client.OK
-        json_item = Item.select().where(
-            Item.item_id == item.item_id).get().json()
+        json_item = Item.get(Item.item_id == item.item_id).json()
         assert json_item['name'] == 'new-name'
         assert json_item['price'] == TEST_ITEM['price']
         assert json_item['description'] == TEST_ITEM['description']
@@ -110,8 +109,7 @@ class TestItems(TestCase):
                                    'description': 'new-description'}),
                               content_type='application/json')
         assert resp.status_code == client.OK
-        json_item = Item.select().where(
-            Item.item_id == item.item_id).get().json()
+        json_item = Item.get(Item.item_id == item.item_id).json()
         assert json_item['name'] == 'new-name'
         assert json_item['price'] == 40.20
         assert json_item['description'] == 'new-description'
