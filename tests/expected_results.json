@@ -510,19 +510,45 @@
             {
                 "data": {
                     "type": "user",
-                    "attributes": {
-                        "admin": false,
-                        "first_name": "John",
-                        "email": "user2@email.com",
-                        "last_name": "Doe"
-                    },
                     "relationships": {
-                        "addresses": {
-                            "data": []
-                        },
                         "orders": {
                             "data": []
+                        },
+                        "addresses": {
+                            "data": []
                         }
+                    },
+                    "attributes": {
+                        "admin": false,
+                        "email": "user1@email.com",
+                        "last_name": "Doe",
+                        "first_name": "John"
+                    },
+                    "id": "4373d5d7-cae5-42bc-b218-d6fc6d18626f",
+                    "links": {
+                        "self": "/users/4373d5d7-cae5-42bc-b218-d6fc6d18626f"
+                    }
+                },
+                "links": {
+                    "self": "/users/4373d5d7-cae5-42bc-b218-d6fc6d18626f"
+                }
+            },
+            {
+                "data": {
+                    "type": "user",
+                    "relationships": {
+                        "orders": {
+                            "data": []
+                        },
+                        "addresses": {
+                            "data": []
+                        }
+                    },
+                    "attributes": {
+                        "admin": false,
+                        "email": "user2@email.com",
+                        "last_name": "Doe",
+                        "first_name": "John"
                     },
                     "id": "9630b105-ca99-4a27-a51d-ab3430bf52d1",
                     "links": {
