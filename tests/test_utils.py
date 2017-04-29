@@ -145,17 +145,27 @@ def _test_res_patch_id(r, _id):
 
 def _test_res_patch_date(result, date):
     """
-    Add the date from a response to an expected result and return it.
-    If the result is a list (i.e. get on all orders), set the date for each
-    item in the list
+    Patch a jsonapi response date in result['data']['attributes']['date']
+    with the given date. If a result list needs to be patched, a matching indexes
+    list of dates needs to be given as `date`.
+
+    :param result: a single jsonapi result `dict` or a `list` of result
+    :param date: a single `DateTime` object or a **matching** `list` of DateTime
     """
+    # patch the attribute
     def patch(r, d):
         r['data']['attributes']['date'] = d
+
     # add timezone info to match the actual response datetime
-    date = date.replace(tzinfo=timezone.utc).isoformat()
+    def set_tz(d):
+        return d.replace(tzinfo=timezone.utc).isoformat()
+
+    # if result is a list iterate each item.
+    # TODO: in this case <date> should be another list with dates with matching
+    # indexes
     if type(result) == list:
-        for r in result:
-            patch(r, date)
+        for r, d in zip(result, date):
+            patch(r, set_tz(d))
     else:
-        patch(result, date)
+        patch(result, set_tz(date))
     return result
