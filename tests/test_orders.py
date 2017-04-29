@@ -46,10 +46,17 @@ class TestOrders(TestCase):
             order_id='06451e0a-8fa2-40d2-8c51-1af50d369ca6'
         ).add_item(item, 2)
 
+        order2 = Order.create(
+            delivery_address=addr, user=user,
+            order_id='429994bf-784e-47cc-a823-e0c394b823e8'
+        ).add_item(item, 5)
+
         resp = self.app.get('/orders/')
 
         expected_data = patch_date(
-            EXPECTED_RESULTS['get_orders__success'], order.created_at)
+            EXPECTED_RESULTS['get_orders__success'],
+            [order.created_at, order2.created_at]
+        )
 
         assert resp.status_code == OK
         assert json.loads(resp.data) == expected_data
