@@ -604,7 +604,7 @@
                     "type": "user",
                     "attributes": {
                         "last_name": "Python",
-                        "email": "montsdf@asdhon.org",
+                        "email": "python@monty.org",
                         "admin": false,
                         "first_name": "Monty"
                     },
@@ -616,15 +616,83 @@
                             "data": []
                         }
                     },
-                    "id": "cfe57aa6-76c6-433d-93fe-443363978904",
+                    "id": "94495ece-559b-4b3a-87ed-799259c921bf",
+                    "links": {
+                        "self": "/users/94495ece-559b-4b3a-87ed-799259c921bf"
+                    }
+                },
+                "links": {
+                    "self": "/users/94495ece-559b-4b3a-87ed-799259c921bf"
+                }
+            },
+            "get_users_list_json__success": [
+                {
+                    "data": {
+                        "type": "user",
+                        "attributes": {
+                            "admin": false,
+                            "email": "montsdf@asdhon.org",
+                            "last_name": "Python",
+                            "first_name": "Monty"
+                        },
+                        "relationships": {
+                            "orders": {
+                                "data": [
+                                    {
+                                        "type": "order",
+                                        "id": "4cefa833-2f45-4662-b2fc-083ddad4f7a3"
+                                    },
+                                    {
+                                        "type": "order",
+                                        "id": "8d449938-5745-4489-ab32-89dc8178e347"
+                                    }
+                                ]
+                            },
+                            "addresses": {
+                                "data": [
+                                    {
+                                        "type": "address",
+                                        "id": "e8c4607a-a271-423f-981b-1aaefdac87e8"
+                                    }
+                                ]
+                            }
+                        },
+                        "id": "cfe57aa6-76c6-433d-93fe-443363978904",
+                        "links": {
+                            "self": "/users/cfe57aa6-76c6-433d-93fe-443363978904"
+                        }
+                    },
                     "links": {
                         "self": "/users/cfe57aa6-76c6-433d-93fe-443363978904"
                     }
                 },
-                "links": {
-                    "self": "/users/cfe57aa6-76c6-433d-93fe-443363978904"
+                {
+                    "data": {
+                        "type": "user",
+                        "attributes": {
+                            "admin": false,
+                            "email": "python@monty.org",
+                            "last_name": "Python",
+                            "first_name": "Monty"
+                        },
+                        "relationships": {
+                            "orders": {
+                                "data": []
+                            },
+                            "addresses": {
+                                "data": []
+                            }
+                        },
+                        "id": "94495ece-559b-4b3a-87ed-799259c921bf",
+                        "links": {
+                            "self": "/users/94495ece-559b-4b3a-87ed-799259c921bf"
+                        }
+                    },
+                    "links": {
+                        "self": "/users/94495ece-559b-4b3a-87ed-799259c921bf"
+                    }
                 }
-            },
+            ],
             "user_include_orders__success": {
                 "data": {
                     "type": "user",
