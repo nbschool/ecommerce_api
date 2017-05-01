@@ -128,16 +128,38 @@ class TestOrderSchema(TestCase):
         assert False
         # TODO: finish implementing the test
 
-    def test_order_validate_input__success(self):
-        post_data = format_jsonapi_request('order', {
-            'items': [
-                {'id': '9f3664b8-f945-44ef-8360-0b786ffcbf56', 'quantity': 4},
-                {'id': 'ad810505-eb47-4a00-9f9d-96fca30bd16d', 'quantity': 10}
-            ],
-            'delivery_address': 'Via Rossi 12',
-            'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47',
-        })
+        assert type(parsed) == str
 
+        expected_result = EXPECTED_ORDERS['order_json__success']
+        parsed = sort_included(json.loads(parsed))
+        assert parsed == expected_result
+
+    def test_order_validate_input__success(self):
+        data = {
+            "relationships": {
+                "user": {
+                    "type": "user",
+                    "id": "cfe57aa6-76c6-433d-93fe-443363978904"
+                },
+                "items": [
+                    {
+                        "type": "item",
+                        "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a",
+                        "quantity": 2
+                    },
+                    {
+                        "type": "item",
+                        "id": "08bd8de0-a4ac-459d-956f-cf6d8b8a7507",
+                        "quantity": 2
+                    }
+                ],
+                "delivery_address": {
+                    "type": "address",
+                    "id": "27e375f4-3d54-458c-91e4-d8a4fdf3b032"
+                }
+            }
+        }
+        post_data = format_jsonapi_request('order', data)
         isValid, errors = OrderSchema.validate_input(post_data)
-        assert False
-        # TODO: Finisc implementing the test. check validation
+        assert isValid is True
+        assert errors == {}
