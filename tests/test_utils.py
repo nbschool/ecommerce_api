@@ -102,15 +102,49 @@ def setup_images():
 
 def format_jsonapi_request(type_, data):
     """
-    Given the attributes of a resource, compile the jsonapi post data for
-    the request.
+    Given the attributes and relationships of a resource, compile the jsonapi
+    post data for the request.
+    All key-value pairs except ``relationships`` will be mapped inside
+    ``['data']['attributes']`` of the request.
+    Relationships key value will be mapped inside ``['data']['relationship']``
+
+    > NOTE:
+    > All relationship **must** map to the related field inside the Schema of
+    > the type and have a ``type`` and ``id`` properties.
+
+    .. code-block:: python
+
+        data = {
+            "<attribute field": "bar"
+            "relationships": {
+                "<field_name>": {
+                    "type": "<Resource type_>",
+                    "id": <Resource id>
+                },
+                "<field_name>": [
+                    {
+                        "type": "item",
+                        "id": <Resource id>
+                        "<metadata>": <metadata_value (ie. quantity of items)>
+                    }
+                ]
+            }
+        }
+
     """
-    return {
+    rels = {}
+    if 'relationships' in data:
+        rels = {k: {'data': v} for k, v in data['relationships'].items()}
+        del data['relationships']
+
+    retval = {
         'data': {
             'type': type_,
-            'attributes': data
+            'attributes': data,
+            'relationships': rels
         }
     }
+    return retval
 
 
 def get_expected_results(section):
