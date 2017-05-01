@@ -917,7 +917,85 @@
                         }
                     }
                 ]
-            }
+            },
+            "get_orders_list__success": [
+                {
+                    "data": {
+                        "type": "order",
+                        "relationships": {
+                            "delivery_address": {
+                                "data": {
+                                    "type": "address",
+                                    "id": "27e375f4-3d54-458c-91e4-d8a4fdf3b032"
+                                }
+                            },
+                            "user": {
+                                "data": {
+                                    "type": "user",
+                                    "id": "cfe57aa6-76c6-433d-93fe-443363978904"
+                                }
+                            },
+                            "items": {
+                                "data": [
+                                    {
+                                        "type": "item",
+                                        "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a"
+                                    }
+                                ]
+                            }
+                        },
+                        "attributes": {
+                            "total_price": 5.24,
+                            "date": "2017-05-01T09:04:47+00:00"
+                        },
+                        "id": "451b3bba-fe4d-470d-bf48-cb306c939bc6",
+                        "links": {
+                            "self": "/orders/451b3bba-fe4d-470d-bf48-cb306c939bc6"
+                        }
+                    },
+                    "links": {
+                        "self": "/orders/451b3bba-fe4d-470d-bf48-cb306c939bc6"
+                    }
+                },
+                {
+                    "data": {
+                        "type": "order",
+                        "relationships": {
+                            "delivery_address": {
+                                "data": {
+                                    "type": "address",
+                                    "id": "27e375f4-3d54-458c-91e4-d8a4fdf3b032"
+                                }
+                            },
+                            "user": {
+                                "data": {
+                                    "type": "user",
+                                    "id": "cfe57aa6-76c6-433d-93fe-443363978904"
+                                }
+                            },
+                            "items": {
+                                "data": [
+                                    {
+                                        "type": "item",
+                                        "id": "08bd8de0-a4ac-459d-956f-cf6d8b8a7507"
+                                    }
+                                ]
+                            }
+                        },
+                        "attributes": {
+                            "total_price": 16,
+                            "date": "2017-05-01T09:04:47+00:00"
+                        },
+                        "id": "27e375f4-3d54-458c-91e4-d8a4fdf3b032",
+                        "links": {
+                            "self": "/orders/27e375f4-3d54-458c-91e4-d8a4fdf3b032"
+                        }
+                    },
+                    "links": {
+                        "self": "/orders/27e375f4-3d54-458c-91e4-d8a4fdf3b032"
+                    }
+                }
+            ]
         }
     }
 }
