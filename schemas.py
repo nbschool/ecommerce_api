@@ -39,13 +39,13 @@ class BaseSchema(Schema):
         return serialized.data, serialized.errors
 
     @classmethod
-    def jsonapi_list(cls, obj_list):
+    def jsonapi_list(cls, obj_list, include_data=[]):
         """
         Given a list of resource models returns a json array with all
         the rows of the table.
         return value is a string `[{resource}, ...]`
         """
-        json_string = ','.join([o.json() for o in obj_list])
+        json_string = ','.join([o.json(include_data) for o in obj_list])
         json_string = '[{}]'.format(json_string)
 
         return json_string
@@ -67,8 +67,8 @@ class BaseSchema(Schema):
         documentation at https://goo.gl/0ZW1OW
 
         :returns:
-        * True if validation is ok
-        * Errors dict with validation errors if any
+        * (True, {}) if validation is ok
+        * (False, <dict:errors>) if there was some problem
         """
 
         errors = cls().validate(jsondata)
