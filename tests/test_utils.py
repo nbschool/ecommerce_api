@@ -205,3 +205,29 @@ def _test_res_patch_date(result, date):
     else:
         patch(result, set_tz(date))
     return result
+
+
+def _test_res_sort_included(result, sortFn=lambda x: x['type']):
+    """
+    Given a jsonapi response with included data (i.e. an Order that includes
+    user, address and items), return the same result with the list of `included`
+    sorted using ``sortFn``.
+
+    :param result: jsonapi structure that needs normalization
+    :param sortFn: sorting function called on every ``included`` resource.
+                   default takes the attribute ``type`` to sort the resources.
+    :type sortFn: ``function``
+    """
+    # safety check.
+    if 'included' not in result:
+        return result
+
+    def sort(r):
+        r['included'] = sorted(r['included'], key=sortFn)
+        return r
+    if type(result) is list:
+        result = [sort(r) for r in result]
+    else:
+        result = sort(result)
+
+    return result
