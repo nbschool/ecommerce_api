@@ -10,6 +10,7 @@ from uuid import uuid4
 from models import Address, User
 from utils import get_image_folder
 
+random.seed(10485)
 
 def wrong_dump(data):
     """
