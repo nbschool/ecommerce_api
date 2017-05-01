@@ -4,13 +4,16 @@ Tests run with no flask involvment and are used to check validation
 of inputs (post/put request data) and output from the Schemas dump method, that
 will be used as return value for Flask-Restful endpoint handlers.
 """
+from datetime import datetime
 
-from models import User, Order, Item
-from schemas import UserSchema, OrderSchema
-from uuid import uuid4
-from tests.test_case import TestCase
-from tests.test_utils import format_jsonapi_request, add_address
 import simplejson as json
+
+from models import Item, Order
+from schemas import OrderSchema, UserSchema
+from tests.test_case import TestCase
+from tests.test_utils import _test_res_sort_included as sort_included
+from tests.test_utils import (add_address, add_user, format_jsonapi_request,
+                              get_expected_results)
 
 USER_TEST_DICT = {
     "first_name": "Monty",
@@ -18,48 +21,20 @@ USER_TEST_DICT = {
     "email": "montsdf@asdhon.org",
     "password": "ewrwer"
 }
+EXPECTED_RESULTS = get_expected_results('schemas')
+EXPECTED_ORDERS = EXPECTED_RESULTS['orders']
+EXPECTED_USERS = EXPECTED_RESULTS['users']
 
 
-def get_expected_serialized_user(user):
-    """
-    From USER_TEST_DICT and a generated User, get a dict that should match
-    the return value of the JSONApi serialization for that user.
-    TODO: Implement expected orders/data serialization if user has orders.
-    """
-    # Copy and normalize the test user definition with the expected attributes
-    # returned by the API
-    user_data = USER_TEST_DICT.copy()
-    del user_data['password']
-    user_data['admin'] = user.admin
 
-    return {
-        'data': {
-            'type': 'user',
-            'id': str(user.user_id),
-            'attributes': user_data,
-            'links': {
-                'self': '/users/{}'.format(user.user_id)
-            },
-            'relationships': {
-                'orders': {
-                    'data': []
-                },
-                'addresses': {
-                    'data': []
-                }
-            },
-        },
-        'links': {
-            'self': '/users/{}'.format(user.user_id)
-        }
-    }
 
 
 class TestUserSchema(TestCase):
     def test_user_json__success(self):
-        user = User.create(**USER_TEST_DICT, user_id=uuid4())
+        user = add_user(**USER_TEST_DICT,
+                        id='cfe57aa6-76c6-433d-93fe-443363978904')
         parsed_user, errors = UserSchema.jsonapi(user)
-        expected_result = get_expected_serialized_user(user)
+        expected_result = EXPECTED_USERS['user_json__success']
 
         assert type(parsed_user) == str
 
@@ -67,19 +42,20 @@ class TestUserSchema(TestCase):
         assert errors == {}
 
     def test_user_include_orders__success(self):
-        user = User.create(**USER_TEST_DICT, user_id=uuid4())
-        addr = add_address(user)
-        o1 = Order.create(delivery_address=addr, user=user)
-        o2 = Order.create(delivery_address=addr, user=user)
+        user = add_user(**USER_TEST_DICT,
+                        id='cfe57aa6-76c6-433d-93fe-443363978904')
+        addr = add_address(user, id='e8c4607a-a271-423f-981b-1aaefdac87e8')
+        Order.create(delivery_address=addr, user=user,
+                     order_id='4cefa833-2f45-4662-b2fc-083ddad4f7a3',
+                     created_at=datetime(2017, 5, 1, 3, 5, 57))
+        Order.create(delivery_address=addr, user=user,
+                     order_id='8d449938-5745-4489-ab32-89dc8178e347',
+                     created_at=datetime(2017, 5, 1, 11, 16, 25))
 
-        parsed_user, errors = UserSchema.jsonapi(user, include_data=['orders'])
+        parsed_user, _ = UserSchema.jsonapi(user, include_data=['orders'])
 
-        parsed_user = json.loads(parsed_user)
-
-        assert type(parsed_user['included']) == list
-        assert len(parsed_user['included']) == 2
-        assert parsed_user['included'][0]['id'] == str(o1.order_id)
-        assert parsed_user['included'][1]['id'] == str(o2.order_id)
+        expected_result = EXPECTED_USERS['user_include_orders__success']
+        assert json.loads(parsed_user) == expected_result
 
     def test_user_validate_input__success(self):
         post_data = format_jsonapi_request('user', USER_TEST_DICT)
@@ -106,27 +82,31 @@ class TestUserSchema(TestCase):
 
 class TestOrderSchema(TestCase):
     def test_order_json__success(self):
-        user = User.create(**USER_TEST_DICT, user_id=uuid4())
+        user = add_user(**USER_TEST_DICT,
+                        id='cfe57aa6-76c6-433d-93fe-443363978904')
         item1 = Item.create(
-            item_id=uuid4(),
+            item_id='25da606b-dbd3-45e1-bb23-ff1f84a5622a',
             name='Item 1',
             description='Item 1 description',
             price=5.24,
         )
         item2 = Item.create(
-            item_id=uuid4(),
+            item_id='08bd8de0-a4ac-459d-956f-cf6d8b8a7507',
             name='Item 2',
             description='Item 2 description',
             price=8,
         )
-        addr = add_address(user=user)
-        order = Order.create(delivery_address=addr, user=user)
-        order.add_item(item1, 2).add_item(item2, 5)
+        addr = add_address(
+            user=user, id='27e375f4-3d54-458c-91e4-d8a4fdf3b032')
 
-        # parsed = order.json(include_data=['items', 'user', 'delivery_address'])
+        order = Order.create(
+            delivery_address=addr, user=user,
+            order_id='451b3bba-fe4d-470d-bf48-cb306c939bc6',
+            created_at=datetime(2017, 5, 1, 9, 4, 47)
+        ).add_item(item1, 2).add_item(item2, 5)
 
-        assert False
-        # TODO: finish implementing the test
+        parsed, _ = OrderSchema.jsonapi(
+            order, include_data=['items', 'user', 'delivery_address'])
 
         assert type(parsed) == str
 

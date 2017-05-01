@@ -596,5 +596,260 @@
                 }
             ]
         }
+    },
+    "schemas": {
+        "users": {
+            "user_json__success": {
+                "data": {
+                    "type": "user",
+                    "attributes": {
+                        "last_name": "Python",
+                        "email": "montsdf@asdhon.org",
+                        "admin": false,
+                        "first_name": "Monty"
+                    },
+                    "relationships": {
+                        "orders": {
+                            "data": []
+                        },
+                        "addresses": {
+                            "data": []
+                        }
+                    },
+                    "id": "cfe57aa6-76c6-433d-93fe-443363978904",
+                    "links": {
+                        "self": "/users/cfe57aa6-76c6-433d-93fe-443363978904"
+                    }
+                },
+                "links": {
+                    "self": "/users/cfe57aa6-76c6-433d-93fe-443363978904"
+                }
+            },
+            "user_include_orders__success": {
+                "data": {
+                    "type": "user",
+                    "id": "cfe57aa6-76c6-433d-93fe-443363978904",
+                    "attributes": {
+                        "first_name": "Monty",
+                        "last_name": "Python",
+                        "admin": false,
+                        "email": "montsdf@asdhon.org"
+                    },
+                    "relationships": {
+                        "addresses": {
+                            "data": [
+                                {
+                                    "type": "address",
+                                    "id": "e8c4607a-a271-423f-981b-1aaefdac87e8"
+                                }
+                            ]
+                        },
+                        "orders": {
+                            "data": [
+                                {
+                                    "type": "order",
+                                    "id": "4cefa833-2f45-4662-b2fc-083ddad4f7a3"
+                                },
+                                {
+                                    "type": "order",
+                                    "id": "8d449938-5745-4489-ab32-89dc8178e347"
+                                }
+                            ]
+                        }
+                    },
+                    "links": {
+                        "self": "/users/cfe57aa6-76c6-433d-93fe-443363978904"
+                    }
+                },
+                "links": {
+                    "self": "/users/cfe57aa6-76c6-433d-93fe-443363978904"
+                },
+                "included": [
+                    {
+                        "type": "order",
+                        "relationships": {
+                            "delivery_address": {
+                                "data": {
+                                    "type": "address",
+                                    "id": "e8c4607a-a271-423f-981b-1aaefdac87e8"
+                                }
+                            },
+                            "items": {
+                                "data": []
+                            },
+                            "user": {
+                                "data": {
+                                    "type": "user",
+                                    "id": "cfe57aa6-76c6-433d-93fe-443363978904"
+                                }
+                            }
+                        },
+                        "id": "4cefa833-2f45-4662-b2fc-083ddad4f7a3",
+                        "attributes": {
+                            "total_price": 0,
+                            "date": "2017-05-01T03:05:57+00:00"
+                        },
+                        "links": {
+                            "self": "/orders/4cefa833-2f45-4662-b2fc-083ddad4f7a3"
+                        }
+                    },
+                    {
+                        "type": "order",
+                        "relationships": {
+                            "delivery_address": {
+                                "data": {
+                                    "type": "address",
+                                    "id": "e8c4607a-a271-423f-981b-1aaefdac87e8"
+                                }
+                            },
+                            "items": {
+                                "data": []
+                            },
+                            "user": {
+                                "data": {
+                                    "type": "user",
+                                    "id": "cfe57aa6-76c6-433d-93fe-443363978904"
+                                }
+                            }
+                        },
+                        "id": "8d449938-5745-4489-ab32-89dc8178e347",
+                        "attributes": {
+                            "total_price": 0,
+                            "date": "2017-05-01T11:16:25+00:00"
+                        },
+                        "links": {
+                            "self": "/orders/8d449938-5745-4489-ab32-89dc8178e347"
+                        }
+                    }
+                ]
+            }
+        },
+        "orders": {
+            "order_json__success": {
+                "data": {
+                    "type": "order",
+                    "attributes": {
+                        "total_price": 50.48,
+                        "date": "2017-05-01T09:04:47+00:00"
+                    },
+                    "id": "451b3bba-fe4d-470d-bf48-cb306c939bc6",
+                    "relationships": {
+                        "user": {
+                            "data": {
+                                "type": "user",
+                                "id": "cfe57aa6-76c6-433d-93fe-443363978904"
+                            }
+                        },
+                        "items": {
+                            "data": [
+                                {
+                                    "type": "item",
+                                    "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a"
+                                },
+                                {
+                                    "type": "item",
+                                    "id": "08bd8de0-a4ac-459d-956f-cf6d8b8a7507"
+                                }
+                            ]
+                        },
+                        "delivery_address": {
+                            "data": {
+                                "type": "address",
+                                "id": "27e375f4-3d54-458c-91e4-d8a4fdf3b032"
+                            }
+                        }
+                    },
+                    "links": {
+                        "self": "/orders/451b3bba-fe4d-470d-bf48-cb306c939bc6"
+                    }
+                },
+                "links": {
+                    "self": "/orders/451b3bba-fe4d-470d-bf48-cb306c939bc6"
+                },
+                "included": [
+                    {
+                        "type": "address",
+                        "attributes": {
+                            "phone": "3294882773",
+                            "city": "Pistoia",
+                            "address": "Via Verdi 12",
+                            "post_code": "51100",
+                            "country": "Italy"
+                        },
+                        "id": "27e375f4-3d54-458c-91e4-d8a4fdf3b032",
+                        "relationships": {
+                            "user": {
+                                "data": {
+                                    "type": "user",
+                                    "id": "cfe57aa6-76c6-433d-93fe-443363978904"
+                                }
+                            }
+                        },
+                        "links": {
+                            "self": "/addresses/27e375f4-3d54-458c-91e4-d8a4fdf3b032"
+                        }
+                    },
+                    {
+                        "type": "order_item",
+                        "attributes": {
+                            "quantity": 2,
+                            "price": 5.24,
+                            "name": "Item 1",
+                            "subtotal": 10.48,
+                            "description": "Item 1 description"
+                        },
+                        "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a",
+                        "links": {
+                            "self": "/items/25da606b-dbd3-45e1-bb23-ff1f84a5622a"
+                        }
+                    },
+                    {
+                        "type": "order_item",
+                        "attributes": {
+                            "quantity": 5,
+                            "price": 8,
+                            "name": "Item 2",
+                            "subtotal": 40,
+                            "description": "Item 2 description"
+                        },
+                        "id": "08bd8de0-a4ac-459d-956f-cf6d8b8a7507",
+                        "links": {
+                            "self": "/items/08bd8de0-a4ac-459d-956f-cf6d8b8a7507"
+                        }
+                    },
+                    {
+                        "type": "user",
+                        "attributes": {
+                            "first_name": "Monty",
+                            "email": "montsdf@asdhon.org",
+                            "last_name": "Python",
+                            "admin": false
+                        },
+                        "id": "cfe57aa6-76c6-433d-93fe-443363978904",
+                        "relationships": {
+                            "orders": {
+                                "data": [
+                                    {
+                                        "type": "order",
+                                        "id": "451b3bba-fe4d-470d-bf48-cb306c939bc6"
+                                    }
+                                ]
+                            },
+                            "addresses": {
+                                "data": [
+                                    {
+                                        "type": "address",
+                                        "id": "27e375f4-3d54-458c-91e4-d8a4fdf3b032"
+                                    }
+                                ]
+                            }
+                        },
+                        "links": {
+                            "self": "/users/cfe57aa6-76c6-433d-93fe-443363978904"
+                        }
+                    }
+                ]
+            }
+        }
     }
 }
