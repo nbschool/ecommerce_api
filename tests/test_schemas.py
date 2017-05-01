@@ -173,4 +173,20 @@ class TestOrderSchema(TestCase):
         assert errors == {}
 
     def test_orders_list__success(self):
-        pass
+        order1 = Order.create(
+            delivery_address=self.addr, user=self.user,
+            order_id='451b3bba-fe4d-470d-bf48-cb306c939bc6',
+            created_at=datetime(2017, 5, 1, 9, 4, 47),
+        ).add_item(self.item1)
+        order2 = Order.create(
+            delivery_address=self.addr, user=self.user,
+            order_id='27e375f4-3d54-458c-91e4-d8a4fdf3b032',
+            created_at=datetime(2017, 5, 1, 9, 4, 47),
+        ).add_item(self.item2, 2)
+
+        parsed = OrderSchema.jsonapi_list([order1, order2])
+
+        assert type(parsed) is str
+
+        expected_result = EXPECTED_ORDERS['get_orders_list__success']
+        assert json.loads(parsed) == expected_result
