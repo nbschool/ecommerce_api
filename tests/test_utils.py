@@ -124,7 +124,7 @@ def format_jsonapi_request(type_, data):
                 "<field_name>": [
                     {
                         "type": "item",
-                        "id": <Resource id>
+                        "id": <Resource id>,
                         "<metadata>": <metadata_value (ie. quantity of items)>
                     }
                 ]
@@ -197,8 +197,6 @@ def _test_res_patch_date(result, date):
         return d.replace(tzinfo=timezone.utc).isoformat()
 
     # if result is a list iterate each item.
-    # TODO: in this case <date> should be another list with dates with matching
-    # indexes
     if type(result) == list:
         for r, d in zip(result, date):
             patch(r, set_tz(d))
