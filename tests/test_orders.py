@@ -159,8 +159,8 @@ class TestOrders(TestCase):
         assert len(OrderItem.select()) == 2
 
         total_price = 0
-        for item in order['order']['items']:
-            total_price += (item['price'] * item['quantity'])
+        for p in order['order']['items']:
+            total_price += (p['price'] * p['quantity'])
 
         data = json.loads(resp.data)
 
@@ -345,6 +345,7 @@ class TestOrders(TestCase):
                 ],
                 'delivery_address': addr_B.json()["address_id"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+
             }
         }
         path = 'orders/{}'.format(order1.order_id)

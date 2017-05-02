@@ -66,11 +66,6 @@ class OrdersHandler(Resource):
         if items.count() != len(res_items):
             abort(BAD_REQUEST)
 
-        # Check whether availabilities allow orders
-        # if any(item.availability < res_item['quantity'] for item in items
-        #         for res_item in res_items if item.item_id == res_item['item_id']):
-        #     return None, BAD_REQUEST
-
         # Check that the address exist
         try:
             address = Address.get(Address.address_id == res['order']['delivery_address'])
@@ -120,9 +115,9 @@ class OrderHandler(Resource):
         try:
             order = Order.get(order_id=str(order_id))
             address = Address.get(Address.address_id == res['order']['delivery_address'])
-            item_ids = [res_item['item_id'] for res_item in res_items]
-            items = list(Item.select().where(Item.item_id << item_ids))
-            if len(items) != len(item_ids):
+            items_ids = [e['item_id'] for e in res_items]
+            items = list(Item.select().where(Item.item_id << items_ids))
+            if len(items) != len(items_ids):
                 return None, BAD_REQUEST
         except (Address.DoesNotExist, Order.DoesNotExist):
             return None, NOT_FOUND
