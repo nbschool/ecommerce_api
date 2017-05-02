@@ -133,7 +133,7 @@ class TestAddresses:
                               user.email, TEST_USER_PSW, None, None)
         assert resp.status_code == NOT_FOUND
 
-    def test_patch_change1valueaddress__success(self):
+    def test_patch_only_city__success(self):
         user = add_user('mariorossi@gmail.com', '123')
         addr = Address.create(**get_test_addr_dict(user, city="Firenze",
                                                    post_code='50132', address="Via Rossi 10"))
@@ -151,7 +151,7 @@ class TestAddresses:
         assert address['post_code'] == addr.post_code
         assert json.loads(resp.data) == address
 
-    def test_patch_changeallvalueaddress__success(self):
+    def test_patch_all__success(self):
         user = add_user('mariorossi@gmail.com', '123')
         addr = Address.create(**get_test_addr_dict(user, city="Firenze",
                                                    post_code='50132', address="Via Rossi 10"))
