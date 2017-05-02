@@ -143,14 +143,12 @@ class TestAddresses:
                                   {'city': "Genova"}),
                               content_type='application/json')
         assert resp.status_code == OK
-
         address = Address.get(Address.address_id == addr.address_id).json()
-
-        assert address['country'] == address['country']
+        assert address['country'] == addr.country
         assert address['city'] == 'Genova'
-        assert address['address'] == address['address']
-        assert address['phone'] == address['phone']
-        assert address['post_code'] == address['post_code']
+        assert address['address'] == addr.address
+        assert address['phone'] == addr.phone
+        assert address['post_code'] == addr.post_code
         assert json.loads(resp.data) == address
 
     def test_patch_changeallvalueaddress__success(self):
@@ -165,9 +163,7 @@ class TestAddresses:
                                    "post_code": "16100"}),
                               content_type='application/json')
         assert resp.status_code == OK
-
         address = Address.get(Address.address_id == addr.address_id).json()
-
         assert address['country'] == "Germany"
         assert address['city'] == "Genova"
         assert address['address'] == "Via XX Settembre, 30"
