@@ -138,10 +138,10 @@ class TestOrders(TestCase):
         addr_A = add_address(user=user_A)
         order = {
             'order': {
-                'items': {
-                    'mario': {'price': 20.20, 'quantity': 4},
-                    'GINO': {'price': 30.20, 'quantity': 10}
-                },
+                'items': [
+                    {'name': 'mario', 'price': 20.20, 'quantity': 4},
+                    {'name': 'GINO', 'price': 30.20, 'quantity': 10}
+                ],
                 'delivery_address': addr_A.json()["address_id"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
@@ -157,8 +157,8 @@ class TestOrders(TestCase):
         assert len(OrderItem.select()) == 2
 
         total_price = 0
-        for _, values in order['order']['items'].items():
-            total_price += (values['price'] * values['quantity'])
+        for item in order['order']['items']:
+            total_price += (item['price'] * item['quantity'])
 
         data = json.loads(resp.data)
 
@@ -176,9 +176,9 @@ class TestOrders(TestCase):
         )
         order = {
             'order': {
-                'items': {
-                    'item1': {'price': 10.10, 'quantity': 3}
-                }
+                'items': [
+                    {'name': 'item1', 'price': 10.10, 'quantity': 3}
+                ]
             }
         }
         user_A = add_user('123@email.com', TEST_USER_PSW)
@@ -207,10 +207,10 @@ class TestOrders(TestCase):
         user_A = add_user('12345@email.com', TEST_USER_PSW)
         order = {
             'order': {
-                'items': {
-                    'item1': {'price': 50.0, 'quantity': 4},
-                    'item2': {'price': 20.0, 'quantity': 10}
-                },
+                'items': [
+                    {'name': 'item1', 'price': 50.0, 'quantity': 4},
+                    {'name': 'item2', 'price': 20.0, 'quantity': 10}
+                ],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
         }
@@ -239,10 +239,10 @@ class TestOrders(TestCase):
         user_A = add_user('12345@email.com', TEST_USER_PSW)
         order = {
             'order': {
-                'items': {
-                    'mario': {'price': 50.0, 'quantity': 4},
-                    'GINO': {'price': 20.0, 'quantity': 10}
-                },
+                'items': [
+                    {'name': 'mario', 'price': 50.0, 'quantity': 4},
+                    {'name': 'GINO', 'price': 20.0, 'quantity': 10}
+                ],
                 'delivery_address': '',
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
@@ -302,10 +302,10 @@ class TestOrders(TestCase):
         order = {
             "order": {
                 "order_id": order_id,
-                'items': {
-                    'mario': {'price': 20.0, 'quantity': 5},
-                    'GINO': {'price': 30.20, 'quantity': 1}
-                },
+                'items': [
+                    {'name': 'mario', 'price': 20.0, 'quantity': 5},
+                    {'name': 'GINO', 'price': 30.20, 'quantity': 1}
+                ],
                 'delivery_address': addr_B.json()["address_id"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
@@ -414,10 +414,10 @@ class TestOrders(TestCase):
         order = {
             "order": {
                 "order_id": order_id,
-                'items': {
-                    'item1': {'price': 100.0, 'quantity': 5},
-                    'item2': {'price': 2222.0, 'quantity': 1}
-                },
+                'items': [
+                    {'name': 'item1', 'price': 100.0, 'quantity': 5},
+                    {'name': 'item2', 'price': 2222.0, 'quantity': 1}
+                ],
                 'delivery_address': addr_A.json()["address_id"]
             }
         }
@@ -452,9 +452,9 @@ class TestOrders(TestCase):
         update_order = {
             "order": {
                 "order_id": str(order.order_id),
-                'items': {
-                    'mario': {'price': 30.30, 'quantity': 3},
-                },
+                'items': [
+                    {'name': 'mario', 'price': 30.30, 'quantity': 3},
+                ],
                 'delivery_address': 'Via Verdi 20'
             }
         }
@@ -473,10 +473,10 @@ class TestOrders(TestCase):
         order = {
             "order": {
                 "order_id": order_id,
-                'items': {
-                    'item1': {'price': 100.0, 'quantity': 5},
-                    'item2': {'price': 2222.0, 'quantity': 1}
-                },
+                'items': [
+                    {'name': 'item1', 'price': 100.0, 'quantity': 5},
+                    {'name': 'item2', 'price': 2222.0, 'quantity': 1}
+                ],
                 'delivery_address': addr.json()["address_id"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }

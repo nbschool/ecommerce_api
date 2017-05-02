@@ -60,15 +60,15 @@ class OrdersHandler(Resource):
 
         # Check that the items exist by getting all the item names from the
         # request and executing a get() request with Peewee
-        item_names = [e for e in res_items]
+        item_names = list(map(lambda x: x['name'], res_items))
         items = Item.select().where(Item.name << item_names)
 
         if items.count() != len(res_items):
             abort(BAD_REQUEST)
 
         # check whether availabilities allow orders
-        if any(item.availability < res_items[item.name]['quantity']
-                for item in items):
+        if any(item.availability < res_item['quantity'] for item in items 
+                for res_item in res_items if item.name == res_item['name']):
             return None, BAD_REQUEST
         
         # Check that the order has an 'items' and 'delivery_address' attributes
@@ -96,7 +96,11 @@ class OrdersHandler(Resource):
         )
 
         for item in items:
-            order.add_item(item, res_items[item.name]['quantity'])
+            for res_item in res_items:
+                # if names match add item and quantity, once per res_item
+                if item.name == res_item['name']:
+                    order.add_item(item, res_item['quantity'])
+                    break
 
         return serialize_order(order), CREATED
 
@@ -142,6 +146,10 @@ class OrderHandler(Resource):
         # check whether availabilities allow order update
         if any(item.availability < res_items[item.name]['quantity']
                 for item in items):
+            return None, BAD_REQUEST
+        # check whether availabilities allow order update
+        if any(item.availability < res_item['quantity'] for item in items 
+                for res_item in res_items if item.name == res_item['name']):
             return None, BAD_REQUEST
 
         # Clear the order of all items before adding the new items
