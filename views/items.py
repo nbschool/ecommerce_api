@@ -68,19 +68,25 @@ class ItemHandler(Resource):
             return None, client.NOT_FOUND
 
         request_data = request.get_json(force=True)
-        name = request_data.get('name')
-        price = request_data.get('price')
-        description = request_data.get('description')
-        availability = request_data.get('availability')
+
+        isValid, errors = Item.validate_input(request_data, partial=True)
+        if not isValid:
+            return errors, client.BAD_REQUEST
+
+        data = request_data['data']['attributes']
+        name = data.get('name')
+        price = data.get('price')
+        description = data.get('description')
+        availability = data.get('availability')
 
         if name and name != obj.name:
-            obj.name = request_data['name']
+            obj.name = data['name']
 
         if price and price != obj.price:
-            obj.price = request_data['price']
+            obj.price = data['price']
 
         if description and description != obj.description:
-            obj.description = request_data['description']
+            obj.description = data['description']
 
         if availability and availability != obj.availability:
             obj.availability = request_data['availability']

@@ -503,6 +503,16 @@
             "links": {
                 "self": "/items/429994bf-784e-47cc-a823-e0c394b823e8"
             }
+        },
+        "post_item_missing_field__fail": {
+            "errors": [
+                {
+                    "detail": "Missing data for required field.",
+                    "source": {
+                        "pointer": "/data/attributes/price"
+                    }
+                }
+            ]
         }
     },
     "users": {
