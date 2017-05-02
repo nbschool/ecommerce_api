@@ -297,6 +297,16 @@
                 "self": "/orders/caae3e26-905f-4541-8f90-b2758e449407"
             }
         },
+        "create_order__failure_missing_field": {
+            "errors": [
+                {
+                    "detail": "Must include a `data` key",
+                    "source": {
+                        "pointer": "/data/relationships/delivery_address/data"
+                    }
+                }
+            ]
+        },
         "update_order__success": {
             "data": {
                 "type": "order",

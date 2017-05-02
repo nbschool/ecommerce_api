@@ -90,7 +90,7 @@ class ItemSchema(BaseSchema):
         self_url_kwargs = {'id': '<id>'}
         self_url_many = '/items/'
 
-    id = fields.Str(dump_only=True, attribute='item_id')
+    id = fields.Str(dump_only=True, attribute='uuid')
     name = fields.Str(required=True, validate=NOT_BLANK)
     price = fields.Float(required=True, validate=MORE_THAN_ZERO)
     description = fields.Str(required=True, validate=NOT_BLANK)
@@ -111,7 +111,7 @@ class OrderSchema(BaseSchema):
         self_url_kwargs = {'id': '<id>'}
         json_module = simplejson
 
-    id = fields.Str(dump_only=True, attribute='order_id')
+    id = fields.Str(dump_only=True, attribute='uuid')
     date = fields.DateTime(attribute='created_at', dump_only=True)
     total_price = fields.Decimal(dump_only=True, places=2,
                                  validate=MORE_THAN_ZERO,
@@ -120,7 +120,7 @@ class OrderSchema(BaseSchema):
     delivery_address = fields.Relationship(
         required=True, include_resource_linkage=True,
         type_='address', schema='AddressSchema',
-        id_field='address_id',
+        id_field='uuid',
     )
 
     # Uses the OrderItem table and OrderItemSchema to serialize a json object
@@ -128,7 +128,7 @@ class OrderSchema(BaseSchema):
     items = fields.Relationship(
         many=True, include_resource_linkage=True,
         type_='item', schema='OrderItemSchema',
-        id_field='item.item_id',
+        id_field='item.uuid',
         attribute='order_items', required=True,
         validate=NOT_EMPTY,
     )
@@ -136,7 +136,7 @@ class OrderSchema(BaseSchema):
     user = fields.Relationship(
         include_resource_linkage=True,
         type_='user', schema='UserSchema',
-        id_field='user_id',
+        id_field='uuid',
         required=True,
     )
 
@@ -152,12 +152,12 @@ class OrderItemSchema(BaseSchema):
 
     class Meta:
         type_ = 'order_item'
-        self_url = '/items/{item_id}'
-        self_url_kwargs = {'item_id': '<id>'}
+        self_url = '/items/{uuid}'
+        self_url_kwargs = {'uuid': '<id>'}
         self_url_many = '/items/'
         json_module = simplejson
 
-    id = fields.Str(dump_only=True, attribute='item.item_id')
+    id = fields.Str(dump_only=True, attribute='item.uuid')
     name = fields.Str(attribute='item.name')
     description = fields.Str(attribute='item.description')
     price = fields.Float(attribute='item.price')
@@ -177,7 +177,7 @@ class UserSchema(BaseSchema):
         self_url_kwargs = {'id': '<id>'}
         json_module = simplejson
 
-    id = fields.Str(dump_only=True, attribute='user_id')
+    id = fields.Str(dump_only=True, attribute='uuid')
     first_name = fields.Str(required=True, validate=NOT_BLANK)
     last_name = fields.Str(required=True, validate=NOT_BLANK)
     email = fields.Email(required=True, validate=NOT_BLANK)
@@ -187,13 +187,13 @@ class UserSchema(BaseSchema):
     orders = fields.Relationship(
         many=True, include_resource_linkage=True,
         type_='order', schema='OrderSchema',
-        dump_only=True, id_field='order_id',
+        dump_only=True, id_field='uuid',
     )
 
     addresses = fields.Relationship(
         many=True, include_resource_linkage=True,
         type_='address', schema='AddressSchema',
-        dump_only=True, id_field='address_id',
+        dump_only=True, id_field='uuid',
     )
 
 
@@ -209,7 +209,7 @@ class AddressSchema(BaseSchema):
         self_url_kwargs = {'id': '<id>'}
         json_module = simplejson
 
-    id = fields.Str(dump_only=True, attribute='address_id')
+    id = fields.Str(dump_only=True, attribute='uuid')
     country = fields.Str(required=True, validate=NOT_BLANK)
     city = fields.Str(required=True, validate=NOT_BLANK)
     post_code = fields.Str(required=True, validate=NOT_BLANK)
@@ -219,5 +219,5 @@ class AddressSchema(BaseSchema):
     user = fields.Relationship(
         include_resource_linkage=True,
         type_='user', schema='UserSchema',
-        id_field='user_id',
+        id_field='uuid',
     )
