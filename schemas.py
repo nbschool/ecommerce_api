@@ -59,7 +59,7 @@ class BaseSchema(Schema):
         return serialized.data, serialized.errors
 
     @classmethod
-    def validate_input(cls, jsondata):
+    def validate_input(cls, jsondata, partial=False):
         """"
         validate an input json data against the schema of its relative object
         schema
@@ -71,7 +71,7 @@ class BaseSchema(Schema):
         * (False, <dict:errors>) if there was some problem
         """
 
-        errors = cls().validate(jsondata)
+        errors = cls().validate(jsondata, partial=partial)
         if not errors:
             return True, {}
         return False, errors
@@ -89,10 +89,10 @@ class ItemSchema(BaseSchema):
         self_url_many = '/items/'
 
     id = fields.Str(dump_only=True, attribute='item_id')
-    name = fields.Str(validate=NOT_BLANK)
-    price = fields.Float(validate=MORE_THAN_ZERO)
-    description = fields.Str(validate=NOT_BLANK)
-    availability = fields.Int(MORE_THAN_ZERO)
+    name = fields.Str(required=True, validate=NOT_BLANK)
+    price = fields.Float(required=True, validate=MORE_THAN_ZERO)
+    description = fields.Str(required=True, validate=NOT_BLANK)
+    availability = fields.Int(required=True, validate=MORE_THAN_ZERO)
 
 
 class OrderSchema(BaseSchema):

@@ -50,8 +50,8 @@ class BaseModel(Model):
         return self._schema.serialize(self, include_data)
 
     @classmethod
-    def validate_input(cls, data):
-        return cls._schema.validate_input(data)
+    def validate_input(cls, data, partial=False):
+        return cls._schema.validate_input(data, partial=partial)
 
 
 class Item(BaseModel):
