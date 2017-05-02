@@ -8,8 +8,10 @@ Documentation can be found at https://goo.gl/pVvryk
 """
 NOT_BLANK = validate.Length(min=1, error='Field cannot be blank')
 
-"""Validation rule for prices that must be >= 0"""
+"""Validation rule for prices that must be >= 0 """
 MORE_THAN_ZERO = validate.Range(min=0)
+"""Validation rule for lists that cannot be empty. """
+NOT_EMPTY = validate.Length(min=1, error='List cannot be empty')
 
 
 class BaseSchema(Schema):
@@ -70,8 +72,8 @@ class BaseSchema(Schema):
         * (True, {}) if validation is ok
         * (False, <dict:errors>) if there was some problem
         """
-
         errors = cls().validate(jsondata, partial=partial)
+
         if not errors:
             return True, {}
         return False, errors
@@ -112,7 +114,8 @@ class OrderSchema(BaseSchema):
     id = fields.Str(dump_only=True, attribute='order_id')
     date = fields.DateTime(attribute='created_at', dump_only=True)
     total_price = fields.Decimal(dump_only=True, places=2,
-                                 validate=MORE_THAN_ZERO)
+                                 validate=MORE_THAN_ZERO,
+                                 )
 
     delivery_address = fields.Relationship(
         required=True, include_resource_linkage=True,
@@ -125,14 +128,16 @@ class OrderSchema(BaseSchema):
     items = fields.Relationship(
         many=True, include_resource_linkage=True,
         type_='item', schema='OrderItemSchema',
-        dump_only=True, id_field='item.item_id',
-        attribute='order_items',
+        id_field='item.item_id',
+        attribute='order_items', required=True,
+        validate=NOT_EMPTY,
     )
 
     user = fields.Relationship(
         include_resource_linkage=True,
         type_='user', schema='UserSchema',
-        dump_only=True, id_field='user_id',
+        id_field='user_id',
+        required=True,
     )
 
 
