@@ -67,7 +67,7 @@ class OrdersHandler(Resource):
             abort(BAD_REQUEST)
 
         # Check whether availabilities allow orders
-        # if any(item.availability < res_item['quantity'] for item in items 
+        # if any(item.availability < res_item['quantity'] for item in items
         #         for res_item in res_items if item.item_id == res_item['item_id']):
         #     return None, BAD_REQUEST
 
@@ -136,7 +136,7 @@ class OrderHandler(Resource):
                     UNAUTHORIZED)
 
         # check whether availabilities allow order update
-        if any(item.availability < res_item['quantity'] for item in items 
+        if any(item.availability < res_item['quantity'] for item in items
                 for res_item in res_items if item.item_id == res_item['item_id']):
             return None, BAD_REQUEST
 
