@@ -134,6 +134,18 @@ class TestItems(TestCase):
         assert resp.status_code == client.BAD_REQUEST
         assert not Item.select().exists()
 
+    def test_post_item_missing_field__fail(self):
+        item = TEST_ITEM.copy()
+        del item['price']
+        data = format_jsonapi_request('item', item)
+
+        resp = self.app.post('/items/', data=json.dumps(data),
+                             content_type='application/json')
+
+        assert resp.status_code == client.BAD_REQUEST
+        expected_result = EXPECTED_RESULTS['post_item_missing_field__fail']
+        assert json.loads(resp.data) == expected_result
+
     def test_get_items__success(self):
         Item.create(**TEST_ITEM)
         Item.create(**TEST_ITEM2)
@@ -156,6 +168,7 @@ class TestItems(TestCase):
 
     def test_patch_change1item__success(self):
         item = Item.create(**TEST_ITEM)
+
         post_data = format_jsonapi_request('item', {'name': 'new-name'})
         resp = self.app.patch('/items/{item_uuid}'.format(item_uuid=item.uuid),
                               data=json.dumps(post_data),
@@ -170,7 +183,8 @@ class TestItems(TestCase):
     def test_patch_allitems__success(self):
         item = Item.create(**TEST_ITEM)
         post_data = format_jsonapi_request('item', {
-            'name': 'new-name', 'price': 40.20,
+            'name': 'new-name',
+            'price': 40.20,
             'description': 'new-description',
             'availability': 2,
         })
@@ -179,7 +193,6 @@ class TestItems(TestCase):
                               content_type='application/json')
 
         assert resp.status_code == client.OK
-
         expected_result = EXPECTED_RESULTS['patch_allitems__success']
         assert json.loads(resp.data) == expected_result
 
