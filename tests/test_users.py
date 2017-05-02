@@ -60,7 +60,7 @@ class TestUser(TestCase):
 
         expected_result = patch_id(
             EXPECTED_RESULTS['post_new_user__success'],
-            User.get().user_id)
+            User.get().uuid)
 
         assert resp_user == expected_result
 

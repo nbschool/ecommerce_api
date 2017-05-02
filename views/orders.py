@@ -26,15 +26,15 @@ class OrdersHandler(Resource):
     @auth.login_required
     def post(self):
         """ Insert a new order."""
-        user = g.user
         res = request.get_json(force=True)
-        # Check that the order has an 'items' and 'delivery_address' attributes
-        # otherwise it's useless to continue.
-        for key in ('items', 'delivery_address'):
-            if not res['order'].get(key):
-                return None, BAD_REQUEST
 
-        res_items = res['order']['items']
+        isValid, errors = Order.validate_input(res)
+        if not isValid:
+            return errors, BAD_REQUEST
+
+        # Extract data to create the new order
+        res_items = res['data']['relationships']['items']['data']
+        res_address = res['data']['relationships']['delivery_address']['data']
 
         # Check that the items exist
         item_uuids = [res_item['item_uuid'] for res_item in res_items]
@@ -44,7 +44,7 @@ class OrdersHandler(Resource):
 
         # Check that the address exist
         try:
-            address = Address.get(Address.uuid == res['order']['delivery_address'])
+            address = Address.get(Address.address_id == res_address['id'])
         except Address.DoesNotExist:
             abort(BAD_REQUEST)
 
@@ -52,13 +52,14 @@ class OrdersHandler(Resource):
             try:
                 order = Order.create(
                     delivery_address=address,
-                    user=user,
+                    user=g.user,
                 )
 
                 for item in items:
                     for res_item in res_items:
-                        # if names match add item and quantity, once per res_item
-                        if str(item.uuid) == res_item['item_uuid']:
+                        # if names match add item and quantity, once per
+                        # res_item
+                        if str(item.uuid) == res_item['id']:
                             order.add_item(item, res_item['quantity'])
                             break
             except InsufficientAvailabilityException:
@@ -85,11 +86,12 @@ class OrderHandler(Resource):
         """ Modify a specific order. """
         res = request.get_json(force=True)
 
-        res_items = res['order'].get('items')
-        res_address = res['order'].get('delivery_address')
+        isValid, errors = Order.validate_input(res)
+        if not isValid:
+            return errors, BAD_REQUEST
 
-        if res_items is not None and len(res_items) == 0:
-            return None, BAD_REQUEST
+        res_items = res['data']['relationships']['items']['data']
+        res_address = res['data']['relationships']['delivery_address']['data']
 
         with database.transaction() as txn:
             try:
@@ -105,7 +107,7 @@ class OrderHandler(Resource):
                     abort(BAD_REQUEST)
 
             if res_items:
-                items_uuids = [e['item_uuid'] for e in res_items]
+                items_uuids = [e['id'] for e in res_items]
                 items_query = Item.select().where(Item.uuid << items_uuids)
                 items = {str(item.uuid): item for item in items_query}
 
@@ -114,7 +116,8 @@ class OrderHandler(Resource):
 
                 for res_item in res_items:
                     try:
-                        order.update_item(items[res_item['item_uuid']], res_item['quantity'])
+                        order.update_item(
+                            items[res_item['id']], res_item['quantity'])
                     except InsufficientAvailabilityException:
                         txn.rollback()
                         return None, BAD_REQUEST

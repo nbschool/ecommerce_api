@@ -12,13 +12,13 @@ from utils import get_image_folder
 
 random.seed(10485)
 
+
 def wrong_dump(data):
     """
     Give a wrong encoding (urlencode-like) to the given dictionary
     """
     return reduce(lambda x, y: "{}&{}".format(x, y), [
         "{}={}".format(k, v) for k, v in zip(data.keys(), data.values())])
-
 
 
 def add_user(email, password, id=None, first_name='John', last_name='Doe'):

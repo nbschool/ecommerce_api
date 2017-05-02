@@ -136,8 +136,7 @@ class TestAddresses(TestCase):
                          address="Via Bianchi 20")
 
         resp = open_with_auth(self.app, '/addresses/{}'.format(addr.uuid), 'PATCH',
-                              data=json.dumps(addr1),
-                              user.email, TEST_USER_PSW, data=json.dumps(
+                              user.email, TEST_USER_PSW, data=json.dumps(addr1),
                               content_type='application/json')
 
         assert resp.status_code == OK

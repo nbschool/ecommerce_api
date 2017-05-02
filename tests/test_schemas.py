@@ -40,11 +40,11 @@ class TestUserSchema(TestCase):
         )
 
         self.order1 = Order.create(delivery_address=self.addr1, user=self.user1,
-                                   order_id='4cefa833-2f45-4662-b2fc-083ddad4f7a3',
+                                   uuid='4cefa833-2f45-4662-b2fc-083ddad4f7a3',
                                    created_at=datetime(2017, 5, 1, 3, 5, 57),
                                    )
         self.order2 = Order.create(delivery_address=self.addr1, user=self.user1,
-                                   order_id='8d449938-5745-4489-ab32-89dc8178e347',
+                                   uuid='8d449938-5745-4489-ab32-89dc8178e347',
                                    created_at=datetime(2017, 5, 1, 11, 16, 25),
                                    )
 
@@ -114,13 +114,13 @@ class TestOrderSchema(TestCase):
             self.user, id='27e375f4-3d54-458c-91e4-d8a4fdf3b032',
         )
         self.item1 = Item.create(
-            item_id='25da606b-dbd3-45e1-bb23-ff1f84a5622a',
+            uuid='25da606b-dbd3-45e1-bb23-ff1f84a5622a',
             name='Item 1',
             description='Item 1 description',
             price=5.24,
         )
         self.item2 = Item.create(
-            item_id='08bd8de0-a4ac-459d-956f-cf6d8b8a7507',
+            uuid='08bd8de0-a4ac-459d-956f-cf6d8b8a7507',
             name='Item 2',
             description='Item 2 description',
             price=8,
@@ -129,7 +129,7 @@ class TestOrderSchema(TestCase):
     def test_order_json__success(self):
         order = Order.create(
             delivery_address=self.addr, user=self.user,
-            order_id='451b3bba-fe4d-470d-bf48-cb306c939bc6',
+            uuid='451b3bba-fe4d-470d-bf48-cb306c939bc6',
             created_at=datetime(2017, 5, 1, 9, 4, 47)
         ).add_item(self.item1, 2).add_item(self.item2, 5)
 
@@ -175,12 +175,12 @@ class TestOrderSchema(TestCase):
     def test_orders_list__success(self):
         order1 = Order.create(
             delivery_address=self.addr, user=self.user,
-            order_id='451b3bba-fe4d-470d-bf48-cb306c939bc6',
+            uuid='451b3bba-fe4d-470d-bf48-cb306c939bc6',
             created_at=datetime(2017, 5, 1, 9, 4, 47),
         ).add_item(self.item1)
         order2 = Order.create(
             delivery_address=self.addr, user=self.user,
-            order_id='27e375f4-3d54-458c-91e4-d8a4fdf3b032',
+            uuid='27e375f4-3d54-458c-91e4-d8a4fdf3b032',
             created_at=datetime(2017, 5, 1, 9, 4, 47),
         ).add_item(self.item2, 2)
 
