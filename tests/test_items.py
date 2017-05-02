@@ -128,7 +128,7 @@ class TestItems(TestCase):
     def test_patch_allitems_success(self):
         item = Item.create(**TEST_ITEM)
         resp = self.app.patch('/items/{item_id}'.format(item_id=item.item_id),
-                              data=json.dumps(**TEST_ITEM2),
+                              data=json.dumps({**TEST_ITEM2}),
                               content_type='application/json')
         assert resp.status_code == client.OK
         json_item = Item.get(Item.item_id == item.item_id).json()

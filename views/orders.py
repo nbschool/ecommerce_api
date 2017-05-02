@@ -8,6 +8,8 @@ from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST, UNAUTHO
 from flask import abort, request, g
 from auth import auth
 
+from exceptions import InsufficientAvailabilityException
+
 
 def serialize_order(order_obj):
     """
@@ -58,47 +60,37 @@ class OrdersHandler(Resource):
 
         res_items = res['order']['items']
 
-        # Check that the items exist by getting all the item names from the
-        # request and executing a get() request with Peewee
-        item_ids = list(map(lambda x: x['item_id'], res_items))
+        # Check that the items exist
+        item_ids = [res_item['item_id'] for res_item in res_items]
         items = Item.select().where(Item.item_id << item_ids)
-
         if items.count() != len(res_items):
             abort(BAD_REQUEST)
 
-        # check whether availabilities allow orders
-        if any(item.availability < res_item['quantity'] for item in items 
-                for res_item in res_items if item.item_id == res_item['item_id']):
-            return None, BAD_REQUEST
-        
-        # Check that the order has an 'items' and 'delivery_address' attributes
-        # otherwise it's useless to continue.
-        for i in ('items', 'delivery_address'):
-            if not res['order'].get(i):
-                return None, BAD_REQUEST
+        # Check whether availabilities allow orders
+        # if any(item.availability < res_item['quantity'] for item in items 
+        #         for res_item in res_items if item.item_id == res_item['item_id']):
+        #     return None, BAD_REQUEST
 
-        # Check that the address exist and check that the items exist by getting all the item names
-        # from the request and executing a get() request with Peewee
+        # Check that the address exist
         try:
-            items_ids = [e['item_id'] for e in res['order']['items']]
             address = Address.get(Address.address_id == res['order']['delivery_address'])
-            items = list(Item.select().where(Item.item_id << items_ids))
-            if len(items) != len(items_ids):
-                return None, BAD_REQUEST
         except Address.DoesNotExist:
             abort(BAD_REQUEST)
 
-        order = Order.create(
-            delivery_address=address,
-            user=user,
-        )
+        try:
+            order = Order.create(
+                delivery_address=address,
+                user=user,
+            )
 
-        for item in items:
-            for res_item in res_items:
-                # if names match add item and quantity, once per res_item
-                if item.item_id == res_item['item_id']:
-                    order.add_item(item, res_item['quantity'])
-                    break
+            for item in items:
+                for res_item in res_items:
+                    # if names match add item and quantity, once per res_item
+                    if str(item.item_id) == res_item['item_id']:
+                        order.add_item(item, res_item['quantity'])
+                        break
+        except InsufficientAvailabilityException:
+            return None, BAD_REQUEST
 
         return serialize_order(order), CREATED
 
@@ -128,9 +120,9 @@ class OrderHandler(Resource):
         try:
             order = Order.get(order_id=str(order_id))
             address = Address.get(Address.address_id == res['order']['delivery_address'])
-            items_ids = [res_item['item_id'] for res_item in res_items]
-            items = list(Item.select().where(Item.item_id << items_ids))
-            if len(items) != len(items_ids):
+            item_ids = [res_item['item_id'] for res_item in res_items]
+            items = list(Item.select().where(Item.item_id << item_ids))
+            if len(items) != len(item_ids):
                 return None, BAD_REQUEST
         except (Address.DoesNotExist, Order.DoesNotExist):
             return None, NOT_FOUND
@@ -148,16 +140,19 @@ class OrderHandler(Resource):
                 for res_item in res_items if item.item_id == res_item['item_id']):
             return None, BAD_REQUEST
 
-        # Clear the order of all items before adding the new items
-        # that came with the PATCH request
-        order.empty_order()
+        try:
+            # Clear the order of all items before adding the new items
+            # that came with the PATCH request
+            order.empty_order()
 
-        for item in items:
-            for res_item in res_items:
-                # if names match add item and quantity, once per res_item
-                if item.item_id == res_item['item_id']:
-                    order.add_item(item, res_item['quantity'])
-                    break
+            for item in items:
+                for res_item in res_items:
+                    # if names match add item and quantity, once per res_item
+                    if str(item.item_id) == res_item['item_id']:
+                        order.add_item(item, res_item['quantity'])
+                        break
+        except InsufficientAvailabilityException:
+            return None, BAD_REQUEST
 
         order.delivery_address = address
         order.save()

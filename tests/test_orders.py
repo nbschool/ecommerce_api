@@ -282,7 +282,8 @@ class TestOrders(TestCase):
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
-            description='svariati mariii'
+            description='svariati mariii',
+            availability=4
         )
         user_A = add_user('12345@email.com', TEST_USER_PSW)
         addr_A = add_address(user=user_A)
@@ -361,13 +362,15 @@ class TestOrders(TestCase):
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
-            description='svariati mariii'
+            description='svariati mariii',
+            availability=2
         )
         item2 = Item.create(
             item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
-            description='svariati GINIIIII'
+            description='svariati GINIIIII',
+            availability=1
         )
 
         user_A = add_user('12345@email.com', TEST_USER_PSW)
@@ -407,13 +410,15 @@ class TestOrders(TestCase):
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
-            description='svariati mariii'
+            description='svariati mariii',
+            availability=5
         )
         item2 = Item.create(
             item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
-            description='svariati GINIIIII'
+            description='svariati GINIIIII',
+            availability=1
         )
 
         user_A = add_user('12345@email.com', TEST_USER_PSW)
@@ -459,7 +464,8 @@ class TestOrders(TestCase):
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
-            description='svariati mariii'
+            description='svariati mariii',
+            availability=2
         )
         user = add_user('12345@email.com', TEST_USER_PSW)
         addr = add_address(user=user)
@@ -517,6 +523,7 @@ class TestOrders(TestCase):
 
     def test_update_order__failure_availability(self):
         user_A = add_user('12345@email.com', TEST_USER_PSW)
+        addr_A = add_address(user=user_A)
         item = Item.create(
             item_id=uuid4(),
             name='mario',
@@ -525,7 +532,7 @@ class TestOrders(TestCase):
             availability=2
         )
         order = Order.create(
-            delivery_address='Via Rossi 12',
+            delivery_address=addr_A,
             user=user_A
         )
         OrderItem.create(
@@ -539,14 +546,15 @@ class TestOrders(TestCase):
             "order": {
                 "order_id": str(order.order_id),
                 'items': [
-                    {'name': 'mario', 'price': 30.30, 'quantity': 3},
+                    {'item_id': 'dfa6cce8-2740-4384-aeed-467e5d4798e0',
+                        'price': 30.30, 'quantity': 3},
                 ],
-                'delivery_address': 'Via Verdi 20'
+                'delivery_address': addr_A.json()["address_id"]
             }
         }
 
         path = 'orders/{}'.format(order.order_id)
-        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PUT',
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(update_order))
 
@@ -581,13 +589,15 @@ class TestOrders(TestCase):
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
-            description='svariati mariii'
+            description='svariati mariii',
+            availability=5
         )
         item2 = Item.create(
             item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
-            description='svariati GINIIIII'
+            description='svariati GINIIIII',
+            availability=1
         )
 
         user_A = add_user('12345@email.com', TEST_USER_PSW)
@@ -660,7 +670,8 @@ class TestOrders(TestCase):
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
-            description='svariati mariii'
+            description='svariati mariii',
+            availability=2
         )
         order1 = Order.create(delivery_address=addr_A, user=user_A)
         order1.add_item(item1, 2)
@@ -686,7 +697,8 @@ class TestOrders(TestCase):
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
-            description='svariati mariii'
+            description='svariati mariii',
+            availability=2
         )
         order1 = Order.create(delivery_address=addr_A, user=user_A)
         order1.add_item(item1, 2)
