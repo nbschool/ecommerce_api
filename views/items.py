@@ -62,14 +62,23 @@ class ItemHandler(Resource):
             return None, client.NOT_FOUND
 
         request_data = request.get_json()
-        check_required_fields(
-            request_data=request_data,
-            required_fields=['name', 'price', 'description', 'availability'])
+        name = request_data.get('name')
+        price = request_data.get('price')
+        description = request_data.get('description')
+        availability = request_data.get('availability')
 
-        obj.name = request_data['name']
-        obj.price = request_data['price']
-        obj.description = request_data['description']
-        obj.availability = request_data['availability']
+        if name and name != obj.name:
+            obj.name = request_data['name']
+
+        if price and price != obj.price:
+            obj.price = request_data['price']
+
+        if description and description != obj.description:
+            obj.description = request_data['description']
+
+        if availability and availability != obj.availability:
+            obj.availability = request_data['availability']
+
         obj.save()
 
         return obj.json(), client.OK

@@ -60,15 +60,15 @@ class OrdersHandler(Resource):
 
         # Check that the items exist by getting all the item names from the
         # request and executing a get() request with Peewee
-        item_names = list(map(lambda x: x['name'], res_items))
-        items = Item.select().where(Item.name << item_names)
+        item_ids = list(map(lambda x: x['item_id'], res_items))
+        items = Item.select().where(Item.item_id << item_ids)
 
         if items.count() != len(res_items):
             abort(BAD_REQUEST)
 
         # check whether availabilities allow orders
         if any(item.availability < res_item['quantity'] for item in items 
-                for res_item in res_items if item.name == res_item['name']):
+                for res_item in res_items if item.item_id == res_item['item_id']):
             return None, BAD_REQUEST
         
         # Check that the order has an 'items' and 'delivery_address' attributes
@@ -80,14 +80,12 @@ class OrdersHandler(Resource):
         # Check that the address exist and check that the items exist by getting all the item names
         # from the request and executing a get() request with Peewee
         try:
-            item_names = [e['name'] for e in res['order']['items']]
-            # FIXME: This look up just one item, not all of them, so it does
-            # not work for testing that ALL the requested items exist
-            # TODO: Use a query to get all the items and use the result to
-            # add the items to the order instead of querying again below
+            items_ids = [e['item_id'] for e in res['order']['items']]
             address = Address.get(Address.address_id == res['order']['delivery_address'])
-            Item.get(Item.name << item_names)
-        except (Address.DoesNotExist, Item.DoesNotExist):
+            items = list(Item.select().where(Item.item_id << items_ids))
+            if len(items) != len(items_ids):
+                return None, BAD_REQUEST
+        except Address.DoesNotExist:
             abort(BAD_REQUEST)
 
         order = Order.create(
@@ -98,7 +96,7 @@ class OrdersHandler(Resource):
         for item in items:
             for res_item in res_items:
                 # if names match add item and quantity, once per res_item
-                if item.name == res_item['name']:
+                if item.item_id == res_item['item_id']:
                     order.add_item(item, res_item['quantity'])
                     break
 
@@ -122,8 +120,6 @@ class OrderHandler(Resource):
         """ Modify a specific order. """
         res = request.get_json()
         res_items = res['order']['items']
-        item_names = [e for e in res_items]
-        items = Item.select().where(Item.name << item_names)
 
         for key in ('items', 'delivery_address', 'order_id'):
             if not res['order'].get(key):
@@ -132,6 +128,10 @@ class OrderHandler(Resource):
         try:
             order = Order.get(order_id=str(order_id))
             address = Address.get(Address.address_id == res['order']['delivery_address'])
+            items_ids = [res_item['item_id'] for res_item in res_items]
+            items = list(Item.select().where(Item.item_id << items_ids))
+            if len(items) != len(items_ids):
+                return None, BAD_REQUEST
         except (Address.DoesNotExist, Order.DoesNotExist):
             return None, NOT_FOUND
 
@@ -144,21 +144,20 @@ class OrderHandler(Resource):
                     UNAUTHORIZED)
 
         # check whether availabilities allow order update
-        if any(item.availability < res_items[item.name]['quantity']
-                for item in items):
-            return None, BAD_REQUEST
-        # check whether availabilities allow order update
         if any(item.availability < res_item['quantity'] for item in items 
-                for res_item in res_items if item.name == res_item['name']):
+                for res_item in res_items if item.item_id == res_item['item_id']):
             return None, BAD_REQUEST
 
         # Clear the order of all items before adding the new items
         # that came with the PATCH request
         order.empty_order()
 
-        for name, item in res_items.items():
-            order.add_item(
-                Item.get(Item.name == name), item['quantity'])
+        for item in items:
+            for res_item in res_items:
+                # if names match add item and quantity, once per res_item
+                if item.item_id == res_item['item_id']:
+                    order.add_item(item, res_item['quantity'])
+                    break
 
         order.delivery_address = address
         order.save()
