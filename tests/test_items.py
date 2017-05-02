@@ -11,40 +11,40 @@ from models import Item
 from tests.test_case import TestCase
 
 TEST_ITEM = {
-    "item_id": "429994bf-784e-47cc-a823-e0c394b823e8",
-    "name": "mario",
-    "price": 20.20,
-    "description": "svariati mariii",
-    "availability": 1,
+    'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+    'name': 'mario',
+    'price': 20.20,
+    'description': 'svariati mariii',
+    'availability': 1,
 }
 TEST_ITEM2 = {
-    "item_id": "577ad826-a79d-41e9-a5b2-7955bcf03499",
-    "name": "GINO",
-    "price": 30.20,
-    "description": "svariati GINIIIII",
-    "availability": 2,
+    'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+    'name': 'GINO',
+    'price': 30.20,
+    'description': 'svariati GINIIIII',
+    'availability': 2,
 }
 TEST_ITEM_WRONG = {
-    "item_id": "19b4c6dc-e393-4e76-bf0f-72559dd5d32e",
-    "name": "",
-    "price": 30.20,
-    "description": "svariati GINIIIII",
-    "availability": 3,
+    'item_id': '19b4c6dc-e393-4e76-bf0f-72559dd5d32e',
+    'name': '',
+    'price': 30.20,
+    'description': 'svariati GINIIIII',
+    'availability': 3,
 }
 TEST_ITEM_PRECISION = {
-    "item_id": "68e587f7-3982-4b6a-a882-dd43b89134fe",
-    "name": "Anna Pannocchia",
-    "price": 30.222222,
-    "description": "lorem ipsum",
-    "availability": 1,
+    'item_id': '68e587f7-3982-4b6a-a882-dd43b89134fe',
+    'name': 'Anna Pannocchia',
+    'price': 30.222222,
+    'description': 'lorem ipsum',
+    'availability': 1,
 }
 
 TEST_ITEM_AVAILABILITY = {
-    "item_id": "68e587f7-3982-4b6a-a882-dd43b89134fe",
-    "name": "Anna Pannocchia",
-    "price": 30.00,
-    "description": "lorem ipsum",
-    "availability": -1,
+    'item_id': '68e587f7-3982-4b6a-a882-dd43b89134fe',
+    'name': 'Anna Pannocchia',
+    'price': 30.00,
+    'description': 'lorem ipsum',
+    'availability': -1,
 }
 
 WRONG_UUID = '04f2f213-1a0f-443d-a5ab-79097ba725ba'
@@ -113,12 +113,11 @@ class TestItems(TestCase):
     def test_patch_change1item__success(self):
         item = Item.create(**TEST_ITEM)
         resp = self.app.patch('/items/{item_id}'.format(item_id=item.item_id),
-                              data=json.dumps({'name': TEST_ITEM2['name']}),
+                              data=json.dumps({'name': 'new-name'}),
                               content_type='application/json')
         assert resp.status_code == client.OK
-        json_item = Item.select().where(
-            Item.item_id == item.item_id).get().json()
-        assert json_item['name'] == TEST_ITEM2['name']
+        json_item = Item.get(Item.item_id == item.item_id).json()
+        assert json_item['name'] == 'new-name'
         assert json_item['price'] == TEST_ITEM['price']
         assert json_item['description'] == TEST_ITEM['description']
         assert json_item['availability'] == TEST_ITEM['availability']
@@ -128,13 +127,15 @@ class TestItems(TestCase):
     def test_patch_allitems_success(self):
         item = Item.create(**TEST_ITEM)
         resp = self.app.patch('/items/{item_id}'.format(item_id=item.item_id),
-                              data=json.dumps({**TEST_ITEM2}),
+                              data=json.dumps(
+                                  {'name': 'new-name', 'price': 40.20,
+                                   'description': 'new-description'}),
                               content_type='application/json')
         assert resp.status_code == client.OK
         json_item = Item.get(Item.item_id == item.item_id).json()
-        assert json_item['name'] == TEST_ITEM2['name']
-        assert json_item['price'] == TEST_ITEM2['price']
-        assert json_item['description'] == TEST_ITEM2['description']
+        assert json_item['name'] == 'new-name'
+        assert json_item['price'] == 40.20
+        assert json_item['description'] == 'new-description'
         assert json_item['item_id'] == item.item_id
         assert json.loads(resp.data) == json_item
 
