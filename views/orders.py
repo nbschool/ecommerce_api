@@ -9,7 +9,7 @@ from flask import abort, g, request
 from flask_restful import Resource
 
 from auth import auth
-from models import Address, Item, Order
+from models import database, Address, Item, Order
 from utils import generate_response
 
 from exceptions import InsufficientAvailabilityException
