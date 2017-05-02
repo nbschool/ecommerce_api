@@ -55,7 +55,7 @@ class AddressHandler(Resource):
             return None, NOT_FOUND
 
     @auth.login_required
-    def put(self, address_id):
+    def patch(self, address_id):
         user = g.user
 
         try:
@@ -65,15 +65,27 @@ class AddressHandler(Resource):
 
         res = request.get_json()
 
-        check_required_fields(
-            request_data=res,
-            required_fields=['country', 'city', 'post_code', 'address', 'phone'])
+        country = res.get('country')
+        city = res.get('city')
+        post_code = res.get('post_code')
+        address = res.get('address')
+        phone = res.get('phone')
 
-        obj.country = res['country']
-        obj.city = res['city']
-        obj.post_code = res['post_code']
-        obj.address = res['address']
-        obj.phone = res['phone']
+        if country and country != obj.country:
+            obj.country = res['country']
+
+        if city and city != obj.city:
+            obj.city = res['city']
+
+        if post_code and post_code != obj.post_code:
+            obj.post_code = res['post_code']
+
+        if address and address != obj.address:
+            obj.address = res['address']
+
+        if phone and phone != obj.phone:
+            obj.phone = res['phone']
+
         obj.save()
 
         return obj.json(), OK
