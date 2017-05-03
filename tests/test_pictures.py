@@ -200,4 +200,3 @@ class TestPictures(TestCase):
         assert resp.status_code == client.NO_CONTENT
         assert not Picture.select().exists()
         assert Item.select().exists()
-        assert item.json() == TEST_ITEM
