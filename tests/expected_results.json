@@ -83,6 +83,26 @@
                 "self": "/addresses/5e67e12a-20e9-4bf9-9254-5ef946a1a2e7"
             }
         },
+        "create_address__failure_missing_field": {
+            "errors": [
+                {
+                    "detail": "Missing data for required field.",
+                    "source": {
+                        "pointer": "/data/attributes/country"
+                    }
+                }
+            ]
+        },
+        "create_address__failure_empty_field": {
+            "errors": [
+                {
+                    "detail": "Field cannot be blank",
+                    "source": {
+                        "pointer": "/data/attributes/country"
+                    }
+                }
+            ]
+        },
         "get_address": {
             "data": {
                 "type": "address",
