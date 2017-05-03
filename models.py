@@ -44,17 +44,6 @@ class Item(BaseModel):
     description = TextField()
     availability = IntegerField()
 
-    def is_available(self):
-        return self.availability > 0
-
-    def __str__(self):
-        return '{}, {}, {}, {}, {}'.format(
-            self.item_id,
-            self.name,
-            self.price,
-            self.description,
-            self.availability)
-
     def json(self):
         return {
             'item_id': str(self.item_id),
