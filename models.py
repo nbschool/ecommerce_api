@@ -198,9 +198,6 @@ class Order(BaseModel):
         :param item Item: instance of models.Item
         """
 
-        if quantity > item.availability:
-            raise InsufficientAvailabilityException(item, quantity)
-
         for orderitem in self.order_items:
             # Looping all the OrderItem related to this order, if one with the
             # same item is found we update that row.
@@ -283,6 +280,10 @@ class OrderItem(BaseModel):
         Add one item to the OrderItem, increasing the quantity count and
         recalculating the subtotal value for this item(s)
         """
+
+        if quantity > self.item.availability:
+            raise InsufficientAvailabilityException(self.item, quantity)
+
         self.quantity += quantity
         self._calculate_subtotal()
         self.save()
