@@ -9,30 +9,6 @@ from flask import abort, request, g
 from auth import auth
 
 
-def serialize_order(order_obj):
-    """
-    From a Order object create a json-serializable dict with all the order
-    information, including all the OrderItem(s) - and related Item(s) -
-    properties.
-    """
-
-    order = order_obj.json()
-    order['items'] = []
-
-    for orderitem in order_obj.order_items:
-        # serialize the Item(s) for the order, adding the info stored into
-        # the OrderItem table related to the order/item, into the 'items'
-        # property of the return value
-        order['items'].append({
-            'quantity': orderitem.quantity,
-            'price': float(orderitem.item.price),
-            'subtotal': float(orderitem.subtotal),
-            'name': orderitem.item.name,
-            'description': orderitem.item.description
-        })
-    return order
-
-
 class OrdersHandler(Resource):
     """ Orders endpoint. """
 
@@ -41,7 +17,7 @@ class OrdersHandler(Resource):
         retval = []
 
         for order in Order.select():
-            retval.append(serialize_order(order))
+            retval.append(order.json(include_items=True))
 
         return retval, OK
 
@@ -76,7 +52,7 @@ class OrdersHandler(Resource):
             item = next(i for i in items if str(i.item_id) == res_item['item_id'])
             order.add_item(item, res_item['quantity'])
 
-        return serialize_order(order), CREATED
+        return order.json(include_items=True), CREATED
 
 
 class OrderHandler(Resource):
@@ -89,7 +65,7 @@ class OrderHandler(Resource):
         except Order.DoesNotExist:
             return None, NOT_FOUND
 
-        return serialize_order(order), OK
+        return order.json(include_items=True), OK
 
     @auth.login_required
     def patch(self, order_id):
@@ -129,7 +105,7 @@ class OrderHandler(Resource):
         order.delivery_address = address
         order.save()
 
-        return serialize_order(order), OK
+        return order.json(include_items=True), OK
 
     @auth.login_required
     def delete(self, order_id):
