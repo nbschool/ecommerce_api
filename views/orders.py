@@ -87,6 +87,8 @@ class OrderHandler(Resource):
                 abort(NOT_FOUND)
             else:
                 order.delivery_address = address
+        else:
+            return None, BAD_REQUEST
 
         if res_items:
             items_ids = [e['item_id'] for e in res_items]
@@ -98,6 +100,8 @@ class OrderHandler(Resource):
             for res_item in res_items:
                 item = next(i for i in items if str(i.item_id) == res_item['item_id'])
                 order.update_item(item, res_item['quantity'])
+        else:
+            return None, BAD_REQUEST
 
         # get the user from the flask.g global object registered inside the
         # auth.py::verify() function, called by @auth.login_required decorator
