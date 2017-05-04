@@ -1237,7 +1237,82 @@
                 }
             ]
         },
-        "items": {},
-        "orderitems": {}
+        "items": {
+            "item_validate_input__fail": {
+                "errors": [
+                    {
+                        "detail": "Field cannot be blank",
+                        "source": {
+                            "pointer": "/data/attributes/description"
+                        }
+                    },
+                    {
+                        "detail": "Field cannot be blank",
+                        "source": {
+                            "pointer": "/data/attributes/name"
+                        }
+                    },
+                    {
+                        "detail": "Must be at least 0.",
+                        "source": {
+                            "pointer": "/data/attributes/price"
+                        }
+                    }
+                ]
+            },
+            "get_item_json__success": {
+                "data": {
+                    "type": "item",
+                    "attributes": {
+                        "name": "Item 1",
+                        "price": 5.24,
+                        "description": "Item 1 description"
+                    },
+                    "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a",
+                    "links": {
+                        "self": "/items/25da606b-dbd3-45e1-bb23-ff1f84a5622a"
+                    }
+                },
+                "links": {
+                    "self": "/items/25da606b-dbd3-45e1-bb23-ff1f84a5622a"
+                }
+            },
+            "get_items_list__success": [
+                {
+                    "data": {
+                        "type": "item",
+                        "attributes": {
+                            "name": "Item 1",
+                            "price": 5.24,
+                            "description": "Item 1 description"
+                        },
+                        "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a",
+                        "links": {
+                            "self": "/items/25da606b-dbd3-45e1-bb23-ff1f84a5622a"
+                        }
+                    },
+                    "links": {
+                        "self": "/items/25da606b-dbd3-45e1-bb23-ff1f84a5622a"
+                    }
+                },
+                {
+                    "data": {
+                        "type": "item",
+                        "attributes": {
+                            "name": "Item 2",
+                            "price": 8.0,
+                            "description": "Item 2 description"
+                        },
+                        "id": "08bd8de0-a4ac-459d-956f-cf6d8b8a7507",
+                        "links": {
+                            "self": "/items/08bd8de0-a4ac-459d-956f-cf6d8b8a7507"
+                        }
+                    },
+                    "links": {
+                        "self": "/items/08bd8de0-a4ac-459d-956f-cf6d8b8a7507"
+                    }
+                }
+            ]
+        }
     }
 }
