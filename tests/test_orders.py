@@ -271,6 +271,52 @@ class TestOrders(TestCase):
         assert resp.status_code == BAD_REQUEST
         assert len(Order.select()) == 0
 
+    def test_update_order__item_quantity_zero(self):
+        # TODO
+        item1 = Item.create(
+            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii'
+        )
+        item2 = Item.create(
+            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            name='GINO',
+            price=30.20,
+            description='svariati GINIIIII'
+        )
+
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
+        addr_A = add_address(user=user_A)
+        addr_B = add_address(user=user_A)
+
+        order1 = Order.create(delivery_address=addr_A, user=user_A)
+        order1.add_item(item1, 2).add_item(item2)
+
+        order_id = str(order1.order_id)
+
+        order = {
+            "order": {
+                "order_id": order_id,
+                'items': [
+                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                     'price': 20.0, 'quantity': 0},
+                ],
+                'delivery_address': addr_B.json()["address_id"],
+                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+            }
+        }
+        path = 'orders/{}'.format(order1.order_id)
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
+                              '12345@email.com', TEST_USER_PSW, 'application/json',
+                              json.dumps(order))
+        assert resp.status_code == OK
+        resp_order = Order.get(order_id=order1.order_id).json(include_items=True)
+        assert resp_order['order_id'] == order['order']['order_id']
+        assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
+        assert len(resp_order['items']) == 1
+        assert str(OrderItem.get().item.item_id) == item2.item_id
+
     def test_update_order__success(self):
         item1 = Item.create(
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
