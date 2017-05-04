@@ -4,7 +4,6 @@ and supply a new one db with new down-to-earth data.
 """
 
 from peewee import SqliteDatabase
-# from models import User, Item, Order, OrderItem, Address
 from faker import Factory
 from colorama import init, Fore, Style
 import sys
