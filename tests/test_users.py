@@ -2,8 +2,8 @@
 Test suite for User(s) resources.
 """
 
-from models import User
-from tests.test_utils import open_with_auth, add_user
+from models import User, Address, Item, Order
+from tests.test_utils import open_with_auth, add_user, add_address
 from tests.test_case import TestCase
 from http.client import (OK, NOT_FOUND, NO_CONTENT, BAD_REQUEST,
                          CREATED, CONFLICT, UNAUTHORIZED)
@@ -128,6 +128,41 @@ class TestUser(TestCase):
                               email, TEST_USER_PSW, None, None)
         assert resp.status_code == NO_CONTENT
         assert User.select().count() == 0
+
+    def test_delete_user__cascade(self):
+        Item.create(
+            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii'
+        )
+        Item.create(
+            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            name='GINO',
+            price=30.20,
+            description='svariati GINIIIII'
+        )
+        email = 'mail@email.it'
+        user = add_user(email, TEST_USER_PSW)
+        user1 = add_user('mail2@hotmail.com', TEST_USER_PSW)
+        addr = add_address(user=user)
+        addr1 = add_address(user=user1)
+        Order.create(delivery_address=addr, user=user)
+        order1 = Order.create(delivery_address=addr1, user=user1)
+
+        user_path = 'users/{}'.format(user.user_id)
+        resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
+                              email, TEST_USER_PSW, None, None)
+        assert resp.status_code == NO_CONTENT
+        assert Address.select().count() == 1
+        assert Order.select().count() == 1
+        assert User.select().count() == 1
+        addr2 = Address.get()
+        assert addr2 == addr1
+        order2 = Order.get()
+        assert order2 == order1
+        user2 = User.get()
+        assert user2 == user1
 
     def test_delete_user_dont_exists__fail(self):
         user = add_user(None, TEST_USER_PSW)
