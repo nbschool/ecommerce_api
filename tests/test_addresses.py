@@ -157,7 +157,7 @@ class TestAddresses(TestCase):
         expected_result = EXPECTED_RESULTS['put_address__success']
         # Check that the response data is what is expected and is also
         # the same as what has ben actually saved
-        assert json.loads(resp.data) == expected_result == upd_addr
+        assert json.loads(resp.data) == expected_result == json.loads(upd_addr)
 
     def test_patch_address__wrong_uuid(self):
         user = add_user('mariorossi@gmail.com', '123')

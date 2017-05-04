@@ -46,9 +46,6 @@ class BaseModel(Model):
         parsed, errors = self._schema.jsonapi(self, include_data)
         return parsed
 
-    def serialize(self, include_data=[]):
-        return self._schema.serialize(self, include_data)
-
     @classmethod
     def validate_input(cls, data, partial=False):
         return cls._schema.validate_input(data, partial=partial)
