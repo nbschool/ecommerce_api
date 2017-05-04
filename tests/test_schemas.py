@@ -10,7 +10,7 @@ from datetime import datetime
 import simplejson as json
 
 from models import Item, Order, Address
-from schemas import OrderSchema, UserSchema, AddressSchema
+from schemas import OrderSchema, UserSchema, AddressSchema, ItemSchema
 from tests.test_case import TestCase
 from tests.test_utils import _test_res_sort_included as sort_included
 from tests.test_utils import _test_res_sort_errors as sort_errors
@@ -27,6 +27,7 @@ EXPECTED_RESULTS = get_expected_results('schemas')
 EXPECTED_ORDERS = EXPECTED_RESULTS['orders']
 EXPECTED_USERS = EXPECTED_RESULTS['users']
 EXPECTED_ADDRESSES = EXPECTED_RESULTS['addresses']
+EXPECTED_ITEMS = EXPECTED_RESULTS['items']
 
 
 class TestUserSchema(TestCase):
@@ -282,15 +283,54 @@ class TestAddressSchema(TestCase):
 
 
 class TestItemSchema(TestCase):
+    def setup_method(self):
+        super(TestItemSchema, self).setup_method()
+        self.data = {
+            'name': 'Test item',
+            'price': 10.25,
+            'description': 'Test item description'
+        }
+        self.item1 = Item.create(
+            item_id='25da606b-dbd3-45e1-bb23-ff1f84a5622a',
+            name='Item 1',
+            description='Item 1 description',
+            price=5.24,
+        )
+        self.item2 = Item.create(
+            item_id='08bd8de0-a4ac-459d-956f-cf6d8b8a7507',
+            name='Item 2',
+            description='Item 2 description',
+            price=8,
+        )
+
     def test_item_validate_input__success(self):
-        pass
+        post_data = format_jsonapi_request('item', self.data)
+        isValid, errors = ItemSchema.validate_input(post_data)
+
+        assert isValid is True
+        assert errors == {}
 
     def test_item_validate_input__fail(self):
-        # TODO: Test validation rules for required, empty fields and >=1 price.
-        pass
+        data = {
+            'name': '',         # not empty
+            'price': -2,        # more than 0
+            'description': ''   # not empty
+        }
+        post_data = format_jsonapi_request('item', data)
+        isValid, errors = ItemSchema.validate_input(post_data)
+
+        assert isValid is False
+        expected_result = EXPECTED_ITEMS['item_validate_input__fail']
+        assert sort_errors(errors) == expected_result
 
     def test_get_item_json__success(self):
-        pass
+        data, errors = ItemSchema.jsonapi(self.item1)
 
-    def test_get_user_items_list__success(self):
-        pass
+        assert errors == {}
+        expected_result = EXPECTED_ITEMS['get_item_json__success']
+        assert json.loads(data) == expected_result
+
+    def test_get_items_list__success(self):
+        data = ItemSchema.jsonapi_list([self.item1, self.item2])
+        expected_result = EXPECTED_ITEMS['get_items_list__success']
+        assert json.loads(data) == expected_result
