@@ -332,6 +332,9 @@ class OrderItem(BaseModel):
         return quantity
 
     def get_diff(self, quantity):
+        """
+        Return the difference between the given quantity and the self-quantity.
+        """
         return quantity - self.quantity
 
     def _calculate_subtotal(self):
