@@ -4,12 +4,13 @@ Tests run with no flask involvment and are used to check validation
 of inputs (post/put request data) and output from the Schemas dump method, that
 will be used as return value for Flask-Restful endpoint handlers.
 """
+import copy
 from datetime import datetime
 
 import simplejson as json
 
-from models import Item, Order
-from schemas import OrderSchema, UserSchema
+from models import Item, Order, Address
+from schemas import OrderSchema, UserSchema, AddressSchema
 from tests.test_case import TestCase
 from tests.test_utils import _test_res_sort_included as sort_included
 from tests.test_utils import _test_res_sort_errors as sort_errors
@@ -25,6 +26,7 @@ USER_TEST_DICT = {
 EXPECTED_RESULTS = get_expected_results('schemas')
 EXPECTED_ORDERS = EXPECTED_RESULTS['orders']
 EXPECTED_USERS = EXPECTED_RESULTS['users']
+EXPECTED_ADDRESSES = EXPECTED_RESULTS['addresses']
 
 
 class TestUserSchema(TestCase):
@@ -211,3 +213,91 @@ class TestOrderSchema(TestCase):
         expected_result = EXPECTED_ORDERS['order_validate_fields__fail']
         assert sort_errors(errors) == expected_result
 
+
+class TestAddressSchema(TestCase):
+    def setup_method(self):
+        super(TestAddressSchema, self).setup_method()
+        self.data = {
+            'country': 'Italy',
+            'city': 'Florence',
+            'post_code': '50100',
+            'address': 'Via dei matti 0',
+            'phone': '0051234567',
+            'relationships': {
+                'user': {'type': 'user', 'id': '9630b105-ca99-4a27-a51d-ab3430bf52d1'}
+            }
+        }
+        self.user = add_user(email='e@mail.com', password='123',
+                             id='9630b105-ca99-4a27-a51d-ab3430bf52d1')
+        self.addr = add_address(self.user,
+                                id='943d754e-5826-4d5c-b878-47edc478b789')
+
+    def test_address_validate_input__success(self):
+        post_data = format_jsonapi_request('address', self.data)
+        isValid, errors = AddressSchema.validate_input(post_data)
+
+        assert isValid is True
+        assert errors == {}
+
+    def test_address_validate_input__fail(self):
+        data = copy.deepcopy(self.data)
+        data['country'] = ''
+        del data['relationships']['user']
+
+        post_data = format_jsonapi_request('address', data)
+        isValid, errors = AddressSchema.validate_input(post_data)
+
+        assert isValid is False
+        expected_result = EXPECTED_ADDRESSES['address_validate_input__fail']
+        assert sort_errors(errors) == expected_result
+
+    def test_get_address_json__success(self):
+
+        data, errors = AddressSchema.jsonapi(self.addr)
+
+        assert errors == {}
+        assert type(data) is str
+
+        expected_result = EXPECTED_ADDRESSES['get_address_json__success']
+        assert json.loads(data) == expected_result
+
+    def test_address_json_include_user__success(self):
+        data, errors = AddressSchema.jsonapi(self.addr, include_data=['user'])
+
+        assert errors == {}
+        assert type(data) is str
+
+        expected_result = EXPECTED_ADDRESSES['get_address_json_include_user__success']
+        assert json.loads(data) == expected_result
+
+    def test_get_addresses_list__success(self):
+        add_address(
+            self.user, id='4373d5d7-cae5-42bc-b218-d6fc6d18626f')
+
+        addr_list = [a for a in Address.select()]
+        data = AddressSchema.jsonapi_list(addr_list)
+
+        expected_result = EXPECTED_ADDRESSES['get_addresses_list__success']
+        assert json.loads(data) == expected_result
+
+
+class TestItemSchema(TestCase):
+    def test_validate_input__success(self):
+        pass
+
+    def test_item_validate_input_rules__fail(self):
+        # TODO: Test validation rules for required, empty fields and >=1 price.
+        pass
+
+    def test_get_item_json__success(self):
+        pass
+
+    def test_item_include_user__success(self):
+        pass
+
+    def test_get_user_items_list__success(self):
+        pass
+
+
+class testOrderItemSchema(TestCase):
+    pass
