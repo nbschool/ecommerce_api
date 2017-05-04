@@ -7,9 +7,7 @@ from peewee import SqliteDatabase
 from models import User, Item, Order, OrderItem, Address
 from faker import Factory
 from colorama import init, Fore, Style
-import os
 import sys
-import sqlite3
 import glob
 import random
 
@@ -218,30 +216,6 @@ def good_bye(word, default='has'):
     sys.exit()
 
 
-def remove_db():
-    print(WARNING_DELETE)
-    print(Fore.RED + Style.BRIGHT + """
-          *************************************************************
-          *   ARE YOU SURE?!? (You are one step to delete your db).   *
-          *************************************************************
-          """)
-    path = get_databases()
-    print('Your database is [{}]'.format(path[0]), end='\n')
-    choice_a_db = input(Fore.WHITE + Style.BRIGHT +
-                        'Write the name of database to delete\n' +
-                        'or hit [ENTER] to exit without changes. >' +
-                        Fore.RED + Style.BRIGHT + ' ')
-    if choice_a_db == '':
-        good_bye('deleted', default='hasn\'t')
-    if choice_a_db == path[0]:
-        os.remove(path[0])
-        good_bye('deleted')
-    if choice_a_db != path[0]:
-        print(Fore.RED + Style.BRIGHT +
-              'ERROR: You typed [{}] instead of [{}]'.format(choice_a_db, path[0]))
-        good_bye('deleted', default='hasn\'t')
-
-
 def overwrite_db():
     print(WARNING_OVERWRITE, '\n')
     print('Are you sure to overwrite?')
@@ -256,6 +230,7 @@ def overwrite_db():
         good_bye('overwritten')
     if selct == '':
         good_bye('deleted', default='hasn\'t')
+
 
 def main():
 
@@ -278,8 +253,6 @@ def main():
             overwrite_db()
         if choice == '2':
             write_db()
-        if choice == '3':
-                remove_db()
         if choice is '':
             good_bye('change', default='hasn\'t')
         else:
