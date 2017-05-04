@@ -160,6 +160,8 @@ def write_db():
     Given the SEED 9623954 the first user email is
     'fatima.caputo@tiscali.it', and its password is '9J0.'
     """
+    global User, Item, Order, OrderItem, Address
+    from models import User, Item, Order, OrderItem, Address
     user_creator(10)
     address_creator(10)
     item_creator(10)
@@ -204,6 +206,8 @@ def good_bye(word, default='has'):
 
 
 def overwrite_db():
+    global User, Item, Order, OrderItem, Address
+    from models import User, Item, Order, OrderItem, Address
     print(WARNING_OVERWRITE, '\n')
     print('Are you sure to overwrite?')
     selct = input('If YES press(1) or [ENTER] to exit without change. >'
@@ -233,7 +237,7 @@ def main():
         if choice == '':
             good_bye('be created', default='hasn\'t')
     if len(list_db) != 0:
-        print('You have already a database.')
+        print(Fore.YELLOW + Style.BRIGHT + 'You have already a database.')
         print(MENU_TEXT)
         choice = input(Fore.YELLOW + Style.BRIGHT + ' > ').strip()
         if choice == '1':
