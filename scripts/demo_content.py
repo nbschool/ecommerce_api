@@ -15,7 +15,7 @@ User = None
 Address = None
 Item = None
 Order = None
-OrderItem = None 
+OrderItem = None
 
 
 init(autoreset=True)
@@ -70,12 +70,14 @@ class InsertionCall:
         self.lucky_num = self.obj.random_pick()
         self.insert = table.select().where(table.id == self.lucky_num).get()
 
+
 def set_db(database):
     Order._meta.database = database
     Item._meta.database = database
     OrderItem._meta.database = database
     User._meta.database = database
     Address._meta.database = database
+
 
 def user_creator(num_user=1):
     """Create users from an Italian-like context. Due to param in factory create 'it_iT'."""
@@ -95,6 +97,7 @@ def user_creator(num_user=1):
             password=User.hash_password(password)
         )
 
+
 def item_creator(num_item=1):
     for i in range(0, num_item):
         item_id = fake.uuid4()
@@ -106,6 +109,7 @@ def item_creator(num_item=1):
             price=item_price,
             description=fake.paragraph(nb_sentences=3, variable_nb_sentences=True)
         )
+
 
 def address_creator(num_addr=1):
     LIST_COUNTRIES = ['Belgium', 'France', 'Germany',
@@ -123,6 +127,7 @@ def address_creator(num_addr=1):
             phone=fake.phone_number(),
         )
 
+
 def order_creator(num_order=1):
     for i in range(0, num_order):
         user_id = CountInsertions(User)
@@ -136,6 +141,7 @@ def order_creator(num_order=1):
             items=[]
         )
 
+
 def order_item_creator(num_order_item=1):
     orders = Order.select()
     for i in orders:
@@ -143,6 +149,7 @@ def order_item_creator(num_order_item=1):
             an_item = InsertionCall(Item)
             quantity = random.choice(range(1, 5))
             i.add_item(an_item.insert, quantity)
+
 
 def create_db():
     global User, Item, Order, OrderItem, Address
@@ -154,6 +161,7 @@ def create_db():
     create_tables()
     write_db()
     good_bye('created')
+
 
 def write_db():
     """
@@ -231,11 +239,13 @@ def main():
     if len(list_db) == 0:
         print(Fore.GREEN + Style.BRIGHT + 'Do you want a database?')
         choice = input('If YES press(1) or [ENTER] to exit without change. >'
-                  + Fore.YELLOW + Style.BRIGHT + ' ').strip()
+                       + Fore.YELLOW + Style.BRIGHT + ' ').strip()
         if choice == '1':
             create_db()
         if choice == '':
             good_bye('be created', default='hasn\'t')
+        else:
+            main()
     if len(list_db) != 0:
         print(Fore.YELLOW + Style.BRIGHT + 'You have already a database.')
         print(MENU_TEXT)
