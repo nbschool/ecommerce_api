@@ -15,6 +15,7 @@ API_ENDPOINT = '/{}'
 # correct password used for all test users.
 TEST_USER_PSW = 'my_password123@'
 
+
 def get_test_addr_dict(user, country='Italy', city='Pistoia', post_code='51100',
                        address='Via Verdi 12', phone='3294882773'):
     return {
@@ -28,6 +29,7 @@ def get_test_addr_dict(user, country='Italy', city='Pistoia', post_code='51100',
         'address': address,
         'phone': phone
     }
+
 
 class TestUser(TestCase):
     """
@@ -160,7 +162,7 @@ class TestUser(TestCase):
         user1 = add_user('mail2@hotmail.com', TEST_USER_PSW)
         addr = add_address(user=user)
         addr1 = add_address(user=user1)
-        order = Order.create(delivery_address=addr, user=user)
+        Order.create(delivery_address=addr, user=user)
         order1 = Order.create(delivery_address=addr1, user=user1)
 
         user_path = 'users/{}'.format(user.user_id)
