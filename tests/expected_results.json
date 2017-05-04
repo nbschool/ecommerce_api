@@ -830,6 +830,28 @@
                         }
                     }
                 ]
+            },
+            "user_validate_input__fail": {
+                "errors": [
+                    {
+                        "detail": "Not a valid email address.",
+                        "source": {
+                            "pointer": "/data/attributes/email"
+                        }
+                    },
+                    {
+                        "detail": "Field cannot be blank",
+                        "source": {
+                            "pointer": "/data/attributes/last_name"
+                        }
+                    },
+                    {
+                        "detail": "Missing data for required field.",
+                        "source": {
+                            "pointer": "/data/attributes/password"
+                        }
+                    }
+                ]
             }
         },
         "orders": {
@@ -1035,7 +1057,32 @@
                         "self": "/orders/27e375f4-3d54-458c-91e4-d8a4fdf3b032"
                     }
                 }
-            ]
-        }
+            ],
+            "order_validate_fields__fail": {
+                "errors": [
+                    {
+                        "detail": "Must include a `data` key",
+                        "source": {
+                            "pointer": "/data/relationships/delivery_address/data"
+                        }
+                    },
+                    {
+                        "detail": "List cannot be empty",
+                        "source": {
+                            "pointer": "/data/relationships/items/data"
+                        }
+                    },
+                    {
+                        "detail": "Must include a `data` key",
+                        "source": {
+                            "pointer": "/data/relationships/user/data"
+                        }
+                    }
+                ]
+            }
+        },
+        "addresses": {},
+        "items": {},
+        "orderitems": {}
     }
 }
