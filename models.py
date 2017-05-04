@@ -5,9 +5,12 @@ import datetime
 
 from passlib.hash import pbkdf2_sha256
 from peewee import DateTimeField, TextField, CharField, BooleanField
-from peewee import Model, SqliteDatabase, DecimalField
+from peewee import SqliteDatabase, DecimalField
 from peewee import UUIDField, ForeignKeyField, IntegerField
+from playhouse.signals import Model, post_delete, pre_delete
 from uuid import uuid4
+
+from utils import remove_image
 
 
 database = SqliteDatabase('database.db')
@@ -54,6 +57,53 @@ class Item(BaseModel):
             'price': float(self.price),
             'description': self.description
         }
+
+
+@database.atomic()
+@pre_delete(sender=Item)
+def on_delete_item_handler(model_class, instance):
+    """Delete item pictures in cascade"""
+    pictures = Picture.select().join(Item).where(
+        Item.item_id == instance.item_id)
+    for pic in pictures:
+        pic.delete_instance()
+
+
+class Picture(BaseModel):
+    """
+    Picture model
+        picture_id: picture identifier and file name stored
+        extension: picture type
+        item: referenced item
+    """
+    picture_id = UUIDField(unique=True)
+    extension = CharField()
+    item = ForeignKeyField(Item, related_name='pictures')
+
+    def filename(self):
+        return '{}.{}'.format(
+            self.picture_id,
+            self.extension)
+
+    def json(self):
+        return {
+            'picture_id': str(self.picture_id),
+            'extension': self.extension,
+            'item_id': str(self.item.item_id)
+        }
+
+    def __str__(self):
+        return '{}.{} -> item: {}'.format(
+            self.picture_id,
+            self.extension,
+            self.item.item_id)
+
+
+@post_delete(sender=Picture)
+def on_delete_picture_handler(model_class, instance):
+    """Delete file picture"""
+    # TODO log eventual inconsistency
+    remove_image(instance.picture_id, instance.extension)
 
 
 class User(BaseModel):
@@ -323,8 +373,10 @@ class OrderItem(BaseModel):
 
 # Check if the table exists in the database; if not create it.
 # TODO: Use database migration
+
 User.create_table(fail_silently=True)
 Item.create_table(fail_silently=True)
 Order.create_table(fail_silently=True)
 OrderItem.create_table(fail_silently=True)
+Picture.create_table(fail_silently=True)
 Address.create_table(fail_silently=True)
