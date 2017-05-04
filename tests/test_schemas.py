@@ -12,6 +12,7 @@ from models import Item, Order
 from schemas import OrderSchema, UserSchema
 from tests.test_case import TestCase
 from tests.test_utils import _test_res_sort_included as sort_included
+from tests.test_utils import _test_res_sort_errors as sort_errors
 from tests.test_utils import (add_address, add_user, format_jsonapi_request,
                               get_expected_results)
 
@@ -88,19 +89,19 @@ class TestUserSchema(TestCase):
         assert valid_user is True
         assert errors == {}
 
-    def test_user_validate_input_missing_attributes__fail(self):
+    def test_user_validate_input__fail(self):
         wrong_user_data = USER_TEST_DICT.copy()
-        # password field is required on input
-        del wrong_user_data['password']
+        del wrong_user_data['password']             # missing field validation
+        wrong_user_data['last_name'] = ''           # empty field validation
+        wrong_user_data['email'] = 'email.is.not'   # email validation
+
         post_data = format_jsonapi_request('user', wrong_user_data)
 
         validated, errors = UserSchema.validate_input(post_data)
 
+        expected_result = EXPECTED_USERS['user_validate_input__fail']
         assert validated is not True
-        assert errors == {'errors': [{
-            'detail': 'Missing data for required field.',
-            'source': {'pointer': '/data/attributes/password'}
-        }]}
+        assert sort_errors(errors) == expected_result
 
 
 class TestOrderSchema(TestCase):
@@ -190,3 +191,23 @@ class TestOrderSchema(TestCase):
 
         expected_result = EXPECTED_ORDERS['get_orders_list__success']
         assert json.loads(parsed) == expected_result
+
+    def test_order_validate_fields__fail(self):
+        order = {
+            'relationships': {
+                'items': [
+                    # Items relationship should not be empty
+                ],
+                # Missing delivery_address relationship
+                # Missing user relationship
+            }
+        }
+
+        post_data = format_jsonapi_request('order', order)
+
+        isValid, errors = OrderSchema.validate_input(post_data)
+
+        assert isValid is False
+        expected_result = EXPECTED_ORDERS['order_validate_fields__fail']
+        assert sort_errors(errors) == expected_result
+
