@@ -4,12 +4,18 @@ and supply a new one db with new down-to-earth data.
 """
 
 from peewee import SqliteDatabase
-from models import User, Item, Order, OrderItem, Address
+# from models import User, Item, Order, OrderItem, Address
 from faker import Factory
 from colorama import init, Fore, Style
 import sys
 import glob
 import random
+
+User = None
+Address = None
+Item = None
+Order = None
+OrderItem = None 
 
 
 init(autoreset=True)
@@ -138,8 +144,18 @@ def order_item_creator(num_order_item=1):
             quantity = random.choice(range(1, 5))
             i.add_item(an_item.insert, quantity)
 
-def write_db():
+def create_db():
+    global User, Item, Order, OrderItem, Address
     from models import User, Item, Order, OrderItem, Address
+    db = SqliteDatabase('database.db', autocommit=True)
+    if db.is_closed():
+        db.connect()
+    set_db(db)
+    create_tables()
+    write_db()
+    good_bye('created')
+
+def write_db():
     """
     Given the SEED 9623954 the first user email is
     'fatima.caputo@tiscali.it', and its password is '9J0.'
@@ -209,19 +225,18 @@ def main():
     print(TEXT_DISPLAY)
     list_db = get_databases()
     if len(list_db) == 0:
-        db = SqliteDatabase('database.db', autocommit=True)
-        if db.is_closed():
-            db.connect()
-        set_db(db)
-        create_tables()
-        write_db()
-        good_bye('created')
+        print(Fore.GREEN + Style.BRIGHT + 'Do you want a database?')
+        choice = input('If YES press(1) or [ENTER] to exit without change. >'
+                  + Fore.YELLOW + Style.BRIGHT + ' ').strip()
+        if choice == '1':
+            create_db()
+        if choice == '':
+            good_bye('be created', default='hasn\'t')
     if len(list_db) != 0:
         print('You have already a database.')
         print(MENU_TEXT)
         choice = input(Fore.YELLOW + Style.BRIGHT + ' > ').strip()
         if choice == '1':
-            from models import User, Item, Order, OrderItem, Address
             overwrite_db()
         if choice == '2':
             write_db()
