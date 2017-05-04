@@ -229,3 +229,13 @@ def _test_res_sort_included(result, sortFn=lambda x: x['type']):
         result = sort(result)
 
     return result
+
+
+def _test_res_sort_errors(e):
+    """
+    Returns the list of errors from a validate_input call, sorted by the
+    errors/source/pointer attribute, allowing proper testing.
+    """
+
+    e['errors'] = sorted(e['errors'], key=lambda e: e['source']['pointer'])
+    return e
