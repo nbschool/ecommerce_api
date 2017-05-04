@@ -11,7 +11,13 @@ import sys
 import glob
 import random
 
+
 init(autoreset=True)
+
+SEED = 9623954
+fake = Factory.create('it_IT')
+fake.seed(SEED)
+random.seed(SEED)
 
 
 TEXT_DISPLAY = Fore.MAGENTA + Style.BRIGHT + """
@@ -58,110 +64,90 @@ class InsertionCall:
         self.lucky_num = self.obj.random_pick()
         self.insert = table.select().where(table.id == self.lucky_num).get()
 
-
 def set_db(database):
-        Order._meta.database = database
-        Item._meta.database = database
-        OrderItem._meta.database = database
-        User._meta.database = database
-        Address._meta.database = database
+    Order._meta.database = database
+    Item._meta.database = database
+    OrderItem._meta.database = database
+    User._meta.database = database
+    Address._meta.database = database
 
+def user_creator(num_user=1):
+    """Create users from an Italian-like context. Due to param in factory create 'it_iT'."""
+    for i in range(0, num_user):
+        user_uuid = fake.uuid4()
+        first_name = fake.first_name()
+        last_name = fake.last_name()
+        email_provider = fake.free_email_domain()
+        email_user = '{}.{}@{}'.format(first_name.lower(), last_name.lower(), email_provider)
+        password = fake.password(length=3, special_chars=False, digits=True,
+                                 upper_case=True, lower_case=False)
+        User.create(
+            user_id=user_uuid,
+            first_name=first_name,
+            last_name=last_name,
+            email=email_user,
+            password=User.hash_password(password)
+        )
+
+def item_creator(num_item=1):
+    for i in range(0, num_item):
+        item_id = fake.uuid4()
+        item_name = fake.sentence(nb_words=3, variable_nb_words=True)
+        item_price = fake.pyfloat(left_digits=2, right_digits=2, positive=True)
+        Item.create(
+            item_id=item_id,
+            name=item_name,
+            price=item_price,
+            description=fake.paragraph(nb_sentences=3, variable_nb_sentences=True)
+        )
+
+def address_creator(num_addr=1):
+    LIST_COUNTRIES = ['Belgium', 'France', 'Germany',
+                      'Greece', 'Italy', 'Portugal', 'Spain']
+    for i in range(0, num_addr):
+        country = random.choice(LIST_COUNTRIES)
+        user_id = CountInsertions(User)
+        Address.create(
+            address_id=fake.uuid4(),
+            user_id=user_id.random_pick(),
+            country=country,
+            city=fake.city(),
+            post_code=fake.postcode(),
+            address=fake.street_name(),
+            phone=fake.phone_number(),
+        )
+
+def order_creator(num_order=1):
+    for i in range(0, num_order):
+        user_id = CountInsertions(User)
+        order_id = fake.uuid4()
+        address = CountInsertions(Address)
+        Order.create(
+            order_id=order_id,
+            user_id=user_id.random_pick(),
+            total_price=0,
+            delivery_address=address.random_pick(),
+            items=[]
+        )
+
+def order_item_creator(num_order_item=1):
+    orders = Order.select()
+    for i in orders:
+        for e in range(1, random.choice(range(1, 7))):
+            an_item = InsertionCall(Item)
+            quantity = random.choice(range(1, 5))
+            i.add_item(an_item.insert, quantity)
 
 def write_db():
+    from models import User, Item, Order, OrderItem, Address
     """
     Given the SEED 9623954 the first user email is
     'fatima.caputo@tiscali.it', and its password is '9J0.'
     """
-    SEED = 9623954
-    fake = Factory.create('it_IT')
-    fake.seed(SEED)
-    random.seed(SEED)
-
-    def user_creator(num_user=1):
-        """Create users from an Italian-like context. Due to param in factory create 'it_iT'."""
-        for i in range(0, num_user):
-            user_uuid = fake.uuid4()
-            first_name = fake.first_name()
-            last_name = fake.last_name()
-            email_provider = fake.free_email_domain()
-            email_user = '{}.{}@{}'.format(first_name.lower(), last_name.lower(), email_provider)
-            password = fake.password(length=3, special_chars=False, digits=True,
-                                     upper_case=True, lower_case=False)
-            User.create(
-                user_id=user_uuid,
-                first_name=first_name,
-                last_name=last_name,
-                email=email_user,
-                password=User.hash_password(password)
-            )
-
-    def item_creator(num_item=1):
-        for i in range(0, num_item):
-            item_id = fake.uuid4()
-            item_name = fake.sentence(nb_words=3, variable_nb_words=True)
-            item_price = fake.pyfloat(left_digits=2, right_digits=2, positive=True)
-            Item.create(
-                item_id=item_id,
-                name=item_name,
-                price=item_price,
-                description=fake.paragraph(nb_sentences=3, variable_nb_sentences=True)
-            )
-
-    def address_creator(num_addr=1):
-        LIST_COUNTRIES = ['Belgium', 'France', 'Germany',
-                          'Greece', 'Italy', 'Portugal', 'Spain']
-        for i in range(0, num_addr):
-            country = random.choice(LIST_COUNTRIES)
-            user_id = CountInsertions(User)
-            Address.create(
-                address_id=fake.uuid4(),
-                user_id=user_id.random_pick(),
-                country=country,
-                city=fake.city(),
-                post_code=fake.postcode(),
-                address=fake.street_name(),
-                phone=fake.phone_number(),
-            )
-
-    def order_creator(num_order=1):
-        for i in range(0, num_order):
-            user_id = CountInsertions(User)
-            order_id = fake.uuid4()
-            address = CountInsertions(Address)
-            Order.create(
-                order_id=order_id,
-                user_id=user_id.random_pick(),
-                total_price=0,
-                delivery_address=address.random_pick(),
-                items=[]
-            )
-
-    def order_item_creator(num_order_item=1):
-        orders = Order.select()
-        for i in orders:
-            for e in range(1, random.choice(range(1, 7))):
-                an_item = InsertionCall(Item)
-                quantity = random.choice(range(1, 5))
-                i.add_item(an_item.insert, quantity)
-
-    # start create users
-
     user_creator(10)
-
-    # start create addresses
-
     address_creator(10)
-
-    # start create items
-
     item_creator(10)
-
-    # start create orders
-
     order_creator(10)
-
-    # start create order_item
-
     order_item_creator(100)
 
 
@@ -208,6 +194,8 @@ def overwrite_db():
                   + Fore.YELLOW + Style.BRIGHT + ' ').strip()
     if selct == '1':
         db = SqliteDatabase('database.db', autocommit=False)
+        if db.is_closed():
+            db.connect()
         set_db(db)
         drops_all_tables(db)
         create_tables()
@@ -218,14 +206,12 @@ def overwrite_db():
 
 
 def main():
-
     print(TEXT_DISPLAY)
     list_db = get_databases()
     if len(list_db) == 0:
         db = SqliteDatabase('database.db', autocommit=True)
         if db.is_closed():
             db.connect()
-        print(db.database)
         set_db(db)
         create_tables()
         write_db()
@@ -235,6 +221,7 @@ def main():
         print(MENU_TEXT)
         choice = input(Fore.YELLOW + Style.BRIGHT + ' > ').strip()
         if choice == '1':
+            from models import User, Item, Order, OrderItem, Address
             overwrite_db()
         if choice == '2':
             write_db()
