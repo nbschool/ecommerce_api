@@ -21,7 +21,10 @@ def new_addr(user, country='Italy', city='Pistoia', post_code='51100',
         'city': city,
         'post_code': post_code,
         'address': address,
-        'phone': phone
+        'phone': phone,
+        'relationships': {
+            'user': {'type': 'user', 'id': str(user.user_id)}
+        }
     }
 
 
