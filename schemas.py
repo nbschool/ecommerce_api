@@ -53,14 +53,6 @@ class BaseSchema(Schema):
         return json_string
 
     @classmethod
-    def serialize(cls, obj, include_data=[]):
-        """
-        Serialize the given object into a python data structure.
-        """
-        serialized = cls(include_data=include_data).dump(obj)
-        return serialized.data, serialized.errors
-
-    @classmethod
     def validate_input(cls, jsondata, partial=False):
         """"
         validate an input json data against the schema of its relative object
