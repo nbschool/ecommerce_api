@@ -192,12 +192,12 @@ class Order(BaseModel):
             # same item is found we update that row.
             if orderitem.item == item:
                 orderitem.add_item(quantity)
-                item.availability -= quantity
-                item.save()
                 self.total_price += (item.price * quantity)
                 self.save()
                 return self
 
+        if quantity > item.availability:
+            raise InsufficientAvailabilityException(item, quantity)
         # if no existing OrderItem is found with this order and this Item,
         # create a new row in the OrderItem table
         OrderItem.create(
@@ -273,6 +273,8 @@ class OrderItem(BaseModel):
         if quantity > self.item.availability:
             raise InsufficientAvailabilityException(self.item, quantity)
 
+        self.item.availability -= quantity
+        self.item.save()
         self.quantity += quantity
         self._calculate_subtotal()
         self.save()
