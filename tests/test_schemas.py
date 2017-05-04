@@ -282,22 +282,15 @@ class TestAddressSchema(TestCase):
 
 
 class TestItemSchema(TestCase):
-    def test_validate_input__success(self):
+    def test_item_validate_input__success(self):
         pass
 
-    def test_item_validate_input_rules__fail(self):
+    def test_item_validate_input__fail(self):
         # TODO: Test validation rules for required, empty fields and >=1 price.
         pass
 
     def test_get_item_json__success(self):
         pass
 
-    def test_item_include_user__success(self):
-        pass
-
     def test_get_user_items_list__success(self):
         pass
-
-
-class testOrderItemSchema(TestCase):
-    pass
