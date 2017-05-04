@@ -291,7 +291,7 @@ class OrderItem(BaseModel):
     def json(self):
         return {
             'order_id': self.order.order_id,
-            'item_name': self.item.name,
+            'item_id': self.item.item_id,
             'quantity': str(self.quantity),
             'subtotal': float(self.subtotal)
         }
