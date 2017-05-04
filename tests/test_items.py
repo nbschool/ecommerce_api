@@ -129,13 +129,15 @@ class TestItems(TestCase):
         resp = self.app.patch('/items/{item_id}'.format(item_id=item.item_id),
                               data=json.dumps(
                                   {'name': 'new-name', 'price': 40.20,
-                                   'description': 'new-description'}),
+                                   'description': 'new-description',
+                                   'availability': 2}),
                               content_type='application/json')
         assert resp.status_code == client.OK
         json_item = Item.get(Item.item_id == item.item_id).json()
         assert json_item['name'] == 'new-name'
         assert json_item['price'] == 40.20
         assert json_item['description'] == 'new-description'
+        assert json_item['availability'] == 2
         assert json_item['item_id'] == item.item_id
         assert json.loads(resp.data) == json_item
 
