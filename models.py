@@ -210,6 +210,14 @@ class Order(BaseModel):
         self.save()
         return self
 
+    def update_item(self, item, quantity):
+        """
+        Update the quantity of the orderitem of the given item.
+        """
+        for orderitem in self.order_items:
+            if orderitem.item == item:
+                orderitem.set_item_quantity(quantity)
+
     def remove_item(self, item, quantity=1):
         """
         Remove the given item from the order, reducing quantity of the relative
@@ -315,6 +323,17 @@ class OrderItem(BaseModel):
             self.save()
 
         return quantity
+
+    def set_item_quantity(self, quantity):
+        """
+        Sets the quantity of an item from the OrderItem.
+        """
+        if quantity == 0:
+            self.remove_item(self.quantity)
+        else:
+            self.quantity = quantity
+            self._calculate_subtotal()
+        self.save()
 
     def _calculate_subtotal(self):
         """Calculate the subtotal value of the item(s) in the order."""
