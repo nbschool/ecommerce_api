@@ -93,10 +93,9 @@ class AddressHandler(Resource):
     @auth.login_required
     def delete(self, address_id):
         user = g.user
-
-        try:
-            obj = Address.get(Address.user == user, Address.address_id == address_id)
-        except Address.DoesNotExist:
+        result = Address.delete().where(Address.user == user,
+                                        Address.address_id == address_id).execute()
+        if result == 0:
             return None, NOT_FOUND
-        obj.delete_instance()
+
         return None, NO_CONTENT
