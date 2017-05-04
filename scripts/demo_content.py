@@ -171,21 +171,6 @@ def get_databases():
     return list_of_db
 
 
-def print_any_db():
-    """In the case there's any db it prints a list in the CLI."""
-    list_of_db = get_databases()
-    lenght_of_list = len(list_of_db)
-    word_db = 'database'
-    if lenght_of_list > 1:
-        word_db = 'databases'
-    print(Fore.YELLOW + Style.BRIGHT
-          + 'You\'ve already {} {} in your folder :'.format(lenght_of_list, word_db))
-    for index, name_db in enumerate(list_of_db, start=1):
-        print(index, '-', name_db)
-    else:
-        good_bye('Error')
-
-
 def drops_all_tables(database):
     """Doesn't drop unknown tables."""
     tables = database.get_tables()
