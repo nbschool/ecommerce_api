@@ -1081,7 +1081,162 @@
                 ]
             }
         },
-        "addresses": {},
+        "addresses": {
+            "address_validate_input__fail": {
+                "errors": [
+                    {
+                        "detail": "Field cannot be blank",
+                        "source": {
+                            "pointer": "/data/attributes/country"
+                        }
+                    },
+                    {
+                        "detail": "Must include a `data` key",
+                        "source": {
+                            "pointer": "/data/relationships/user/data"
+                        }
+                    }
+                ]
+            },
+            "get_address_json__success": {
+                "data": {
+                    "type": "address",
+                    "attributes": {
+                        "phone": "3294882773",
+                        "address": "Via Verdi 12",
+                        "city": "Pistoia",
+                        "post_code": "51100",
+                        "country": "Italy"
+                    },
+                    "relationships": {
+                        "user": {
+                            "data": {
+                                "type": "user",
+                                "id": "9630b105-ca99-4a27-a51d-ab3430bf52d1"
+                            }
+                        }
+                    },
+                    "id": "943d754e-5826-4d5c-b878-47edc478b789",
+                    "links": {
+                        "self": "/addresses/943d754e-5826-4d5c-b878-47edc478b789"
+                    }
+                },
+                "links": {
+                    "self": "/addresses/943d754e-5826-4d5c-b878-47edc478b789"
+                }
+            },
+            "get_address_json_include_user__success": {
+                "data": {
+                    "type": "address",
+                    "attributes": {
+                        "post_code": "51100",
+                        "phone": "3294882773",
+                        "country": "Italy",
+                        "address": "Via Verdi 12",
+                        "city": "Pistoia"
+                    },
+                    "relationships": {
+                        "user": {
+                            "data": {
+                                "type": "user",
+                                "id": "9630b105-ca99-4a27-a51d-ab3430bf52d1"
+                            }
+                        }
+                    },
+                    "id": "943d754e-5826-4d5c-b878-47edc478b789",
+                    "links": {
+                        "self": "/addresses/943d754e-5826-4d5c-b878-47edc478b789"
+                    }
+                },
+                "links": {
+                    "self": "/addresses/943d754e-5826-4d5c-b878-47edc478b789"
+                },
+                "included": [
+                    {
+                        "type": "user",
+                        "attributes": {
+                            "admin": false,
+                            "first_name": "John",
+                            "last_name": "Doe",
+                            "email": "e@mail.com"
+                        },
+                        "relationships": {
+                            "addresses": {
+                                "data": [
+                                    {
+                                        "type": "address",
+                                        "id": "943d754e-5826-4d5c-b878-47edc478b789"
+                                    }
+                                ]
+                            },
+                            "orders": {
+                                "data": []
+                            }
+                        },
+                        "id": "9630b105-ca99-4a27-a51d-ab3430bf52d1",
+                        "links": {
+                            "self": "/users/9630b105-ca99-4a27-a51d-ab3430bf52d1"
+                        }
+                    }
+                ]
+            },
+            "get_addresses_list__success": [
+                {
+                    "data": {
+                        "type": "address",
+                        "attributes": {
+                            "address": "Via Verdi 12",
+                            "post_code": "51100",
+                            "country": "Italy",
+                            "city": "Pistoia",
+                            "phone": "3294882773"
+                        },
+                        "relationships": {
+                            "user": {
+                                "data": {
+                                    "type": "user",
+                                    "id": "9630b105-ca99-4a27-a51d-ab3430bf52d1"
+                                }
+                            }
+                        },
+                        "id": "943d754e-5826-4d5c-b878-47edc478b789",
+                        "links": {
+                            "self": "/addresses/943d754e-5826-4d5c-b878-47edc478b789"
+                        }
+                    },
+                    "links": {
+                        "self": "/addresses/943d754e-5826-4d5c-b878-47edc478b789"
+                    }
+                },
+                {
+                    "data": {
+                        "type": "address",
+                        "attributes": {
+                            "address": "Via Verdi 12",
+                            "post_code": "51100",
+                            "country": "Italy",
+                            "city": "Pistoia",
+                            "phone": "3294882773"
+                        },
+                        "relationships": {
+                            "user": {
+                                "data": {
+                                    "type": "user",
+                                    "id": "9630b105-ca99-4a27-a51d-ab3430bf52d1"
+                                }
+                            }
+                        },
+                        "id": "4373d5d7-cae5-42bc-b218-d6fc6d18626f",
+                        "links": {
+                            "self": "/addresses/4373d5d7-cae5-42bc-b218-d6fc6d18626f"
+                        }
+                    },
+                    "links": {
+                        "self": "/addresses/4373d5d7-cae5-42bc-b218-d6fc6d18626f"
+                    }
+                }
+            ]
+        },
         "items": {},
         "orderitems": {}
     }
