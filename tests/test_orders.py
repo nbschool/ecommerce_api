@@ -176,11 +176,18 @@ class TestOrders(TestCase):
             description='svariati mariii',
             availability=2
         )
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
+        addr_A = add_address(user=user_A)
         order = {
             'order': {
                 'items': [
-                    {'name': 'item1', 'price': 10.10, 'quantity': 3}
-                ]
+                    {
+                        'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                        'price': 30.30,
+                        'quantity': 3,
+                    }
+                ],
+                'delivery_address': addr_A.json()["address_id"],
             }
         }
         user_A = add_user('123@email.com', TEST_USER_PSW)
