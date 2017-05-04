@@ -27,7 +27,7 @@ MENU_TEXT = Fore.GREEN + Style.BRIGHT + """
                  ***********************************************
                  * Press:                                      *
                  *(1) Overwrite the database                   *
-                 *(2) Add data to the current database          *
+                 *(2) Add data to the current database         *
                  *(Enter) Just to exit                         *
                  ***********************************************
             """
@@ -218,7 +218,7 @@ def good_bye(word, default='has'):
     sys.exit()
 
 
-def remove_unique_db():
+def remove_db():
     print(WARNING_DELETE)
     print(Fore.RED + Style.BRIGHT + """
           *************************************************************
@@ -242,40 +242,20 @@ def remove_unique_db():
         good_bye('deleted', default='hasn\'t')
 
 
-def remove_chosen_db(lenght_of_list):
-    print(WARNING_DELETE)
-    list_of_db = get_databases()
-    for index, name_db in enumerate(list_of_db, start=1):
-        print('( {} ).- {}|'.format(index, name_db), end=' ')
-    print('\n')
-    choice_a_db = input(Fore.YELLOW + Style.BRIGHT +
-                        'Press the number of database to delete ' +
-                        'or hit [ENTER] to exit without changes. >' +
-                        Fore.RED + Style.BRIGHT + ' ')
-    if choice_a_db is '':
-        sys.exit()
-    else:
-        try:
-            choice_a_db = int(choice_a_db)-1
-        except ValueError:
-            print(Fore.RED + Style.BRIGHT + "Oops! That wasn't a number. Try again...")
-            sys.exit()
-    while True:
-        path = list_of_db[choice_a_db]
-        if choice_a_db <= lenght_of_list:
-            print(Fore.YELLOW + Style.BRIGHT + 'You\'ve chosen {}'.format(path))
-            os.remove(path)
-            good_bye('deleted')
-        else:
-            remove_chosen_db()
-
-
 def overwrite_db():
     print(WARNING_OVERWRITE, '\n')
     print('Are you sure to overwrite?')
-    selct = input('if Yes press(1) or [ENTER] to exit without change. >'
-                  + Fore.YELLOW + Style.BRIGHT + ' ')
-
+    selct = input('If YES press(1) or [ENTER] to exit without change. >'
+                  + Fore.YELLOW + Style.BRIGHT + ' ').strip()
+    if selct == '1':
+        db = SqliteDatabase('database.db', autocommit=False)
+        set_db(db)
+        drops_all_tables(db)
+        create_tables()
+        write_db()
+        good_bye('overwritten')
+    if selct == '':
+        good_bye('deleted', default='hasn\'t')
 
 def main():
 
@@ -295,16 +275,11 @@ def main():
         print(MENU_TEXT)
         choice = input(Fore.YELLOW + Style.BRIGHT + ' > ').strip()
         if choice == '1':
-            db = SqliteDatabase('database.db', autocommit=False)
-            set_db(db)
-            drops_all_tables(db)
-            create_tables()
-            write_db()
-            good_bye('written')
+            overwrite_db()
         if choice == '2':
             write_db()
         if choice == '3':
-                remove_unique_db()
+                remove_db()
         if choice is '':
             good_bye('change', default='hasn\'t')
         else:
