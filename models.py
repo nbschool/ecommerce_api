@@ -216,7 +216,14 @@ class Order(BaseModel):
         """
         for orderitem in self.order_items:
             if orderitem.item == item:
-                orderitem.set_item_quantity(quantity)
+                diff = orderitem.get_diff(quantity)
+                if diff > 0:
+                    self.add_item(item, abs(diff))
+                elif diff < 0:
+                    self.remove_item(item, abs(diff))
+                break
+        else:
+            self.add_item(item, quantity)
 
     def remove_item(self, item, quantity=1):
         """
@@ -324,16 +331,8 @@ class OrderItem(BaseModel):
 
         return quantity
 
-    def set_item_quantity(self, quantity):
-        """
-        Sets the quantity of an item from the OrderItem.
-        """
-        if quantity == 0:
-            self.remove_item(self.quantity)
-        else:
-            self.quantity = quantity
-            self._calculate_subtotal()
-        self.save()
+    def get_diff(self, quantity):
+        return quantity - self.quantity
 
     def _calculate_subtotal(self):
         """Calculate the subtotal value of the item(s) in the order."""
