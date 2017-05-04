@@ -16,21 +16,6 @@ API_ENDPOINT = '/{}'
 TEST_USER_PSW = 'my_password123@'
 
 
-def get_test_addr_dict(user, country='Italy', city='Pistoia', post_code='51100',
-                       address='Via Verdi 12', phone='3294882773'):
-    return {
-        'address_id': uuid.uuid4(),
-        'user': user,
-        'user_first_name': user.first_name,
-        'user_last_name': user.last_name,
-        'country': country,
-        'city': city,
-        'post_code': post_code,
-        'address': address,
-        'phone': phone
-    }
-
-
 class TestUser(TestCase):
     """
     Implements py.test suite for User Resource endpoints.
