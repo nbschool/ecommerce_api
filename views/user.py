@@ -85,5 +85,5 @@ class UserHandler(Resource):
             return ({'message': "You can't delete another user's account"},
                     UNAUTHORIZED)
 
-        user.delete_instance()
+        user.delete_instance(recursive=True)
         return None, NO_CONTENT
