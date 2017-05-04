@@ -65,6 +65,15 @@ class OrdersHandler(Resource):
             except InsufficientAvailabilityException:
                 txn.rollback()
                 return None, BAD_REQUEST
+            except KeyError:
+                # FIXME: This catch is required to catch missing quantity attribute
+                # on the post request. This should be done from the validate_input
+                # function but this needs to be implemented yet, so this prevents
+                # raising KeyError later on when adding items
+                msg = {
+                    'message': 'Item {} missing quantity attribute'.format(item.item_id)
+                }
+                return msg, BAD_REQUEST
 
         return generate_response(order.json(), CREATED)
 
@@ -121,6 +130,13 @@ class OrderHandler(Resource):
                     except InsufficientAvailabilityException:
                         txn.rollback()
                         return None, BAD_REQUEST
+                    except KeyError:
+                        # FIXME: Prevent future KeyError when adding items. See post method
+                        # for further info.
+                        msg = {
+                            'message': 'Item {} missing quantity attribute'.format(item.item_id)
+                        }
+                        return msg, BAD_REQUEST
             # get the user from the flask.g global object registered inside the
             # auth.py::verify() function, called by @auth.login_required decorator
             # and match it against the found user.

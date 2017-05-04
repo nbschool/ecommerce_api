@@ -358,6 +358,46 @@ class TestOrders(TestCase):
         assert resp.status_code == BAD_REQUEST
         assert len(Order.select()) == 0
 
+    def test_create_order_missing_item_qty__fail(self):
+        Item.create(
+            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii'
+        )
+        Item.create(
+            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            name='GINO',
+            price=30.20,
+            description='svariati GINIIIII'
+        )
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
+        order = {
+            'relationships': {
+                'items': [
+                    {'id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                     'type': 'item'},
+                    {'id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                     'type': 'item', 'quantity': 10}
+                ],
+                'delivery_address': {
+                    'type': 'address',
+                    'id': '8473fbaa-94f0-46db-939f-faae898f001c'
+                },
+                'user': {
+                    'type': 'user',
+                    'id': ''
+                }
+            }
+        }
+        data = format_jsonapi_request('order', order)
+        path = 'orders/'
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'POST',
+                              user_A.email, TEST_USER_PSW, 'application/json',
+                              json.dumps(data))
+        assert resp.status_code == BAD_REQUEST
+        assert len(Order.select()) == 0
+
     def test_create_order_no_items__fail(self):
         user = add_user('12345@email.com', TEST_USER_PSW)
         addr = add_address(
