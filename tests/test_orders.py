@@ -38,7 +38,7 @@ class TestOrders(TestCase):
             name='mario',
             price=20.20,
             description='svariati mariii',
-            availability=2
+            availability=12
         )
         user = add_user(
             None, TEST_USER_PSW, id='f3f72634-7054-43ef-9119-9e8f54a9531e')
@@ -219,21 +219,26 @@ class TestOrders(TestCase):
             description='svariati mariii',
             availability=2
         )
-        user = add_user('12345@email.com', TEST_USER_PSW)
-        add_address(user=user, id='429994bf-784e-47cc-a823-e0c394b823e8')
+        user = add_user('123@email.com', TEST_USER_PSW,
+                        id='e736a9a6-448b-4b92-9e38-4cf745b066db')
+        add_address(user=user, id='8473fbaa-94f0-46db-939f-faae898f001c')
         order = {
-            'order': {
-                'items': [
-                    {
+            'relationships': {
+                'items': [{
                         'id': '429994bf-784e-47cc-a823-e0c394b823e8',
-                        'type': 'item',
-                        'quantity': 3,
-                    }
-                ],
-                'delivery_address': '429994bf-784e-47cc-a823-e0c394b823e8',
+                        'type': 'item', 'quantity': 4
+                     }],
+                'delivery_address': {
+                    'type': 'address',
+                    'id': '8473fbaa-94f0-46db-939f-faae898f001c'
+                },
+                'user': {
+                    'type': 'user',
+                    'id': 'e736a9a6-448b-4b92-9e38-4cf745b066db'
+                }
             }
         }
-        user = add_user('123@email.com', TEST_USER_PSW)
+
         path = 'orders/'
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'POST',
                               user.email, TEST_USER_PSW, 'application/json',
@@ -365,23 +370,26 @@ class TestOrders(TestCase):
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
-            description='svariati mariii'
+            description='svariati mariii',
+            availability=25
         )
         Item.create(
             item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
-            description='svariati GINIIIII'
+            description='svariati GINIIIII',
+            availability=25
         )
         user_A = add_user('12345@email.com', TEST_USER_PSW)
         order = {
             'relationships': {
-                'items': [
-                    {'id': '429994bf-784e-47cc-a823-e0c394b823e8',
-                     'type': 'item'},
-                    {'id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
-                     'type': 'item', 'quantity': 10}
-                ],
+                'items': [{
+                    'id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    'type': 'item',
+                }, {
+                    'id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                    'type': 'item', 'quantity': 10,
+                }],
                 'delivery_address': {
                     'type': 'address',
                     'id': '8473fbaa-94f0-46db-939f-faae898f001c'
@@ -692,7 +700,7 @@ class TestOrders(TestCase):
                 ],
                 'delivery_address': {
                     'type': 'address',
-                    'id': str(addr_B.uuid)
+                    'id': '284ac7f6-40c2-4da6-b722-5d8cd248b1cc'
                 },
                 'user': {
                     'type': 'user',
@@ -956,11 +964,13 @@ class TestOrders(TestCase):
 
     def test_update_order__failure_availability(self, mocker):
         mocker.patch('views.orders.database', new=self.TEST_DB)
-        user = add_user('12345@email.com', TEST_USER_PSW)
+
+        user = add_user('12345@email.com', TEST_USER_PSW,
+                        id='90c3e1c1-b51c-4224-b69d-17f84f6a8dfc')
         addr = add_address(
-            user=user, id='429994bf-784e-47cc-a823-e0c394b823e8')
+            user=user, id='8f3b518e-9c17-4103-9a47-b274740726e7')
         item = Item.create(
-            uuid=uuid4(),
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
@@ -969,37 +979,26 @@ class TestOrders(TestCase):
         order = Order.create(
             delivery_address=addr,
             user=user,
-        )
-        order_item = OrderItem.create(
-            order=order,
-            item=item,
-            quantity=2,
-            subtotal=50.00,
-        )
+        ).add_item(item, 2)
 
         update_order = {
-            "order": {
-                "uuid": str(order.uuid),
+            'relationships': {
                 'items': [{
-                    'id': str(item.uuid),
-                    'type': 'item', 'quantity': 4,
-                }],
-                'delivery_address': '429994bf-784e-47cc-a823-e0c394b823e8'
+                    'id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    'type': 'item', 'quantity': 5
+                }]
             }
         }
-
+        post_data = format_jsonapi_request('order', update_order)
         path = 'orders/{}'.format(order.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               '12345@email.com', TEST_USER_PSW, 'application/json',
-                              json.dumps(update_order))
+                              json.dumps(post_data))
 
         assert resp.status_code == BAD_REQUEST
-        assert Order.select().count() == 1
-        assert Order.get() == order
-        assert Item.select().count() == 1
-        assert Item.get() == item
         assert OrderItem.select().count() == 1
-        assert OrderItem.get() == order_item
+        assert OrderItem.get() == order.order_items[0]
+        assert order.order_items[0].quantity == 2
 
     def test_update_order__failure_non_existing_empty_orders(self):
         user = add_user('user@email.com', TEST_USER_PSW)

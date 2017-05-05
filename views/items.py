@@ -74,22 +74,23 @@ class ItemHandler(Resource):
             return errors, client.BAD_REQUEST
 
         data = request_data['data']['attributes']
+
         name = data.get('name')
         price = data.get('price')
         description = data.get('description')
         availability = data.get('availability')
 
-        if name and name != obj.name:
-            obj.name = data['name']
+        if name:
+            obj.name = name
 
-        if price and price != obj.price:
-            obj.price = data['price']
+        if price:
+            obj.price = price
 
-        if description and description != obj.description:
-            obj.description = data['description']
+        if description:
+            obj.description = description
 
-        if availability and availability != obj.availability:
-            obj.availability = request_data['availability']
+        if availability:
+            obj.availability = availability
 
         obj.save()
 

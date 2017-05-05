@@ -121,12 +121,14 @@ class TestOrderSchema(TestCase):
             name='Item 1',
             description='Item 1 description',
             price=5.24,
+            availability=10,
         )
         self.item2 = Item.create(
             uuid='08bd8de0-a4ac-459d-956f-cf6d8b8a7507',
             name='Item 2',
             description='Item 2 description',
             price=8,
+            availability=10,
         )
 
     def test_order_json__success(self):
@@ -283,19 +285,22 @@ class TestItemSchema(TestCase):
         self.data = {
             'name': 'Test item',
             'price': 10.25,
-            'description': 'Test item description'
+            'description': 'Test item description',
+            'availability': 73
         }
         self.item1 = Item.create(
             item_id='25da606b-dbd3-45e1-bb23-ff1f84a5622a',
             name='Item 1',
             description='Item 1 description',
             price=5.24,
+            availability=5,
         )
         self.item2 = Item.create(
             item_id='08bd8de0-a4ac-459d-956f-cf6d8b8a7507',
             name='Item 2',
             description='Item 2 description',
             price=8,
+            availability=10,
         )
 
     def test_item_validate_input__success(self):
@@ -306,9 +311,10 @@ class TestItemSchema(TestCase):
 
     def test_item_validate_input__fail(self):
         data = {
-            'name': '',         # not empty
-            'price': -2,        # more than 0
-            'description': ''   # not empty
+            'name': '',          # not empty
+            'price': -2,         # more than 0
+            'availability': -2,  # more than 0
+            'description': '',   # not empty
         }
         post_data = format_jsonapi_request('item', data)
         errors = ItemSchema.validate_input(post_data)
@@ -325,5 +331,6 @@ class TestItemSchema(TestCase):
 
     def test_get_items_list__success(self):
         data = ItemSchema.jsonapi_list([self.item1, self.item2])
+
         expected_result = EXPECTED_ITEMS['get_items_list__success']
         assert json.loads(data) == expected_result

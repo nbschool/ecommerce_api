@@ -231,14 +231,15 @@ class TestItems(TestCase):
         picture = Picture.create(item=item, **TEST_PICTURE)
         picture2 = Picture.create(item=item, **TEST_PICTURE2)
         picture3 = Picture.create(item=item2, **TEST_PICTURE3)
-        path_pic = os.path.join(utils.get_image_folder(), "{picture_uuid}.{extension}".format(
-            picture_uuid=picture.uuid,
+        imgfolder = utils.get_image_folder()
+        path_pic = os.path.join(imgfolder, "{picture_id}.{extension}".format(
+            picture_id=picture.picture_id,
             extension=picture.extension))
-        path_pic2 = os.path.join(utils.get_image_folder(), "{picture_uuid}.{extension}".format(
-            picture_uuid=picture2.uuid,
+        path_pic2 = os.path.join(imgfolder, "{picture_id}.{extension}".format(
+            picture_id=picture2.picture_id,
             extension=picture2.extension))
-        path_pic3 = os.path.join(utils.get_image_folder(), "{picture_uuid}.{extension}".format(
-            picture_uuid=picture3.uuid,
+        path_pic3 = os.path.join(imgfolder, "{picture_id}.{extension}".format(
+            picture_id=picture3.picture_id,
             extension=picture3.extension))
         open(path_pic, "wb")
         open(path_pic2, "wb")

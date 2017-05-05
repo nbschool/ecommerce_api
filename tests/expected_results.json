@@ -417,9 +417,10 @@
             "data": {
                 "type": "item",
                 "attributes": {
-                    "name": "mario",
                     "description": "svariati mariii",
-                    "price": 20.2
+                    "price": 20.2,
+                    "availability": 1,
+                    "name": "mario"
                 },
                 "id": "00000000-0000-0000-0000-000000000001",
                 "links": {
@@ -434,9 +435,10 @@
             "data": {
                 "type": "item",
                 "attributes": {
-                    "name": "Anna Pannocchia",
+                    "description": "lorem ipsum",
                     "price": 30.222222,
-                    "description": "lorem ipsum"
+                    "name": "Anna Pannocchia",
+                    "availability": 1
                 },
                 "id": "00000000-0000-0000-0000-000000000001",
                 "links": {
@@ -454,7 +456,8 @@
                     "attributes": {
                         "description": "svariati mariii",
                         "price": 20.2,
-                        "name": "mario"
+                        "name": "mario",
+                        "availability": 1
                     },
                     "id": "429994bf-784e-47cc-a823-e0c394b823e8",
                     "links": {
@@ -471,7 +474,8 @@
                     "attributes": {
                         "description": "svariati GINIIIII",
                         "price": 30.2,
-                        "name": "GINO"
+                        "name": "GINO",
+                        "availability": 2
                     },
                     "id": "577ad826-a79d-41e9-a5b2-7955bcf03499",
                     "links": {
@@ -488,8 +492,9 @@
                 "type": "item",
                 "attributes": {
                     "description": "svariati mariii",
+                    "price": 20.2,
                     "name": "mario",
-                    "price": 20.2
+                    "availability": 1
                 },
                 "id": "429994bf-784e-47cc-a823-e0c394b823e8",
                 "links": {
@@ -504,9 +509,10 @@
             "data": {
                 "type": "item",
                 "attributes": {
-                    "name": "new-name",
+                    "description": "svariati mariii",
                     "price": 20.2,
-                    "description": "svariati mariii"
+                    "name": "new-name",
+                    "availability": 1
                 },
                 "id": "429994bf-784e-47cc-a823-e0c394b823e8",
                 "links": {
@@ -522,8 +528,9 @@
                 "type": "item",
                 "id": "429994bf-784e-47cc-a823-e0c394b823e8",
                 "attributes": {
-                    "name": "new-name",
+                    "availability": 2,
                     "price": 40.2,
+                    "name": "new-name",
                     "description": "new-description"
                 },
                 "links": {
@@ -1241,6 +1248,12 @@
             "item_validate_input__fail": {
                 "errors": [
                     {
+                        "detail": "Must be at least 0.",
+                        "source": {
+                            "pointer": "/data/attributes/availability"
+                        }
+                    },
+                    {
                         "detail": "Field cannot be blank",
                         "source": {
                             "pointer": "/data/attributes/description"
@@ -1264,9 +1277,10 @@
                 "data": {
                     "type": "item",
                     "attributes": {
-                        "name": "Item 1",
+                        "availability": 5,
                         "price": 5.24,
-                        "description": "Item 1 description"
+                        "description": "Item 1 description",
+                        "name": "Item 1"
                     },
                     "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a",
                     "links": {
@@ -1282,9 +1296,10 @@
                     "data": {
                         "type": "item",
                         "attributes": {
-                            "name": "Item 1",
+                            "availability": 5,
                             "price": 5.24,
-                            "description": "Item 1 description"
+                            "description": "Item 1 description",
+                            "name": "Item 1"
                         },
                         "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a",
                         "links": {
@@ -1299,9 +1314,10 @@
                     "data": {
                         "type": "item",
                         "attributes": {
-                            "name": "Item 2",
-                            "price": 8.0,
-                            "description": "Item 2 description"
+                            "availability": 10,
+                            "price": 8,
+                            "description": "Item 2 description",
+                            "name": "Item 2"
                         },
                         "id": "08bd8de0-a4ac-459d-956f-cf6d8b8a7507",
                         "links": {
