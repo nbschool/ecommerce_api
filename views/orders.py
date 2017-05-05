@@ -3,7 +3,7 @@ Orders-view: this module contains functions for the interaction with the orders.
 """
 
 from flask_restful import Resource
-from models import Address, Order, Item
+from models import database, Address, Order, Item
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST, UNAUTHORIZED
 from flask import abort, request, g
 from auth import auth
@@ -72,20 +72,22 @@ class OrdersHandler(Resource):
         except Address.DoesNotExist:
             abort(BAD_REQUEST)
 
-        try:
-            order = Order.create(
-                delivery_address=address,
-                user=user,
-            )
+        with database.transaction() as txn:
+            try:
+                order = Order.create(
+                    delivery_address=address,
+                    user=user,
+                )
 
-            for item in items:
-                for res_item in res_items:
-                    # if names match add item and quantity, once per res_item
-                    if str(item.item_id) == res_item['item_id']:
-                        order.add_item(item, res_item['quantity'])
-                        break
-        except InsufficientAvailabilityException:
-            return None, BAD_REQUEST
+                for item in items:
+                    for res_item in res_items:
+                        # if names match add item and quantity, once per res_item
+                        if str(item.item_id) == res_item['item_id']:
+                            order.add_item(item, res_item['quantity'])
+                            break
+            except InsufficientAvailabilityException:
+                txn.rollback()
+                return None, BAD_REQUEST
 
         return serialize_order(order), CREATED
 
@@ -130,24 +132,21 @@ class OrderHandler(Resource):
             return ({'message': "You can't delete another user's order"},
                     UNAUTHORIZED)
 
-        # check whether availabilities allow order update
-        if any(item.availability < res_item['quantity'] for item in items
-                for res_item in res_items if item.item_id == res_item['item_id']):
-            return None, BAD_REQUEST
+        with database.transaction() as txn:
+            try:
+                # Clear the order of all items before adding the new items
+                # that came with the PATCH request
+                order.empty_order()
 
-        try:
-            # Clear the order of all items before adding the new items
-            # that came with the PATCH request
-            order.empty_order()
-
-            for item in items:
-                for res_item in res_items:
-                    # if names match add item and quantity, once per res_item
-                    if str(item.item_id) == res_item['item_id']:
-                        order.add_item(item, res_item['quantity'])
-                        break
-        except InsufficientAvailabilityException:
-            return None, BAD_REQUEST
+                for item in items:
+                    for res_item in res_items:
+                        # if names match add item and quantity, once per res_item
+                        if str(item.item_id) == res_item['item_id']:
+                            order.add_item(item, res_item['quantity'])
+                            break
+            except InsufficientAvailabilityException:
+                txn.rollback()
+                return None, BAD_REQUEST
 
         order.delivery_address = address
         order.save()

@@ -2,20 +2,20 @@
 Test suite.
 """
 
+import models
 from models import Order, OrderItem, Item
 from tests.test_utils import\
     add_user, add_address, add_admin_user, open_with_auth
 from tests.test_case import TestCase
 from http.client import\
     CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST, UNAUTHORIZED
-from peewee import SqliteDatabase
 import json
 from uuid import uuid4
 
+from mock import patch
+
 # main endpoint for API
 API_ENDPOINT = '/{}'
-# tests are run in temp database in memory
-TEST_DB = SqliteDatabase(':memory:')
 # correct password used for all test users.
 TEST_USER_PSW = 'my_password123@'
 
@@ -168,7 +168,8 @@ class TestOrders(TestCase):
         assert data['delivery_address']['address_id'] == order['order']['delivery_address']
         assert Order.get().json()['order_id'] == data['order_id']
 
-    def test_create_order__failure_availability(self):
+    def test_create_order__failure_availability(self, mocker):
+        mocker.patch('views.orders.database', new=self.TEST_DB)
         Item.create(
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
@@ -529,7 +530,8 @@ class TestOrders(TestCase):
 
         assert resp.status_code == NOT_FOUND
 
-    def test_update_order__failure_availability(self):
+    def test_update_order__failure_availability(self, mocker):
+        mocker.patch('views.orders.database', new=self.TEST_DB)
         user_A = add_user('12345@email.com', TEST_USER_PSW)
         addr_A = add_address(user=user_A)
         item = Item.create(
@@ -543,7 +545,7 @@ class TestOrders(TestCase):
             delivery_address=addr_A,
             user=user_A
         )
-        OrderItem.create(
+        order_item = OrderItem.create(
             order=order,
             item=item,
             quantity=2,
@@ -554,7 +556,7 @@ class TestOrders(TestCase):
             "order": {
                 "order_id": str(order.order_id),
                 'items': [
-                    {'item_id': 'dfa6cce8-2740-4384-aeed-467e5d4798e0',
+                    {'item_id': str(item.item_id),
                         'price': 30.30, 'quantity': 3},
                 ],
                 'delivery_address': addr_A.json()["address_id"]
@@ -567,6 +569,12 @@ class TestOrders(TestCase):
                               json.dumps(update_order))
 
         assert resp.status_code == BAD_REQUEST
+        assert Order.select().count() == 1
+        assert Order.get() == order
+        assert Item.select().count() == 1
+        assert Item.get() == item
+        assert OrderItem.select().count() == 1
+        assert OrderItem.get() == order_item
 
     def test_update_order__failure_non_existing_empty_orders(self):
         user_A = add_user('user@email.com', TEST_USER_PSW)
