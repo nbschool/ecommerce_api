@@ -92,14 +92,14 @@ class OrderHandler(Resource):
 
         if res_items:
             items_ids = [e['item_id'] for e in res_items]
-            items = list(Item.select().where(Item.item_id << items_ids))
+            items_query = Item.select().where(Item.item_id << items_ids)
+            items = {str(item.item_id): item for item in items_query}
 
             if len(items) != len(items_ids):
                 return None, BAD_REQUEST
 
             for res_item in res_items:
-                item = next(i for i in items if str(i.item_id) == res_item['item_id'])
-                order.update_item(item, res_item['quantity'])
+                order.update_item(items[res_item['item_id']], res_item['quantity'])
 
         # get the user from the flask.g global object registered inside the
         # auth.py::verify() function, called by @auth.login_required decorator
