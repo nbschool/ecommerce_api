@@ -49,20 +49,14 @@ WARNING_OVERWRITE = Fore.YELLOW + Style.BRIGHT + """
                 """
 
 
-class CountInsertions:
-    def __init__(self, table):
-        self.total = table.select().count()
-
-    def random_pick(self):
-        pick = random.choice(range(1, self.total+1))
-        return pick
+def get_random_row(table):
+    total_rows = table.select().count()
+    lucky_row = random.choice(range(1, total_rows+1))
+    return table.select().where(table.id == lucky_row).get()
 
 
-class InsertionCall:
-    def __init__(self, table):
-        self.obj = CountInsertions(table)
-        self.lucky_num = self.obj.random_pick()
-        self.insert = table.select().where(table.id == self.lucky_num).get()
+def count_rows(table):
+    return table.select().count()
 
 
 def set_db(database):
@@ -110,10 +104,10 @@ def address_creator(num_addr=1):
                       'Greece', 'Italy', 'Portugal', 'Spain']
     for i in range(0, num_addr):
         country = random.choice(LIST_COUNTRIES)
-        user_id = CountInsertions(User)
+        user_id = count_rows(User)
         Address.create(
             address_id=fake.uuid4(),
-            user_id=user_id.random_pick(),
+            user_id=random.choice(range(1, user_id)),
             country=country,
             city=fake.city(),
             post_code=fake.postcode(),
@@ -124,25 +118,25 @@ def address_creator(num_addr=1):
 
 def order_creator(num_order=1):
     for i in range(0, num_order):
-        user_id = CountInsertions(User)
+        user_id = count_rows(User)
         order_id = fake.uuid4()
-        address = CountInsertions(Address)
+        address = count_rows(Address)
         Order.create(
             order_id=order_id,
-            user_id=user_id.random_pick(),
+            user_id=random.choice(range(1, user_id)),
             total_price=0,
-            delivery_address=address.random_pick(),
+            delivery_address=random.choice(range(1, address)),
             items=[]
         )
 
 
 def order_item_creator(num_order_item=1):
     orders = Order.select()
-    for i in orders:
+    for order in orders:
         for e in range(1, random.choice(range(1, 7))):
-            an_item = InsertionCall(Item)
+            an_item = get_random_row(Item)
             quantity = random.choice(range(1, 5))
-            i.add_item(an_item.insert, quantity)
+            order.add_item(an_item, quantity)
 
 
 def create_db():
@@ -164,7 +158,7 @@ def write_db():
     address_creator(10)
     item_creator(10)
     order_creator(10)
-    order_item_creator(100)
+    order_item_creator(10)
 
 
 def get_databases():
@@ -207,8 +201,8 @@ def overwrite_db():
     print(WARNING_OVERWRITE, '\n')
     print('Are you sure to overwrite?')
     choice = input('If YES press(1) or [ENTER] to exit without change. >'
-                  + Fore.YELLOW + Style.BRIGHT + ' ').strip()
-    if schoice == '1':
+                   + Fore.YELLOW + Style.BRIGHT + ' ').strip()
+    if choice == '1':
         db = SqliteDatabase('database.db', autocommit=False)
         if db.is_closed():
             db.connect()
