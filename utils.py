@@ -5,8 +5,12 @@ from http.client import BAD_REQUEST
 IMAGE_FOLDER = 'images'
 
 
+def get_project_root():
+    return os.path.dirname(__file__)
+
+
 def get_image_folder():
-    return IMAGE_FOLDER
+    return os.path.join(get_project_root(), IMAGE_FOLDER)
 
 
 def check_required_fields(required_fields, request_data):
@@ -45,7 +49,7 @@ def remove_image(picture_id, extension):
     Remove a specified picture by picture_id from folder
     """
     if (os.path.isdir(get_image_folder()) and
-       os.path.isfile(image_fullpath(picture_id, extension))):
+            os.path.isfile(image_fullpath(picture_id, extension))):
         os.remove(image_fullpath(picture_id, extension))
         # TODO log in case file or folder not found
 
