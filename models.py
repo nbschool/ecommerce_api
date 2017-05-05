@@ -5,12 +5,13 @@ import datetime
 
 from passlib.hash import pbkdf2_sha256
 from peewee import DateTimeField, TextField, CharField, BooleanField
-from peewee import Model, SqliteDatabase, DecimalField
+from peewee import SqliteDatabase, DecimalField
 from peewee import UUIDField, ForeignKeyField, IntegerField
+from playhouse.signals import Model, post_delete, pre_delete
 from uuid import uuid4
 
 from exceptions import InsufficientAvailabilityException
-
+from utils import remove_image
 
 database = SqliteDatabase('database.db')
 
@@ -52,6 +53,53 @@ class Item(BaseModel):
             'description': self.description,
             'availability': self.availability,
         }
+
+
+@database.atomic()
+@pre_delete(sender=Item)
+def on_delete_item_handler(model_class, instance):
+    """Delete item pictures in cascade"""
+    pictures = Picture.select().join(Item).where(
+        Item.item_id == instance.item_id)
+    for pic in pictures:
+        pic.delete_instance()
+
+
+class Picture(BaseModel):
+    """
+    Picture model
+        picture_id: picture identifier and file name stored
+        extension: picture type
+        item: referenced item
+    """
+    picture_id = UUIDField(unique=True)
+    extension = CharField()
+    item = ForeignKeyField(Item, related_name='pictures')
+
+    def filename(self):
+        return '{}.{}'.format(
+            self.picture_id,
+            self.extension)
+
+    def json(self):
+        return {
+            'picture_id': str(self.picture_id),
+            'extension': self.extension,
+            'item_id': str(self.item.item_id)
+        }
+
+    def __str__(self):
+        return '{}.{} -> item: {}'.format(
+            self.picture_id,
+            self.extension,
+            self.item.item_id)
+
+
+@post_delete(sender=Picture)
+def on_delete_picture_handler(model_class, instance):
+    """Delete file picture"""
+    # TODO log eventual inconsistency
+    remove_image(instance.picture_id, instance.extension)
 
 
 class User(BaseModel):
@@ -232,14 +280,42 @@ class Order(BaseModel):
         # TODO: Raise or return something more explicit
         return self
 
-    def json(self):
-        return {
+    def json(self, include_items=False):
+        """
+        The order json method is different compared to the others, as long as the OrderItem
+        cross-table exists.
+        With the include_items flag sets to false, the function returns the order json.
+        Otherwise, if include_items is equal to true, all the OrderItems and related items
+        are included.
+        """
+
+        order_json = {
             'order_id': str(self.order_id),
             'date': str(self.created_at),
             'total_price': float(self.total_price),
             'delivery_address': self.delivery_address.json(),
             'user_id': str(self.user.user_id)
         }
+        if include_items:
+            order_json['items'] = self.get_order_items()
+
+        return order_json
+
+    def get_order_items(self):
+        """
+        Gets all the OrderItems related to an order.
+        """
+
+        items = []
+        for orderitem in self.order_items:
+            items.append({
+                'quantity': orderitem.quantity,
+                'price': float(orderitem.item.price),
+                'subtotal': float(orderitem.subtotal),
+                'name': orderitem.item.name,
+                'description': orderitem.item.description
+            })
+        return items
 
 
 class OrderItem(BaseModel):
@@ -305,8 +381,10 @@ class OrderItem(BaseModel):
 
 # Check if the table exists in the database; if not create it.
 # TODO: Use database migration
+
 User.create_table(fail_silently=True)
 Item.create_table(fail_silently=True)
 Order.create_table(fail_silently=True)
 OrderItem.create_table(fail_silently=True)
+Picture.create_table(fail_silently=True)
 Address.create_table(fail_silently=True)

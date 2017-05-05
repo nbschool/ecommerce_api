@@ -86,8 +86,9 @@ class ItemHandler(Resource):
     def delete(self, item_id):
         """Remove the item specified by item_id"""
         try:
-            obj = Item.get(Item.item_id == item_id)
+            item = Item.get(Item.item_id == item_id)
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
-        obj.delete_instance()
+
+        item.delete_instance()
         return None, client.NO_CONTENT

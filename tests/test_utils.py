@@ -1,7 +1,10 @@
 from models import Address, User
 from base64 import b64encode
 import uuid
+import os
 import random
+import shutil
+from utils import get_image_folder
 
 
 def add_user(email, psw):
@@ -66,3 +69,18 @@ def open_with_auth(app, url, method, username, password, content_type, data):
                     headers={'Authorization': auth_str},
                     content_type=content_type,
                     data=data)
+
+
+def clean_images():
+    """
+    Delete all the images in the IMAGE_FOLDER
+    """
+    shutil.rmtree(get_image_folder(), onerror=None)
+
+
+def setup_images():
+    """
+    Create images folder if doesnt exist
+    """
+    if not os.path.exists(get_image_folder()):
+        os.makedirs(get_image_folder())
