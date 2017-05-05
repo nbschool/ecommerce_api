@@ -75,6 +75,9 @@ class OrderHandler(Resource):
         res_items = res['order'].get('items')
         res_address = res['order'].get('delivery_address')
 
+        if res_items is not None and len(res_items) == 0:
+            return None, BAD_REQUEST
+
         try:
             order = Order.get(order_id=str(order_id))
         except Order.DoesNotExist:
@@ -83,10 +86,9 @@ class OrderHandler(Resource):
         if res_address:
             try:
                 address = Address.get(Address.address_id == res_address)
+                order.delivery_address = address
             except Address.DoesNotExist:
                 abort(NOT_FOUND)
-            else:
-                order.delivery_address = address
 
         if res_items:
             items_ids = [e['item_id'] for e in res_items]
