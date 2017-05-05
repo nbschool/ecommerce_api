@@ -48,8 +48,9 @@ def remove_image(picture_id, extension):
     """
     Remove a specified picture by picture_id from folder
     """
-    if (os.path.isdir(get_image_folder()) and
-            os.path.isfile(image_fullpath(picture_id, extension))):
+    if os.path.isdir(get_image_folder()) and os.path.isfile(
+        image_fullpath(picture_id, extension)
+    ):
         os.remove(image_fullpath(picture_id, extension))
         # TODO log in case file or folder not found
 
