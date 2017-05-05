@@ -495,9 +495,6 @@ class TestOrders(TestCase):
                     {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'price': 30.20, 'quantity': 1}
                 ],
-                'delivery_address': addr_B.json()["address_id"],
-                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
-
             }
         }
         path = 'orders/{}'.format(order1.order_id)
@@ -508,7 +505,6 @@ class TestOrders(TestCase):
         assert resp.status_code == OK
         resp_order = Order.get(order_id=order1.order_id).json()
         assert resp_order['order_id'] == order['order']['order_id']
-        assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
 
     def test_update_order__non_existing_items(self):
         item1 = Item.create(
