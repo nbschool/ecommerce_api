@@ -217,9 +217,9 @@ def overwrite_db():
     from models import User, Item, Order, OrderItem, Address
     print(WARNING_OVERWRITE, '\n')
     print('Are you sure to overwrite?')
-    selct = input('If YES press(1) or [ENTER] to exit without change. >'
+    choice = input('If YES press(1) or [ENTER] to exit without change. >'
                   + Fore.YELLOW + Style.BRIGHT + ' ').strip()
-    if selct == '1':
+    if schoice == '1':
         db = SqliteDatabase('database.db', autocommit=False)
         if db.is_closed():
             db.connect()
@@ -228,7 +228,7 @@ def overwrite_db():
         create_tables()
         write_db()
         good_bye('overwritten')
-    if selct == '':
+    if choice == '':
         good_bye('deleted', default='hasn\'t')
 
 
