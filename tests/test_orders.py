@@ -3,11 +3,11 @@ Test suite.
 """
 
 from models import Order, OrderItem, Item
-from tests.test_utils import\
-    add_user, add_address, add_admin_user, open_with_auth
+from tests.test_utils import (add_user, add_address,
+                              add_admin_user, open_with_auth)
 from tests.test_case import TestCase
-from http.client import\
-    CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST, UNAUTHORIZED
+from http.client import (CREATED, NO_CONTENT, NOT_FOUND,
+                         OK, BAD_REQUEST, UNAUTHORIZED)
 import json
 from uuid import uuid4
 
