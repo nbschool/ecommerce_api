@@ -60,15 +60,9 @@ class BaseSchema(Schema):
 
         documentation at https://goo.gl/0ZW1OW
 
-        :returns:
-        * (True, {}) if validation is ok
-        * (False, <dict:errors>) if there was some problem
+        Returns `list` with errors (jsonapi standard) if any, else empty list
         """
-        errors = cls().validate(jsondata, partial=partial)
-
-        if not errors:
-            return True, {}
-        return False, errors
+        return cls().validate(jsondata, partial=partial)
 
 
 class ItemSchema(BaseSchema):
