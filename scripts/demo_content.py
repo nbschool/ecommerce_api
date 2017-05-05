@@ -6,15 +6,10 @@ and supply a new one db with new down-to-earth data.
 from peewee import SqliteDatabase
 from faker import Factory
 from colorama import init, Fore, Style
+from models import User, Item, Order, OrderItem, Address
 import sys
 import glob
 import random
-
-User = None
-Address = None
-Item = None
-Order = None
-OrderItem = None
 
 
 init(autoreset=True)
@@ -151,8 +146,6 @@ def order_item_creator(num_order_item=1):
 
 
 def create_db():
-    global User, Item, Order, OrderItem, Address
-    from models import User, Item, Order, OrderItem, Address
     db = SqliteDatabase('database.db', autocommit=True)
     if db.is_closed():
         db.connect()
@@ -167,8 +160,6 @@ def write_db():
     Given the SEED 9623954 the first user email is
     'fatima.caputo@tiscali.it', and its password is '9J0.'
     """
-    global User, Item, Order, OrderItem, Address
-    from models import User, Item, Order, OrderItem, Address
     user_creator(10)
     address_creator(10)
     item_creator(10)
@@ -213,8 +204,6 @@ def good_bye(word, default='has'):
 
 
 def overwrite_db():
-    global User, Item, Order, OrderItem, Address
-    from models import User, Item, Order, OrderItem, Address
     print(WARNING_OVERWRITE, '\n')
     print('Are you sure to overwrite?')
     choice = input('If YES press(1) or [ENTER] to exit without change. >'
