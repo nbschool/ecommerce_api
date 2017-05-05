@@ -20,14 +20,16 @@ TEST_ITEM = {
     'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
     'name': 'mario',
     'price': 20.20,
-    'description': 'svariati mariii'
+    'description': 'svariati mariii',
+    'availability': 1,
 }
 
 TEST_ITEM2 = {
     'item_id': 'd46b13a1-f4bb-4cfb-8076-6953358145f3',
     'name': 'GINO',
     'price': 30.20,
-    'description': 'svariati GINIIIII'
+    'description': 'svariati GINIIIII',
+    'availability': 1,
 }
 
 TEST_PICTURE = {

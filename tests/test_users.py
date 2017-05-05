@@ -134,13 +134,15 @@ class TestUser(TestCase):
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
-            description='svariati mariii'
+            description='svariati mariii',
+            availability=1,
         )
         Item.create(
             item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
-            description='svariati GINIIIII'
+            description='svariati GINIIIII',
+            availability=1,
         )
         email = 'mail@email.it'
         user = add_user(email, TEST_USER_PSW)
