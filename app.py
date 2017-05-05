@@ -24,7 +24,10 @@ from views.address import AddressesHandler, AddressHandler
 from views.orders import OrdersHandler, OrderHandler
 from views.items import ItemHandler, ItemsHandler
 from views.user import UsersHandler, UserHandler
-from views.pictures import ItemPictureHandler, PictureHandler
+from views.address import AddressesHandler, AddressHandler
+from views.pictures import PictureHandler, ItemPictureHandler
+from views.favorites import FavoritesHandler
+
 
 app = Flask(__name__)
 CORS(app)
@@ -54,3 +57,5 @@ api.add_resource(OrderHandler, '/orders/<uuid:order_uuid>')
 api.add_resource(UsersHandler, '/users/')
 api.add_resource(UserHandler, '/users/<uuid:user_uuid>')
 api.add_resource(PictureHandler, '/pictures/<uuid:picture_uuid>')
+# api.add_resource(FavoritesHandler, '/favorites/')
+# api.add_resource(FavoriteHandler, 'favorites/<uuid:favorite_id>')

@@ -407,6 +407,14 @@ class Favorite(BaseModel):
     """ Many to many table to relate an item with a user."""
     user_id = ForeignKeyField(User, related_name="favorites")
     item_id = ForeignKeyField(Item, related_name="favorites")
+    favorite_id = UUIDField(unique=True, default=uuid4)
+
+    def json(self):
+        return {
+            'favorite_id': str(self.favorite_id),
+            'item_id': str(self.item_id),
+            'user_id': str(self.user_id)
+        }
 
 
 
@@ -419,3 +427,4 @@ Order.create_table(fail_silently=True)
 OrderItem.create_table(fail_silently=True)
 Picture.create_table(fail_silently=True)
 Address.create_table(fail_silently=True)
+Favorite.create_table(fail_silently=True)
