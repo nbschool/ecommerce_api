@@ -96,3 +96,7 @@ database.db
 .env
 
 \.vscode/
+
+# image folder
+images/
+test_images/

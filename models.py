@@ -5,10 +5,13 @@ import datetime
 
 from passlib.hash import pbkdf2_sha256
 from peewee import DateTimeField, TextField, CharField, BooleanField
-from peewee import Model, SqliteDatabase, DecimalField
+from peewee import SqliteDatabase, DecimalField
 from peewee import UUIDField, ForeignKeyField, IntegerField
+from playhouse.signals import Model, post_delete, pre_delete
 from uuid import uuid4
 
+from exceptions import InsufficientAvailabilityException
+from utils import remove_image
 
 database = SqliteDatabase('database.db')
 
@@ -34,11 +37,13 @@ class Item(BaseModel):
         name: product unique name
         price: product price
         description: product description text
+        availability: number of available products of this kind
     """
     item_id = UUIDField(unique=True)
     name = CharField()
     price = DecimalField(auto_round=True)
     description = TextField()
+    availability = IntegerField()
 
     def __str__(self):
         return '{}, {}, {}, {}'.format(
@@ -52,8 +57,56 @@ class Item(BaseModel):
             'item_id': str(self.item_id),
             'name': self.name,
             'price': float(self.price),
-            'description': self.description
+            'description': self.description,
+            'availability': self.availability,
         }
+
+
+@database.atomic()
+@pre_delete(sender=Item)
+def on_delete_item_handler(model_class, instance):
+    """Delete item pictures in cascade"""
+    pictures = Picture.select().join(Item).where(
+        Item.item_id == instance.item_id)
+    for pic in pictures:
+        pic.delete_instance()
+
+
+class Picture(BaseModel):
+    """
+    Picture model
+        picture_id: picture identifier and file name stored
+        extension: picture type
+        item: referenced item
+    """
+    picture_id = UUIDField(unique=True)
+    extension = CharField()
+    item = ForeignKeyField(Item, related_name='pictures')
+
+    def filename(self):
+        return '{}.{}'.format(
+            self.picture_id,
+            self.extension)
+
+    def json(self):
+        return {
+            'picture_id': str(self.picture_id),
+            'extension': self.extension,
+            'item_id': str(self.item.item_id)
+        }
+
+    def __str__(self):
+        return '{}.{} -> item: {}'.format(
+            self.picture_id,
+            self.extension,
+            self.item.item_id)
+
+
+@post_delete(sender=Picture)
+def on_delete_picture_handler(model_class, instance):
+    """Delete file picture"""
+    # TODO log eventual inconsistency
+    remove_image(instance.picture_id, instance.extension)
 
 
 class User(BaseModel):
@@ -182,7 +235,9 @@ class Order(BaseModel):
         """
         Add one item to the order.
         Creates one OrderItem row if the item is not present in the order yet,
-        or increasing the count of the existing OrderItem.
+        or increasing the count of the existing OrderItem. It also updates the
+        item availability counter and raise InsufficientAvailability if
+        quantity is less than item availability.
 
         :param item Item: instance of models.Item
         """
@@ -197,6 +252,8 @@ class Order(BaseModel):
                 self.save()
                 return self
 
+        if quantity > item.availability:
+            raise InsufficientAvailabilityException(item, quantity)
         # if no existing OrderItem is found with this order and this Item,
         # create a new row in the OrderItem table
         OrderItem.create(
@@ -229,12 +286,15 @@ class Order(BaseModel):
         """
         Remove the given item from the order, reducing quantity of the relative
         OrderItem entity or deleting it if removing the last item
-        (OrderItem.quantity == 0)
+        (OrderItem.quantity == 0).
+        It also restores the item availability.
         """
 
         for orderitem in self.order_items:
             if orderitem.item == item:
                 removed_items = orderitem.remove_item(quantity)
+                item.availability += quantity
+                item.save()
                 self.total_price -= (item.price * removed_items)
                 self.save()
                 return self
@@ -308,6 +368,12 @@ class OrderItem(BaseModel):
         Add one item to the OrderItem, increasing the quantity count and
         recalculating the subtotal value for this item(s)
         """
+
+        if quantity > self.item.availability:
+            raise InsufficientAvailabilityException(self.item, quantity)
+
+        self.item.availability -= quantity
+        self.item.save()
         self.quantity += quantity
         self._calculate_subtotal()
         self.save()
@@ -338,8 +404,10 @@ class OrderItem(BaseModel):
 
 # Check if the table exists in the database; if not create it.
 # TODO: Use database migration
+
 User.create_table(fail_silently=True)
 Item.create_table(fail_silently=True)
 Order.create_table(fail_silently=True)
 OrderItem.create_table(fail_silently=True)
+Picture.create_table(fail_silently=True)
 Address.create_table(fail_silently=True)

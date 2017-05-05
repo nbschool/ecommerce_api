@@ -44,6 +44,38 @@ To use the development Procfile (without gunicorn) use the -f flag:
 heroku local -f Procfile.dev
 ```
 
+## Create a TestModel
+
+To create a class that tests some model use:
+
+```
+TestCase
+```
+TestCase is a class that imports all the models and then defines ```setup_class``` and ```setup_method```.
+Import your models in **test_case.py**:
+```
+from models import Item, Order, OrderItem, User
+```
+add it in ```TABLES``` array:
+```
+TABLES = [Order, Item, OrderItem, User]
+```
+
+
+Import it in your **test_model.py**:
+```
+from tests.test_case import TestCase
+```
+Inherit it in your model:
+```
+class TestModel(TestCase):
+```
+Define some function that must starts with ```test```:
+```
+def test_my_function(self):
+    assert True
+```
+
 ## Running the tests
 
 To perform the test of the project:
@@ -51,6 +83,7 @@ To perform the test of the project:
 ```
 pytest
 ```
+
 
 ## Built With
 
