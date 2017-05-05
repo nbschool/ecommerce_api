@@ -33,18 +33,18 @@ class OrdersHandler(Resource):
             return errors, BAD_REQUEST
 
         # Extract data to create the new order
-        res_items = res['data']['relationships']['items']['data']
-        res_address = res['data']['relationships']['delivery_address']['data']
+        req_items = res['data']['relationships']['items']['data']
+        req_address = res['data']['relationships']['delivery_address']['data']
 
         # Check that the items exist
-        item_uuids = [res_item['item_uuid'] for res_item in res_items]
-        items = Item.select().where(Item.uuid << item_uuids)
-        if items.count() != len(res_items):
+        item_ids = [req_item['id'] for req_item in req_items]
+        items = Item.select().where(Item.item_id << item_ids)
+        if items.count() != len(req_items):
             abort(BAD_REQUEST)
 
         # Check that the address exist
         try:
-            address = Address.get(Address.address_id == res_address['id'])
+            address = Address.get(Address.address_id == req_address['id'])
         except Address.DoesNotExist:
             abort(BAD_REQUEST)
 
@@ -56,11 +56,11 @@ class OrdersHandler(Resource):
                 )
 
                 for item in items:
-                    for res_item in res_items:
+                    for req_item in req_items:
                         # if names match add item and quantity, once per
-                        # res_item
-                        if str(item.uuid) == res_item['id']:
-                            order.add_item(item, res_item['quantity'])
+                        # req_item
+                        if str(item.item_id) == req_item['id']:
+                            order.add_item(item, req_item['quantity'])
                             break
             except InsufficientAvailabilityException:
                 txn.rollback()
@@ -99,8 +99,8 @@ class OrderHandler(Resource):
         if not isValid:
             return errors, BAD_REQUEST
 
-        res_items = res['data']['relationships']['items']['data']
-        res_address = res['data']['relationships']['delivery_address']['data']
+        req_items = res['data']['relationships']['items']['data']
+        req_address = res['data']['relationships']['delivery_address']['data']
 
         with database.transaction() as txn:
             try:
@@ -108,22 +108,22 @@ class OrderHandler(Resource):
             except Order.DoesNotExist:
                 abort(NOT_FOUND)
 
-            if res_address:
+            if req_address:
                 try:
-                    address = Address.get(Address.uuid == res_address)
+                    address = Address.get(Address.uuid == req_address['id'])
                     order.delivery_address = address
                 except Address.DoesNotExist:
                     abort(BAD_REQUEST)
 
-            if res_items:
-                items_uuids = [e['id'] for e in res_items]
+            if req_items:
+                items_uuids = [e['id'] for e in req_items]
                 items_query = Item.select().where(Item.uuid << items_uuids)
                 items = {str(item.uuid): item for item in items_query}
 
                 if len(items) != len(items_uuids):
                     return None, BAD_REQUEST
 
-                for res_item in res_items:
+                for res_item in req_items:
                     try:
                         order.update_item(
                             items[res_item['id']], res_item['quantity'])
