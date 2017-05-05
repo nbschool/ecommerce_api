@@ -1,6 +1,7 @@
 """
 Test suite for User(s) resources.
 """
+from tests.test_case import TestCase
 
 import json
 import uuid
@@ -8,9 +9,7 @@ from http.client import (BAD_REQUEST, CONFLICT, CREATED, NO_CONTENT, NOT_FOUND,
                          OK, UNAUTHORIZED)
 
 from models import Address, Item, Order, User
-from tests.test_case import TestCase
 
-from tests.test_utils import _test_res_patch_id as patch_id
 from tests.test_utils import (add_address, add_user, format_jsonapi_request,
                               get_expected_results, open_with_auth, wrong_dump)
 

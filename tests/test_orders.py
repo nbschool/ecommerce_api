@@ -1,15 +1,18 @@
 """
 Test suite.
 """
+
+from tests.test_case import TestCase
+
 import json
 from http.client import (BAD_REQUEST, CREATED, NO_CONTENT, NOT_FOUND, OK,
                          UNAUTHORIZED)
+
+
 from uuid import uuid4
 from models import Item, Order, OrderItem, WrongQuantity
-from datetime import timezone
 from tests.test_case import TestCase
 from tests.test_utils import _test_res_patch_date as patch_date
-from tests.test_utils import _test_res_patch_id as patch_id
 from tests.test_utils import (add_address, add_admin_user, add_user,
                               get_expected_results, open_with_auth,
                               format_jsonapi_request, wrong_dump)
@@ -24,7 +27,6 @@ EXPECTED_RESULTS = get_expected_results('orders')
 
 
 class TestOrders(TestCase):
-
     def test_get_orders__empty(self):
         resp = self.app.get('/orders/')
         assert resp.status_code == OK

@@ -59,7 +59,7 @@
         "create_address__success": {
             "data": {
                 "type": "address",
-                "id": "5e67e12a-20e9-4bf9-9254-5ef946a1a2e7",
+                "id": "00000000-0000-0000-0000-000000000001",
                 "attributes": {
                     "country": "Italy",
                     "address": "Via Verdi 12",
@@ -76,11 +76,11 @@
                     }
                 },
                 "links": {
-                    "self": "/addresses/5e67e12a-20e9-4bf9-9254-5ef946a1a2e7"
+                    "self": "/addresses/00000000-0000-0000-0000-000000000001"
                 }
             },
             "links": {
-                "self": "/addresses/5e67e12a-20e9-4bf9-9254-5ef946a1a2e7"
+                "self": "/addresses/00000000-0000-0000-0000-000000000001"
             }
         },
         "create_address__failure_missing_field": {
@@ -281,9 +281,9 @@
                     "date": "2017-04-26T13:16:31.654706+00:00",
                     "total_price": 382.8
                 },
-                "id": "caae3e26-905f-4541-8f90-b2758e449407",
+                "id": "00000000-0000-0000-0000-000000000001",
                 "links": {
-                    "self": "/orders/caae3e26-905f-4541-8f90-b2758e449407"
+                    "self": "/orders/00000000-0000-0000-0000-000000000001"
                 },
                 "relationships": {
                     "delivery_address": {
@@ -314,7 +314,7 @@
                 "type": "order"
             },
             "links": {
-                "self": "/orders/caae3e26-905f-4541-8f90-b2758e449407"
+                "self": "/orders/00000000-0000-0000-0000-000000000001"
             }
         },
         "create_order__failure_missing_field": {
@@ -421,13 +421,13 @@
                     "description": "svariati mariii",
                     "price": 20.2
                 },
-                "id": "d04cf416-ecee-4698-b47c-d14190f3e0d1",
+                "id": "00000000-0000-0000-0000-000000000001",
                 "links": {
-                    "self": "/items/d04cf416-ecee-4698-b47c-d14190f3e0d1"
+                    "self": "/items/00000000-0000-0000-0000-000000000001"
                 }
             },
             "links": {
-                "self": "/items/d04cf416-ecee-4698-b47c-d14190f3e0d1"
+                "self": "/items/00000000-0000-0000-0000-000000000001"
             }
         },
         "post_item__round_price": {
@@ -438,13 +438,13 @@
                     "price": 30.222222,
                     "description": "lorem ipsum"
                 },
-                "id": "fe7fc533-9af6-487f-97c8-04f7c99b6a32",
+                "id": "00000000-0000-0000-0000-000000000001",
                 "links": {
-                    "self": "/items/fe7fc533-9af6-487f-97c8-04f7c99b6a32"
+                    "self": "/items/00000000-0000-0000-0000-000000000001"
                 }
             },
             "links": {
-                "self": "/items/fe7fc533-9af6-487f-97c8-04f7c99b6a32"
+                "self": "/items/00000000-0000-0000-0000-000000000001"
             }
         },
         "get_items__success": [
@@ -617,13 +617,13 @@
                         "data": []
                     }
                 },
-                "id": "e86fcf16-15ad-4048-91b4-70b04fdf44e5",
+                "id": "00000000-0000-0000-0000-000000000001",
                 "links": {
-                    "self": "/users/e86fcf16-15ad-4048-91b4-70b04fdf44e5"
+                    "self": "/users/00000000-0000-0000-0000-000000000001"
                 }
             },
             "links": {
-                "self": "/users/e86fcf16-15ad-4048-91b4-70b04fdf44e5"
+                "self": "/users/00000000-0000-0000-0000-000000000001"
             }
         },
         "post_new_user_no_email__fail": {
