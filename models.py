@@ -45,6 +45,13 @@ class Item(BaseModel):
     description = TextField()
     availability = IntegerField()
 
+    def __str__(self):
+        return '{}, {}, {}, {}'.format(
+            self.item_id,
+            self.name,
+            self.price,
+            self.description)
+
     def json(self):
         return {
             'item_id': str(self.item_id),
@@ -240,6 +247,7 @@ class Order(BaseModel):
             # same item is found we update that row.
             if orderitem.item == item:
                 orderitem.add_item(quantity)
+
                 self.total_price += (item.price * quantity)
                 self.save()
                 return self
