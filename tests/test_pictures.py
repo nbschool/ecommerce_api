@@ -2,6 +2,8 @@
 Test suite for PictureHandler and ItemPictureHandler
 """
 
+from tests.test_case import TestCase
+
 import json
 from io import BytesIO
 import os
@@ -10,7 +12,6 @@ import uuid
 import http.client as client
 
 from models import Item, Picture
-from tests.test_case import TestCase
 from tests import test_utils
 import utils
 

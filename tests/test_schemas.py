@@ -4,14 +4,16 @@ Tests run with no flask involvment and are used to check validation
 of inputs (post/put request data) and output from the Schemas dump method, that
 will be used as return value for Flask-Restful endpoint handlers.
 """
+from tests.test_case import TestCase
+
 import copy
+
 from datetime import datetime
 
 import simplejson as json
 
 from models import Item, Order, Address
 from schemas import OrderSchema, UserSchema, AddressSchema, ItemSchema
-from tests.test_case import TestCase
 from tests.test_utils import _test_res_sort_included as sort_included
 from tests.test_utils import _test_res_sort_errors as sort_errors
 from tests.test_utils import (add_address, add_user, format_jsonapi_request,

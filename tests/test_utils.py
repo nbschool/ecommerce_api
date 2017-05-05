@@ -5,10 +5,29 @@ import random
 import shutil
 from base64 import b64encode
 from datetime import timezone
-from uuid import uuid4
+import uuid
 
-from models import Address, User
-from utils import get_image_folder
+
+class DeterministicUUID:
+    """ Generate a deterministic progressive UUID4-type UUID object."""
+
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.counter = 0
+
+    def __call__(self):
+        self.counter += 1
+        return uuid.UUID('00000000-0000-0000-0000-{:012d}'.format(self.counter))
+
+
+# Override the uuid4 function to use our DeterministicUUID object and get
+# predictable UUID objects
+uuid.uuid4 = DeterministicUUID()
+
+from models import Address, User    # noqa:E402
+from utils import get_image_folder  # noqa: E402
 
 random.seed(10485)
 
@@ -158,25 +177,6 @@ def get_expected_results(section):
         data = json.load(fo)
 
     return data[section]
-
-
-def _test_res_patch_id(r, _id):
-    """
-    When testing a server-created object, patch the result resource id with
-    the actual object uuid.
-    """
-    _id = str(_id)
-
-    def patch_link(link, _id):
-        # change the in the link string and return it
-        strlist = link.split('/')[:2]
-        strlist.append(_id)
-        return '/'.join(strlist)
-
-    r['data']['id'] = _id
-    r['data']['links']['self'] = patch_link(r['data']['links']['self'], _id)
-    r['links']['self'] = patch_link(r['links']['self'], _id)
-    return r
 
 
 def _test_res_patch_date(result, date):

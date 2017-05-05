@@ -1,10 +1,11 @@
+from tests.test_case import TestCase
 import json
 from http.client import BAD_REQUEST, CREATED, NO_CONTENT, NOT_FOUND, OK
+
+
 from uuid import uuid4
 
 from models import Address
-from tests.test_case import TestCase
-from tests.test_utils import _test_res_patch_id as patch_id
 from tests.test_utils import (add_address, add_user, get_expected_results,
                               open_with_auth, format_jsonapi_request, wrong_dump)
 
@@ -79,10 +80,7 @@ class TestAddresses(TestCase):
         assert resp.status_code == CREATED
         assert len(Address.select()) == 1
 
-        expected_result = patch_id(
-            EXPECTED_RESULTS['create_address__success'],
-            Address.get().address_id)
-
+        expected_result = EXPECTED_RESULTS['create_address__success']
         assert json.loads(resp.data) == expected_result
 
     def test_create_address__failure_missing_field(self):
