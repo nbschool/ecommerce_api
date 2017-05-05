@@ -48,7 +48,8 @@ class TestPictures(TestCase):
     @classmethod
     def setup_class(cls):
         super(TestPictures, cls).setup_class()
-        utils.get_image_folder = lambda: TEST_IMAGE_FOLDER
+        utils.get_image_folder = lambda: os.path.join(utils.get_project_root(),
+                                                      TEST_IMAGE_FOLDER)
         test_utils.get_image_folder = utils.get_image_folder
 
     def test_get_picture__success(self):
