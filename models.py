@@ -354,7 +354,7 @@ class OrderItem(BaseModel):
         recalculating the subtotal value for this item(s)
         """
 
-        if quantity > self.item.availability:
+        if self.quantity + quantity > self.item.availability:
             raise InsufficientAvailabilityException(self.item, quantity)
 
         self.item.availability -= quantity
