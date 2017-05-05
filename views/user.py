@@ -27,8 +27,8 @@ class UsersHandler(Resource):
         """ Add an user to the database."""
         data = request.get_json(force=True)
 
-        isValid, errors = User.validate_input(data)
-        if not isValid:
+        errors = User.validate_input(data)
+        if errors:
             return errors, BAD_REQUEST
 
         # Extract the user attributes to check and generate the User row

@@ -19,8 +19,8 @@ class AddressesHandler(Resource):
     @auth.login_required
     def post(self):
         res = request.get_json(force=True)
-        isValid, errors = Address.validate_input(res)
-        if not isValid:
+        errors = Address.validate_input(res)
+        if errors:
             return errors, BAD_REQUEST
 
         data = res['data']['attributes']
@@ -61,8 +61,8 @@ class AddressHandler(Resource):
 
         res = request.get_json(force=True)
 
-        isValid, errors = Address.validate_input(res)
-        if not isValid:
+        errors = Address.validate_input(res)
+        if errors:
             return errors, BAD_REQUEST
 
         data = res['data']['attributes']

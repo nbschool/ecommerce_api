@@ -89,9 +89,7 @@ class TestUserSchema(TestCase):
     def test_user_validate_input__success(self):
         post_data = format_jsonapi_request('user', USER_TEST_DICT)
 
-        valid_user, errors = UserSchema.validate_input(post_data)
-
-        assert valid_user is True
+        errors = UserSchema.validate_input(post_data)
         assert errors == {}
 
     def test_user_validate_input__fail(self):
@@ -102,10 +100,9 @@ class TestUserSchema(TestCase):
 
         post_data = format_jsonapi_request('user', wrong_user_data)
 
-        validated, errors = UserSchema.validate_input(post_data)
+        errors = UserSchema.validate_input(post_data)
 
         expected_result = EXPECTED_USERS['user_validate_input__fail']
-        assert validated is not True
         assert sort_errors(errors) == expected_result
 
 
@@ -174,8 +171,7 @@ class TestOrderSchema(TestCase):
             }
         }
         post_data = format_jsonapi_request('order', data)
-        isValid, errors = OrderSchema.validate_input(post_data)
-        assert isValid is True
+        errors = OrderSchema.validate_input(post_data)
         assert errors == {}
 
     def test_orders_list__success(self):
@@ -210,9 +206,8 @@ class TestOrderSchema(TestCase):
 
         post_data = format_jsonapi_request('order', order)
 
-        isValid, errors = OrderSchema.validate_input(post_data)
+        errors = OrderSchema.validate_input(post_data)
 
-        assert isValid is False
         expected_result = EXPECTED_ORDERS['order_validate_fields__fail']
         assert sort_errors(errors) == expected_result
 
@@ -237,9 +232,8 @@ class TestAddressSchema(TestCase):
 
     def test_address_validate_input__success(self):
         post_data = format_jsonapi_request('address', self.data)
-        isValid, errors = AddressSchema.validate_input(post_data)
+        errors = AddressSchema.validate_input(post_data)
 
-        assert isValid is True
         assert errors == {}
 
     def test_address_validate_input__fail(self):
@@ -248,9 +242,8 @@ class TestAddressSchema(TestCase):
         del data['relationships']['user']
 
         post_data = format_jsonapi_request('address', data)
-        isValid, errors = AddressSchema.validate_input(post_data)
+        errors = AddressSchema.validate_input(post_data)
 
-        assert isValid is False
         expected_result = EXPECTED_ADDRESSES['address_validate_input__fail']
         assert sort_errors(errors) == expected_result
 
@@ -307,9 +300,8 @@ class TestItemSchema(TestCase):
 
     def test_item_validate_input__success(self):
         post_data = format_jsonapi_request('item', self.data)
-        isValid, errors = ItemSchema.validate_input(post_data)
+        errors = ItemSchema.validate_input(post_data)
 
-        assert isValid is True
         assert errors == {}
 
     def test_item_validate_input__fail(self):
@@ -319,9 +311,8 @@ class TestItemSchema(TestCase):
             'description': ''   # not empty
         }
         post_data = format_jsonapi_request('item', data)
-        isValid, errors = ItemSchema.validate_input(post_data)
+        errors = ItemSchema.validate_input(post_data)
 
-        assert isValid is False
         expected_result = EXPECTED_ITEMS['item_validate_input__fail']
         assert sort_errors(errors) == expected_result
 

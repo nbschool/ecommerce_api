@@ -29,8 +29,8 @@ class ItemsHandler(Resource):
         """
         request_data = request.get_json(force=True)
 
-        isValid, errors = Item.validate_input(request_data)
-        if not isValid:
+        errors = Item.validate_input(request_data)
+        if errors:
             return errors, client.BAD_REQUEST
 
         data = request_data['data']['attributes']
@@ -69,8 +69,8 @@ class ItemHandler(Resource):
 
         request_data = request.get_json(force=True)
 
-        isValid, errors = Item.validate_input(request_data, partial=True)
-        if not isValid:
+        errors = Item.validate_input(request_data, partial=True)
+        if errors:
             return errors, client.BAD_REQUEST
 
         data = request_data['data']['attributes']
