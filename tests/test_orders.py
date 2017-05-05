@@ -2,7 +2,6 @@
 Test suite.
 """
 
-import models
 from models import Order, OrderItem, Item
 from tests.test_utils import\
     add_user, add_address, add_admin_user, open_with_auth
@@ -11,8 +10,6 @@ from http.client import\
     CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST, UNAUTHORIZED
 import json
 from uuid import uuid4
-
-from mock import patch
 
 # main endpoint for API
 API_ENDPOINT = '/{}'
