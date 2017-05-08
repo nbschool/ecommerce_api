@@ -230,6 +230,41 @@ class TestOrders(TestCase):
         assert resp.status_code == BAD_REQUEST
         assert len(Order.select()) == 0
 
+    def test_create_order__non_existing_address(self):
+        Item.create(
+            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii',
+            availability=4
+        )
+        Item.create(
+            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            name='GINO',
+            price=30.20,
+            description='svariati GINIIIII',
+            availability=10
+        )
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
+        order = {
+            'order': {
+                'items': [
+                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                     'price': 50.0, 'quantity': 4},
+                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                     'price': 20.0, 'quantity': 10}
+                ],
+                'delivery_address': '577ad826-a79d-41e9-a5b2-7955bcf09043',
+                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+            }
+        }
+        path = 'orders/'
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'POST',
+                              user_A.email, TEST_USER_PSW, 'application/json',
+                              json.dumps(order))
+        assert resp.status_code == BAD_REQUEST
+        assert len(Order.select()) == 0
+
     def test_create_order__failure_empty_field(self):
         Item.create(
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
@@ -311,6 +346,203 @@ class TestOrders(TestCase):
         assert resp.status_code == BAD_REQUEST
         assert len(Order.select()) == 0
 
+    def test_update_order__new_item(self):
+        item1 = Item.create(
+            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii',
+            availability=5
+        )
+        item2 = Item.create(
+            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            name='GINO',
+            price=30.20,
+            description='svariati GINIIIII',
+            availability=10
+        )
+
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
+        addr_A = add_address(user=user_A)
+        addr_B = add_address(user=user_A)
+
+        order1 = Order.create(delivery_address=addr_A, user=user_A)
+        order1.add_item(item1, 2)
+
+        order_id = str(order1.order_id)
+
+        order = {
+            "order": {
+                "order_id": order_id,
+                'items': [
+                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                     'price': 20.0, 'quantity': 5},
+                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                     'price': 30.2, 'quantity': 10},
+                ],
+                'delivery_address': addr_B.json()["address_id"],
+                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+            }
+        }
+        path = 'orders/{}'.format(order1.order_id)
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
+                              '12345@email.com', TEST_USER_PSW, 'application/json',
+                              json.dumps(order))
+        assert resp.status_code == OK
+        resp_order = Order.get(order_id=order1.order_id).json(include_items=True)
+        assert resp_order['order_id'] == order['order']['order_id']
+        assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
+        order_items = [o.json() for o in OrderItem.select()]
+        assert str(order_items[0]['item_id']) == item1.item_id
+        assert str(order_items[1]['item_id']) == item2.item_id
+
+    def test_update_order__item_quantity_zero(self):
+        item1 = Item.create(
+            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii',
+            availability=2
+        )
+        item2 = Item.create(
+            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            name='GINO',
+            price=30.20,
+            description='svariati GINIIIII',
+            availability=1
+        )
+
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
+        addr_A = add_address(user=user_A)
+        addr_B = add_address(user=user_A)
+
+        order1 = Order.create(delivery_address=addr_A, user=user_A)
+        order1.add_item(item1, 2).add_item(item2)
+
+        order_id = str(order1.order_id)
+
+        order = {
+            "order": {
+                "order_id": order_id,
+                'items': [
+                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                     'price': 20.0, 'quantity': 0},
+                ],
+                'delivery_address': addr_B.json()["address_id"],
+                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+            }
+        }
+        path = 'orders/{}'.format(order1.order_id)
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
+                              '12345@email.com', TEST_USER_PSW, 'application/json',
+                              json.dumps(order))
+        assert resp.status_code == OK
+        resp_order = Order.get(order_id=order1.order_id).json(include_items=True)
+        assert resp_order['order_id'] == order['order']['order_id']
+        assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
+        assert len(resp_order['items']) == 1
+        assert str(OrderItem.get().item.item_id) == item2.item_id
+
+    def test_update_order__remove_item_without_delete(self):
+        item1 = Item.create(
+            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii',
+            availability=10
+        )
+        item2 = Item.create(
+            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            name='GINO',
+            price=30.20,
+            description='svariati GINIIIII',
+            availability=20
+        )
+
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
+        addr_A = add_address(user=user_A)
+        addr_B = add_address(user=user_A)
+
+        order1 = Order.create(delivery_address=addr_A, user=user_A)
+        order1.add_item(item1, 10).add_item(item2, 20)
+
+        order_id = str(order1.order_id)
+
+        order = {
+            "order": {
+                "order_id": order_id,
+                'items': [
+                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                     'price': 20.0, 'quantity': 5},
+                ],
+                'delivery_address': addr_B.json()["address_id"],
+                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+            }
+        }
+        path = 'orders/{}'.format(order1.order_id)
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
+                              '12345@email.com', TEST_USER_PSW, 'application/json',
+                              json.dumps(order))
+        assert resp.status_code == OK
+        resp_order = Order.get(order_id=order1.order_id).json(include_items=True)
+        assert resp_order['order_id'] == order['order']['order_id']
+        assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
+        order_items = [o.json() for o in OrderItem.select()]
+        assert str(order_items[0]['item_id']) == item1.item_id
+        assert str(order_items[1]['item_id']) == item2.item_id
+        assert order_items[0]['quantity'] == '5'
+        assert order_items[1]['quantity'] == '20'
+
+    def test_update_order__add_item(self):
+        item1 = Item.create(
+            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii',
+            availability=10
+        )
+        item2 = Item.create(
+            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            name='GINO',
+            price=30.20,
+            description='svariati GINIIIII',
+            availability=20
+        )
+
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
+        addr_A = add_address(user=user_A)
+        addr_B = add_address(user=user_A)
+
+        order1 = Order.create(delivery_address=addr_A, user=user_A)
+        order1.add_item(item1, 5).add_item(item2, 20)
+
+        order_id = str(order1.order_id)
+
+        order = {
+            "order": {
+                "order_id": order_id,
+                'items': [
+                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                     'price': 20.0, 'quantity': 10},
+                ],
+                'delivery_address': addr_B.json()["address_id"],
+                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+            }
+        }
+        path = 'orders/{}'.format(order1.order_id)
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
+                              '12345@email.com', TEST_USER_PSW, 'application/json',
+                              json.dumps(order))
+        assert resp.status_code == OK
+        resp_order = Order.get(order_id=order1.order_id).json(include_items=True)
+        assert resp_order['order_id'] == order['order']['order_id']
+        assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
+        order_items = [o.json() for o in OrderItem.select()]
+        assert str(order_items[0]['item_id']) == item1.item_id
+        assert str(order_items[1]['item_id']) == item2.item_id
+        assert order_items[0]['quantity'] == '10'
+        assert order_items[1]['quantity'] == '20'
+
     def test_update_order__success(self):
         item1 = Item.create(
             item_id='429994bf-784e-47cc-a823-e0c394b823e8',
@@ -348,9 +580,6 @@ class TestOrders(TestCase):
                     {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'price': 30.20, 'quantity': 1}
                 ],
-                'delivery_address': addr_B.json()["address_id"],
-                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
-
             }
         }
         path = 'orders/{}'.format(order1.order_id)
@@ -361,7 +590,6 @@ class TestOrders(TestCase):
         assert resp.status_code == OK
         resp_order = Order.get(order_id=order1.order_id).json()
         assert resp_order['order_id'] == order['order']['order_id']
-        assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
 
     def test_update_order__non_existing_items(self):
         item1 = Item.create(
@@ -400,6 +628,51 @@ class TestOrders(TestCase):
                      'price': 90.20, 'quantity': 2}
                 ],
                 'delivery_address': addr_B.json()["address_id"],
+                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+            }
+        }
+        path = 'orders/{}'.format(order1.order_id)
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
+                              '12345@email.com', TEST_USER_PSW, 'application/json',
+                              json.dumps(order))
+        order_item_after = [o.json() for o in OrderItem.select()]
+        assert resp.status_code == BAD_REQUEST
+        assert order_item_before == order_item_after
+
+    def test_update_order__non_existing_address(self):
+        item1 = Item.create(
+            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii',
+            availability=2
+        )
+        item2 = Item.create(
+            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            name='GINO',
+            price=30.20,
+            description='svariati GINIIIII',
+            availability=1
+        )
+
+        user_A = add_user('12345@email.com', TEST_USER_PSW)
+        addr_A = add_address(user=user_A)
+
+        order1 = Order.create(delivery_address=addr_A, user=user_A)
+        order1.add_item(item1, 2).add_item(item2)
+        order_item_before = [o.json() for o in OrderItem.select()]
+        order_id = str(order1.order_id)
+
+        order = {
+            "order": {
+                "order_id": order_id,
+                'items': [
+                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf00000',
+                     'price': 30.20, 'quantity': 1},
+                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf2222',
+                     'price': 50.20, 'quantity': 1},
+                ],
+                'delivery_address': '577ad826-a79d-41e9-a5b2-7955bcf5423',
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
         }
@@ -536,7 +809,7 @@ class TestOrders(TestCase):
             name='mario',
             price=20.20,
             description='svariati mariii',
-            availability=2
+            availability=1
         )
         order = Order.create(
             delivery_address=addr_A,
@@ -554,7 +827,7 @@ class TestOrders(TestCase):
                 "order_id": str(order.order_id),
                 'items': [
                     {'item_id': str(item.item_id),
-                        'price': 30.30, 'quantity': 3},
+                        'price': 30.30, 'quantity': 4},
                 ],
                 'delivery_address': addr_A.json()["address_id"]
             }

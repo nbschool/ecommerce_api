@@ -267,6 +267,21 @@ class Order(BaseModel):
         self.save()
         return self
 
+    def update_item(self, item, quantity):
+        """
+        Update the quantity of the orderitem of the given item.
+        """
+        for order_item in self.order_items:
+            if order_item.item == item:
+                diff = quantity - order_item.quantity
+                if diff > 0:
+                    self.add_item(item, abs(diff))
+                elif diff < 0:
+                    self.remove_item(item, abs(diff))
+                break
+        else:
+            self.add_item(item, quantity)
+
     def remove_item(self, item, quantity=1):
         """
         Remove the given item from the order, reducing quantity of the relative
@@ -343,7 +358,7 @@ class OrderItem(BaseModel):
     def json(self):
         return {
             'order_id': self.order.order_id,
-            'item_name': self.item.name,
+            'item_id': self.item.item_id,
             'quantity': str(self.quantity),
             'subtotal': float(self.subtotal)
         }
