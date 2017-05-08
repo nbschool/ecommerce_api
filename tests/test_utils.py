@@ -15,14 +15,6 @@ from utils import get_image_folder
 # Functions to create new instances with overridable defaults
 
 
-def wrong_dump(data):
-    """
-    Give a wrong encoding (urlencode-like) to the given dictionary
-    """
-    return reduce(lambda x, y: "{}&{}".format(x, y), [
-        "{}={}".format(k, v) for k, v in zip(data.keys(), data.values())])
-
-
 def add_user(email, password, id=None, first_name='John', last_name='Doe'):
     """
     Create a single user in the test database.
@@ -232,3 +224,22 @@ def _test_res_sort_errors(e):
 
     e['errors'] = sorted(e['errors'], key=lambda e: e['source']['pointer'])
     return e
+
+
+def wrong_dump(data):
+    """
+    Give a wrong encoding (urlencode-like) to the given dictionary
+    """
+    return reduce(lambda x, y: "{}&{}".format(x, y), [
+        "{}={}".format(k, v) for k, v in zip(data.keys(), data.values())])
+
+
+def mock_uuid_generator():
+    """
+    Returns a generator object that creates UUID instances with a deterministic
+    and progressive value in the form of `00000000-0000-0000-0000-000000000001`
+    """
+    i = 1
+    while True:
+        yield uuid.UUID('00000000-0000-0000-0000-{:012d}'.format(i))
+        i += 1
