@@ -155,10 +155,17 @@ def favorite_creator(num_order_fav=1):
         item_id = count_rows(Item)
         Favorite.create(
             favorite_id=fake.uuid4(),
-            item_id=random.choice(range(1, item_id)),
-            user_id=random.choice(range(1, user_id))
+            item_id=random.choice(range(1, item_id+1)),
+            user_id=random.choice(range(1, user_id+1))
             )
-
+    # for i in range(1, 30):
+    #     user_id = count_rows(User)
+    #     item_id = count_rows(Item)
+    #     Favorite.create(
+    #         favorite_id=fake.uuid4(),
+    #         item_id=random.choice(range(1, item_id)),
+    #         user_id=11
+    #         )
 
 def create_db():
     db = SqliteDatabase('database.db', autocommit=True)
