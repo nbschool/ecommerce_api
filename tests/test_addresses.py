@@ -1,11 +1,10 @@
 import json
-import uuid
+from uuid import uuid4
 
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
 from models import Address
 from tests.test_case import TestCase
-from tests.test_utils import add_user, open_with_auth
-from uuid import uuid4
+from tests.test_utils import add_user, open_with_auth, wrong_dump
 
 TEST_USER_PSW = '123'
 
@@ -13,7 +12,7 @@ TEST_USER_PSW = '123'
 def get_test_addr_dict(user, country='Italy', city='Pistoia', post_code='51100',
                        address='Via Verdi 12', phone='3294882773'):
     return {
-        'address_id': uuid.uuid4(),
+        'address_id': uuid4(),
         'user': user,
         'user_first_name': user.first_name,
         'user_last_name': user.last_name,
@@ -39,6 +38,17 @@ def new_addr(user, country='Italy', city='Pistoia', post_code='51100',
 
 class TestAddresses(TestCase):
 
+    def test_create_address__not_json_failure(self):
+        user = add_user('mariorossi@gmail.com', '123')
+        addr = new_addr(user)
+
+        resp = open_with_auth(self.app, '/addresses/', 'POST',
+                              user.email, TEST_USER_PSW, 'application/json',
+                              wrong_dump(addr))
+
+        assert resp.status_code == BAD_REQUEST
+        assert len(Address.select()) == 0
+
     def test_get_addresses__empty(self):
         user = add_user('mariorossi@gmail.com', TEST_USER_PSW)
 
@@ -57,7 +67,8 @@ class TestAddresses(TestCase):
         resp = open_with_auth(self.app, '/addresses/',
                               'GET', user.email, TEST_USER_PSW, None, None)
         assert resp.status_code == OK
-        assert json.loads(resp.data) == [addr.json(), addr1.json()]
+        assert json.loads(resp.data) == [addr.json(),
+                                         addr1.json()]
 
     def test_create_address__success(self):
         user = add_user('mariorossi@gmail.com', '123')

@@ -91,6 +91,12 @@ class TestItems(TestCase):
         except ValueError:
             assert False
 
+    def test_post_item__not_json_failure(self):
+        resp = self.app.post('/items/', data=test_utils.wrong_dump(TEST_ITEM),
+                             content_type='application/json')
+        assert resp.status_code == client.BAD_REQUEST
+        assert len(Item.select()) == 0
+
     def test_post_item__failed(self):
         resp = self.app.post('/items/', data=json.dumps(TEST_ITEM_WRONG),
                              content_type='application/json')

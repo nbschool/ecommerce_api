@@ -4,7 +4,7 @@ Test suite.
 
 from models import Order, OrderItem, Item
 from tests.test_utils import (add_user, add_address,
-                              add_admin_user, open_with_auth)
+                              add_admin_user, open_with_auth, wrong_dump)
 from tests.test_case import TestCase
 from http.client import (CREATED, NO_CONTENT, NOT_FOUND,
                          OK, BAD_REQUEST, UNAUTHORIZED)
@@ -164,6 +164,45 @@ class TestOrders(TestCase):
         assert data['total_price'] == total_price
         assert data['delivery_address']['address_id'] == order['order']['delivery_address']
         assert Order.get().json()['order_id'] == data['order_id']
+
+    def test_create_order__not_json_failure(self):
+        Item.create(
+            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii',
+            availability=4
+        )
+        Item.create(
+            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            name='GINO',
+            price=30.20,
+            description='svariati GINIIIII',
+            availability=10
+        )
+        user_A = add_user('123@email.com', TEST_USER_PSW)
+        addr_A = add_address(user=user_A)
+        order = {
+            'order': {
+                'items': [
+                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                     'price': 20.20, 'quantity': 4},
+                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                     'price': 30.20, 'quantity': 10}
+                ],
+                'delivery_address': addr_A.json()["address_id"],
+                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+            }
+        }
+
+        path = 'orders/'
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'POST',
+                              user_A.email, TEST_USER_PSW, 'application/json',
+                              wrong_dump(order))
+
+        assert resp.status_code == BAD_REQUEST
+        assert len(Order.select()) == 0
+        assert len(OrderItem.select()) == 0
 
     def test_create_order__failure_availability(self, mocker):
         mocker.patch('views.orders.database', new=self.TEST_DB)
