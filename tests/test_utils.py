@@ -10,14 +10,9 @@ from models import Address, User
 from utils import get_image_folder
 
 
-path = os.path.abspath(os.path.dirname(__file__))
-path = os.path.join(path, 'expected_results.json')
-with open(path) as fo:
-    """
-    Expected results dict loaded from `expected_results.json` that can be used
-    to match tests operations with flask.
-    """
-    RESULTS = json.load(fo)
+# ###########################################################
+# Peewee models helpers
+# Functions to create new instances with overridable defaults
 
 
 def wrong_dump(data):
@@ -77,6 +72,11 @@ def add_address(user, country='Italy', city='Pistoia', post_code='51100',
     )
 
 
+# ###########################################################
+# Flask helpers
+# Common operations for flask functionalities
+
+
 def open_with_auth(app, url, method, username, password, content_type, data):
     """Generic call to app for http request. """
 
@@ -90,6 +90,10 @@ def open_with_auth(app, url, method, username, password, content_type, data):
                     headers={'Authorization': auth_str},
                     content_type=content_type,
                     data=data)
+
+
+# ###########################################################
+# Images helpers
 
 
 def clean_images():
@@ -107,36 +111,46 @@ def setup_images():
         os.makedirs(get_image_folder())
 
 
-# ######################################
+# ###########################################################
 # JSONAPI testing utilities
+
+
+path = os.path.abspath(os.path.dirname(__file__))
+path = os.path.join(path, 'expected_results.json')
+with open(path) as fo:
+    """
+    Expected results dict loaded from `expected_results.json` that can be used
+    to match tests operations with flask.
+    """
+    RESULTS = json.load(fo)
 
 
 def format_jsonapi_request(type_, data):
     """
     Given the attributes and relationships of a resource, compile the jsonapi
     post data for the request.
-    All key-value pairs except ``relationships`` will be mapped inside
+    All key - value pairs except ``relationships`` will be mapped inside
     ``['data']['attributes']`` of the request.
     Relationships key value will be mapped inside ``['data']['relationship']``
 
     > NOTE:
-    > All relationship **must** map to the related field inside the Schema of
+    > All relationship ** must ** map to the related field inside the Schema of
     > the type and have a ``type`` and ``id`` properties.
 
-    .. code-block:: python
+    .. code-block: : python
 
         data = {
             "<attribute field": "bar"
             "relationships": {
                 "<field_name>": {
                     "type": "<Resource type_>",
-                    "id": <Resource id>
+                    "id": < Resource id >
                 },
                 "<field_name>": [
                     {
                         "type": "item",
-                        "id": <Resource id>,
-                        "<metadata>": <metadata_value (ie. quantity of items)>
+                        "id": < Resource id > ,
+                        "<metadata>": < metadata_value(ie. quantity of items) >
                     }
                 ]
             }
@@ -173,7 +187,7 @@ def _test_res_patch_date(result, date):
 
     # add timezone info to match the actual response datetime
     def set_tz(d):
-        return d.replace(tzinfo=timezone.utc).isoformat()
+        return d.replace(tzinfo=datetime.timezone.utc).isoformat()
 
     # if result is a list iterate each item.
     if type(result) == list:
