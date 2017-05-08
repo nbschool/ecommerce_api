@@ -50,9 +50,7 @@ class AddressHandler(Resource):
         user = g.user
 
         try:
-            return Address.get(
-                Address.user == user,
-                Address.address_id == address_id).json(), OK
+            return Address.get(Address.user == user, Address.address_id == address_id).json(), OK
         except Address.DoesNotExist:
             return None, NOT_FOUND
 

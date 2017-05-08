@@ -67,8 +67,7 @@ class TestAddresses(TestCase):
         resp = open_with_auth(self.app, '/addresses/',
                               'GET', user.email, TEST_USER_PSW, None, None)
         assert resp.status_code == OK
-        assert json.loads(resp.data) == [addr.json(),
-                                         addr1.json()]
+        assert json.loads(resp.data) == [addr.json(), addr1.json()]
 
     def test_create_address__success(self):
         user = add_user('mariorossi@gmail.com', '123')

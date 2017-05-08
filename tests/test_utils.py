@@ -8,12 +8,12 @@ import shutil
 from utils import get_image_folder
 
 
-def wrong_dump(d):
+def wrong_dump(data):
     """
     Give a wrong encoding (urlencode-like) to the given dictionary
     """
     return reduce(lambda x, y: "{}&{}".format(x, y), [
-        "{}={}".format(k, v) for k, v in zip(d.keys(), d.values())])
+        "{}={}".format(k, v) for k, v in zip(data.keys(), data.values())])
 
 
 def add_user(email, psw):
