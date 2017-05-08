@@ -11,10 +11,10 @@ import uuid
 class FavoritesHandler(Resource):
     """TEST DOCSTRING"""
     @auth.login_required
-    def get():
+    def get(self):
         """TODO Set the user status when logged"""
         user = g.user
-        favorites = [f.json() for f in Favorite.select(favorite_id).where(user_id == user)]
+        favorites = [f.json() for f in Favorite.select()]
 
         if favorites:
             return favorites, OK
@@ -22,7 +22,7 @@ class FavoritesHandler(Resource):
 
 
     @auth.login_required    
-    def post():
+    def post(self):
         user = g.user
         res = request.get_json()
 

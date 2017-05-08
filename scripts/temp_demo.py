@@ -6,7 +6,7 @@ and supply a new one db with new down-to-earth data.
 from peewee import SqliteDatabase
 from faker import Factory
 from colorama import init, Fore, Style
-from models import User, Item, Order, OrderItem, Address
+from models import User, Item, Order, OrderItem, Address, Favorite
 import sys
 import glob
 import random
@@ -65,6 +65,7 @@ def set_db(database):
     OrderItem._meta.database = database
     User._meta.database = database
     Address._meta.database = database
+    Favorite._meta.database = database
 
 
 def user_creator(num_user=1):
@@ -85,6 +86,15 @@ def user_creator(num_user=1):
             password=User.hash_password(password)
         )
 
+    User.create(
+        user_id=fake.uuid4(),
+        first_name='German',
+        last_name='lugo',
+        email='german@email.com',
+        password=User.hash_password('@1234'),
+        admin=True
+    )
+
 
 def item_creator(num_item=1):
     for i in range(0, num_item):
@@ -95,7 +105,8 @@ def item_creator(num_item=1):
             item_id=item_id,
             name=item_name,
             price=item_price,
-            description=fake.paragraph(nb_sentences=3, variable_nb_sentences=True)
+            description=fake.paragraph(nb_sentences=3, variable_nb_sentences=True),
+            availability=random.choice(range(100))
         )
 
 
@@ -138,6 +149,16 @@ def order_item_creator(num_order_item=1):
             quantity = random.choice(range(1, 5))
             order.add_item(an_item, quantity)
 
+def favorite_creator(num_order_fav=1):
+    for i in range(0, num_order_fav):
+        user_id = count_rows(User)
+        item_id = count_rows(Item)
+        Favorite.create(
+            favorite_id=fake.uuid4(),
+            item_id=random.choice(range(1, item_id)),
+            user_id=random.choice(range(1, user_id))
+            )
+
 
 def create_db():
     db = SqliteDatabase('database.db', autocommit=True)
@@ -159,6 +180,7 @@ def write_db():
     item_creator(10)
     order_creator(10)
     order_item_creator(10)
+    favorite_creator(100)
 
 
 def get_databases():
@@ -181,6 +203,8 @@ def drops_all_tables(database):
             OrderItem.drop_table()
         if table == 'address':
             Address.drop_table()
+        if table == 'favorite':
+            Favorite.drop_table()
 
 
 def create_tables():
@@ -189,6 +213,7 @@ def create_tables():
     Order.create_table(fail_silently=True)
     OrderItem.create_table(fail_silently=True)
     Address.create_table(fail_silently=True)
+    Favorite.create_table(fail_silently=True)
 
 
 def good_bye(word, default='has'):
