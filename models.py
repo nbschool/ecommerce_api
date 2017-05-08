@@ -10,7 +10,8 @@ from peewee import UUIDField, ForeignKeyField, IntegerField
 from playhouse.signals import Model, post_delete, pre_delete
 from uuid import uuid4
 
-from exceptions import InsufficientAvailabilityException
+from exceptions import (InsufficientAvailabilityException,
+                        ItemAlreadyUserFavoritesException)
 from utils import remove_image
 
 
@@ -409,7 +410,6 @@ class Favorite(BaseModel):
     user = ForeignKeyField(User, related_name="favorites")
     item = ForeignKeyField(Item, related_name="favorites")
 
-
     def json(self):
         return {
             'favorite_id': str(self.favorite_id),
@@ -417,6 +417,36 @@ class Favorite(BaseModel):
             'user_id': str(self.user_id)
         }
 
+    def add_favorite(self, res):
+        """
+        It doesn't allow duplicated items as favorites
+        """
+        self.item = res['item_id']
+        self.user = res['user_id']
+
+        list_item = Favorite.select().where(Favorite.user == self.user)
+
+        for item in list_item:
+            if str(item.item_id) == self.item:
+                raise ItemAlreadyUserFavoritesException(self.item, self.user)
+
+        self.fav = {
+            'item_id': str(self.item),
+            'user_id': str(self.user)
+           }
+
+        return self.fav
+
+    def remove_favorite(self, item):
+        """
+        TODO Docstring
+        """
+        if item:
+            self.delete_instance()
+        else:
+            self.save()
+
+        return
 
 
 # Check if the table exists in the database; if not create it.
