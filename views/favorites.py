@@ -3,8 +3,7 @@ from flask import g, request
 from flask_restful import Resource
 from models import Favorite
 from utils import check_required_fields
-from http.client import (CREATED, NO_CONTENT, NOT_FOUND, OK,
-                         BAD_REQUEST, CONFLICT, UNAUTHORIZED)
+from http.client import (CREATED, NOT_FOUND, OK)
 import uuid
 
 
@@ -20,10 +19,8 @@ class FavoritesHandler(Resource):
             return favorites, OK
         return None, NOT_FOUND
 
-
-    @auth.login_required    
+    @auth.login_required
     def post(self):
-        user = g.user
         res = request.get_json()
 
         check_required_fields(
@@ -31,10 +28,12 @@ class FavoritesHandler(Resource):
             required_fields=['item_id', 'user_id']
             )
 
-        fav = Favorite.create(
+        fav = Favorite.add_favorite(self, res)
+
+        new_fav = Favorite.create(
             favorite_id=uuid.uuid4(),
-            item_id= res['item_id'],
-            user_id= res['user_id']
+            item_id=fav['item_id'],
+            user_id=fav['user_id']
             )
 
-        return fav.json(), CREATED
+        return new_fav.json(), CREATED

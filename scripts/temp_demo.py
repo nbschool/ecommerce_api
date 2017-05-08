@@ -149,6 +149,7 @@ def order_item_creator(num_order_item=1):
             quantity = random.choice(range(1, 5))
             order.add_item(an_item, quantity)
 
+
 def favorite_creator(num_order_fav=1):
     for i in range(0, num_order_fav):
         user_id = count_rows(User)
@@ -166,6 +167,7 @@ def favorite_creator(num_order_fav=1):
     #         item_id=random.choice(range(1, item_id)),
     #         user_id=11
     #         )
+
 
 def create_db():
     db = SqliteDatabase('database.db', autocommit=True)
