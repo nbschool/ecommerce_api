@@ -13,8 +13,8 @@ from uuid import uuid4
 from models import Item, Order, OrderItem
 from tests.test_utils import _test_res_patch_date as patch_date
 from tests.test_utils import (add_address, add_admin_user, add_user,
-                              get_expected_results, open_with_auth,
-                              format_jsonapi_request, wrong_dump)
+                              format_jsonapi_request, RESULTS,
+                              open_with_auth, wrong_dump)
 
 # main endpoint for API
 API_ENDPOINT = '/{}'
@@ -22,7 +22,7 @@ API_ENDPOINT = '/{}'
 # correct password used for all test users.
 TEST_USER_PSW = 'my_password123@'
 
-EXPECTED_RESULTS = get_expected_results('orders')
+EXPECTED_RESULTS = RESULTS['orders']
 
 
 class TestOrders(TestCase):

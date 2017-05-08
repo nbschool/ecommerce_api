@@ -11,7 +11,7 @@ from tests.test_utils import (add_address, add_user, get_expected_results,
 
 TEST_USER_PSW = '123'
 
-EXPECTED_RESULTS = get_expected_results('addresses')
+EXPECTED_RESULTS = RESULTS['addresses']
 
 
 def new_addr(user, country='Italy', city='Pistoia', post_code='51100',
