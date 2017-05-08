@@ -11,14 +11,14 @@ from http.client import (BAD_REQUEST, CONFLICT, CREATED, NO_CONTENT, NOT_FOUND,
 from models import Address, Item, Order, User
 
 from tests.test_utils import (add_address, add_user, format_jsonapi_request,
-                              get_expected_results, open_with_auth, wrong_dump)
+                              RESULTS, open_with_auth, wrong_dump)
 
 # main endpoint for API
 API_ENDPOINT = '/{}'
 # correct password used for all test users.
 TEST_USER_PSW = 'my_password123@'
 
-EXPECTED_RESULTS = get_expected_results('users')
+EXPECTED_RESULTS = RESULTS['users']
 
 
 class TestUser(TestCase):

@@ -17,7 +17,7 @@ from schemas import OrderSchema, UserSchema, AddressSchema, ItemSchema
 from tests.test_utils import _test_res_sort_included as sort_included
 from tests.test_utils import _test_res_sort_errors as sort_errors
 from tests.test_utils import (add_address, add_user, format_jsonapi_request,
-                              get_expected_results)
+                              RESULTS)
 
 USER_TEST_DICT = {
     "first_name": "Monty",
@@ -25,7 +25,7 @@ USER_TEST_DICT = {
     "email": "montsdf@asdhon.org",
     "password": "ewrwer"
 }
-EXPECTED_RESULTS = get_expected_results('schemas')
+EXPECTED_RESULTS = RESULTS['schemas']
 EXPECTED_ORDERS = EXPECTED_RESULTS['orders']
 EXPECTED_USERS = EXPECTED_RESULTS['users']
 EXPECTED_ADDRESSES = EXPECTED_RESULTS['addresses']

@@ -12,7 +12,7 @@ import utils
 
 from models import Item, Picture
 from tests import test_utils
-from tests.test_utils import format_jsonapi_request, get_expected_results
+from tests.test_utils import format_jsonapi_request, RESULTS
 
 TEST_IMAGE_FOLDER = 'test_images'
 
@@ -68,7 +68,7 @@ TEST_PICTURE3 = {
 
 WRONG_UUID = '04f2f213-1a0f-443d-a5ab-79097ba725ba'
 
-EXPECTED_RESULTS = get_expected_results('items')
+EXPECTED_RESULTS = RESULTS['items']
 
 
 class TestItems(TestCase):
