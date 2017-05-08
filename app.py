@@ -21,12 +21,11 @@ from http.client import BAD_REQUEST
 from flask_cors import CORS
 
 from models import database
+from views.address import AddressesHandler, AddressHandler
 from views.orders import OrdersHandler, OrderHandler
 from views.items import ItemHandler, ItemsHandler
 from views.user import UsersHandler, UserHandler
 from views.pictures import ItemPictureHandler, PictureHandler
-
-from views.address import AddressesHandler, AddressHandler
 
 app = Flask(__name__)
 CORS(app)
