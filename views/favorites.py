@@ -28,13 +28,13 @@ class FavoritesHandler(Resource):
 
         check_required_fields(
             request_data=res,
-            required_fields=['favorite_id', 'item_id', 'user_id']
+            required_fields=['item_id', 'user_id']
             )
 
         fav = Favorite.create(
             favorite_id=uuid.uuid4(),
-            item_id= res[item_id],
-            user_id= user
+            item_id= res['item_id'],
+            user_id= res['user_id']
             )
 
         return fav.json(), CREATED
