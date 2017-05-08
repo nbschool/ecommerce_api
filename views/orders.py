@@ -84,7 +84,6 @@ class OrderHandler(Resource):
     def patch(self, order_id):
         """ Modify a specific order. """
         res = request.get_json()
-        res_items = res['order']['items']
 
         res_items = res['order'].get('items')
         res_address = res['order'].get('delivery_address')
