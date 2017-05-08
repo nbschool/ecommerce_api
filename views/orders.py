@@ -102,7 +102,7 @@ class OrderHandler(Resource):
                     address = Address.get(Address.address_id == res_address)
                     order.delivery_address = address
                 except Address.DoesNotExist:
-                    abort(NOT_FOUND)
+                    abort(BAD_REQUEST)
 
             if res_items:
                 items_ids = [e['item_id'] for e in res_items]

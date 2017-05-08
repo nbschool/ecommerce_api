@@ -681,7 +681,7 @@ class TestOrders(TestCase):
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order))
         order_item_after = [o.json() for o in OrderItem.select()]
-        assert resp.status_code == NOT_FOUND
+        assert resp.status_code == BAD_REQUEST
         assert order_item_before == order_item_after
 
     def test_update_order__success_admin_not_own_order(self):
