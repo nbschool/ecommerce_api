@@ -100,3 +100,7 @@ database.db
 # image folder
 images/
 test_images/
+
+# temp_scripts
+
+temp_.*
