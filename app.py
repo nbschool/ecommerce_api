@@ -15,9 +15,8 @@ User can be deleted using `/api/users/<email>` and a list of all existing users
 can be retrieved making a GET to `/api/users/`
 """
 
-from flask import abort, Flask, request
+from flask import Flask
 from flask_restful import Api
-from http.client import BAD_REQUEST
 from flask_cors import CORS
 
 from models import database
@@ -30,26 +29,6 @@ from views.pictures import ItemPictureHandler, PictureHandler
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
-
-
-@app.before_request
-def bad_content_type():
-    """Checks for a correct request"""
-
-    # In case of POST of a picture a "multipart/form-data" has to be specified
-    # in the content-type of the request header
-    if request.endpoint == 'itempicturehandler' and request.method == 'POST':
-        ct = dict(request.headers).get('Content-Type', '')
-        if "multipart/form-data" not in ct:
-            abort(BAD_REQUEST)
-    # Force POST and PUT methods to have `Content-Type` as 'application/json'
-    # before proceeding inside the method handlers, that use `request.get_json`
-    # from `flask.request` that require the header to be set in order to return
-    # the content of the request.
-    elif request.method in ('POST', 'PUT'):
-        ct = dict(request.headers).get('Content-Type', '')
-        if ct != 'application/json':
-            abort(BAD_REQUEST)
 
 
 @app.before_request

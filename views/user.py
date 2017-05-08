@@ -27,7 +27,7 @@ class UsersHandler(Resource):
         # request and not be empty strings.
         required_fields = ['first_name', 'last_name', 'email', 'password']
 
-        request_data = request.get_json()
+        request_data = request.get_json(force=True)
 
         # For every field required for creating a new user try to get the
         # value from the json data of the request.

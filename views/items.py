@@ -25,7 +25,7 @@ class ItemsHandler(Resource):
         Insert a new item, the item_id identifier is forwarded
         from the one generated from the database
         """
-        request_data = request.get_json()
+        request_data = request.get_json(force=True)
         check_required_fields(
             request_data=request_data,
             required_fields=['name', 'price', 'description', 'availability'])
@@ -61,7 +61,7 @@ class ItemHandler(Resource):
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
 
-        request_data = request.get_json()
+        request_data = request.get_json(force=True)
         name = request_data.get('name')
         price = request_data.get('price')
         description = request_data.get('description')
