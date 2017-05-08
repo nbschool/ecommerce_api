@@ -3,33 +3,11 @@ import json
 import os
 import random
 import shutil
-from base64 import b64encode
-from datetime import timezone
 import uuid
+from base64 import b64encode
 
-
-class DeterministicUUID:
-    """ Generate a deterministic progressive UUID4-type UUID object."""
-
-    def __init__(self):
-        self.reset()
-
-    def reset(self):
-        self.counter = 0
-
-    def __call__(self):
-        self.counter += 1
-        return uuid.UUID('00000000-0000-0000-0000-{:012d}'.format(self.counter))
-
-
-# Override the uuid4 function to use our DeterministicUUID object and get
-# predictable UUID objects
-uuid.uuid4 = DeterministicUUID()
-
-from models import Address, User    # noqa:E402
-from utils import get_image_folder  # noqa: E402
-
-random.seed(10485)
+from models import Address, User
+from utils import get_image_folder
 
 
 path = os.path.abspath(os.path.dirname(__file__))
