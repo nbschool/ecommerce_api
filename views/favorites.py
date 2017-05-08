@@ -14,7 +14,7 @@ class FavoritesHandler(Resource):
     def get(self):
         """TODO Set the user status when logged"""
         user = g.user
-        favorites = [f.json() for f in Favorite.select()]
+        favorites = [f.json() for f in Favorite.select().where(Favorite.user == user.get_id())]
 
         if favorites:
             return favorites, OK
