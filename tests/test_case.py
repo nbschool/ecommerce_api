@@ -1,13 +1,8 @@
 """
 Test case for setup and teardown methods
 """
-# Test utils are the first thing to be imported as they override stuff inside
-# standard library such as uuid.uuid4 to generate deterministic values that can
-# be reproduced
-import tests.test_utils  # noqa:F401
 
-import uuid
-
+import pytest
 from peewee import SqliteDatabase
 
 from app import app
@@ -16,7 +11,7 @@ from models import Address, Item, Order, OrderItem, Picture, User
 TABLES = [Address, Item, Order, OrderItem, Picture, User]
 
 
-# @freeze_time('Jan 14th, 2012')
+@pytest.mark.usefixtures('mockuuid4')
 class TestCase:
     """
     Created TestCase to avoid duplicated code in the other tests
@@ -32,7 +27,6 @@ class TestCase:
         cls.app = app.test_client()
 
     def setup_method(self):
-        uuid.uuid4.reset()
 
         for table in TABLES:
             table.delete().execute()

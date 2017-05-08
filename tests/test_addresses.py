@@ -1,11 +1,10 @@
-from tests.test_case import TestCase
+# from tests.test_case import TestCase
 import json
 from http.client import BAD_REQUEST, CREATED, NO_CONTENT, NOT_FOUND, OK
-
-
 from uuid import uuid4
 
 from models import Address
+from tests.test_case import TestCase
 from tests.test_utils import (add_address, add_user, RESULTS,
                               open_with_auth, format_jsonapi_request, wrong_dump)
 
@@ -47,7 +46,6 @@ class TestAddresses(TestCase):
 
         resp = open_with_auth(self.app, '/addresses/', 'GET', user.email,
                               TEST_USER_PSW, None, None)
-
         assert resp.status_code == OK
         assert json.loads(resp.data) == []
 
