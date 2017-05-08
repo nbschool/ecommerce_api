@@ -809,7 +809,7 @@ class TestOrders(TestCase):
             name='mario',
             price=20.20,
             description='svariati mariii',
-            availability=2
+            availability=1
         )
         order = Order.create(
             delivery_address=addr_A,
@@ -827,7 +827,7 @@ class TestOrders(TestCase):
                 "order_id": str(order.order_id),
                 'items': [
                     {'item_id': str(item.item_id),
-                        'price': 30.30, 'quantity': 3},
+                        'price': 30.30, 'quantity': 4},
                 ],
                 'delivery_address': addr_A.json()["address_id"]
             }
