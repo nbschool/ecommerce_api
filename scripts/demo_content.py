@@ -70,7 +70,7 @@ def user_creator(num_user):
         password = fake.password(length=3, special_chars=False, digits=True,
                                  upper_case=True, lower_case=False)
         User.create(
-            user_id=user_uuid,
+            uuid=user_uuid,
             first_name=first_name,
             last_name=last_name,
             email=email_user,
@@ -84,7 +84,7 @@ def item_creator(num_item):
         item_name = fake.sentence(nb_words=3, variable_nb_words=True)
         item_price = fake.pyfloat(left_digits=2, right_digits=2, positive=True)
         Item.create(
-            item_id=item_id,
+            uuid=item_id,
             name=item_name,
             price=item_price,
             description=fake.paragraph(nb_sentences=3, variable_nb_sentences=True),
@@ -99,7 +99,7 @@ def address_creator(num_addr):
         country = random.choice(LIST_COUNTRIES)
         user_id = count_rows(User)
         Address.create(
-            address_id=fake.uuid4(),
+            uuid=fake.uuid4(),
             user_id=random.randint(1, user_id),
             country=country,
             city=fake.city(),
