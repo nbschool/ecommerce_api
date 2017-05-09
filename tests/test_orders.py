@@ -90,14 +90,14 @@ class TestOrders(TestCase):
             name='mario',
             price=20.20,
             description='svariati mariii',
-            availability=2
+            availability=12
         )
         item2 = Item.create(
             uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
-            availability=3
+            availability=30
         )
 
         order1 = Order.create(
@@ -137,12 +137,13 @@ class TestOrders(TestCase):
 
         order = {
             'relationships': {
-                'items': [
-                    {'id': '429994bf-784e-47cc-a823-e0c394b823e8',
-                     'type': 'item', 'quantity': 4},
-                    {'id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
-                     'type': 'item', 'quantity': 10}
-                ],
+                'items': [{
+                    'id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    'type': 'item', 'quantity': 4
+                }, {
+                    'id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                    'type': 'item', 'quantity': 10
+                }],
                 'delivery_address': {
                     'type': 'address',
                     'id': '8473fbaa-94f0-46db-939f-faae898f001c'
@@ -168,7 +169,6 @@ class TestOrders(TestCase):
         expected_result = patch_date(
             EXPECTED_RESULTS['create_order__success'], order.created_at)
         # inject the order id
-        expected_result = patch_id(expected_result, order.uuid)
         assert json.loads(resp.data) == expected_result
 
     def test_create_order__not_json_failure(self):
@@ -367,14 +367,14 @@ class TestOrders(TestCase):
 
     def test_create_order_missing_item_qty__fail(self):
         Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
             availability=25
         )
         Item.create(
-            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
@@ -444,15 +444,21 @@ class TestOrders(TestCase):
         user = add_user('12345@email.com', TEST_USER_PSW)
         add_address(user=user, id='429994bf-784e-47cc-a823-e0c394b823e8')
         order = {
-            'order': {
+            'relationships': {
                 'items': [
                     {'id': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'type': 'item', 'quantity': 4},
                     {'id': '577ad826-a79d-41e9-a5b2-7955bcf034r3',
                      'type': 'item', 'quantity': 10}
                 ],
-                'delivery_address': '429994bf-784e-47cc-a823-e0c394b823e8',
-                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+                'delivery_address': {
+                    'type': 'address',
+                    'id': '429994bf-784e-47cc-a823-e0c394b823e8'
+                },
+                'user': {
+                    'type': 'user',
+                    'id': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+                }
             }
         }
         path = 'orders/'
@@ -469,46 +475,47 @@ class TestOrders(TestCase):
             name='mario',
             price=20.20,
             description='svariati mariii',
-            availability=5
+            availability=15
         )
-        item2 = Item.create(
+        Item.create(
             uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
-            availability=10
+            availability=15
         )
 
         user = add_user('12345@email.com', TEST_USER_PSW)
         addr = add_address(user=user, id='429994bf-784e-47cc-a823-e0c394b823e8')
 
-        order1 = Order.create(delivery_address=addr, user=user)
-        order1.add_item(item1, 2)
-
-        order_uuid = str(order1.uuid)
+        order1 = Order.create(
+            delivery_address=addr,
+            user=user
+        ).add_item(item1, 2)
 
         order = {
-            "order": {
+            "relationships": {
                 'items': [{
-                    'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    'id': '429994bf-784e-47cc-a823-e0c394b823e8',
                     'type': 'item', 'quantity': 5,
                      }, {
-                    'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                    'id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                     'type': 'item', 'quantity': 10,
                 }]
             }
         }
+        post_data = format_jsonapi_request('order', order)
         path = 'orders/{}'.format(order1.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               '12345@email.com', TEST_USER_PSW, 'application/json',
-                              json.dumps(order))
-        assert resp.status_code == OK
-        resp_order = Order.get(uuid=order1.uuid).json(include_items=True)
-        assert resp_order['uuid'] == order['order']['uuid']
-        assert resp_order['delivery_address']['uuid'] == order['order']['delivery_address']
-        order_items = [o.json() for o in OrderItem.select()]
-        assert str(order_items[0]['item_uuid']) == item1.uuid
-        assert str(order_items[1]['item_uuid']) == item2.uuid
+                              json.dumps(post_data))
+        order = Order.get()
+        expected_result = patch_date(
+            EXPECTED_RESULTS['update_order__new_item'],
+            order.created_at
+        )
+
+        assert json.loads(resp.data) == expected_result
 
     def test_update_order__item_quantity_zero(self):
         item1 = Item.create(
@@ -523,6 +530,7 @@ class TestOrders(TestCase):
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
+            availability=2
         )
 
         user = add_user('12345@email.com', TEST_USER_PSW)
@@ -535,25 +543,30 @@ class TestOrders(TestCase):
         ).add_item(item1, 2).add_item(item2)
 
         post_data = {
-            "order": {
-                'items': [
-                    {'id': '429994bf-784e-47cc-a823-e0c394b823e8',
-                     'type': 'item', 'quantity': 0},
-                ],
-                'delivery_address': '429994bf-784e-47cc-a823-e0c394b823e8',
-                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+            "relationships": {
+                    'items': [{
+                        'id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                        'type': 'item', 'quantity': 0,
+                    }]
             }
         }
+        post_data = format_jsonapi_request('order', post_data)
         path = 'orders/{}'.format(order.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               user.email, TEST_USER_PSW, 'application/json',
                               json.dumps(post_data))
         assert resp.status_code == OK
-        resp_order = Order.get(uuid=order.uuid).json(include_items=True)
-        assert resp_order['uuid'] == order['order']['uuid']
-        assert resp_order['delivery_address']['uuid'] == order['order']['delivery_address']
-        assert len(resp_order['items']) == 1
-        assert str(OrderItem.get().item.uuid) == item2.uuid
+
+        expected_result = patch_date(
+            EXPECTED_RESULTS['update_order__item_quantity_zero'],
+            order.created_at,
+        )
+
+        assert json.loads(resp.data) == expected_result
+
+        # test remove with quantity=0 functionality, item1 is not present.
+        assert len(order.order_items) == 1
+        assert order.order_items[0].item == item2
 
     def test_update_order__remove_item_without_delete(self):
         item1 = Item.create(
@@ -572,38 +585,40 @@ class TestOrders(TestCase):
         )
 
         user = add_user('12345@email.com', TEST_USER_PSW)
-        addr = add_address(user=user)
+        addr = add_address(user=user, id='86ba7e70-b3c0-4c9c-8d26-a14f49360e47')
         add_address(user=user, id='429994bf-784e-47cc-a823-e0c394b823e8')
 
-        order1 = Order.create(delivery_address=addr, user=user)
-        order1.add_item(item1, 10).add_item(item2, 20)
+        order = Order.create(
+            delivery_address=addr,
+            user=user,
+        ).add_item(item1, 10).add_item(item2, 20)
 
-        order_uuid = str(order1.uuid)
-
-        order = {
-            "order": {
-                "uuid": order_uuid,
-                'items': [
-                    {'id': '429994bf-784e-47cc-a823-e0c394b823e8',
-                     'type': 'item', 'quantity': 5},
-                ],
-                'delivery_address': '429994bf-784e-47cc-a823-e0c394b823e8',
-                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+        post_data = {
+            "relationships": {
+                    'items': [{
+                        'id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                        'type': 'item', 'quantity': 0,
+                    }],
+                    'delivery_address': {
+                        'type': 'address',
+                        'id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    }
             }
         }
-        path = 'orders/{}'.format(order1.uuid)
+        post_data = format_jsonapi_request('order', post_data)
+        path = 'orders/{}'.format(order.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               user.email, TEST_USER_PSW, 'application/json',
-                              json.dumps(order))
+                              json.dumps(post_data))
         assert resp.status_code == OK
-        resp_order = Order.get(uuid=order1.uuid).json(include_items=True)
-        assert resp_order['uuid'] == order['order']['uuid']
-        assert resp_order['delivery_address']['uuid'] == order['order']['delivery_address']
-        order_items = [o.json() for o in OrderItem.select()]
-        assert str(order_items[0]['id']) == item1.uuid
-        assert str(order_items[1]['id']) == item2.uuid
-        assert order_items[0]['quantity'] == '5'
-        assert order_items[1]['quantity'] == '20'
+
+        expected_result = patch_date(
+            EXPECTED_RESULTS['update_order__remove_item_without_delete'],
+            order.created_at
+        )
+        assert json.loads(resp.data) == expected_result
+        assert len(order.order_items) == 1
+        assert order.order_items[0].quantity == 20
 
     def test_update_order__add_item(self):
         item1 = Item.create(
@@ -625,35 +640,30 @@ class TestOrders(TestCase):
         addr_A = add_address(user=user)
         add_address(user=user, id='429994bf-784e-47cc-a823-e0c394b823e8')
 
-        order1 = Order.create(delivery_address=addr_A, user=user)
-        order1.add_item(item1, 5).add_item(item2, 20)
+        order = Order.create(delivery_address=addr_A, user=user)
+        order.add_item(item1, 5).add_item(item2, 20)
 
-        order_uuid = str(order1.uuid)
-
-        order = {
-            "order": {
-                "uuid": order_uuid,
-                'items': [
-                    {'id': '429994bf-784e-47cc-a823-e0c394b823e8',
-                     'type': 'item', 'quantity': 10},
-                ],
-                'delivery_address': '429994bf-784e-47cc-a823-e0c394b823e8',
-                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+        post_data = {
+            "relationships": {
+                    'items': [{
+                        'id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                        'type': 'item', 'quantity': 10,
+                    }]
             }
         }
-        path = 'orders/{}'.format(order1.uuid)
+        post_data = format_jsonapi_request('order', post_data)
+
+        path = 'orders/{}'.format(order.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               user.email, TEST_USER_PSW, 'application/json',
-                              json.dumps(order))
+                              json.dumps(post_data))
         assert resp.status_code == OK
-        resp_order = Order.get(uuid=order1.uuid).json(include_items=True)
-        assert resp_order['uuid'] == order['order']['uuid']
-        assert resp_order['delivery_address']['uuid'] == order['order']['delivery_address']
-        order_items = [o.json() for o in OrderItem.select()]
-        assert str(order_items[0]['id']) == item1.uuid
-        assert str(order_items[1]['id']) == item2.uuid
-        assert order_items[0]['quantity'] == '10'
-        assert order_items[1]['quantity'] == '20'
+
+        expected_result = patch_date(
+            EXPECTED_RESULTS['update_order__add_item'],
+            order.created_at
+        )
+        assert json.loads(resp.data) == expected_result
 
     def test_update_order__success(self):
         item1 = Item.create(
@@ -673,24 +683,17 @@ class TestOrders(TestCase):
 
         user = add_user('12345@email.com', TEST_USER_PSW,
                         id='90c3e1c1-b51c-4224-b69d-17f84f6a8dfc')
-        addr_A = add_address(
+        addr = add_address(
             user=user, id='8f3b518e-9c17-4103-9a47-b274740726e7')
-        addr_B = add_address(
+        add_address(
             user=user, id='284ac7f6-40c2-4da6-b722-5d8cd248b1cc')
+        order = Order.create(
+            delivery_address=addr,
+            user=user,
+            uuid='9d899e2d-66e8-4728-aee5-fee733807b4a'
+        ).add_item(item1, 2).add_item(item2)
 
-        order1 = Order.create(delivery_address=addr_A, user=user,
-                              uuid='9d899e2d-66e8-4728-aee5-fee733807b4a')
-        order1.add_item(item1, 2).add_item(item2)
-
-        order2 = Order.create(delivery_address=addr_B, user=user,
-                              uuid='b4b879c6-8f74-4eee-8e18-25c919749828')
-        order2.add_item(item2)
-        Order.create(
-            delivery_address=addr_B, user=user,
-            uuid='b4b879c6-8f74-4eee-8e18-25c919749828'
-        ).add_item(item2)
-
-        order = {
+        post_data = {
             'relationships': {
                 'items': [
                     {'id': '429994bf-784e-47cc-a823-e0c394b823e8',
@@ -708,14 +711,15 @@ class TestOrders(TestCase):
                 }
             }
         }
-        data = format_jsonapi_request('order', order)
-        path = 'orders/{}'.format(order1.uuid)
+        post_data = format_jsonapi_request('order', post_data)
+        path = 'orders/{}'.format(order.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               user.email, TEST_USER_PSW, 'application/json',
-                              json.dumps(data))
+                              json.dumps(post_data))
 
         expected_result = patch_date(EXPECTED_RESULTS['update_order__success'],
-                                     order1.created_at)
+                                     order.created_at)
+
         assert resp.status_code == OK
         assert json.loads(resp.data) == expected_result
 
@@ -785,12 +789,7 @@ class TestOrders(TestCase):
 
         user = add_user('12345@email.com', TEST_USER_PSW)
         addr_A = add_address(user=user)
-        user = add_user('12345@email.com', TEST_USER_PSW)
-        addr_A = add_address(user=user)
 
-        order1 = Order.create(delivery_address=addr_A, user=user)
-        order1.add_item(item1, 2).add_item(item2)
-        order_item_before = [o.json() for o in OrderItem.select()]
         order1 = Order.create(
             delivery_address=addr_A, user=user
         ).add_item(item1, 2).add_item(item2)
@@ -836,24 +835,12 @@ class TestOrders(TestCase):
                         id='35b9d92a-83c4-48c6-bc2a-580d95951f99')
         addr_A = add_address(
             user=user, id='7f7bc402-469c-4f7b-8918-d4e150469ac7')
-        addr_B = add_address(
-            user=user, id='2bac777f-14b6-4a87-8ddb-03a8a1ede076')
-        user = add_user('12345@email.com', TEST_USER_PSW,
-                        id='35b9d92a-83c4-48c6-bc2a-580d95951f99')
-        addr_A = add_address(
-            user=user, id='7f7bc402-469c-4f7b-8918-d4e150469ac7')
-        addr_B = add_address(
-            user=user, id='2bac777f-14b6-4a87-8ddb-03a8a1ede076')
 
-        order1 = Order.create(delivery_address=addr_A, user=user,
-                              uuid='54a2b917-6c21-42b5-b273-39ad6c765187')
-        order1.add_item(item1, 2).add_item(item2)
         order1 = Order.create(
-            delivery_address=addr_A, user=user,
+            delivery_address=addr_A,
+            user=user,
             uuid='54a2b917-6c21-42b5-b273-39ad6c765187'
         ).add_item(item1, 2).add_item(item2)
-
-        Order.create(delivery_address=addr_B, user=user).add_item(item2)
 
         order = {
             'relationships': {
@@ -863,14 +850,6 @@ class TestOrders(TestCase):
                     {'id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'type': 'item', 'quantity': 1}
                 ],
-                'delivery_address': {
-                    'type': 'address',
-                    'id': str(addr_B.uuid)
-                },
-                'user': {
-                    'type': 'user',
-                    'id': '90c3e1c1-b51c-4224-b69d-17f84f6a8dfc'
-                }
             }
         }
         data = format_jsonapi_request('order', order)
@@ -880,6 +859,7 @@ class TestOrders(TestCase):
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               user_B.email, TEST_USER_PSW, 'application/json',
                               json.dumps(data))
+
         assert resp.status_code == OK
 
         expected_result = patch_date(
@@ -929,9 +909,6 @@ class TestOrders(TestCase):
         addr = add_address(
             user=user, id='429994bf-784e-47cc-a823-e0c394b823e8')
         Order.create(delivery_address=addr, user=user)
-        user = add_user('12345@email.com', TEST_USER_PSW)
-        addr = add_address(user=user)
-        Order.create(delivery_address=addr, user=user)
 
         order_uuid = str(uuid4())
 
@@ -940,17 +917,7 @@ class TestOrders(TestCase):
                 'items': [
                     {'id': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'type': 'item', 'quantity': 5},
-                    {'id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
-                     'type': 'item', 'quantity': 1}
                 ],
-                'delivery_address': {
-                    'type': 'address',
-                    'id': str(addr.uuid)
-                },
-                'user': {
-                    'type': 'user',
-                    'id': '90c3e1c1-b51c-4224-b69d-17f84f6a8dfc'
-                }
             }
         }
         data = format_jsonapi_request('order', order)
@@ -974,7 +941,7 @@ class TestOrders(TestCase):
             name='mario',
             price=20.20,
             description='svariati mariii',
-            availability=1
+            availability=4
         )
         order = Order.create(
             delivery_address=addr,
@@ -1045,21 +1012,13 @@ class TestOrders(TestCase):
         user = add_user('12345@email.com', TEST_USER_PSW)
         addr = add_address(
             user=user, id='429994bf-784e-47cc-a823-e0c394b823e8')
-        user = add_user('12345@email.com', TEST_USER_PSW)
-        addr_A = add_address(user=user)
-        addr_B = add_address(user=user)
 
         order = Order.create(
             delivery_address=addr,
-            user=user,
-        ).add_item(item1, 2).add_item(item2)
-        Order.create(
-            delivery_address=addr_A, user=user
+            user=user
         ).add_item(item1, 2).add_item(item2)
 
-        Order.create(delivery_address=addr_B, user=user).add_item(item2)
-
-        order = {
+        post_data = {
             'relationships': {
                 'items': [
                     {'id': '429994bf-784e-47cc-a823-e0c394b823e8',
@@ -1069,7 +1028,7 @@ class TestOrders(TestCase):
                 ],
                 'delivery_address': {
                     'type': 'address',
-                    'id': str(addr_B.uuid)
+                    'id': '429994bf-784e-47cc-a823-e0c394b823e8'
                 },
                 'user': {
                     'type': 'user',
@@ -1077,12 +1036,12 @@ class TestOrders(TestCase):
                 }
             }
         }
-        data = format_jsonapi_request('order', order)
+        post_data = format_jsonapi_request('order', post_data)
         user_B = add_user('wrong_user@email.com', TEST_USER_PSW)
         path = 'orders/{}'.format(order.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               user_B.email, TEST_USER_PSW, 'application/json',
-                              json.dumps(data))
+                              json.dumps(post_data))
 
         assert resp.status_code == UNAUTHORIZED
 

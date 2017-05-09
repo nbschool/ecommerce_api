@@ -232,7 +232,6 @@ class Order(BaseModel):
 
         :param item Item: instance of models.Item
         """
-
         for orderitem in self.order_items:
             # Looping all the OrderItem related to this order, if one with the
             # same item is found we update that row.
@@ -243,19 +242,21 @@ class Order(BaseModel):
                 self.save()
                 return self
 
-        if quantity > item.availability:
-            raise InsufficientAvailabilityException(item, quantity)
         # if no existing OrderItem is found with this order and this Item,
-        # create a new row in the OrderItem table
+        # create a new row in the OrderItem table and use OrderItem.add_item
+        # to properly use the calculus logic that handles updating prices and
+        # availability. To use correctly add_item the initial quantity and
+        # subtotal are set to 0
         OrderItem.create(
             order=self,
             item=item,
-            quantity=quantity,
-            subtotal=item.price * quantity
-        )
+            quantity=0,
+            subtotal=0,
+        ).add_item(quantity)
 
         self.total_price += (item.price * quantity)
         self.save()
+
         return self
 
     def update_item(self, item, quantity):
@@ -320,6 +321,7 @@ class OrderItem(BaseModel):
 
         self.item.availability -= quantity
         self.item.save()
+
         self.quantity += quantity
         self._calculate_subtotal()
         self.save()

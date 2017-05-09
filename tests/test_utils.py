@@ -63,7 +63,7 @@ def add_user(email, password, id=None, first_name='John', last_name='Doe'):
         last_name=last_name,
         email=email,
         password=User.hash_password(password),
-        uuid=id or uuid4(),
+        uuid=id or uuid.uuid4(),
     )
 
 
@@ -80,7 +80,7 @@ def add_admin_user(email, psw, id=None):
         last_name='Doe',
         email=email,
         password=User.hash_password(psw),
-        uuid=id or uuid4(),
+        uuid=id or uuid.uuid4(),
         admin=True,
     )
 
@@ -89,7 +89,7 @@ def add_address(user, country='Italy', city='Pistoia', post_code='51100',
                 address='Via Verdi 12', phone='3294882773', id=None):
 
     return Address.create(
-        uuid=id or uuid4(),
+        uuid=id or uuid.uuid4(),
         user=user,
         country=country,
         city=city,

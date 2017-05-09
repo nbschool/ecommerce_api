@@ -58,9 +58,7 @@ class TestUser(TestCase):
         assert resp.status_code == CREATED
         resp_user = json.loads(resp.data)
 
-        expected_result = patch_id(
-            EXPECTED_RESULTS['post_new_user__success'],
-            User.get().uuid)
+        expected_result = EXPECTED_RESULTS['post_new_user__success']
 
         assert resp_user == expected_result
 

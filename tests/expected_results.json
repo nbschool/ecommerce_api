@@ -373,11 +373,23 @@
             "data": {
                 "type": "order",
                 "attributes": {
-                    "date": "2017-04-28T12:01:39.337674+00:00",
-                    "total_price": 131.2
+                    "total_price": 131.2,
+                    "date": "2017-05-09T18:00:32.076603+00:00"
                 },
                 "id": "54a2b917-6c21-42b5-b273-39ad6c765187",
                 "relationships": {
+                    "delivery_address": {
+                        "data": {
+                            "type": "address",
+                            "id": "7f7bc402-469c-4f7b-8918-d4e150469ac7"
+                        }
+                    },
+                    "user": {
+                        "data": {
+                            "type": "user",
+                            "id": "35b9d92a-83c4-48c6-bc2a-580d95951f99"
+                        }
+                    },
                     "items": {
                         "data": [
                             {
@@ -389,18 +401,6 @@
                                 "id": "577ad826-a79d-41e9-a5b2-7955bcf03499"
                             }
                         ]
-                    },
-                    "user": {
-                        "data": {
-                            "type": "user",
-                            "id": "35b9d92a-83c4-48c6-bc2a-580d95951f99"
-                        }
-                    },
-                    "delivery_address": {
-                        "data": {
-                            "type": "address",
-                            "id": "2bac777f-14b6-4a87-8ddb-03a8a1ede076"
-                        }
                     }
                 },
                 "links": {
@@ -409,6 +409,166 @@
             },
             "links": {
                 "self": "/orders/54a2b917-6c21-42b5-b273-39ad6c765187"
+            }
+        },
+        "update_order__new_item": {
+            "data": {
+                "type": "order",
+                "relationships": {
+                    "user": {
+                        "data": {
+                            "type": "user",
+                            "id": "00000000-0000-0000-0000-000000000001"
+                        }
+                    },
+                    "delivery_address": {
+                        "data": {
+                            "type": "address",
+                            "id": "429994bf-784e-47cc-a823-e0c394b823e8"
+                        }
+                    },
+                    "items": {
+                        "data": [
+                            {
+                                "type": "item",
+                                "id": "429994bf-784e-47cc-a823-e0c394b823e8"
+                            },
+                            {
+                                "type": "item",
+                                "id": "577ad826-a79d-41e9-a5b2-7955bcf03499"
+                            }
+                        ]
+                    }
+                },
+                "attributes": {
+                    "date": "2017-05-09T16:40:35.834307+00:00",
+                    "total_price": 403
+                },
+                "id": "00000000-0000-0000-0000-000000000002",
+                "links": {
+                    "self": "/orders/00000000-0000-0000-0000-000000000002"
+                }
+            },
+            "links": {
+                "self": "/orders/00000000-0000-0000-0000-000000000002"
+            }
+        },
+        "update_order__item_quantity_zero": {
+            "data": {
+                "type": "order",
+                "attributes": {
+                    "date": "2017-05-09T17:31:28.906795+00:00",
+                    "total_price": 30.2
+                },
+                "relationships": {
+                    "user": {
+                        "data": {
+                            "type": "user",
+                            "id": "00000000-0000-0000-0000-000000000001"
+                        }
+                    },
+                    "delivery_address": {
+                        "data": {
+                            "type": "address",
+                            "id": "00000000-0000-0000-0000-000000000002"
+                        }
+                    },
+                    "items": {
+                        "data": [
+                            {
+                                "type": "item",
+                                "id": "577ad826-a79d-41e9-a5b2-7955bcf03499"
+                            }
+                        ]
+                    }
+                },
+                "id": "00000000-0000-0000-0000-000000000003",
+                "links": {
+                    "self": "/orders/00000000-0000-0000-0000-000000000003"
+                }
+            },
+            "links": {
+                "self": "/orders/00000000-0000-0000-0000-000000000003"
+            }
+        },
+        "update_order__remove_item_without_delete": {
+            "data": {
+                "type": "order",
+                "relationships": {
+                    "delivery_address": {
+                        "data": {
+                            "type": "address",
+                            "id": "429994bf-784e-47cc-a823-e0c394b823e8"
+                        }
+                    },
+                    "user": {
+                        "data": {
+                            "type": "user",
+                            "id": "00000000-0000-0000-0000-000000000001"
+                        }
+                    },
+                    "items": {
+                        "data": [
+                            {
+                                "type": "item",
+                                "id": "577ad826-a79d-41e9-a5b2-7955bcf03499"
+                            }
+                        ]
+                    }
+                },
+                "attributes": {
+                    "total_price": 604,
+                    "date": "2017-05-09T17:43:35.046926+00:00"
+                },
+                "id": "00000000-0000-0000-0000-000000000002",
+                "links": {
+                    "self": "/orders/00000000-0000-0000-0000-000000000002"
+                }
+            },
+            "links": {
+                "self": "/orders/00000000-0000-0000-0000-000000000002"
+            }
+        },
+        "update_order__add_item": {
+            "data": {
+                "type": "order",
+                "relationships": {
+                    "user": {
+                        "data": {
+                            "type": "user",
+                            "id": "00000000-0000-0000-0000-000000000001"
+                        }
+                    },
+                    "delivery_address": {
+                        "data": {
+                            "type": "address",
+                            "id": "00000000-0000-0000-0000-000000000002"
+                        }
+                    },
+                    "items": {
+                        "data": [
+                            {
+                                "type": "item",
+                                "id": "429994bf-784e-47cc-a823-e0c394b823e8"
+                            },
+                            {
+                                "type": "item",
+                                "id": "577ad826-a79d-41e9-a5b2-7955bcf03499"
+                            }
+                        ]
+                    }
+                },
+                "attributes": {
+                    "total_price": 806,
+                    "date": "2017-05-09T17:49:02.721028+00:00"
+                },
+                "id": "00000000-0000-0000-0000-000000000003",
+                "links": {
+                    "self": "/orders/00000000-0000-0000-0000-000000000003"
+                }
+            },
+            "links": {
+                "self": "/orders/00000000-0000-0000-0000-000000000003"
             }
         }
     },

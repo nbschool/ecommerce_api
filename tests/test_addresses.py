@@ -6,7 +6,7 @@ from http.client import BAD_REQUEST, CREATED, NO_CONTENT, NOT_FOUND, OK
 from uuid import uuid4
 
 from models import Address
-from tests.test_utils import (add_address, add_user, get_expected_results,
+from tests.test_utils import (add_address, add_user, RESULTS,
                               open_with_auth, format_jsonapi_request, wrong_dump)
 
 TEST_USER_PSW = '123'
@@ -24,7 +24,7 @@ def new_addr(user, country='Italy', city='Pistoia', post_code='51100',
         'address': address,
         'phone': phone,
         'relationships': {
-            'user': {'type': 'user', 'id': str(user.user_id)}
+            'user': {'type': 'user', 'id': str(user.uuid)}
         }
     }
 
@@ -119,7 +119,6 @@ class TestAddresses(TestCase):
         addr = add_address(user, city='Firenze',
                            post_code='50132', address='Via Rossi 10',
                            id='4dbf5f2b-e164-4967-9a82-022996a17cc9')
-        add_address(user)
 
         resp = open_with_auth(self.app, '/addresses/{}'.format(addr.uuid), 'GET',
                               user.email, TEST_USER_PSW, None, None)
@@ -151,7 +150,7 @@ class TestAddresses(TestCase):
                               content_type='application/json')
 
         assert resp.status_code == OK
-        upd_addr = Address.get(Address.uuid == addr_id).serialize()[0]
+        upd_addr = Address.get(Address.uuid == addr_id).json()
         expected_result = EXPECTED_RESULTS['put_address__success']
         # Check that the response data is what is expected and is also
         # the same as what has ben actually saved
@@ -164,7 +163,7 @@ class TestAddresses(TestCase):
                          address="Via Bianchi 20")
         addr1 = format_jsonapi_request('address', addr1)
 
-        resp = open_with_auth(self.app, '/addresses/{}'.format(uuid4()), 'PUT',
+        resp = open_with_auth(self.app, '/addresses/{}'.format(uuid4()), 'PATCH',
                               user.email, TEST_USER_PSW,
                               data=json.dumps(addr1),
                               content_type='application/json')

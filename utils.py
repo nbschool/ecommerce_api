@@ -12,7 +12,7 @@ def get_image_folder():
     return os.path.join(get_project_root(), IMAGE_FOLDER)
 
 
-def save_image(file, picture_id, extension):
+def save_image(file, picture_uuid, extension):
     """
     Create an image folder if not exist and then save in the
     folder the image passed with its extension

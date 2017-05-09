@@ -44,7 +44,7 @@ class AddressHandler(Resource):
         try:
             addr = Address.get(
                 Address.user == g.user,
-                Address.uuid == uuid
+                Address.uuid == address_uuid
             )
             return generate_response(addr.json(), OK)
 
