@@ -1,11 +1,8 @@
 import json
 import uuid
 
-from peewee import SqliteDatabase
-
-from app import app
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
-from models import Address, User
+from models import Address
 from tests.test_case import TestCase
 from tests.test_utils import add_user, open_with_auth
 from uuid import uuid4
