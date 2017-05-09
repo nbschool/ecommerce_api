@@ -23,12 +23,6 @@ parser.add_argument('-o','--orders', type=int,
                     help='Set up the number of insertions in Order table.', default=10, choices=range(10,101))
 
 args = parser.parse_args()
-
-num_u = args.users
-num_a = args.addresses
-num_i = args.items
-num_o = agrs.orders
-
 import pdb; pdb.set_trace()
 
 init(autoreset=True)
@@ -86,7 +80,7 @@ def set_db(database):
     Address._meta.database = database
 
 
-def user_creator(num_user=num_u):
+def user_creator(num_user):
     """Create users from an Italian-like context. Due to param in factory create 'it_iT'."""
     for i in range(0, num_user):
         user_uuid = fake.uuid4()
@@ -105,7 +99,7 @@ def user_creator(num_user=num_u):
         )
 
 
-def item_creator(num_item=num_i):
+def item_creator(num_item):
     for i in range(0, num_item):
         item_id = fake.uuid4()
         item_name = fake.sentence(nb_words=3, variable_nb_words=True)
@@ -118,7 +112,7 @@ def item_creator(num_item=num_i):
         )
 
 
-def address_creator(num_addr=num_a):
+def address_creator(num_addr):
     LIST_COUNTRIES = ['Belgium', 'France', 'Germany',
                       'Greece', 'Italy', 'Portugal', 'Spain']
     for i in range(0, num_addr):
@@ -135,7 +129,7 @@ def address_creator(num_addr=num_a):
         )
 
 
-def order_creator(num_order=num_o):
+def order_creator(num_order):
     for i in range(0, num_order):
         user_id = count_rows(User)
         order_id = fake.uuid4()
