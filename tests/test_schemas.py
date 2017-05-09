@@ -289,14 +289,14 @@ class TestItemSchema(TestCase):
             'availability': 73
         }
         self.item1 = Item.create(
-            item_id='25da606b-dbd3-45e1-bb23-ff1f84a5622a',
+            uuid='25da606b-dbd3-45e1-bb23-ff1f84a5622a',
             name='Item 1',
             description='Item 1 description',
             price=5.24,
             availability=5,
         )
         self.item2 = Item.create(
-            item_id='08bd8de0-a4ac-459d-956f-cf6d8b8a7507',
+            uuid='08bd8de0-a4ac-459d-956f-cf6d8b8a7507',
             name='Item 2',
             description='Item 2 description',
             price=8,

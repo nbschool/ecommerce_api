@@ -38,13 +38,13 @@ class OrdersHandler(Resource):
 
         # Check that the items exist
         item_ids = [req_item['id'] for req_item in req_items]
-        items = Item.select().where(Item.item_id << item_ids)
+        items = Item.select().where(Item.uuid << item_ids)
         if items.count() != len(req_items):
             abort(BAD_REQUEST)
 
         # Check that the address exist
         try:
-            address = Address.get(Address.address_id == req_address['id'])
+            address = Address.get(Address.uuid == req_address['id'])
         except Address.DoesNotExist:
             abort(BAD_REQUEST)
 
@@ -59,7 +59,7 @@ class OrdersHandler(Resource):
                     for req_item in req_items:
                         # if names match add item and quantity, once per
                         # req_item
-                        if str(item.item_id) == req_item['id']:
+                        if str(item.uuid) == req_item['id']:
                             order.add_item(item, req_item['quantity'])
                             break
             except InsufficientAvailabilityException:
@@ -71,7 +71,7 @@ class OrdersHandler(Resource):
                 # function but this needs to be implemented yet, so this prevents
                 # raising KeyError later on when adding items
                 msg = {
-                    'message': 'Item {} missing quantity attribute'.format(item.item_id)
+                    'message': 'Item {} missing quantity attribute'.format(item.uuid)
                 }
                 return msg, BAD_REQUEST
 
@@ -95,12 +95,13 @@ class OrderHandler(Resource):
         """ Modify a specific order. """
         res = request.get_json(force=True)
 
-        errors = Order.validate_input(res)
+        errors = Order.validate_input(res, partial=True)
         if errors:
             return errors, BAD_REQUEST
 
-        req_items = res['data']['relationships']['items']['data']
-        req_address = res['data']['relationships']['delivery_address']['data']
+        data = res['data']['relationships']
+        req_items = data.get('items')
+        req_address = data.get('delivery_address')
 
         with database.transaction() as txn:
             try:
@@ -108,35 +109,6 @@ class OrderHandler(Resource):
             except Order.DoesNotExist:
                 abort(NOT_FOUND)
 
-            if req_address:
-                try:
-                    address = Address.get(Address.uuid == req_address['id'])
-                    order.delivery_address = address
-                except Address.DoesNotExist:
-                    abort(BAD_REQUEST)
-
-            if req_items:
-                items_uuids = [e['id'] for e in req_items]
-                items_query = Item.select().where(Item.uuid << items_uuids)
-                items = {str(item.uuid): item for item in items_query}
-
-                if len(items) != len(items_uuids):
-                    return None, BAD_REQUEST
-
-                for res_item in req_items:
-                    try:
-                        order.update_item(
-                            items[res_item['id']], res_item['quantity'])
-                    except InsufficientAvailabilityException:
-                        txn.rollback()
-                        return None, BAD_REQUEST
-                    except KeyError:
-                        # FIXME: Prevent future KeyError when adding items. See post method
-                        # for further info.
-                        msg = {
-                            'message': 'Item {} missing quantity attribute'.format(item.item_id)
-                        }
-                        return msg, BAD_REQUEST
             # get the user from the flask.g global object registered inside the
             # auth.py::verify() function, called by @auth.login_required decorator
             # and match it against the found user.
@@ -144,6 +116,37 @@ class OrderHandler(Resource):
             if g.user != order.user and g.user.admin is False:
                 return ({'message': "You can't delete another user's order"},
                         UNAUTHORIZED)
+
+            if req_address:
+                try:
+                    address = Address.get(Address.uuid == req_address['data']['id'])
+                    order.delivery_address = address
+                except Address.DoesNotExist:
+                    abort(BAD_REQUEST)
+
+            if req_items:
+                req_items = req_items['data']  # avoid refactoring everything
+                items_uuids = [e['id'] for e in req_items]
+                items_query = Item.select().where(Item.uuid << items_uuids)
+                items = {str(item.uuid): item for item in items_query}
+
+                if len(items) != len(items_uuids):
+                    return None, BAD_REQUEST
+
+                for req_item in req_items:
+                    try:
+                        order.update_item(
+                            items[req_item['id']], req_item['quantity'])
+                    except InsufficientAvailabilityException:
+                        txn.rollback()
+                        return None, BAD_REQUEST
+                    except KeyError:
+                        # FIXME: Prevent future KeyError when adding items. See post method
+                        # for further info.
+                        msg = {
+                            'message': 'Item {} missing quantity attribute'.format(item.uuid)
+                        }
+                        return msg, BAD_REQUEST
 
             order.save()
 

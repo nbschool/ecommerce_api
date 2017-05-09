@@ -87,21 +87,14 @@ class TestItems(TestCase):
         assert resp.status_code == client.CREATED
         assert len(Item.select()) == 1
 
-        expected_result = patch_id(
-            EXPECTED_RESULTS['post_item__success'],
-            Item.get().item_id
-        )
+        expected_result = EXPECTED_RESULTS['post_item__success']
+        assert json.loads(resp.data) == expected_result
+
     def test_post_item__not_json_failure(self):
         resp = self.app.post('/items/', data=test_utils.wrong_dump(TEST_ITEM),
                              content_type='application/json')
         assert resp.status_code == client.BAD_REQUEST
         assert len(Item.select()) == 0
-
-        # check for the item id and get the object
-        item = Item.get(Item.item_id == resp_item['data']['id'])
-        assert item is not None
-
-        assert json.loads(resp.data) == expected_result
 
     def test_post_item__failed(self):
         data = format_jsonapi_request('item', TEST_ITEM_WRONG)
@@ -186,7 +179,7 @@ class TestItems(TestCase):
             'description': 'new-description',
             'availability': 2,
         })
-        resp = self.app.patch('/items/{item_id}'.format(item_id=item.item_id),
+        resp = self.app.patch('/items/{uuid}'.format(uuid=item.uuid),
                               data=json.dumps(post_data),
                               content_type='application/json')
 
@@ -232,14 +225,14 @@ class TestItems(TestCase):
         picture2 = Picture.create(item=item, **TEST_PICTURE2)
         picture3 = Picture.create(item=item2, **TEST_PICTURE3)
         imgfolder = utils.get_image_folder()
-        path_pic = os.path.join(imgfolder, "{picture_id}.{extension}".format(
-            picture_id=picture.picture_id,
+        path_pic = os.path.join(imgfolder, "{uuid}.{extension}".format(
+            uuid=picture.uuid,
             extension=picture.extension))
-        path_pic2 = os.path.join(imgfolder, "{picture_id}.{extension}".format(
-            picture_id=picture2.picture_id,
+        path_pic2 = os.path.join(imgfolder, "{uuid}.{extension}".format(
+            uuid=picture2.uuid,
             extension=picture2.extension))
-        path_pic3 = os.path.join(imgfolder, "{picture_id}.{extension}".format(
-            picture_id=picture3.picture_id,
+        path_pic3 = os.path.join(imgfolder, "{uuid}.{extension}".format(
+            uuid=picture3.uuid,
             extension=picture3.extension))
         open(path_pic, "wb")
         open(path_pic2, "wb")
