@@ -27,7 +27,7 @@ def get_test_addr_dict(user, country='Italy', city='Pistoia', post_code='51100',
 def new_addr(user, country='Italy', city='Pistoia', post_code='51100',
              address='Via Verdi 12', phone='3294882773'):
     return {
-        'user_id': str(user.user_id),
+        'user_uuid': str(user.uuid),
         'country': country,
         'city': city,
         'post_code': post_code,
@@ -79,7 +79,7 @@ class TestAddresses(TestCase):
 
         assert resp.status_code == CREATED
         assert len(Address.select()) == 1
-        assert str(Address.get().user.user_id) == addr['user_id']
+        assert str(Address.get().user.uuid) == addr['user_uuid']
         address = Address.get().json()
         assert address['country'] == addr['country']
         assert address['city'] == addr['city']

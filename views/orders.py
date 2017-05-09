@@ -37,8 +37,8 @@ class OrdersHandler(Resource):
         res_items = res['order']['items']
 
         # Check that the items exist
-        item_ids = [res_item['item_uuid'] for res_item in res_items]
-        items = Item.select().where(Item.uuid << item_ids)
+        item_uuids = [res_item['item_uuid'] for res_item in res_items]
+        items = Item.select().where(Item.uuid << item_uuids)
         if items.count() != len(res_items):
             abort(BAD_REQUEST)
 

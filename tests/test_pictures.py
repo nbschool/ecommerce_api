@@ -80,8 +80,8 @@ class TestPictures(TestCase):
         item = Item.create(**TEST_ITEM)
         Picture.create(item=item, **TEST_PICTURE)
         Picture.create(item=item, **TEST_PICTURE2)
-        resp = self.app.get('/items/{item_id}/pictures/'.format(
-            item_id=item.uuid))
+        resp = self.app.get('/items/{item_uuid}/pictures/'.format(
+            item_uuid=item.uuid))
         pictures = json.loads(resp.data)
         assert resp.status_code == client.OK
         assert len(pictures) == 2
@@ -93,20 +93,20 @@ class TestPictures(TestCase):
 
     def test_get_item_pictures__empty(self):
         item = Item.create(**TEST_ITEM)
-        resp = self.app.get('/items/{item_id}/pictures/'.format(
-            item_id=item.uuid))
+        resp = self.app.get('/items/{item_uuid}/pictures/'.format(
+            item_uuid=item.uuid))
         pictures = json.loads(resp.data)
         assert not pictures
 
-    def test_get_item_pictures__wrong_item_id(self):
-        resp = self.app.get('/items/{item_id}/pictures/'.format(
-            item_id=WRONG_UUID))
+    def test_get_item_pictures__wrong_item_uuid(self):
+        resp = self.app.get('/items/{item_uuid}/pictures/'.format(
+            item_uuid=WRONG_UUID))
         assert resp.status_code == client.NOT_FOUND
 
     def test_post_picture__success(self):
         item = Item.create(**TEST_ITEM)
-        resp = self.app.post('/items/{item_id}/pictures/'.format(
-            item_id=item.uuid),
+        resp = self.app.post('/items/{item_uuid}/pictures/'.format(
+            item_uuid=item.uuid),
             data={'image': (BytesIO(b'my file contents'), 'testimage.jpg')},
             content_type='multipart/form-data')
         assert resp.status_code == client.CREATED
@@ -116,9 +116,9 @@ class TestPictures(TestCase):
         assert picture.extension == 'jpg'
         assert type(picture.uuid) == uuid.UUID
 
-    def test_post_item_pictures__wrong_item_id(self):
-        resp = self.app.post('/items/{item_id}/pictures/'.format(
-            item_id=WRONG_UUID),
+    def test_post_item_pictures__wrong_item_uuid(self):
+        resp = self.app.post('/items/{item_uuid}/pictures/'.format(
+            item_uuid=WRONG_UUID),
             data={'image': (BytesIO(b'my file contents'), 'testimage.jpg')},
             content_type='multipart/form-data')
         assert resp.status_code == client.NOT_FOUND
@@ -126,8 +126,8 @@ class TestPictures(TestCase):
 
     def test_post_item_pictures__wrong_extension(self):
         item = Item.create(**TEST_ITEM)
-        resp = self.app.post('/items/{item_id}/pictures/'.format(
-            item_id=item.uuid),
+        resp = self.app.post('/items/{item_uuid}/pictures/'.format(
+            item_uuid=item.uuid),
             data={'image': (BytesIO(b'my file contents'), 'testimage.txt')},
             content_type='multipart/form-data')
         assert resp.status_code == client.BAD_REQUEST
@@ -135,8 +135,8 @@ class TestPictures(TestCase):
 
     def test_post_picture__no_image(self):
         item = Item.create(**TEST_ITEM)
-        resp = self.app.post('/items/{item_id}/pictures/'.format(
-            item_id=item.uuid),
+        resp = self.app.post('/items/{item_uuid}/pictures/'.format(
+            item_uuid=item.uuid),
             data={},
             content_type='multipart/form-data')
         assert resp.status_code == client.BAD_REQUEST

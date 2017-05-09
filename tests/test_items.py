@@ -132,17 +132,17 @@ class TestItems(TestCase):
 
     def test_get_item__success(self):
         item = Item.create(**TEST_ITEM)
-        resp = self.app.get('/items/{item_id}'.format(item_id=item.uuid))
+        resp = self.app.get('/items/{item_uuid}'.format(item_uuid=item.uuid))
         assert resp.status_code == client.OK
         assert json.loads(resp.data) == TEST_ITEM
 
     def test_get_item__failed(self):
-        resp = self.app.get('/items/{item_id}'.format(item_id=WRONG_UUID))
+        resp = self.app.get('/items/{item_uuid}'.format(item_uuid=WRONG_UUID))
         assert resp.status_code == client.NOT_FOUND
 
     def test_patch_change1item__success(self):
         item = Item.create(**TEST_ITEM)
-        resp = self.app.patch('/items/{item_id}'.format(item_id=item.uuid),
+        resp = self.app.patch('/items/{item_uuid}'.format(item_uuid=item.uuid),
                               data=json.dumps({'name': 'new-name'}),
                               content_type='application/json')
         assert resp.status_code == client.OK
@@ -156,7 +156,7 @@ class TestItems(TestCase):
 
     def test_patch_allitems_success(self):
         item = Item.create(**TEST_ITEM)
-        resp = self.app.patch('/items/{item_id}'.format(item_id=item.uuid),
+        resp = self.app.patch('/items/{item_uuid}'.format(item_uuid=item.uuid),
                               data=json.dumps(
                                   {'name': 'new-name', 'price': 40.20,
                                    'description': 'new-description',
@@ -173,20 +173,20 @@ class TestItems(TestCase):
 
     def test_patch_item__wrong_id(self):
         Item.create(**TEST_ITEM)
-        resp = self.app.patch('/items/{item_id}'.format(item_id=WRONG_UUID),
+        resp = self.app.patch('/items/{item_uuid}'.format(item_uuid=WRONG_UUID),
                               data=json.dumps(TEST_ITEM2),
                               content_type='application/json')
         assert resp.status_code == client.NOT_FOUND
 
     def test_patch_item__failed(self):
-        resp = self.app.patch('/items/{item_id}'.format(item_id=WRONG_UUID),
+        resp = self.app.patch('/items/{item_uuid}'.format(item_uuid=WRONG_UUID),
                               data=json.dumps(TEST_ITEM),
                               content_type='application/json')
         assert resp.status_code == client.NOT_FOUND
 
     def test_delete_item__success(self):
         item = Item.create(**TEST_ITEM2)
-        resp = self.app.delete('/items/{item_id}'.format(item_id=item.uuid))
+        resp = self.app.delete('/items/{item_uuid}'.format(item_uuid=item.uuid))
         assert resp.status_code == client.NO_CONTENT
         assert not Item.select().exists()
 
@@ -213,8 +213,8 @@ class TestItems(TestCase):
         open(path_pic2, "wb")
         open(path_pic3, "wb")
 
-        resp = self.app.delete('/items/{item_id}'.format(
-            item_id=item.uuid))
+        resp = self.app.delete('/items/{item_uuid}'.format(
+            item_uuid=item.uuid))
 
         assert resp.status_code == client.NO_CONTENT
         assert Picture.select().count() == 1
@@ -237,5 +237,5 @@ class TestItems(TestCase):
         test_utils.clean_images()
 
     def test_delete_item__failed(self):
-        resp = self.app.delete('/items/{item_id}'.format(item_id=WRONG_UUID))
+        resp = self.app.delete('/items/{item_uuid}'.format(item_uuid=WRONG_UUID))
         assert resp.status_code == client.NOT_FOUND

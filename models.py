@@ -115,7 +115,7 @@ class User(BaseModel):
     User represents an user for the application.
     Users created are always as role "normal" (admin field = False)
     """
-    user_id = UUIDField(unique=True)
+    uuid = UUIDField(unique=True)
     first_name = CharField()
     last_name = CharField()
     email = CharField(unique=True)
@@ -156,7 +156,7 @@ class User(BaseModel):
         """
 
         return {
-            'user_id': str(self.user_id),
+            'uuid': str(self.uuid),
             'first_name': self.first_name,
             'last_name': self.last_name,
             'email': self.email,
@@ -318,7 +318,7 @@ class Order(BaseModel):
             'date': str(self.created_at),
             'total_price': float(self.total_price),
             'delivery_address': self.delivery_address.json(),
-            'user_id': str(self.user.user_id)
+            'user_uuid': str(self.user.uuid)
         }
         if include_items:
             order_json['items'] = self.get_order_items()

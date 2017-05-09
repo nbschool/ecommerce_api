@@ -29,7 +29,7 @@ def add_user(email, psw):
         last_name='Doe',
         email=email,
         password=User.hash_password(psw),
-        user_id=uuid.uuid4()
+        uuid=uuid.uuid4()
     )
 
 
@@ -46,7 +46,7 @@ def add_admin_user(email, psw):
         last_name='Doe',
         email=email,
         password=User.hash_password(psw),
-        user_id=uuid.uuid4(),
+        uuid=uuid.uuid4(),
         admin=True
     )
 

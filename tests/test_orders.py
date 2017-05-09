@@ -44,7 +44,7 @@ class TestOrders(TestCase):
             'order_id': str(order.order_id),
             'date': str(order.created_at),
             'total_price': 40.40,
-            'user_id': str(user_A.user_id),
+            'user_uuid': str(user_A.uuid),
             'delivery_address': addr_A.json(),
             'items': [{
                 'quantity': 2,
@@ -100,7 +100,7 @@ class TestOrders(TestCase):
         expected_data = {
             'order_id': str(order1.order_id),
             'date': str(order1.created_at),
-            'user_id': str(user.user_id),
+            'user_uuid': str(user.uuid),
             'total_price': 40.40,
             'delivery_address': addr_A.json(),
             'items': [{
@@ -346,7 +346,7 @@ class TestOrders(TestCase):
             'order': {
                 'items': [],
                 'delivery_address': addr.json()["address_id"],
-                'user': str(user.user_id)
+                'user': str(user.uuid)
             }
         }
         path = 'orders/'
@@ -800,7 +800,7 @@ class TestOrders(TestCase):
                 "order_id": order_id,
                 'items': [],
                 'delivery_address': addr.json()["address_id"],
-                'user': str(user.user_id)
+                'user': str(user.uuid)
 
             }
         }

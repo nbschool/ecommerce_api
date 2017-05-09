@@ -14,23 +14,23 @@ ALLOWED_EXTENSION = ['jpg', 'jpeg', 'png', 'gif']
 
 class ItemPictureHandler(Resource):
 
-    def get(self, item_id):
+    def get(self, item_uuid):
         """Retrieve every picture of an item"""
         items = [o.json() for o in Picture.select().join(Item).where(
-            Item.uuid == item_id)]
+            Item.uuid == item_uuid)]
 
         if items:
             return items, client.OK
         return None, client.NOT_FOUND
 
-    def post(self, item_id):
+    def post(self, item_uuid):
         """Insert a new picture for the specified item"""
         if 'image' not in request.files:
             return {"message": "No image received"},\
                 client.BAD_REQUEST
 
         try:
-            item = Item.get(Item.uuid == item_id)
+            item = Item.get(Item.uuid == item_uuid)
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
 
