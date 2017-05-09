@@ -210,7 +210,7 @@ def overwrite_db(num_items, num_users, num_orders, num_addrs):
 
 def prompt_menu_1(actions):
     print(Fore.GREEN + Style.BRIGHT + '\t' * 2 + '*' * 47)
-    print(Fore.GREEN + Style.BRIGHT + '\t' * 2 + '* Press:' + ' ' * 37 +' *')
+    print(Fore.GREEN + Style.BRIGHT + '\t' * 2 + '* Press:' + ' ' * 37 + ' *')
     for action in actions.values():
         print(Fore.GREEN + Style.BRIGHT + '\t' * 2 + '  ({key}) {text}'.format(**action))
     print(Fore.GREEN + Style.BRIGHT + '\t' * 2 + '*' * 47)
@@ -221,6 +221,7 @@ def prompt_menu_1(actions):
 
     actions[choice]['action']()
 
+
 def prompt_menu_0(actions):
     print(Fore.GREEN + Style.BRIGHT + 'Do you want a database?')
     choice = None
@@ -230,22 +231,24 @@ def prompt_menu_0(actions):
 
     actions[choice]()
 
+
 def main():
     def check_range(value):
         int_value = abs(int(value))
         if int_value > 100:
-             raise argparse.ArgumentTypeError("{} is a big number. Maximum accepted is 100.".format(int_value))
+            raise argparse.ArgumentTypeError("{} is a big number. Maximum accepted is 100."
+                                             .format(int_value))
         return int_value
 
     parser = argparse.ArgumentParser(description='Set up the number of rows' +
                                      'to insert in each table from CLI.')
-    parser.add_argument('-u','--users', type=check_range, help='Set up the number' +
+    parser.add_argument('-u', '--users', type=check_range, help='Set up the number' +
                         'of insertions in User table.', default=10)
-    parser.add_argument('-a','--addresses', type=check_range,
+    parser.add_argument('-a', '--addresses', type=check_range,
                         help='Set up the number of insertions in Address table.', default=10)
-    parser.add_argument('-i','--items', type=check_range,
+    parser.add_argument('-i', '--items', type=check_range,
                         help='Set up the number of insertions in Item table.', default=10)
-    parser.add_argument('-o','--orders', type=check_range,
+    parser.add_argument('-o', '--orders', type=check_range,
                         help='Set up the number of insertions in Order table.', default=10)
 
     args = parser.parse_args()
@@ -265,7 +268,7 @@ def main():
         },
         '': {
             'key': 'Enter', 'text': 'Just exit',
-             'action': lambda: good_bye('change', default='hasn\'t')
+            'action': lambda: good_bye('change', default='hasn\'t')
         },
     }
 
