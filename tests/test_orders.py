@@ -1080,7 +1080,7 @@ class TestOrders(TestCase):
             assert count_items(order) == 4
 
         # Check that the total price is correctly updated
-        assert order.total_price == item1.price + item2.price * 2
+        assert order.total_price == item1.price + item2.price + item3.price
 
         # remove non existing item3 from order
         order.remove_item(item3)
