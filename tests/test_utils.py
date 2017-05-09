@@ -1,53 +1,74 @@
 from functools import reduce
+import datetime
+import inspect
 import json
 import os
 import random
 import shutil
-from base64 import b64encode
-from datetime import timezone
+import sys
 import uuid
+from base64 import b64encode
+
+from models import Address, User
+from utils import get_image_folder
 
 
-class DeterministicUUID:
-    """ Generate a deterministic progressive UUID4-type UUID object."""
-
-    def __init__(self):
-        self.reset()
-
-    def reset(self):
-        self.counter = 0
-
-    def __call__(self):
-        self.counter += 1
-        return uuid.UUID('00000000-0000-0000-0000-{:012d}'.format(self.counter))
+# ###########################################################
+# Mocking utilities
 
 
-# Override the uuid4 function to use our DeterministicUUID object and get
-# predictable UUID objects
-uuid.uuid4 = DeterministicUUID()
-
-from models import Address, User    # noqa:E402
-from utils import get_image_folder  # noqa: E402
-
-random.seed(10485)
-
-
-path = os.path.abspath(os.path.dirname(__file__))
-path = os.path.join(path, 'expected_results.json')
-with open(path) as fo:
+def mock_uuid_generator():
     """
-    Expected results dict loaded from `expected_results.json` that can be used
-    to match tests operations with flask.
+    Returns a generator object that creates UUID instances with a deterministic
+    and progressive value in the form of `00000000-0000-0000-0000-000000000001`
     """
-    RESULTS = json.load(fo)
+    i = 1
+    while True:
+        yield uuid.UUID('00000000-0000-0000-0000-{:012d}'.format(i))
+        i += 1
 
 
-def wrong_dump(data):
+def mock_datetime(*args):
     """
-    Give a wrong encoding (urlencode-like) to the given dictionary
+    Datetime mocker fot test suite. Returns fixed time value datetime object.
     """
-    return reduce(lambda x, y: "{}&{}".format(x, y), [
-        "{}={}".format(k, v) for k, v in zip(data.keys(), data.values())])
+    return datetime.datetime(2017, 2, 20, 10, 16, 50, 140620)
+
+
+class MockModelCreate:
+    """
+    Override callable class that goes in place of the Model.create()
+    classmethod and allows extra default custom parameters so test objects can
+    be predictable.
+    Defaulted attributes are `created_at`, with a static datetime and `uuid`
+    with a progressive uuid
+    """
+
+    def __init__(self, cls):
+        self.original = cls.create
+        self.uuid_generator = mock_uuid_generator()
+
+    def __call__(self, created_at=mock_datetime(), uuid=None, **query):
+        query['created_at'] = created_at
+        query['uuid'] = uuid or next(self.uuid_generator)
+        # import pdb
+        # pdb.set_trace()
+        return self.original(**query)
+
+
+def get_all_models_names():
+    """
+    Returns the names of all the classes defined inside the 'models' module.
+    """
+    return [name for
+            (name, cls) in inspect.getmembers(
+                sys.modules['models'], inspect.isclass)
+            if cls.__module__ is 'models']
+
+
+# ###########################################################
+# Peewee models helpers
+# Functions to create new instances with overridable defaults
 
 
 def add_user(email, password, id=None, first_name='John', last_name='Doe'):
@@ -99,6 +120,11 @@ def add_address(user, country='Italy', city='Pistoia', post_code='51100',
     )
 
 
+# ###########################################################
+# Flask helpers
+# Common operations for flask functionalities
+
+
 def open_with_auth(app, url, method, username, password, content_type, data):
     """Generic call to app for http request. """
 
@@ -112,6 +138,10 @@ def open_with_auth(app, url, method, username, password, content_type, data):
                     headers={'Authorization': auth_str},
                     content_type=content_type,
                     data=data)
+
+
+# ###########################################################
+# Images helpers
 
 
 def clean_images():
@@ -129,36 +159,46 @@ def setup_images():
         os.makedirs(get_image_folder())
 
 
-# ######################################
+# ###########################################################
 # JSONAPI testing utilities
+
+
+path = os.path.abspath(os.path.dirname(__file__))
+path = os.path.join(path, 'expected_results.json')
+with open(path) as fo:
+    """
+    Expected results dict loaded from `expected_results.json` that can be used
+    to match tests operations with flask.
+    """
+    RESULTS = json.load(fo)
 
 
 def format_jsonapi_request(type_, data):
     """
     Given the attributes and relationships of a resource, compile the jsonapi
     post data for the request.
-    All key-value pairs except ``relationships`` will be mapped inside
+    All key - value pairs except ``relationships`` will be mapped inside
     ``['data']['attributes']`` of the request.
     Relationships key value will be mapped inside ``['data']['relationship']``
 
     > NOTE:
-    > All relationship **must** map to the related field inside the Schema of
+    > All relationship ** must ** map to the related field inside the Schema of
     > the type and have a ``type`` and ``id`` properties.
 
-    .. code-block:: python
+    .. code-block: : python
 
         data = {
             "<attribute field": "bar"
             "relationships": {
                 "<field_name>": {
                     "type": "<Resource type_>",
-                    "id": <Resource id>
+                    "id": < Resource id >
                 },
                 "<field_name>": [
                     {
                         "type": "item",
-                        "id": <Resource id>,
-                        "<metadata>": <metadata_value (ie. quantity of items)>
+                        "id": < Resource id > ,
+                        "<metadata>": < metadata_value(ie. quantity of items) >
                     }
                 ]
             }
@@ -178,32 +218,6 @@ def format_jsonapi_request(type_, data):
         }
     }
     return retval
-
-
-def _test_res_patch_date(result, date):
-    """
-    Patch a jsonapi response date in result['data']['attributes']['date']
-    with the given date. If a result list needs to be patched, a matching indexes
-    list of dates needs to be given as `date`.
-
-    : param result: a single jsonapi result `dict` or a `list` of result
-    : param date: a single `DateTime` object or a ** matching ** `list` of DateTime
-    """
-    # patch the attribute
-    def patch(r, d):
-        r['data']['attributes']['date'] = d
-
-    # add timezone info to match the actual response datetime
-    def set_tz(d):
-        return d.replace(tzinfo=timezone.utc).isoformat()
-
-    # if result is a list iterate each item.
-    if type(result) == list:
-        for r, d in zip(result, date):
-            patch(r, set_tz(d))
-    else:
-        patch(result, set_tz(date))
-    return result
 
 
 def _test_res_sort_included(result, sortFn=lambda x: x['type']):
@@ -240,3 +254,11 @@ def _test_res_sort_errors(e):
 
     e['errors'] = sorted(e['errors'], key=lambda e: e['source']['pointer'])
     return e
+
+
+def wrong_dump(data):
+    """
+    Give a wrong encoding (urlencode-like) to the given dictionary
+    """
+    return reduce(lambda x, y: "{}&{}".format(x, y), [
+        "{}={}".format(k, v) for k, v in zip(data.keys(), data.values())])

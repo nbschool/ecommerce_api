@@ -134,9 +134,9 @@ class OrderHandler(Resource):
                     return None, BAD_REQUEST
 
                 for req_item in req_items:
+                    item = items[req_item['id']]
                     try:
-                        order.update_item(
-                            items[req_item['id']], req_item['quantity'])
+                        order.update_item(item, req_item['quantity'])
                     except InsufficientAvailabilityException:
                         txn.rollback()
                         return None, BAD_REQUEST

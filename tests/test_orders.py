@@ -2,20 +2,18 @@
 Test suite.
 """
 
-from tests.test_case import TestCase
-
 import json
 from http.client import (BAD_REQUEST, CREATED, NO_CONTENT, NOT_FOUND, OK,
                          UNAUTHORIZED)
-
-
 from uuid import uuid4
+
+import pytest
+
 from models import Item, Order, OrderItem, WrongQuantity
 from tests.test_case import TestCase
-from tests.test_utils import _test_res_patch_date as patch_date
-from tests.test_utils import (add_address, add_admin_user, add_user,
-                              format_jsonapi_request, RESULTS,
-                              open_with_auth, wrong_dump)
+from tests.test_utils import (RESULTS, add_address, add_admin_user, add_user,
+                              format_jsonapi_request, open_with_auth,
+                              wrong_dump)
 
 # main endpoint for API
 API_ENDPOINT = '/{}'
@@ -44,25 +42,22 @@ class TestOrders(TestCase):
             None, TEST_USER_PSW, id='f3f72634-7054-43ef-9119-9e8f54a9531e')
         addr = add_address(
             user=user, id='85c6cba6-3ddd-4847-9d07-1337ff4e8506')
-        order = Order.create(
+        Order.create(
             delivery_address=addr, user=user,
             uuid='06451e0a-8fa2-40d2-8c51-1af50d369ca6'
         ).add_item(item, 2)
 
-        order2 = Order.create(
+        Order.create(
             delivery_address=addr, user=user,
             uuid='429994bf-784e-47cc-a823-e0c394b823e8'
         ).add_item(item, 5)
 
         resp = self.app.get('/orders/')
 
-        expected_data = patch_date(
-            EXPECTED_RESULTS['get_orders__success'],
-            [order.created_at, order2.created_at]
-        )
+        expected_result = EXPECTED_RESULTS['get_orders__success']
 
         assert resp.status_code == OK
-        assert json.loads(resp.data) == expected_data
+        assert json.loads(resp.data) == expected_result
 
     def test_get_order__non_existing_empty_orders(self):
         resp = self.app.get('/orders/{}'.format(uuid4()))
@@ -111,8 +106,7 @@ class TestOrders(TestCase):
 
         resp = self.app.get('/orders/{}'.format(order1.uuid))
 
-        expected_result = patch_date(
-            EXPECTED_RESULTS['get_order__success'], order1.created_at)
+        expected_result = EXPECTED_RESULTS['get_order__success']
         assert resp.status_code == OK
         assert json.loads(resp.data) == expected_result
 
@@ -166,8 +160,7 @@ class TestOrders(TestCase):
         assert len(Order.select()) == 1
         assert len(OrderItem.select()) == 2
         order = Order.get()
-        expected_result = patch_date(
-            EXPECTED_RESULTS['create_order__success'], order.created_at)
+        expected_result = EXPECTED_RESULTS['create_order__success']
         # inject the order id
         assert json.loads(resp.data) == expected_result
 
@@ -225,9 +218,9 @@ class TestOrders(TestCase):
         order = {
             'relationships': {
                 'items': [{
-                        'id': '429994bf-784e-47cc-a823-e0c394b823e8',
-                        'type': 'item', 'quantity': 4
-                     }],
+                    'id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    'type': 'item', 'quantity': 4
+                }],
                 'delivery_address': {
                     'type': 'address',
                     'id': '8473fbaa-94f0-46db-939f-faae898f001c'
@@ -510,10 +503,7 @@ class TestOrders(TestCase):
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(post_data))
         order = Order.get()
-        expected_result = patch_date(
-            EXPECTED_RESULTS['update_order__new_item'],
-            order.created_at
-        )
+        expected_result = EXPECTED_RESULTS['update_order__new_item']
 
         assert json.loads(resp.data) == expected_result
 
@@ -557,10 +547,7 @@ class TestOrders(TestCase):
                               json.dumps(post_data))
         assert resp.status_code == OK
 
-        expected_result = patch_date(
-            EXPECTED_RESULTS['update_order__item_quantity_zero'],
-            order.created_at,
-        )
+        expected_result = EXPECTED_RESULTS['update_order__item_quantity_zero']
 
         assert json.loads(resp.data) == expected_result
 
@@ -612,10 +599,8 @@ class TestOrders(TestCase):
                               json.dumps(post_data))
         assert resp.status_code == OK
 
-        expected_result = patch_date(
-            EXPECTED_RESULTS['update_order__remove_item_without_delete'],
-            order.created_at
-        )
+        expected_result = EXPECTED_RESULTS['update_order__remove_item_without_delete']
+
         assert json.loads(resp.data) == expected_result
         assert len(order.order_items) == 1
         assert order.order_items[0].quantity == 20
@@ -659,10 +644,8 @@ class TestOrders(TestCase):
                               json.dumps(post_data))
         assert resp.status_code == OK
 
-        expected_result = patch_date(
-            EXPECTED_RESULTS['update_order__add_item'],
-            order.created_at
-        )
+        expected_result = EXPECTED_RESULTS['update_order__add_item']
+
         assert json.loads(resp.data) == expected_result
 
     def test_update_order__success(self):
@@ -717,8 +700,7 @@ class TestOrders(TestCase):
                               user.email, TEST_USER_PSW, 'application/json',
                               json.dumps(post_data))
 
-        expected_result = patch_date(EXPECTED_RESULTS['update_order__success'],
-                                     order.created_at)
+        expected_result = EXPECTED_RESULTS['update_order__success']
 
         assert resp.status_code == OK
         assert json.loads(resp.data) == expected_result
@@ -862,10 +844,7 @@ class TestOrders(TestCase):
 
         assert resp.status_code == OK
 
-        expected_result = patch_date(
-            EXPECTED_RESULTS['update_order__success_admin_not_owner'],
-            order1.created_at,
-        )
+        expected_result = EXPECTED_RESULTS['update_order__success_admin_not_owner']
         assert json.loads(resp.data) == expected_result
 
     def test_update_order_empty_items_list__fail(self):
