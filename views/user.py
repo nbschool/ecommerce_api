@@ -46,7 +46,7 @@ class UsersHandler(Resource):
             return msg, CONFLICT
 
         new_user = User.create(
-            user_id=uuid.uuid4(),
+            uuid=uuid.uuid4(),
             first_name=request_data['first_name'],
             last_name=request_data['last_name'],
             email=request_data['email'],
@@ -66,15 +66,15 @@ class UserHandler(Resource):
     """
 
     @auth.login_required
-    def delete(self, user_id):
+    def delete(self, user_uuid):
         """
-        Delete an existing user from the database, looking up by user_id.
-        If the user_id does not exists return NOT_FOUND.
+        Delete an existing user from the database, looking up by user_uuid.
+        If the user_uuid does not exists return NOT_FOUND.
         """
         try:
-            user = User.get(User.user_id == user_id)
+            user = User.get(User.uuid == user_uuid)
         except User.DoesNotExist:
-            return ({'message': 'user `{}` not found'.format(user_id)},
+            return ({'message': 'user `{}` not found'.format(user_uuid)},
                     NOT_FOUND)
 
         # get the user from the flask.g global object registered inside the

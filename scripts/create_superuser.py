@@ -39,7 +39,7 @@ def main():
             return
 
         User.create(
-            user_id=uuid.uuid4(),
+            uuid=uuid.uuid4(),
             first_name=first_name,
             last_name=last_name,
             email=email,

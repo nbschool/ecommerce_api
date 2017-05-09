@@ -16,52 +16,52 @@ import utils
 TEST_IMAGE_FOLDER = 'test_images'
 
 TEST_ITEM = {
-    'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+    'uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
     'name': 'mario',
     'price': 20.20,
     'description': 'svariati mariii',
     'availability': 1,
 }
 TEST_ITEM2 = {
-    'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+    'uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
     'name': 'GINO',
     'price': 30.20,
     'description': 'svariati GINIIIII',
     'availability': 2,
 }
 TEST_ITEM_WRONG = {
-    'item_id': '19b4c6dc-e393-4e76-bf0f-72559dd5d32e',
+    'uuid': '19b4c6dc-e393-4e76-bf0f-72559dd5d32e',
     'name': '',
     'price': 30.20,
     'description': 'svariati GINIIIII',
     'availability': 3,
 }
 TEST_ITEM_PRECISION = {
-    'item_id': '68e587f7-3982-4b6a-a882-dd43b89134fe',
+    'uuid': '68e587f7-3982-4b6a-a882-dd43b89134fe',
     'name': 'Anna Pannocchia',
     'price': 30.222222,
     'description': 'lorem ipsum',
     'availability': 1,
 }
 TEST_ITEM_AVAILABILITY = {
-    'item_id': '68e587f7-3982-4b6a-a882-dd43b89134fe',
+    'uuid': '68e587f7-3982-4b6a-a882-dd43b89134fe',
     'name': 'Anna Pannocchia',
     'price': 30.00,
     'description': 'lorem ipsum',
     'availability': -1,
 }
 TEST_PICTURE = {
-    'picture_id': 'df690434-a488-419f-899e-8853cba1a22b',
+    'uuid': 'df690434-a488-419f-899e-8853cba1a22b',
     'extension': 'jpg'
 }
 
 TEST_PICTURE2 = {
-    'picture_id': 'c0001a48-10a3-43c1-b87b-eabac0b2d42f',
+    'uuid': 'c0001a48-10a3-43c1-b87b-eabac0b2d42f',
     'extension': 'png'
 }
 
 TEST_PICTURE3 = {
-    'picture_id': 'c489bd0f-1e7a-4aaa-ba9b-4145bbb87160',
+    'uuid': 'c489bd0f-1e7a-4aaa-ba9b-4145bbb87160',
     'extension': 'png'
 }
 
@@ -87,7 +87,7 @@ class TestItems(TestCase):
         assert item['description'] == TEST_ITEM['description']
         assert item['availability'] == TEST_ITEM['availability']
         try:
-            uuid.UUID(item['item_id'], version=4)
+            uuid.UUID(item['uuid'], version=4)
         except ValueError:
             assert False
 
@@ -132,61 +132,61 @@ class TestItems(TestCase):
 
     def test_get_item__success(self):
         item = Item.create(**TEST_ITEM)
-        resp = self.app.get('/items/{item_id}'.format(item_id=item.item_id))
+        resp = self.app.get('/items/{item_uuid}'.format(item_uuid=item.uuid))
         assert resp.status_code == client.OK
         assert json.loads(resp.data) == TEST_ITEM
 
     def test_get_item__failed(self):
-        resp = self.app.get('/items/{item_id}'.format(item_id=WRONG_UUID))
+        resp = self.app.get('/items/{item_uuid}'.format(item_uuid=WRONG_UUID))
         assert resp.status_code == client.NOT_FOUND
 
     def test_patch_change1item__success(self):
         item = Item.create(**TEST_ITEM)
-        resp = self.app.patch('/items/{item_id}'.format(item_id=item.item_id),
+        resp = self.app.patch('/items/{item_uuid}'.format(item_uuid=item.uuid),
                               data=json.dumps({'name': 'new-name'}),
                               content_type='application/json')
         assert resp.status_code == client.OK
-        json_item = Item.get(Item.item_id == item.item_id).json()
+        json_item = Item.get(Item.uuid == item.uuid).json()
         assert json_item['name'] == 'new-name'
         assert json_item['price'] == TEST_ITEM['price']
         assert json_item['description'] == TEST_ITEM['description']
         assert json_item['availability'] == TEST_ITEM['availability']
-        assert json_item['item_id'] == item.item_id
+        assert json_item['uuid'] == item.uuid
         assert json.loads(resp.data) == json_item
 
     def test_patch_allitems_success(self):
         item = Item.create(**TEST_ITEM)
-        resp = self.app.patch('/items/{item_id}'.format(item_id=item.item_id),
+        resp = self.app.patch('/items/{item_uuid}'.format(item_uuid=item.uuid),
                               data=json.dumps(
                                   {'name': 'new-name', 'price': 40.20,
                                    'description': 'new-description',
                                    'availability': 2}),
                               content_type='application/json')
         assert resp.status_code == client.OK
-        json_item = Item.get(Item.item_id == item.item_id).json()
+        json_item = Item.get(Item.uuid == item.uuid).json()
         assert json_item['name'] == 'new-name'
         assert json_item['price'] == 40.20
         assert json_item['description'] == 'new-description'
         assert json_item['availability'] == 2
-        assert json_item['item_id'] == item.item_id
+        assert json_item['uuid'] == item.uuid
         assert json.loads(resp.data) == json_item
 
-    def test_patch_item__wrong_id(self):
+    def test_patch_item__wrong_uuid(self):
         Item.create(**TEST_ITEM)
-        resp = self.app.patch('/items/{item_id}'.format(item_id=WRONG_UUID),
+        resp = self.app.patch('/items/{item_uuid}'.format(item_uuid=WRONG_UUID),
                               data=json.dumps(TEST_ITEM2),
                               content_type='application/json')
         assert resp.status_code == client.NOT_FOUND
 
     def test_patch_item__failed(self):
-        resp = self.app.patch('/items/{item_id}'.format(item_id=WRONG_UUID),
+        resp = self.app.patch('/items/{item_uuid}'.format(item_uuid=WRONG_UUID),
                               data=json.dumps(TEST_ITEM),
                               content_type='application/json')
         assert resp.status_code == client.NOT_FOUND
 
     def test_delete_item__success(self):
         item = Item.create(**TEST_ITEM2)
-        resp = self.app.delete('/items/{item_id}'.format(item_id=item.item_id))
+        resp = self.app.delete('/items/{item_uuid}'.format(item_uuid=item.uuid))
         assert resp.status_code == client.NO_CONTENT
         assert not Item.select().exists()
 
@@ -200,21 +200,21 @@ class TestItems(TestCase):
         picture = Picture.create(item=item, **TEST_PICTURE)
         picture2 = Picture.create(item=item, **TEST_PICTURE2)
         picture3 = Picture.create(item=item2, **TEST_PICTURE3)
-        path_pic = os.path.join(utils.get_image_folder(), "{picture_id}.{extension}".format(
-            picture_id=picture.picture_id,
+        path_pic = os.path.join(utils.get_image_folder(), "{picture_uuid}.{extension}".format(
+            picture_uuid=picture.uuid,
             extension=picture.extension))
-        path_pic2 = os.path.join(utils.get_image_folder(), "{picture_id}.{extension}".format(
-            picture_id=picture2.picture_id,
+        path_pic2 = os.path.join(utils.get_image_folder(), "{picture_uuid}.{extension}".format(
+            picture_uuid=picture2.uuid,
             extension=picture2.extension))
-        path_pic3 = os.path.join(utils.get_image_folder(), "{picture_id}.{extension}".format(
-            picture_id=picture3.picture_id,
+        path_pic3 = os.path.join(utils.get_image_folder(), "{picture_uuid}.{extension}".format(
+            picture_uuid=picture3.uuid,
             extension=picture3.extension))
         open(path_pic, "wb")
         open(path_pic2, "wb")
         open(path_pic3, "wb")
 
-        resp = self.app.delete('/items/{item_id}'.format(
-            item_id=item.item_id))
+        resp = self.app.delete('/items/{item_uuid}'.format(
+            item_uuid=item.uuid))
 
         assert resp.status_code == client.NO_CONTENT
         assert Picture.select().count() == 1
@@ -222,20 +222,20 @@ class TestItems(TestCase):
         item2 = Item.get()
         pic = Picture.get()
         assert pic == picture3
-        assert os.path.isfile("{path}/{picture_id}.{extension}".format(
+        assert os.path.isfile("{path}/{picture_uuid}.{extension}".format(
             path=utils.get_image_folder(),
-            picture_id=picture3.picture_id,
+            picture_uuid=picture3.uuid,
             extension=picture3.extension))
-        assert not os.path.isfile("{path}/{picture_id}.{extension}".format(
+        assert not os.path.isfile("{path}/{picture_uuid}.{extension}".format(
             path=utils.get_image_folder(),
-            picture_id=picture.picture_id,
+            picture_uuid=picture.uuid,
             extension=picture.extension))
-        assert not os.path.isfile("{path}/{picture_id}.{extension}".format(
+        assert not os.path.isfile("{path}/{picture_uuid}.{extension}".format(
             path=utils.get_image_folder(),
-            picture_id=picture2.picture_id,
+            picture_uuid=picture2.uuid,
             extension=picture2.extension))
         test_utils.clean_images()
 
     def test_delete_item__failed(self):
-        resp = self.app.delete('/items/{item_id}'.format(item_id=WRONG_UUID))
+        resp = self.app.delete('/items/{item_uuid}'.format(item_uuid=WRONG_UUID))
         assert resp.status_code == client.NOT_FOUND

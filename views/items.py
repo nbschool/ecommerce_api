@@ -22,7 +22,7 @@ class ItemsHandler(Resource):
 
     def post(self):
         """
-        Insert a new item, the item_id identifier is forwarded
+        Insert a new item, the item_uuid identifier is forwarded
         from the one generated from the database
         """
         request_data = request.get_json(force=True)
@@ -34,7 +34,7 @@ class ItemsHandler(Resource):
             return None, client.BAD_REQUEST
 
         obj = Item.create(
-            item_id=uuid.uuid4(),
+            uuid=uuid.uuid4(),
             name=request_data['name'],
             price=float(request_data['price']),
             description=request_data['description'],
@@ -47,17 +47,17 @@ class ItemsHandler(Resource):
 class ItemHandler(Resource):
     """Handler of a specific item"""
 
-    def get(self, item_id):
-        """Retrieve the item specified by item_id"""
+    def get(self, item_uuid):
+        """Retrieve the item specified by item_uuid"""
         try:
-            return Item.get(Item.item_id == item_id).json(), client.OK
+            return Item.get(Item.uuid == item_uuid).json(), client.OK
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
 
-    def patch(self, item_id):
-        """Edit the item specified by item_id"""
+    def patch(self, item_uuid):
+        """Edit the item specified by item_uuid"""
         try:
-            obj = Item.get(Item.item_id == item_id)
+            obj = Item.get(Item.uuid == item_uuid)
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
 
@@ -83,10 +83,10 @@ class ItemHandler(Resource):
 
         return obj.json(), client.OK
 
-    def delete(self, item_id):
-        """Remove the item specified by item_id"""
+    def delete(self, item_uuid):
+        """Remove the item specified by item_uuid"""
         try:
-            item = Item.get(Item.item_id == item_id)
+            item = Item.get(Item.uuid == item_uuid)
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
 
