@@ -25,7 +25,7 @@ class AddressesHandler(Resource):
     @auth.login_required
     def post(self):
         user = g.user
-        res = request.get_json()
+        res = request.get_json(force=True)
 
         check_required_fields(
             request_data=res,
@@ -63,7 +63,7 @@ class AddressHandler(Resource):
         except Address.DoesNotExist:
             return None, NOT_FOUND
 
-        res = request.get_json()
+        res = request.get_json(force=True)
 
         country = res.get('country')
         city = res.get('city')

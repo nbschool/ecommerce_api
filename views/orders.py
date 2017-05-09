@@ -27,7 +27,7 @@ class OrdersHandler(Resource):
     def post(self):
         """ Insert a new order."""
         user = g.user
-        res = request.get_json()
+        res = request.get_json(force=True)
         # Check that the order has an 'items' and 'delivery_address' attributes
         # otherwise it's useless to continue.
         for key in ('items', 'delivery_address'):
@@ -83,7 +83,7 @@ class OrderHandler(Resource):
     @auth.login_required
     def patch(self, order_id):
         """ Modify a specific order. """
-        res = request.get_json()
+        res = request.get_json(force=True)
 
         res_items = res['order'].get('items')
         res_address = res['order'].get('delivery_address')

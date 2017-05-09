@@ -3,7 +3,7 @@ Test suite for User(s) resources.
 """
 
 from models import User, Address, Item, Order
-from tests.test_utils import open_with_auth, add_user, add_address
+from tests.test_utils import open_with_auth, add_user, add_address, wrong_dump
 from tests.test_case import TestCase
 from http.client import (OK, NOT_FOUND, NO_CONTENT, BAD_REQUEST,
                          CREATED, CONFLICT, UNAUTHORIZED)
@@ -62,7 +62,7 @@ class TestUser(TestCase):
         for user in User.select():
             assert user.admin is False
 
-    def test_post_new_user_no_json__fail(self):
+    def test_post_new_user__not_json_failure(self):
         user = {
             'first_name': 'Mario',
             'last_name': 'Rossi',
@@ -70,9 +70,11 @@ class TestUser(TestCase):
             'password': 'aksdg',
         }
         resp = self.app.post(API_ENDPOINT.format('users/'),
-                             data=json.dumps(user))
+                             data=wrong_dump(user),
+                             content_type='application/json')
 
         assert resp.status_code == BAD_REQUEST
+        assert User.select().count() == 0
 
     def test_post_new_user_email_exists__fail(self):
         add_user('mail@gmail.com', TEST_USER_PSW)
