@@ -161,8 +161,7 @@ class TestOrders(TestCase):
                               json.dumps(data))
 
         assert resp.status_code == CREATED
-        import pdb
-        pdb.set_trace()
+
         assert len(Order.select()) == 1
         assert len(OrderItem.select()) == 2
         order = Order.get()

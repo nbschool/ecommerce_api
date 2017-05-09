@@ -25,15 +25,16 @@ def mock_uuid(mocker):
     mockuuid.side_effect = getuuid
 
 
-@pytest.fixture(autouse=True, name='mockdatetimes')
-def mock_basemodel_datetimes(mocker):
+@pytest.fixture(autouse=True, name='mock_create')
+def mock_models_create(mocker):
     """
-    Patch all the `created_at` and `updated_at` attributes of the peewee models
-    defined inside the `models` module.
+    Patch the create method of our models to force a default created_at datetime
+    when creating new instances, but allowing to override with specific values
     """
-    with suppress(AttributeError):
-        for cls in test_utils.get_all_models_names():
-            mocker.patch('models.{}.created_at.default'.format(cls),
-                         new=test_utils.mock_datetime)
-            mocker.patch('models.{}.updated_at.default'.format(cls),
-                         new=test_utils.mock_datetime)
+
+    # Apply the patch
+    for cls in [models.Order]:
+        mocker.patch(
+            'models.{}.create'.format(cls.__name__),
+            new=MockModelCreate(cls),
+        )
