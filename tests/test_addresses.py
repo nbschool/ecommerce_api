@@ -1,11 +1,9 @@
 import json
 import uuid
 
-from peewee import SqliteDatabase
-
-from app import app
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
-from models import Address, User
+from models import Address
+from tests.test_case import TestCase
 from tests.test_utils import add_user, open_with_auth
 from uuid import uuid4
 
@@ -39,20 +37,7 @@ def new_addr(user, country='Italy', city='Pistoia', post_code='51100',
     }
 
 
-class TestAddresses:
-    @classmethod
-    def setup_class(cls):
-        test_db = SqliteDatabase(':memory:')
-        Address._meta.database = test_db
-        User._meta.database = test_db
-        test_db.connect()
-        Address.create_table()
-        User.create_table()
-        cls.app = app.test_client()
-
-    def setup_method(self):
-        Address.delete().execute()
-        User.delete().execute()
+class TestAddresses(TestCase):
 
     def test_get_addresses__empty(self):
         user = add_user('mariorossi@gmail.com', TEST_USER_PSW)
