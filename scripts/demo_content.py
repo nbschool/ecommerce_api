@@ -229,7 +229,6 @@ def overwrite_db():
 
 
 def main():
-    starter()
     print(TEXT_DISPLAY)
     list_db = get_databases()
     if len(list_db) == 0:
