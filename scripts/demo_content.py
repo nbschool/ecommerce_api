@@ -7,10 +7,29 @@ from peewee import SqliteDatabase
 from faker import Factory
 from colorama import init, Fore, Style
 from models import User, Item, Order, OrderItem, Address
+import argparse
 import sys
 import glob
 import random
 
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-u','--users', type=int, help='Set up the number of insertions in User table.', default=10, choices=range(10,101))
+parser.add_argument('-a','--addresses', type=int, 
+                    help='Set up the number of insertions in Address table.', default=10, choices=range(10,101))
+parser.add_argument('-i','--items', type=int, 
+                    help='Set up the number of insertions in Item table.', default=10, choices=range(10,101))
+parser.add_argument('-o','--orders', type=int, 
+                    help='Set up the number of insertions in Order table.', default=10, choices=range(10,101))
+
+args = parser.parse_args()
+
+num_u = args.users
+num_a = args.addresses
+num_i = args.items
+num_o = agrs.orders
+
+import pdb; pdb.set_trace()
 
 init(autoreset=True)
 
@@ -67,7 +86,7 @@ def set_db(database):
     Address._meta.database = database
 
 
-def user_creator(num_user=1):
+def user_creator(num_user=num_u):
     """Create users from an Italian-like context. Due to param in factory create 'it_iT'."""
     for i in range(0, num_user):
         user_uuid = fake.uuid4()
@@ -86,7 +105,7 @@ def user_creator(num_user=1):
         )
 
 
-def item_creator(num_item=1):
+def item_creator(num_item=num_i):
     for i in range(0, num_item):
         item_id = fake.uuid4()
         item_name = fake.sentence(nb_words=3, variable_nb_words=True)
@@ -99,7 +118,7 @@ def item_creator(num_item=1):
         )
 
 
-def address_creator(num_addr=1):
+def address_creator(num_addr=num_a):
     LIST_COUNTRIES = ['Belgium', 'France', 'Germany',
                       'Greece', 'Italy', 'Portugal', 'Spain']
     for i in range(0, num_addr):
@@ -116,7 +135,7 @@ def address_creator(num_addr=1):
         )
 
 
-def order_creator(num_order=1):
+def order_creator(num_order=num_o):
     for i in range(0, num_order):
         user_id = count_rows(User)
         order_id = fake.uuid4()
@@ -130,7 +149,7 @@ def order_creator(num_order=1):
         )
 
 
-def order_item_creator(num_order_item=1):
+def order_item_creator():
     orders = Order.select()
     for order in orders:
         for e in range(1, random.choice(range(1, 7))):
@@ -216,6 +235,7 @@ def overwrite_db():
 
 
 def main():
+    starter()
     print(TEXT_DISPLAY)
     list_db = get_databases()
     if len(list_db) == 0:
@@ -235,7 +255,7 @@ def main():
         if choice == '1':
             overwrite_db()
         if choice == '2':
-            write_db()
+            write_db(user_num, order_num)
         if choice is '':
             good_bye('change', default='hasn\'t')
         else:
