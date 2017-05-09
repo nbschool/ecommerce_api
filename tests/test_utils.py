@@ -32,9 +32,21 @@ def mock_datetime(*args):
     """
     Datetime mocker fot test suite. Returns fixed time value datetime object.
     """
-    import pdb
-    pdb.set_trace()
-    return datetime.datetime(year=2017, month=2, day=20)
+    return datetime.datetime(2017, 2, 20, 10, 16, 50, 140620)
+
+
+class MockModelCreate:
+    """
+    Override callable class that goes in place of the Model.create()
+    classmethod and allows extra default custom parameters.
+    """
+
+    def __init__(self, cls):
+        self.original = cls.create
+
+    def __call__(self, created_at=mock_datetime(), **query):
+        query['created_at'] = created_at
+        return self.original(**query)
 
 
 def get_all_models_names():
