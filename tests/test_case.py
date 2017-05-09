@@ -12,6 +12,7 @@ TABLES = [Address, Item, Order, OrderItem, Picture, User]
 
 
 @pytest.mark.usefixtures('mockuuid4')
+@pytest.mark.usefixtures('mockdatetimes')
 class TestCase:
     """
     Created TestCase to avoid duplicated code in the other tests

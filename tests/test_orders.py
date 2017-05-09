@@ -161,7 +161,8 @@ class TestOrders(TestCase):
                               json.dumps(data))
 
         assert resp.status_code == CREATED
-
+        import pdb
+        pdb.set_trace()
         assert len(Order.select()) == 1
         assert len(OrderItem.select()) == 2
         order = Order.get()
@@ -224,9 +225,9 @@ class TestOrders(TestCase):
         order = {
             'relationships': {
                 'items': [{
-                        'id': '429994bf-784e-47cc-a823-e0c394b823e8',
-                        'type': 'item', 'quantity': 4
-                     }],
+                    'id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    'type': 'item', 'quantity': 4
+                }],
                 'delivery_address': {
                     'type': 'address',
                     'id': '8473fbaa-94f0-46db-939f-faae898f001c'

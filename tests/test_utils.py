@@ -1,13 +1,50 @@
 from functools import reduce
+import datetime
+import inspect
 import json
 import os
 import random
 import shutil
+import sys
 import uuid
 from base64 import b64encode
 
 from models import Address, User
 from utils import get_image_folder
+
+
+# ###########################################################
+# Mocking utilities
+
+
+def mock_uuid_generator():
+    """
+    Returns a generator object that creates UUID instances with a deterministic
+    and progressive value in the form of `00000000-0000-0000-0000-000000000001`
+    """
+    i = 1
+    while True:
+        yield uuid.UUID('00000000-0000-0000-0000-{:012d}'.format(i))
+        i += 1
+
+
+def mock_datetime(*args):
+    """
+    Datetime mocker fot test suite. Returns fixed time value datetime object.
+    """
+    import pdb
+    pdb.set_trace()
+    return datetime.datetime(year=2017, month=2, day=20)
+
+
+def get_all_models_names():
+    """
+    Returns the names of all the classes defined inside the 'models' module.
+    """
+    return [name for
+            (name, cls) in inspect.getmembers(
+                sys.modules['models'], inspect.isclass)
+            if cls.__module__ is 'models']
 
 
 # ###########################################################
@@ -232,14 +269,3 @@ def wrong_dump(data):
     """
     return reduce(lambda x, y: "{}&{}".format(x, y), [
         "{}={}".format(k, v) for k, v in zip(data.keys(), data.values())])
-
-
-def mock_uuid_generator():
-    """
-    Returns a generator object that creates UUID instances with a deterministic
-    and progressive value in the form of `00000000-0000-0000-0000-000000000001`
-    """
-    i = 1
-    while True:
-        yield uuid.UUID('00000000-0000-0000-0000-{:012d}'.format(i))
-        i += 1
