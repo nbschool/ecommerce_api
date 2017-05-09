@@ -28,15 +28,6 @@ TEXT_DISPLAY = Fore.MAGENTA + Style.BRIGHT + """
                 Here you could create a new simulated database.
                 """
 
-MENU_TEXT = Fore.GREEN + Style.BRIGHT + """
-                 ***********************************************
-                 * Press:                                      *
-                 *(1) Overwrite the database                   *
-                 *(2) Add data to the current database         *
-                 *(Enter) Just to exit                         *
-                 ***********************************************
-            """
-
 WARNING_DELETE = Fore.YELLOW + Style.BRIGHT + """
                 ##################################################
                 #   WARNING: YOU WILL DELETE FILES PERMANENTLY   #
@@ -216,6 +207,29 @@ def overwrite_db(num_items, num_users, num_orders, num_addrs):
     if choice == '':
         good_bye('deleted', default='hasn\'t')
 
+
+def prompt_menu_1(actions):
+    print(Fore.GREEN + Style.BRIGHT + '\t' * 2 + '*' * 47)
+    print(Fore.GREEN + Style.BRIGHT + '\t' * 2 + '* Press:' + ' ' * 37 +' *')
+    for action in actions.values():
+        print(Fore.GREEN + Style.BRIGHT + '\t' * 2 + '  ({key}) {text}'.format(**action))
+    print(Fore.GREEN + Style.BRIGHT + '\t' * 2 + '*' * 47)
+
+    choice = None
+    while choice not in actions.keys():
+        choice = input(Fore.YELLOW + Style.BRIGHT + ' > ').strip()
+
+    actions[choice]['action']()
+
+def prompt_menu_0(actions):
+    print(Fore.GREEN + Style.BRIGHT + 'Do you want a database?')
+    choice = None
+    while choice not in actions.keys():
+        choice = input(Fore.YELLOW + Style.BRIGHT +
+                       'If YES press(1) or [ENTER] to exit without change. > ').strip()
+
+    actions[choice]()
+
 def main():
     def check_range(value):
         int_value = abs(int(value))
@@ -240,30 +254,33 @@ def main():
     num_items = args.items
     num_orders = args.orders
 
+    OVERWRITE_ACTIONS = {
+        '1': {
+            'key': '1', 'text': 'Overwrite the database',
+            'action': lambda: overwrite_db(num_items, num_users, num_orders, num_addrs)
+        },
+        '2': {
+            'key': '2', 'text': 'Add data to the current database',
+            'action': lambda: write_db(num_items, num_users, num_orders, num_addrs)
+        },
+        '': {
+            'key': 'Enter', 'text': 'Just exit',
+             'action': lambda: good_bye('change', default='hasn\'t')
+        },
+    }
+
+    NEW_DB_ACTIONS = {
+        '1': lambda: create_db(num_items, num_users, num_orders, num_addrs),
+        '': lambda: good_bye('be created', default='hasn\'t')
+    }
+
     print(TEXT_DISPLAY)
     list_db = get_databases()
     if len(list_db) == 0:
-        print(Fore.GREEN + Style.BRIGHT + 'Do you want a database?')
-        choice = input('If YES press(1) or [ENTER] to exit without change. >'
-                       + Fore.YELLOW + Style.BRIGHT + ' ').strip()
-        if choice == '1':
-            create_db(num_items, num_users, num_orders, num_addrs)
-        if choice == '':
-            good_bye('be created', default='hasn\'t')
-        else:
-            main()
+        prompt_menu_0(NEW_DB_ACTIONS)
     if len(list_db) != 0:
         print(Fore.YELLOW + Style.BRIGHT + 'You have already a database.')
-        print(MENU_TEXT)
-        choice = input(Fore.YELLOW + Style.BRIGHT + ' > ').strip()
-        if choice == '1':
-            overwrite_db(num_items, num_users, num_orders, num_addrs)
-        if choice == '2':
-            write_db(num_items, num_users, num_orders, num_addrs)
-        if choice is '':
-            good_bye('change', default='hasn\'t')
-        else:
-            main()
+        prompt_menu_1(OVERWRITE_ACTIONS)
 
 
 if __name__ == '__main__':
