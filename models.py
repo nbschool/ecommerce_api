@@ -10,13 +10,10 @@ from peewee import UUIDField, ForeignKeyField, IntegerField
 from playhouse.signals import Model, post_delete, pre_delete
 from uuid import uuid4
 
-from exceptions import InsufficientAvailabilityException
+from exceptions import InsufficientAvailabilityException, WrongQuantity
 from utils import remove_image
 
 database = SqliteDatabase('database.db')
-
-class WrongQuantity(Exception):
-    pass
 
 
 class BaseModel(Model):

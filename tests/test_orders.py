@@ -390,7 +390,8 @@ class TestOrders(TestCase):
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order))
         assert resp.status_code == OK
-        resp_order = Order.get(order_id=order1.order_id).json(include_items=True)
+        resp_order = Order.get(
+            order_id=order1.order_id).json(include_items=True)
         assert resp_order['order_id'] == order['order']['order_id']
         assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
         order_items = [o.json() for o in OrderItem.select()]
@@ -438,7 +439,8 @@ class TestOrders(TestCase):
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order))
         assert resp.status_code == OK
-        resp_order = Order.get(order_id=order1.order_id).json(include_items=True)
+        resp_order = Order.get(
+            order_id=order1.order_id).json(include_items=True)
         assert resp_order['order_id'] == order['order']['order_id']
         assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
         assert len(resp_order['items']) == 1
@@ -485,7 +487,8 @@ class TestOrders(TestCase):
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order))
         assert resp.status_code == OK
-        resp_order = Order.get(order_id=order1.order_id).json(include_items=True)
+        resp_order = Order.get(
+            order_id=order1.order_id).json(include_items=True)
         assert resp_order['order_id'] == order['order']['order_id']
         assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
         order_items = [o.json() for o in OrderItem.select()]
@@ -535,7 +538,8 @@ class TestOrders(TestCase):
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order))
         assert resp.status_code == OK
-        resp_order = Order.get(order_id=order1.order_id).json(include_items=True)
+        resp_order = Order.get(
+            order_id=order1.order_id).json(include_items=True)
         assert resp_order['order_id'] == order['order']['order_id']
         assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
         order_items = [o.json() for o in OrderItem.select()]
@@ -828,7 +832,7 @@ class TestOrders(TestCase):
                 "order_id": str(order.order_id),
                 'items': [
                     {'item_id': str(item.item_id),
-                        'price': 30.30, 'quantity': 4},
+                     'price': 30.30, 'quantity': 4},
                 ],
                 'delivery_address': addr_A.json()["address_id"]
             }
@@ -1051,16 +1055,10 @@ class TestOrders(TestCase):
         )
         item3 = Item.create(
             item_id=uuid4(),
-<<<<<<< HEAD
-            name='Item 2',
-            description='Item 2 description',
-            price=15,
-            availability=2
-=======
             name='Item 3',
             description='Item 3 description',
-            price=15
->>>>>>> modify remove_item of OrderItem in models.py
+            price=15,
+            availability=2
         )
         order = Order.create(delivery_address=addr, user=user)
         order.add_item(item1, 2).add_item(item2, 2)
@@ -1082,12 +1080,12 @@ class TestOrders(TestCase):
             assert count_items(order) == 4
 
         # Check that the total price is correctly updated
-        assert order.total_price == item2.price * 2
+        assert order.total_price == item1.price + item2.price * 2
 
         # remove non existing item3 from order
         order.remove_item(item3)
-        assert count_items(order) == 2
-        assert len(order.order_items) == 1
+        assert count_items(order) == 3
+        assert len(order.order_items) == 2
 
         order.empty_order()
         assert len(order.order_items) == 0
