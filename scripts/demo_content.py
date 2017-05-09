@@ -13,18 +13,6 @@ import glob
 import random
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-u','--users', type=int, help='Set up the number of insertions in User table.', default=10, choices=range(10,101))
-parser.add_argument('-a','--addresses', type=int, 
-                    help='Set up the number of insertions in Address table.', default=10, choices=range(10,101))
-parser.add_argument('-i','--items', type=int, 
-                    help='Set up the number of insertions in Item table.', default=10, choices=range(10,101))
-parser.add_argument('-o','--orders', type=int, 
-                    help='Set up the number of insertions in Order table.', default=10, choices=range(10,101))
-
-args = parser.parse_args()
-import pdb; pdb.set_trace()
-
 init(autoreset=True)
 
 SEED = 9623954
@@ -227,8 +215,30 @@ def overwrite_db():
     if choice == '':
         good_bye('deleted', default='hasn\'t')
 
-
 def main():
+    def check_range(value):
+        int_value = abs(int(value))
+        if int_value > 100:
+             raise argparse.ArgumentTypeError("{} is a big number. Maximum accepted is 100.".format(int_value))
+        return int_value
+
+    parser = argparse.ArgumentParser(description='Set up the number of rows' +
+                                     'to insert in each table from CLI.')
+    parser.add_argument('-u','--users', type=check_range, help='Set up the number' +
+                        'of insertions in User table.', default=10)
+    parser.add_argument('-a','--addresses', type=check_range,
+                        help='Set up the number of insertions in Address table.', default=10)
+    parser.add_argument('-i','--items', type=check_range,
+                        help='Set up the number of insertions in Item table.', default=10)
+    parser.add_argument('-o','--orders', type=check_range,
+                        help='Set up the number of insertions in Order table.', default=10)
+
+    args = parser.parse_args()
+    num_u = args.users
+    num_a = args.addresses
+    num_i = args.items
+    num_o = args.orders
+
     print(TEXT_DISPLAY)
     list_db = get_databases()
     if len(list_db) == 0:
