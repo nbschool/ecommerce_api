@@ -52,7 +52,7 @@ WARNING_OVERWRITE = Fore.YELLOW + Style.BRIGHT + """
 
 def get_random_row(table):
     total_rows = table.select().count()
-    lucky_row = random.choice(range(1, total_rows+1))
+    lucky_row = random.randint(1, total_rows)
     return table.select().where(table.id == lucky_row).get()
 
 
@@ -109,7 +109,7 @@ def address_creator(num_addr):
         user_id = count_rows(User)
         Address.create(
             address_id=fake.uuid4(),
-            user_id=random.choice(range(1, user_id)),
+            user_id=random.randint(1, user_id),
             country=country,
             city=fake.city(),
             post_code=fake.postcode(),
@@ -125,9 +125,9 @@ def order_creator(num_order):
         address = count_rows(Address)
         Order.create(
             order_id=order_id,
-            user_id=random.choice(range(1, user_id)),
+            user_id=random.randint(1, user_id),
             total_price=0,
-            delivery_address=random.choice(range(1, address)),
+            delivery_address=random.randint(1, address),
             items=[]
         )
 
@@ -137,7 +137,7 @@ def order_item_creator(num_items):
     for order in orders:
         for e in range(1, num_items):
             an_item = get_random_row(Item)
-            quantity = random.choice(range(1, 5))
+            quantity = random.randint(1, 5)
             order.add_item(an_item, quantity)
 
 
