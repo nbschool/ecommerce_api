@@ -2,13 +2,14 @@
 Test suite.
 """
 
-from models import Order, OrderItem, Item
+from models import Order, OrderItem, Item, WrongQuantity
 from tests.test_utils import (add_user, add_address,
                               add_admin_user, open_with_auth)
 from tests.test_case import TestCase
 from http.client import (CREATED, NO_CONTENT, NOT_FOUND,
                          OK, BAD_REQUEST, UNAUTHORIZED)
 import json
+import pytest
 from uuid import uuid4
 
 # main endpoint for API
@@ -1050,10 +1051,16 @@ class TestOrders(TestCase):
         )
         item3 = Item.create(
             item_id=uuid4(),
+<<<<<<< HEAD
             name='Item 2',
             description='Item 2 description',
             price=15,
             availability=2
+=======
+            name='Item 3',
+            description='Item 3 description',
+            price=15
+>>>>>>> modify remove_item of OrderItem in models.py
         )
         order = Order.create(delivery_address=addr, user=user)
         order.add_item(item1, 2).add_item(item2, 2)
@@ -1068,10 +1075,11 @@ class TestOrders(TestCase):
         assert count_items(order) == 3
 
         # remove more item1 than existing in order
-        order.remove_item(item1, 5)
-        assert len(order.order_items) == 1
-        assert OrderItem.select().count() == 1
-        assert count_items(order) == 2
+        with pytest.raises(WrongQuantity):
+            order.remove_item(item1, 5)
+            assert len(order.order_items) == 2
+            assert OrderItem.select().count() == 2
+            assert count_items(order) == 4
 
         # Check that the total price is correctly updated
         assert order.total_price == item2.price * 2
