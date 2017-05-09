@@ -132,10 +132,10 @@ def order_creator(num_order):
         )
 
 
-def order_item_creator():
+def order_item_creator(num_items):
     orders = Order.select()
     for order in orders:
-        for e in range(1, random.choice(range(1, 7))):
+        for e in range(1, num_items):
             an_item = get_random_row(Item)
             quantity = random.choice(range(1, 5))
             order.add_item(an_item, quantity)
@@ -160,7 +160,7 @@ def write_db(num_items, num_users, num_orders, num_addrs):
     address_creator(num_addrs)
     item_creator(num_items)
     order_creator(num_orders)
-    order_item_creator(10)
+    order_item_creator(random.randint(1, 7))
 
 
 def get_databases():
