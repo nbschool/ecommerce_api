@@ -406,13 +406,13 @@ class OrderItem(BaseModel):
 
 class Favorite(BaseModel):
     """ Many to many table to relate an item with a user."""
-    favorite_id = UUIDField(unique=True, default=uuid4)
+    uuid = UUIDField(unique=True, default=uuid4)
     user = ForeignKeyField(User, related_name="favorites")
     item = ForeignKeyField(Item, related_name="favorites")
 
     def json(self):
         return {
-            'favorite_id': str(self.favorite_id),
+            'uuid': str(self.favorite_id),
             'item_id': str(self.item_id),
             'user_id': str(self.user_id)
         }
