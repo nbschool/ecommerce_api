@@ -25,7 +25,7 @@ def send_email(subject, body):
         'from': email,
         'to': recipient,
         'subject': subject,
-        'text': body
+        'html': body
     })
     return request
 
