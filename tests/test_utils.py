@@ -38,14 +38,21 @@ def mock_datetime(*args):
 class MockModelCreate:
     """
     Override callable class that goes in place of the Model.create()
-    classmethod and allows extra default custom parameters.
+    classmethod and allows extra default custom parameters so test objects can
+    be predictable.
+    Defaulted attributes are `created_at`, with a static datetime and `uuid`
+    with a progressive uuid
     """
 
     def __init__(self, cls):
         self.original = cls.create
+        self.uuid_generator = mock_uuid_generator()
 
-    def __call__(self, created_at=mock_datetime(), **query):
+    def __call__(self, created_at=mock_datetime(), uuid=None, **query):
         query['created_at'] = created_at
+        query['uuid'] = uuid or next(self.uuid_generator)
+        # import pdb
+        # pdb.set_trace()
         return self.original(**query)
 
 
@@ -211,32 +218,6 @@ def format_jsonapi_request(type_, data):
         }
     }
     return retval
-
-
-def _test_res_patch_date(result, date):
-    """
-    Patch a jsonapi response date in result['data']['attributes']['date']
-    with the given date. If a result list needs to be patched, a matching indexes
-    list of dates needs to be given as `date`.
-
-    : param result: a single jsonapi result `dict` or a `list` of result
-    : param date: a single `DateTime` object or a ** matching ** `list` of DateTime
-    """
-    # patch the attribute
-    def patch(r, d):
-        r['data']['attributes']['date'] = d
-
-    # add timezone info to match the actual response datetime
-    def set_tz(d):
-        return d.replace(tzinfo=datetime.timezone.utc).isoformat()
-
-    # if result is a list iterate each item.
-    if type(result) == list:
-        for r, d in zip(result, date):
-            patch(r, set_tz(d))
-    else:
-        patch(result, set_tz(date))
-    return result
 
 
 def _test_res_sort_included(result, sortFn=lambda x: x['type']):
