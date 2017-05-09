@@ -10,5 +10,6 @@ class InsufficientAvailabilityException(Exception):
         self.item = item
         self.requested_quantity = requested_quantity
 
+
 class WrongQuantity(Exception):
     pass

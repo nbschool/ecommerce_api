@@ -387,7 +387,7 @@ class OrderItem(BaseModel):
 
         if self.quantity < quantity:
             raise WrongQuantity('Quantity of items to be removed ({}) higher than availability ({})'
-                            .format(quantity, self.quantity))
+                                .format(quantity, self.quantity))
 
         elif self.quantity > quantity:
             self.quantity -= quantity
