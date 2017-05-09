@@ -35,17 +35,17 @@ class ItemPictureHandler(Resource):
             return None, client.NOT_FOUND
 
         file = request.files['image']
-        picture_id = uuid.uuid4()
+        picture_uuid = uuid.uuid4()
         extension = os.path.splitext(file.filename)[1][1:]
 
         if extension not in ALLOWED_EXTENSION:
             return {"message": "File extension not allowed"},\
                 client.BAD_REQUEST
 
-        utils.save_image(file, picture_id, extension)
+        utils.save_image(file, picture_uuid, extension)
 
         return Picture.create(
-            uuid=picture_id,
+            uuid=picture_uuid,
             extension=extension,
             item=item
         ).json(), client.CREATED
@@ -54,20 +54,20 @@ class ItemPictureHandler(Resource):
 class PictureHandler(Resource):
     """Handler of a specific picture"""
 
-    def get(self, picture_id):
-        """Retrieve the picture specified by picture_id"""
+    def get(self, picture_uuid):
+        """Retrieve the picture specified by picture_uuid"""
         try:
-            picture = Picture.get(Picture.uuid == picture_id)
+            picture = Picture.get(Picture.uuid == picture_uuid)
         except Picture.DoesNotExist:
             return None, client.NOT_FOUND
 
         return send_from_directory(utils.get_image_folder(),
                                    picture.filename(), as_attachment=True)
 
-    def delete(self, picture_id):
-        """Remove the picture specified by picture_id"""
+    def delete(self, picture_uuid):
+        """Remove the picture specified by picture_uuid"""
         try:
-            obj = Picture.get(Picture.uuid == picture_id)
+            obj = Picture.get(Picture.uuid == picture_uuid)
         except Picture.DoesNotExist:
             return None, client.NOT_FOUND
         obj.delete_instance()

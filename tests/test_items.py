@@ -171,7 +171,7 @@ class TestItems(TestCase):
         assert json_item['uuid'] == item.uuid
         assert json.loads(resp.data) == json_item
 
-    def test_patch_item__wrong_id(self):
+    def test_patch_item__wrong_uuid(self):
         Item.create(**TEST_ITEM)
         resp = self.app.patch('/items/{item_uuid}'.format(item_uuid=WRONG_UUID),
                               data=json.dumps(TEST_ITEM2),
@@ -200,14 +200,14 @@ class TestItems(TestCase):
         picture = Picture.create(item=item, **TEST_PICTURE)
         picture2 = Picture.create(item=item, **TEST_PICTURE2)
         picture3 = Picture.create(item=item2, **TEST_PICTURE3)
-        path_pic = os.path.join(utils.get_image_folder(), "{picture_id}.{extension}".format(
-            picture_id=picture.uuid,
+        path_pic = os.path.join(utils.get_image_folder(), "{picture_uuid}.{extension}".format(
+            picture_uuid=picture.uuid,
             extension=picture.extension))
-        path_pic2 = os.path.join(utils.get_image_folder(), "{picture_id}.{extension}".format(
-            picture_id=picture2.uuid,
+        path_pic2 = os.path.join(utils.get_image_folder(), "{picture_uuid}.{extension}".format(
+            picture_uuid=picture2.uuid,
             extension=picture2.extension))
-        path_pic3 = os.path.join(utils.get_image_folder(), "{picture_id}.{extension}".format(
-            picture_id=picture3.uuid,
+        path_pic3 = os.path.join(utils.get_image_folder(), "{picture_uuid}.{extension}".format(
+            picture_uuid=picture3.uuid,
             extension=picture3.extension))
         open(path_pic, "wb")
         open(path_pic2, "wb")
@@ -222,17 +222,17 @@ class TestItems(TestCase):
         item2 = Item.get()
         pic = Picture.get()
         assert pic == picture3
-        assert os.path.isfile("{path}/{picture_id}.{extension}".format(
+        assert os.path.isfile("{path}/{picture_uuid}.{extension}".format(
             path=utils.get_image_folder(),
-            picture_id=picture3.uuid,
+            picture_uuid=picture3.uuid,
             extension=picture3.extension))
-        assert not os.path.isfile("{path}/{picture_id}.{extension}".format(
+        assert not os.path.isfile("{path}/{picture_uuid}.{extension}".format(
             path=utils.get_image_folder(),
-            picture_id=picture.uuid,
+            picture_uuid=picture.uuid,
             extension=picture.extension))
-        assert not os.path.isfile("{path}/{picture_id}.{extension}".format(
+        assert not os.path.isfile("{path}/{picture_uuid}.{extension}".format(
             path=utils.get_image_folder(),
-            picture_id=picture2.uuid,
+            picture_uuid=picture2.uuid,
             extension=picture2.extension))
         test_utils.clean_images()
 

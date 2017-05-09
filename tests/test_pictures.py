@@ -58,11 +58,11 @@ class TestPictures(TestCase):
         test_utils.setup_images()
         item = Item.create(**TEST_ITEM)
         picture = Picture.create(item=item, **TEST_PICTURE)
-        open("{path}/{picture_id}.jpg".format(
+        open("{path}/{picture_uuid}.jpg".format(
             path=utils.get_image_folder(),
-            picture_id=picture.uuid), "wb")
-        resp = self.app.get('/pictures/{picture_id}'.format(
-            picture_id=picture.uuid))
+            picture_uuid=picture.uuid), "wb")
+        resp = self.app.get('/pictures/{picture_uuid}'.format(
+            picture_uuid=picture.uuid))
         assert resp.status_code == client.OK
 
         test_picture = TEST_PICTURE.copy()
@@ -72,8 +72,8 @@ class TestPictures(TestCase):
         test_utils.clean_images()
 
     def test_get_picture__missing(self):
-        resp = self.app.get('/pictures/{picture_id}'.format(
-            picture_id=WRONG_UUID))
+        resp = self.app.get('/pictures/{picture_uuid}'.format(
+            picture_uuid=WRONG_UUID))
         assert resp.status_code == client.NOT_FOUND
 
     def test_get_item_pictures__success(self):
@@ -147,21 +147,21 @@ class TestPictures(TestCase):
         item = Item.create(**TEST_ITEM)
         picture = Picture.create(item=item, **TEST_PICTURE)
         picture2 = Picture.create(item=item, **TEST_PICTURE2)
-        open("{path}/{picture_id}.{extension}".format(
+        open("{path}/{picture_uuid}.{extension}".format(
             path=utils.get_image_folder(),
-            picture_id=picture.uuid,
+            picture_uuid=picture.uuid,
             extension=picture.extension), "wb")
-        open("{path}/{picture_id}.{extension}".format(
+        open("{path}/{picture_uuid}.{extension}".format(
             path=utils.get_image_folder(),
-            picture_id=WRONG_UUID,
+            picture_uuid=WRONG_UUID,
             extension='jpg'), "wb")
-        open("{path}/{picture_id}.{extension}".format(
+        open("{path}/{picture_uuid}.{extension}".format(
             path=utils.get_image_folder(),
-            picture_id=picture2.uuid,
+            picture_uuid=picture2.uuid,
             extension=picture2.extension), "wb")
 
-        resp = self.app.delete('/pictures/{picture_id}'.format(
-            picture_id=picture.uuid))
+        resp = self.app.delete('/pictures/{picture_uuid}'.format(
+            picture_uuid=picture.uuid))
 
         assert resp.status_code == client.NO_CONTENT
         assert Picture.select().count() == 1
@@ -171,31 +171,31 @@ class TestPictures(TestCase):
         assert item2.name == TEST_ITEM['name']
         assert float(item2.price) == TEST_ITEM['price']
         assert item2.description == TEST_ITEM['description']
-        assert os.path.isfile("{path}/{picture_id}.{extension}".format(
+        assert os.path.isfile("{path}/{picture_uuid}.{extension}".format(
             path=utils.get_image_folder(),
-            picture_id=WRONG_UUID,
+            picture_uuid=WRONG_UUID,
             extension='jpg'))
-        assert not os.path.isfile("{path}/{picture_id}.{extension}".format(
+        assert not os.path.isfile("{path}/{picture_uuid}.{extension}".format(
             path=utils.get_image_folder(),
-            picture_id=picture.uuid,
+            picture_uuid=picture.uuid,
             extension=picture.extension))
-        assert os.path.isfile("{path}/{picture_id}.{extension}".format(
+        assert os.path.isfile("{path}/{picture_uuid}.{extension}".format(
             path=utils.get_image_folder(),
-            picture_id=picture2.uuid,
+            picture_uuid=picture2.uuid,
             extension=picture2.extension))
         test_utils.clean_images()
 
-    def test_delete_picture__wrong_id(self):
-        resp = self.app.delete('/pictures/{picture_id}'.format(
-            picture_id=WRONG_UUID))
+    def test_delete_picture__wrong_uuid(self):
+        resp = self.app.delete('/pictures/{picture_uuid}'.format(
+            picture_uuid=WRONG_UUID))
 
         assert resp.status_code == client.NOT_FOUND
 
     def test_delete_pictures__missing_file(self):
         item = Item.create(**TEST_ITEM)
         picture = Picture.create(item=item, **TEST_PICTURE)
-        resp = self.app.delete('/pictures/{picture_id}'.format(
-            picture_id=picture.uuid))
+        resp = self.app.delete('/pictures/{picture_uuid}'.format(
+            picture_uuid=picture.uuid))
 
         assert resp.status_code == client.NO_CONTENT
         assert not Picture.select().exists()

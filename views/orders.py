@@ -71,17 +71,17 @@ class OrdersHandler(Resource):
 class OrderHandler(Resource):
     """ Single order endpoints."""
 
-    def get(self, order_id):
+    def get(self, order_uuid):
         """ Get a specific order, including all the related Item(s)."""
         try:
-            order = Order.get(Order.uuid == order_id)
+            order = Order.get(Order.uuid == order_uuid)
         except Order.DoesNotExist:
             return None, NOT_FOUND
 
         return order.json(include_items=True), OK
 
     @auth.login_required
-    def patch(self, order_id):
+    def patch(self, order_uuid):
         """ Modify a specific order. """
         res = request.get_json(force=True)
 
@@ -93,7 +93,7 @@ class OrderHandler(Resource):
 
         with database.transaction() as txn:
             try:
-                order = Order.get(uuid=str(order_id))
+                order = Order.get(uuid=str(order_uuid))
             except Order.DoesNotExist:
                 abort(NOT_FOUND)
 
@@ -105,11 +105,11 @@ class OrderHandler(Resource):
                     abort(BAD_REQUEST)
 
             if res_items:
-                items_ids = [e['item_uuid'] for e in res_items]
-                items_query = Item.select().where(Item.uuid << items_ids)
+                items_uuids = [e['item_uuid'] for e in res_items]
+                items_query = Item.select().where(Item.uuid << items_uuids)
                 items = {str(item.uuid): item for item in items_query}
 
-                if len(items) != len(items_ids):
+                if len(items) != len(items_uuids):
                     return None, BAD_REQUEST
 
                 for res_item in res_items:
@@ -131,10 +131,10 @@ class OrderHandler(Resource):
         return order.json(include_items=True), OK
 
     @auth.login_required
-    def delete(self, order_id):
+    def delete(self, order_uuid):
         """ Delete a specific order. """
         try:
-            obj = Order.get(uuid=str(order_id))
+            obj = Order.get(uuid=str(order_uuid))
         except Order.DoesNotExist:
             return None, NOT_FOUND
 

@@ -166,7 +166,7 @@ class TestAddresses(TestCase):
         assert address['post_code'] == "16100"
         assert json.loads(resp.data) == address
 
-    def test_patch_address__wrong_id(self):
+    def test_patch_address__wrong_uuid(self):
         user = add_user('mariorossi@gmail.com', '123')
         Address.create(**get_test_addr_dict(user, city="Firenze",
                                             post_code='50132', address="Via Rossi 10"))

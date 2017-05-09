@@ -408,11 +408,11 @@ class TestOrders(TestCase):
         order1 = Order.create(delivery_address=addr_A, user=user_A)
         order1.add_item(item1, 2)
 
-        order_id = str(order1.uuid)
+        order_uuid = str(order1.uuid)
 
         order = {
             "order": {
-                "uuid": order_id,
+                "uuid": order_uuid,
                 'items': [
                     {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.0, 'quantity': 5},
@@ -458,11 +458,11 @@ class TestOrders(TestCase):
         order1 = Order.create(delivery_address=addr_A, user=user_A)
         order1.add_item(item1, 2).add_item(item2)
 
-        order_id = str(order1.uuid)
+        order_uuid = str(order1.uuid)
 
         order = {
             "order": {
-                "uuid": order_id,
+                "uuid": order_uuid,
                 'items': [
                     {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.0, 'quantity': 0},
@@ -505,11 +505,11 @@ class TestOrders(TestCase):
         order1 = Order.create(delivery_address=addr_A, user=user_A)
         order1.add_item(item1, 10).add_item(item2, 20)
 
-        order_id = str(order1.uuid)
+        order_uuid = str(order1.uuid)
 
         order = {
             "order": {
-                "uuid": order_id,
+                "uuid": order_uuid,
                 'items': [
                     {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.0, 'quantity': 5},
@@ -555,11 +555,11 @@ class TestOrders(TestCase):
         order1 = Order.create(delivery_address=addr_A, user=user_A)
         order1.add_item(item1, 5).add_item(item2, 20)
 
-        order_id = str(order1.uuid)
+        order_uuid = str(order1.uuid)
 
         order = {
             "order": {
-                "uuid": order_id,
+                "uuid": order_uuid,
                 'items': [
                     {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.0, 'quantity': 10},
@@ -608,11 +608,11 @@ class TestOrders(TestCase):
         order2 = Order.create(delivery_address=addr_B, user=user_A)
         order2.add_item(item2)
 
-        order_id = str(order1.uuid)
+        order_uuid = str(order1.uuid)
 
         order = {
             "order": {
-                "uuid": order_id,
+                "uuid": order_uuid,
                 'items': [
                     {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.0, 'quantity': 5},
@@ -653,11 +653,11 @@ class TestOrders(TestCase):
         order1 = Order.create(delivery_address=addr_A, user=user_A)
         order1.add_item(item1, 2).add_item(item2)
         order_item_before = [o.json() for o in OrderItem.select()]
-        order_id = str(order1.uuid)
+        order_uuid = str(order1.uuid)
 
         order = {
             "order": {
-                "uuid": order_id,
+                "uuid": order_uuid,
                 'items': [
                     {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf00000',
                      'price': 30.20, 'quantity': 1},
@@ -700,11 +700,11 @@ class TestOrders(TestCase):
         order1 = Order.create(delivery_address=addr_A, user=user_A)
         order1.add_item(item1, 2).add_item(item2)
         order_item_before = [o.json() for o in OrderItem.select()]
-        order_id = str(order1.uuid)
+        order_uuid = str(order1.uuid)
 
         order = {
             "order": {
-                "uuid": order_id,
+                "uuid": order_uuid,
                 'items': [
                     {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf00000',
                      'price': 30.20, 'quantity': 1},
@@ -749,11 +749,11 @@ class TestOrders(TestCase):
         order2 = Order.create(delivery_address=addr_B, user=user_A)
         order2.add_item(item2)
 
-        order_id = str(order1.uuid)
+        order_uuid = str(order1.uuid)
 
         order = {
             "order": {
-                "uuid": order_id,
+                "uuid": order_uuid,
                 'items': [
                     {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.0, 'quantity': 5},
@@ -793,18 +793,18 @@ class TestOrders(TestCase):
             user=user
         ).add_item(item1, 2)
 
-        order_id = str(order.uuid)
+        order_uuid = str(order.uuid)
 
         order_data = {
             "order": {
-                "uuid": order_id,
+                "uuid": order_uuid,
                 'items': [],
                 'delivery_address': addr.json()["uuid"],
                 'user': str(user.uuid)
 
             }
         }
-        path = 'orders/{}'.format(order_id)
+        path = 'orders/{}'.format(order_uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order_data))
@@ -817,11 +817,11 @@ class TestOrders(TestCase):
         addr_A = add_address(user=user_A)
         Order.create(delivery_address=addr_A, user=user_A)
 
-        order_id = str(uuid4())
+        order_uuid = str(uuid4())
 
         order = {
             "order": {
-                "uuid": order_id,
+                "uuid": order_uuid,
                 'items': [
                     {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 100.0, 'quantity': 5},
@@ -832,7 +832,7 @@ class TestOrders(TestCase):
             }
         }
 
-        path = 'orders/{}'.format(order_id)
+        path = 'orders/{}'.format(order_uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order))
@@ -888,10 +888,10 @@ class TestOrders(TestCase):
     def test_update_order__failure_non_existing_empty_orders(self):
         user_A = add_user('user@email.com', TEST_USER_PSW)
         addr = add_address(user=user_A)
-        order_id = str(uuid4())
+        order_uuid = str(uuid4())
         order = {
             "order": {
-                "uuid": order_id,
+                "uuid": order_uuid,
                 'items': [
                     {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 100.0, 'quantity': 5},
@@ -902,7 +902,7 @@ class TestOrders(TestCase):
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
         }
-        path = '/orders/{}'.format(order_id)
+        path = '/orders/{}'.format(order_uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               'user@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order))
@@ -935,11 +935,11 @@ class TestOrders(TestCase):
         order2 = Order.create(delivery_address=addr_B, user=user_A)
         order2.add_item(item2)
 
-        order_id = str(order1.uuid)
+        order_uuid = str(order1.uuid)
 
         order = {
             "order": {
-                "uuid": order_id,
+                "uuid": order_uuid,
                 'items': [
                     {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.0, 'quantity': 5},
