@@ -10,3 +10,7 @@ flask-httpauth==3.2.2
 passlib==1.7.1
 gunicorn==19.7.1
 Flask-Cors==3.0.2
+marshmallow==2.13.4
+marshmallow-jsonapi==0.11.0
+jsonschema==2.6.0
+simplejson==3.10.0

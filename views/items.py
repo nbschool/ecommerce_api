@@ -10,7 +10,8 @@ from flask_restful import Resource
 import http.client as client
 
 from models import Item
-from utils import check_required_fields
+
+from utils import generate_response
 
 
 class ItemsHandler(Resource):
@@ -18,7 +19,8 @@ class ItemsHandler(Resource):
 
     def get(self):
         """Retrieve every item"""
-        return [o.json() for o in Item.select()], client.OK
+        data = Item.json_list(Item.get_all())
+        return generate_response(data, client.OK)
 
     def post(self):
         """
@@ -26,22 +28,25 @@ class ItemsHandler(Resource):
         from the one generated from the database
         """
         request_data = request.get_json(force=True)
-        check_required_fields(
-            request_data=request_data,
-            required_fields=['name', 'price', 'description', 'availability'])
 
-        if int(request_data['availability']) < 0:
+        errors = Item.validate_input(request_data)
+        if errors:
+            return errors, client.BAD_REQUEST
+
+        data = request_data['data']['attributes']
+
+        if int(data['availability']) < 0:
             return None, client.BAD_REQUEST
 
-        obj = Item.create(
+        item = Item.create(
             uuid=uuid.uuid4(),
-            name=request_data['name'],
-            price=float(request_data['price']),
-            description=request_data['description'],
-            availability=int(request_data['availability']))
-        item = obj.json()
+            name=data['name'],
+            price=float(data['price']),
+            description=data['description'],
+            availability=int(data['availability']),
+        )
 
-        return item, client.CREATED
+        return generate_response(item.json(), client.CREATED)
 
 
 class ItemHandler(Resource):
@@ -50,7 +55,8 @@ class ItemHandler(Resource):
     def get(self, item_uuid):
         """Retrieve the item specified by item_uuid"""
         try:
-            return Item.get(Item.uuid == item_uuid).json(), client.OK
+            item = Item.get(Item.uuid == item_uuid)
+            return generate_response(item.json(), client.OK)
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
 
@@ -62,26 +68,33 @@ class ItemHandler(Resource):
             return None, client.NOT_FOUND
 
         request_data = request.get_json(force=True)
-        name = request_data.get('name')
-        price = request_data.get('price')
-        description = request_data.get('description')
-        availability = request_data.get('availability')
 
-        if name and name != obj.name:
-            obj.name = request_data['name']
+        errors = Item.validate_input(request_data, partial=True)
+        if errors:
+            return errors, client.BAD_REQUEST
 
-        if price and price != obj.price:
-            obj.price = request_data['price']
+        data = request_data['data']['attributes']
 
-        if description and description != obj.description:
-            obj.description = request_data['description']
+        name = data.get('name')
+        price = data.get('price')
+        description = data.get('description')
+        availability = data.get('availability')
 
-        if availability and availability != obj.availability:
-            obj.availability = request_data['availability']
+        if name:
+            obj.name = name
+
+        if price:
+            obj.price = price
+
+        if description:
+            obj.description = description
+
+        if availability:
+            obj.availability = availability
 
         obj.save()
 
-        return obj.json(), client.OK
+        return generate_response(obj.json(), client.OK)
 
     def delete(self, item_uuid):
         """Remove the item specified by item_uuid"""

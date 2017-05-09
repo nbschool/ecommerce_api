@@ -2,15 +2,17 @@
 Models contains the database models for the application.
 """
 import datetime
+from uuid import uuid4
 
 from passlib.hash import pbkdf2_sha256
 from peewee import DateTimeField, TextField, CharField, BooleanField
 from peewee import SqliteDatabase, DecimalField
 from peewee import UUIDField, ForeignKeyField, IntegerField
 from playhouse.signals import Model, post_delete, pre_delete
-from uuid import uuid4
 
 from exceptions import InsufficientAvailabilityException
+from schemas import (ItemSchema, UserSchema, OrderSchema, OrderItemSchema,
+                     BaseSchema, AddressSchema)
 from utils import remove_image
 
 
@@ -22,6 +24,7 @@ class BaseModel(Model):
 
     created_at = DateTimeField(default=datetime.datetime.now)
     updated_at = DateTimeField(default=datetime.datetime.now)
+    _schema = BaseSchema
 
     def save(self, *args, **kwargs):
         """Automatically update updated_at time during save"""
@@ -30,6 +33,22 @@ class BaseModel(Model):
 
     class Meta:
         database = database
+
+    @classmethod
+    def get_all(cls):
+        return [o for o in cls.select()]
+
+    @classmethod
+    def json_list(cls, objs_list):
+        return cls._schema.jsonapi_list(objs_list)
+
+    def json(self, include_data=[]):
+        parsed, errors = self._schema.jsonapi(self, include_data)
+        return parsed
+
+    @classmethod
+    def validate_input(cls, data, partial=False):
+        return cls._schema.validate_input(data, partial=partial)
 
 
 class Item(BaseModel):
@@ -45,6 +64,7 @@ class Item(BaseModel):
     price = DecimalField(auto_round=True)
     description = TextField()
     availability = IntegerField()
+    _schema = ItemSchema
 
     def __str__(self):
         return '{}, {}, {}, {}'.format(
@@ -52,15 +72,6 @@ class Item(BaseModel):
             self.name,
             self.price,
             self.description)
-
-    def json(self):
-        return {
-            'uuid': str(self.uuid),
-            'name': self.name,
-            'price': float(self.price),
-            'description': self.description,
-            'availability': self.availability,
-        }
 
 
 @database.atomic()
@@ -121,6 +132,7 @@ class User(BaseModel):
     email = CharField(unique=True)
     password = CharField()
     admin = BooleanField(default=False)
+    _schema = UserSchema
 
     @staticmethod
     def exists(email):
@@ -150,18 +162,6 @@ class User(BaseModel):
         """
         return pbkdf2_sha256.verify(password, self.password)
 
-    def json(self):
-        """
-        Returns a dict describing the object, ready to be jsonified.
-        """
-
-        return {
-            'uuid': str(self.uuid),
-            'first_name': self.first_name,
-            'last_name': self.last_name,
-            'email': self.email,
-        }
-
 
 class Address(BaseModel):
     """ The model Address represent a user address.
@@ -174,18 +174,7 @@ class Address(BaseModel):
     post_code = CharField()
     address = CharField()
     phone = CharField()
-
-    def json(self):
-        return {
-            'uuid': str(self.uuid),
-            'user_first_name': self.user.first_name,
-            'user_last_name': self.user.last_name,
-            'country': self.country,
-            'city': self.city,
-            'post_code': self.post_code,
-            'address': self.address,
-            'phone': self.phone
-        }
+    _schema = AddressSchema
 
 
 class Order(BaseModel):
@@ -200,6 +189,7 @@ class Order(BaseModel):
     total_price = DecimalField(default=0)
     delivery_address = ForeignKeyField(Address, related_name="orders")
     user = ForeignKeyField(User, related_name="orders")
+    _schema = OrderSchema
 
     class Meta:
         order_by = ('created_at',)
@@ -242,7 +232,6 @@ class Order(BaseModel):
 
         :param item Item: instance of models.Item
         """
-
         for orderitem in self.order_items:
             # Looping all the OrderItem related to this order, if one with the
             # same item is found we update that row.
@@ -253,19 +242,21 @@ class Order(BaseModel):
                 self.save()
                 return self
 
-        if quantity > item.availability:
-            raise InsufficientAvailabilityException(item, quantity)
         # if no existing OrderItem is found with this order and this Item,
-        # create a new row in the OrderItem table
+        # create a new row in the OrderItem table and use OrderItem.add_item
+        # to properly use the calculus logic that handles updating prices and
+        # availability. To use correctly add_item the initial quantity and
+        # subtotal are set to 0
         OrderItem.create(
             order=self,
             item=item,
-            quantity=quantity,
-            subtotal=item.price * quantity
-        )
+            quantity=0,
+            subtotal=0,
+        ).add_item(quantity)
 
         self.total_price += (item.price * quantity)
         self.save()
+
         return self
 
     def update_item(self, item, quantity):
@@ -304,43 +295,6 @@ class Order(BaseModel):
         # TODO: Raise or return something more explicit
         return self
 
-    def json(self, include_items=False):
-        """
-        The order json method is different compared to the others, as long as the OrderItem
-        cross-table exists.
-        With the include_items flag sets to false, the function returns the order json.
-        Otherwise, if include_items is equal to true, all the OrderItems and related items
-        are included.
-        """
-
-        order_json = {
-            'uuid': str(self.uuid),
-            'date': str(self.created_at),
-            'total_price': float(self.total_price),
-            'delivery_address': self.delivery_address.json(),
-            'user_uuid': str(self.user.uuid)
-        }
-        if include_items:
-            order_json['items'] = self.get_order_items()
-
-        return order_json
-
-    def get_order_items(self):
-        """
-        Gets all the OrderItems related to an order.
-        """
-
-        items = []
-        for orderitem in self.order_items:
-            items.append({
-                'quantity': orderitem.quantity,
-                'price': float(orderitem.item.price),
-                'subtotal': float(orderitem.subtotal),
-                'name': orderitem.item.name,
-                'description': orderitem.item.description
-            })
-        return items
-
 
 class OrderItem(BaseModel):
     """ The model OrderItem is a cross table that contains the order
@@ -355,14 +309,7 @@ class OrderItem(BaseModel):
     item = ForeignKeyField(Item)
     quantity = IntegerField()
     subtotal = DecimalField()
-
-    def json(self):
-        return {
-            'order_uuid': self.order.uuid,
-            'item_uuid': self.item.uuid,
-            'quantity': str(self.quantity),
-            'subtotal': float(self.subtotal)
-        }
+    _schema = OrderItemSchema
 
     def add_item(self, quantity=1):
         """
@@ -375,6 +322,7 @@ class OrderItem(BaseModel):
 
         self.item.availability -= quantity
         self.item.save()
+
         self.quantity += quantity
         self._calculate_subtotal()
         self.save()
