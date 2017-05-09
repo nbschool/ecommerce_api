@@ -96,7 +96,8 @@ def item_creator(num_item):
             item_id=item_id,
             name=item_name,
             price=item_price,
-            description=fake.paragraph(nb_sentences=3, variable_nb_sentences=True)
+            description=fake.paragraph(nb_sentences=3, variable_nb_sentences=True),
+            availability=random.randint(35, 60),
         )
 
 
