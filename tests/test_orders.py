@@ -26,7 +26,7 @@ class TestOrders(TestCase):
 
     def test_get_orders(self):
         item = Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
@@ -77,14 +77,14 @@ class TestOrders(TestCase):
                              address='Via Rossi 10', phone='055432433')
 
         item1 = Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
             availability=2
         )
         item2 = Item.create(
-            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
@@ -118,14 +118,14 @@ class TestOrders(TestCase):
 
     def test_create_order__success(self):
         Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
             availability=4
         )
         Item.create(
-            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
@@ -136,9 +136,9 @@ class TestOrders(TestCase):
         order = {
             'order': {
                 'items': [
-                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.20, 'quantity': 4},
-                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                    {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'price': 30.20, 'quantity': 10}
                 ],
                 'delivery_address': addr_A.json()["address_id"],
@@ -167,14 +167,14 @@ class TestOrders(TestCase):
 
     def test_create_order__not_json_failure(self):
         Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
             availability=4
         )
         Item.create(
-            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
@@ -185,9 +185,9 @@ class TestOrders(TestCase):
         order = {
             'order': {
                 'items': [
-                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.20, 'quantity': 4},
-                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                    {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'price': 30.20, 'quantity': 10}
                 ],
                 'delivery_address': addr_A.json()["address_id"],
@@ -207,7 +207,7 @@ class TestOrders(TestCase):
     def test_create_order__failure_availability(self, mocker):
         mocker.patch('views.orders.database', new=self.TEST_DB)
         Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
@@ -219,7 +219,7 @@ class TestOrders(TestCase):
             'order': {
                 'items': [
                     {
-                        'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                        'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                         'price': 30.30,
                         'quantity': 3,
                     }
@@ -237,14 +237,14 @@ class TestOrders(TestCase):
 
     def test_create_order__failure_missing_field(self):
         Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
             availability=4
         )
         Item.create(
-            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
@@ -254,9 +254,9 @@ class TestOrders(TestCase):
         order = {
             'order': {
                 'items': [
-                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 50.0, 'quantity': 4},
-                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                    {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'price': 20.0, 'quantity': 10}
                 ],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
@@ -271,14 +271,14 @@ class TestOrders(TestCase):
 
     def test_create_order__non_existing_address(self):
         Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
             availability=4
         )
         Item.create(
-            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
@@ -288,9 +288,9 @@ class TestOrders(TestCase):
         order = {
             'order': {
                 'items': [
-                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 50.0, 'quantity': 4},
-                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                    {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'price': 20.0, 'quantity': 10}
                 ],
                 'delivery_address': '577ad826-a79d-41e9-a5b2-7955bcf09043',
@@ -306,14 +306,14 @@ class TestOrders(TestCase):
 
     def test_create_order__failure_empty_field(self):
         Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
             availability=4
         )
         Item.create(
-            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
@@ -323,9 +323,9 @@ class TestOrders(TestCase):
         order = {
             'order': {
                 'items': [
-                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 50.0, 'quantity': 4},
-                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                    {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'price': 20.0, 'quantity': 10}
                 ],
                 'delivery_address': '',
@@ -358,7 +358,7 @@ class TestOrders(TestCase):
 
     def test_create_order__non_existing_item(self):
         Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
@@ -369,9 +369,9 @@ class TestOrders(TestCase):
         order = {
             'order': {
                 'items': [
-                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 50.0, 'quantity': 4},
-                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf034r3',
+                    {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf034r3',
                      'price': 20.0, 'quantity': 10}
                 ],
                 'delivery_address': addr_A.json()["address_id"],
@@ -387,14 +387,14 @@ class TestOrders(TestCase):
 
     def test_update_order__new_item(self):
         item1 = Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
             availability=5
         )
         item2 = Item.create(
-            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
@@ -414,9 +414,9 @@ class TestOrders(TestCase):
             "order": {
                 "order_id": order_id,
                 'items': [
-                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.0, 'quantity': 5},
-                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                    {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'price': 30.2, 'quantity': 10},
                 ],
                 'delivery_address': addr_B.json()["address_id"],
@@ -432,19 +432,19 @@ class TestOrders(TestCase):
         assert resp_order['order_id'] == order['order']['order_id']
         assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
         order_items = [o.json() for o in OrderItem.select()]
-        assert str(order_items[0]['item_id']) == item1.item_id
-        assert str(order_items[1]['item_id']) == item2.item_id
+        assert str(order_items[0]['item_uuid']) == item1.uuid
+        assert str(order_items[1]['item_uuid']) == item2.uuid
 
     def test_update_order__item_quantity_zero(self):
         item1 = Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
             availability=2
         )
         item2 = Item.create(
-            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
@@ -464,7 +464,7 @@ class TestOrders(TestCase):
             "order": {
                 "order_id": order_id,
                 'items': [
-                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.0, 'quantity': 0},
                 ],
                 'delivery_address': addr_B.json()["address_id"],
@@ -480,18 +480,18 @@ class TestOrders(TestCase):
         assert resp_order['order_id'] == order['order']['order_id']
         assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
         assert len(resp_order['items']) == 1
-        assert str(OrderItem.get().item.item_id) == item2.item_id
+        assert str(OrderItem.get().item.uuid) == item2.uuid
 
     def test_update_order__remove_item_without_delete(self):
         item1 = Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
             availability=10
         )
         item2 = Item.create(
-            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
@@ -511,7 +511,7 @@ class TestOrders(TestCase):
             "order": {
                 "order_id": order_id,
                 'items': [
-                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.0, 'quantity': 5},
                 ],
                 'delivery_address': addr_B.json()["address_id"],
@@ -527,21 +527,21 @@ class TestOrders(TestCase):
         assert resp_order['order_id'] == order['order']['order_id']
         assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
         order_items = [o.json() for o in OrderItem.select()]
-        assert str(order_items[0]['item_id']) == item1.item_id
-        assert str(order_items[1]['item_id']) == item2.item_id
+        assert str(order_items[0]['item_uuid']) == item1.uuid
+        assert str(order_items[1]['item_uuid']) == item2.uuid
         assert order_items[0]['quantity'] == '5'
         assert order_items[1]['quantity'] == '20'
 
     def test_update_order__add_item(self):
         item1 = Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
             availability=10
         )
         item2 = Item.create(
-            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
@@ -561,7 +561,7 @@ class TestOrders(TestCase):
             "order": {
                 "order_id": order_id,
                 'items': [
-                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.0, 'quantity': 10},
                 ],
                 'delivery_address': addr_B.json()["address_id"],
@@ -577,21 +577,21 @@ class TestOrders(TestCase):
         assert resp_order['order_id'] == order['order']['order_id']
         assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
         order_items = [o.json() for o in OrderItem.select()]
-        assert str(order_items[0]['item_id']) == item1.item_id
-        assert str(order_items[1]['item_id']) == item2.item_id
+        assert str(order_items[0]['item_uuid']) == item1.uuid
+        assert str(order_items[1]['item_uuid']) == item2.uuid
         assert order_items[0]['quantity'] == '10'
         assert order_items[1]['quantity'] == '20'
 
     def test_update_order__success(self):
         item1 = Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
             availability=5
         )
         item2 = Item.create(
-            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
@@ -614,9 +614,9 @@ class TestOrders(TestCase):
             "order": {
                 "order_id": order_id,
                 'items': [
-                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.0, 'quantity': 5},
-                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                    {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'price': 30.20, 'quantity': 1}
                 ],
             }
@@ -632,14 +632,14 @@ class TestOrders(TestCase):
 
     def test_update_order__non_existing_items(self):
         item1 = Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
             availability=2
         )
         item2 = Item.create(
-            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
@@ -659,11 +659,11 @@ class TestOrders(TestCase):
             "order": {
                 "order_id": order_id,
                 'items': [
-                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf00000',
+                    {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf00000',
                      'price': 30.20, 'quantity': 1},
-                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf2222',
+                    {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf2222',
                      'price': 50.20, 'quantity': 1},
-                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf9999',
+                    {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf9999',
                      'price': 90.20, 'quantity': 2}
                 ],
                 'delivery_address': addr_B.json()["address_id"],
@@ -680,14 +680,14 @@ class TestOrders(TestCase):
 
     def test_update_order__non_existing_address(self):
         item1 = Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
             availability=2
         )
         item2 = Item.create(
-            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
@@ -706,9 +706,9 @@ class TestOrders(TestCase):
             "order": {
                 "order_id": order_id,
                 'items': [
-                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf00000',
+                    {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf00000',
                      'price': 30.20, 'quantity': 1},
-                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf2222',
+                    {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf2222',
                      'price': 50.20, 'quantity': 1},
                 ],
                 'delivery_address': '577ad826-a79d-41e9-a5b2-7955bcf5423',
@@ -725,14 +725,14 @@ class TestOrders(TestCase):
 
     def test_update_order__success_admin_not_own_order(self):
         item1 = Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
             availability=5
         )
         item2 = Item.create(
-            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
@@ -755,9 +755,9 @@ class TestOrders(TestCase):
             "order": {
                 "order_id": order_id,
                 'items': [
-                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.0, 'quantity': 5},
-                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                    {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'price': 30.20, 'quantity': 1}
                 ],
                 'delivery_address': addr_B.json()["address_id"],
@@ -779,7 +779,7 @@ class TestOrders(TestCase):
 
     def test_update_order_empty_items_list__fail(self):
         item1 = Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
@@ -823,9 +823,9 @@ class TestOrders(TestCase):
             "order": {
                 "order_id": order_id,
                 'items': [
-                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 100.0, 'quantity': 5},
-                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                    {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'price': 2222.0, 'quantity': 1}
                 ],
                 'delivery_address': addr_A.json()["address_id"]
@@ -844,7 +844,7 @@ class TestOrders(TestCase):
         user_A = add_user('12345@email.com', TEST_USER_PSW)
         addr_A = add_address(user=user_A)
         item = Item.create(
-            item_id=uuid4(),
+            uuid=uuid4(),
             name='mario',
             price=20.20,
             description='svariati mariii',
@@ -865,7 +865,7 @@ class TestOrders(TestCase):
             "order": {
                 "order_id": str(order.order_id),
                 'items': [
-                    {'item_id': str(item.item_id),
+                    {'item_uuid': str(item.uuid),
                         'price': 30.30, 'quantity': 4},
                 ],
                 'delivery_address': addr_A.json()["address_id"]
@@ -893,9 +893,9 @@ class TestOrders(TestCase):
             "order": {
                 "order_id": order_id,
                 'items': [
-                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 100.0, 'quantity': 5},
-                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                    {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'price': 2222.0, 'quantity': 1}
                 ],
                 'delivery_address': addr.json()["address_id"],
@@ -911,14 +911,14 @@ class TestOrders(TestCase):
 
     def test_update_order__failure_not_own_order(self):
         item1 = Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
             availability=5
         )
         item2 = Item.create(
-            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
@@ -941,9 +941,9 @@ class TestOrders(TestCase):
             "order": {
                 "order_id": order_id,
                 'items': [
-                    {'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.0, 'quantity': 5},
-                    {'item_id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                    {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'price': 30.20, 'quantity': 1}
                 ],
                 'delivery_address': addr_B.json()["address_id"],
@@ -965,7 +965,7 @@ class TestOrders(TestCase):
         addr_B = add_address(user=user_A)
 
         item1 = Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
@@ -992,7 +992,7 @@ class TestOrders(TestCase):
         addr_B = add_address(user=user_A)
 
         item1 = Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
@@ -1019,7 +1019,7 @@ class TestOrders(TestCase):
         addr_A = add_address(user=user_A)
 
         item1 = Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
@@ -1074,21 +1074,21 @@ class TestOrders(TestCase):
             return tot
 
         item1 = Item.create(
-            item_id=uuid4(),
+            uuid=uuid4(),
             name='Item',
             description='Item description',
             price=10,
             availability=2
         )
         item2 = Item.create(
-            item_id=uuid4(),
+            uuid=uuid4(),
             name='Item 2',
             description='Item 2 description',
             price=15,
             availability=2
         )
         item3 = Item.create(
-            item_id=uuid4(),
+            uuid=uuid4(),
             name='Item 2',
             description='Item 2 description',
             price=15,

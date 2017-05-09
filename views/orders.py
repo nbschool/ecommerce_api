@@ -37,8 +37,8 @@ class OrdersHandler(Resource):
         res_items = res['order']['items']
 
         # Check that the items exist
-        item_ids = [res_item['item_id'] for res_item in res_items]
-        items = Item.select().where(Item.item_id << item_ids)
+        item_ids = [res_item['item_uuid'] for res_item in res_items]
+        items = Item.select().where(Item.uuid << item_ids)
         if items.count() != len(res_items):
             abort(BAD_REQUEST)
 
@@ -58,7 +58,7 @@ class OrdersHandler(Resource):
                 for item in items:
                     for res_item in res_items:
                         # if names match add item and quantity, once per res_item
-                        if str(item.item_id) == res_item['item_id']:
+                        if str(item.uuid) == res_item['item_uuid']:
                             order.add_item(item, res_item['quantity'])
                             break
             except InsufficientAvailabilityException:
@@ -105,16 +105,16 @@ class OrderHandler(Resource):
                     abort(BAD_REQUEST)
 
             if res_items:
-                items_ids = [e['item_id'] for e in res_items]
-                items_query = Item.select().where(Item.item_id << items_ids)
-                items = {str(item.item_id): item for item in items_query}
+                items_ids = [e['item_uuid'] for e in res_items]
+                items_query = Item.select().where(Item.uuid << items_ids)
+                items = {str(item.uuid): item for item in items_query}
 
                 if len(items) != len(items_ids):
                     return None, BAD_REQUEST
 
                 for res_item in res_items:
                     try:
-                        order.update_item(items[res_item['item_id']], res_item['quantity'])
+                        order.update_item(items[res_item['item_uuid']], res_item['quantity'])
                     except InsufficientAvailabilityException:
                         txn.rollback()
                         return None, BAD_REQUEST

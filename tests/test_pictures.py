@@ -17,7 +17,7 @@ import utils
 TEST_IMAGE_FOLDER = 'test_images'
 
 TEST_ITEM = {
-    'item_id': '429994bf-784e-47cc-a823-e0c394b823e8',
+    'uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
     'name': 'mario',
     'price': 20.20,
     'description': 'svariati mariii',
@@ -25,7 +25,7 @@ TEST_ITEM = {
 }
 
 TEST_ITEM2 = {
-    'item_id': 'd46b13a1-f4bb-4cfb-8076-6953358145f3',
+    'uuid': 'd46b13a1-f4bb-4cfb-8076-6953358145f3',
     'name': 'GINO',
     'price': 30.20,
     'description': 'svariati GINIIIII',
@@ -33,12 +33,12 @@ TEST_ITEM2 = {
 }
 
 TEST_PICTURE = {
-    'picture_id': 'df690434-a488-419f-899e-8853cba1a22b',
+    'uuid': 'df690434-a488-419f-899e-8853cba1a22b',
     'extension': 'jpg'
 }
 
 TEST_PICTURE2 = {
-    'picture_id': 'c0001a48-10a3-43c1-b87b-eabac0b2d42f',
+    'uuid': 'c0001a48-10a3-43c1-b87b-eabac0b2d42f',
     'extension': 'png'
 }
 
@@ -60,13 +60,13 @@ class TestPictures(TestCase):
         picture = Picture.create(item=item, **TEST_PICTURE)
         open("{path}/{picture_id}.jpg".format(
             path=utils.get_image_folder(),
-            picture_id=picture.picture_id), "wb")
+            picture_id=picture.uuid), "wb")
         resp = self.app.get('/pictures/{picture_id}'.format(
-            picture_id=picture.picture_id))
+            picture_id=picture.uuid))
         assert resp.status_code == client.OK
 
         test_picture = TEST_PICTURE.copy()
-        test_picture['item_id'] = item.item_id
+        test_picture['item_uuid'] = item.uuid
         assert resp.data == b''
         assert resp.headers['Content-Type'] == 'image/jpeg'
         test_utils.clean_images()
@@ -81,20 +81,20 @@ class TestPictures(TestCase):
         Picture.create(item=item, **TEST_PICTURE)
         Picture.create(item=item, **TEST_PICTURE2)
         resp = self.app.get('/items/{item_id}/pictures/'.format(
-            item_id=item.item_id))
+            item_id=item.uuid))
         pictures = json.loads(resp.data)
         assert resp.status_code == client.OK
         assert len(pictures) == 2
 
         test_picture = test_picture2 = TEST_PICTURE.copy()
-        test_picture['item_id'] = test_picture2['item_id'] = item.item_id
+        test_picture['item_uuid'] = test_picture2['item_uuid'] = item.uuid
         assert test_picture in pictures
         assert test_picture2 in pictures
 
     def test_get_item_pictures__empty(self):
         item = Item.create(**TEST_ITEM)
         resp = self.app.get('/items/{item_id}/pictures/'.format(
-            item_id=item.item_id))
+            item_id=item.uuid))
         pictures = json.loads(resp.data)
         assert not pictures
 
@@ -106,7 +106,7 @@ class TestPictures(TestCase):
     def test_post_picture__success(self):
         item = Item.create(**TEST_ITEM)
         resp = self.app.post('/items/{item_id}/pictures/'.format(
-            item_id=item.item_id),
+            item_id=item.uuid),
             data={'image': (BytesIO(b'my file contents'), 'testimage.jpg')},
             content_type='multipart/form-data')
         assert resp.status_code == client.CREATED
@@ -114,7 +114,7 @@ class TestPictures(TestCase):
         picture = Picture.get()
         assert picture.item == item
         assert picture.extension == 'jpg'
-        assert type(picture.picture_id) == uuid.UUID
+        assert type(picture.uuid) == uuid.UUID
 
     def test_post_item_pictures__wrong_item_id(self):
         resp = self.app.post('/items/{item_id}/pictures/'.format(
@@ -127,7 +127,7 @@ class TestPictures(TestCase):
     def test_post_item_pictures__wrong_extension(self):
         item = Item.create(**TEST_ITEM)
         resp = self.app.post('/items/{item_id}/pictures/'.format(
-            item_id=item.item_id),
+            item_id=item.uuid),
             data={'image': (BytesIO(b'my file contents'), 'testimage.txt')},
             content_type='multipart/form-data')
         assert resp.status_code == client.BAD_REQUEST
@@ -136,7 +136,7 @@ class TestPictures(TestCase):
     def test_post_picture__no_image(self):
         item = Item.create(**TEST_ITEM)
         resp = self.app.post('/items/{item_id}/pictures/'.format(
-            item_id=item.item_id),
+            item_id=item.uuid),
             data={},
             content_type='multipart/form-data')
         assert resp.status_code == client.BAD_REQUEST
@@ -149,7 +149,7 @@ class TestPictures(TestCase):
         picture2 = Picture.create(item=item, **TEST_PICTURE2)
         open("{path}/{picture_id}.{extension}".format(
             path=utils.get_image_folder(),
-            picture_id=picture.picture_id,
+            picture_id=picture.uuid,
             extension=picture.extension), "wb")
         open("{path}/{picture_id}.{extension}".format(
             path=utils.get_image_folder(),
@@ -157,17 +157,17 @@ class TestPictures(TestCase):
             extension='jpg'), "wb")
         open("{path}/{picture_id}.{extension}".format(
             path=utils.get_image_folder(),
-            picture_id=picture2.picture_id,
+            picture_id=picture2.uuid,
             extension=picture2.extension), "wb")
 
         resp = self.app.delete('/pictures/{picture_id}'.format(
-            picture_id=picture.picture_id))
+            picture_id=picture.uuid))
 
         assert resp.status_code == client.NO_CONTENT
         assert Picture.select().count() == 1
         assert Item.select().count() == 1
         item2 = Item.get()
-        assert str(item2.item_id) == TEST_ITEM['item_id']
+        assert str(item2.uuid) == TEST_ITEM['uuid']
         assert item2.name == TEST_ITEM['name']
         assert float(item2.price) == TEST_ITEM['price']
         assert item2.description == TEST_ITEM['description']
@@ -177,11 +177,11 @@ class TestPictures(TestCase):
             extension='jpg'))
         assert not os.path.isfile("{path}/{picture_id}.{extension}".format(
             path=utils.get_image_folder(),
-            picture_id=picture.picture_id,
+            picture_id=picture.uuid,
             extension=picture.extension))
         assert os.path.isfile("{path}/{picture_id}.{extension}".format(
             path=utils.get_image_folder(),
-            picture_id=picture2.picture_id,
+            picture_id=picture2.uuid,
             extension=picture2.extension))
         test_utils.clean_images()
 
@@ -195,7 +195,7 @@ class TestPictures(TestCase):
         item = Item.create(**TEST_ITEM)
         picture = Picture.create(item=item, **TEST_PICTURE)
         resp = self.app.delete('/pictures/{picture_id}'.format(
-            picture_id=picture.picture_id))
+            picture_id=picture.uuid))
 
         assert resp.status_code == client.NO_CONTENT
         assert not Picture.select().exists()

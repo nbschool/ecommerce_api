@@ -17,7 +17,7 @@ class ItemPictureHandler(Resource):
     def get(self, item_id):
         """Retrieve every picture of an item"""
         items = [o.json() for o in Picture.select().join(Item).where(
-            Item.item_id == item_id)]
+            Item.uuid == item_id)]
 
         if items:
             return items, client.OK
@@ -30,7 +30,7 @@ class ItemPictureHandler(Resource):
                 client.BAD_REQUEST
 
         try:
-            item = Item.get(Item.item_id == item_id)
+            item = Item.get(Item.uuid == item_id)
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
 
@@ -45,7 +45,7 @@ class ItemPictureHandler(Resource):
         utils.save_image(file, picture_id, extension)
 
         return Picture.create(
-            picture_id=picture_id,
+            uuid=picture_id,
             extension=extension,
             item=item
         ).json(), client.CREATED
@@ -57,7 +57,7 @@ class PictureHandler(Resource):
     def get(self, picture_id):
         """Retrieve the picture specified by picture_id"""
         try:
-            picture = Picture.get(Picture.picture_id == picture_id)
+            picture = Picture.get(Picture.uuid == picture_id)
         except Picture.DoesNotExist:
             return None, client.NOT_FOUND
 
@@ -67,7 +67,7 @@ class PictureHandler(Resource):
     def delete(self, picture_id):
         """Remove the picture specified by picture_id"""
         try:
-            obj = Picture.get(Picture.picture_id == picture_id)
+            obj = Picture.get(Picture.uuid == picture_id)
         except Picture.DoesNotExist:
             return None, client.NOT_FOUND
         obj.delete_instance()

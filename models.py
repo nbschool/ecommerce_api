@@ -40,7 +40,7 @@ class Item(BaseModel):
         description: product description text
         availability: number of available products of this kind
     """
-    item_id = UUIDField(unique=True)
+    uuid = UUIDField(unique=True)
     name = CharField()
     price = DecimalField(auto_round=True)
     description = TextField()
@@ -48,14 +48,14 @@ class Item(BaseModel):
 
     def __str__(self):
         return '{}, {}, {}, {}'.format(
-            self.item_id,
+            self.uuid,
             self.name,
             self.price,
             self.description)
 
     def json(self):
         return {
-            'item_id': str(self.item_id),
+            'uuid': str(self.uuid),
             'name': self.name,
             'price': float(self.price),
             'description': self.description,
@@ -68,7 +68,7 @@ class Item(BaseModel):
 def on_delete_item_handler(model_class, instance):
     """Delete item pictures in cascade"""
     pictures = Picture.select().join(Item).where(
-        Item.item_id == instance.item_id)
+        Item.uuid == instance.uuid)
     for pic in pictures:
         pic.delete_instance()
 
@@ -76,38 +76,38 @@ def on_delete_item_handler(model_class, instance):
 class Picture(BaseModel):
     """
     Picture model
-        picture_id: picture identifier and file name stored
+        uuid: picture identifier and file name stored
         extension: picture type
         item: referenced item
     """
-    picture_id = UUIDField(unique=True)
+    uuid = UUIDField(unique=True)
     extension = CharField()
     item = ForeignKeyField(Item, related_name='pictures')
 
     def filename(self):
         return '{}.{}'.format(
-            self.picture_id,
+            self.uuid,
             self.extension)
 
     def json(self):
         return {
-            'picture_id': str(self.picture_id),
+            'uuid': str(self.uuid),
             'extension': self.extension,
-            'item_id': str(self.item.item_id)
+            'item_uuid': str(self.item.uuid)
         }
 
     def __str__(self):
         return '{}.{} -> item: {}'.format(
-            self.picture_id,
+            self.uuid,
             self.extension,
-            self.item.item_id)
+            self.item.uuid)
 
 
 @post_delete(sender=Picture)
 def on_delete_picture_handler(model_class, instance):
     """Delete file picture"""
     # TODO log eventual inconsistency
-    remove_image(instance.picture_id, instance.extension)
+    remove_image(instance.uuid, instance.extension)
 
 
 class User(BaseModel):
@@ -359,7 +359,7 @@ class OrderItem(BaseModel):
     def json(self):
         return {
             'order_id': self.order.order_id,
-            'item_id': self.item.item_id,
+            'item_uuid': self.item.uuid,
             'quantity': str(self.quantity),
             'subtotal': float(self.subtotal)
         }

@@ -133,14 +133,14 @@ class TestUser(TestCase):
 
     def test_delete_user__cascade(self):
         Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
             availability=1,
         )
         Item.create(
-            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',

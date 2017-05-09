@@ -34,7 +34,7 @@ class ItemsHandler(Resource):
             return None, client.BAD_REQUEST
 
         obj = Item.create(
-            item_id=uuid.uuid4(),
+            uuid=uuid.uuid4(),
             name=request_data['name'],
             price=float(request_data['price']),
             description=request_data['description'],
@@ -50,14 +50,14 @@ class ItemHandler(Resource):
     def get(self, item_id):
         """Retrieve the item specified by item_id"""
         try:
-            return Item.get(Item.item_id == item_id).json(), client.OK
+            return Item.get(Item.uuid == item_id).json(), client.OK
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
 
     def patch(self, item_id):
         """Edit the item specified by item_id"""
         try:
-            obj = Item.get(Item.item_id == item_id)
+            obj = Item.get(Item.uuid == item_id)
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
 
@@ -86,7 +86,7 @@ class ItemHandler(Resource):
     def delete(self, item_id):
         """Remove the item specified by item_id"""
         try:
-            item = Item.get(Item.item_id == item_id)
+            item = Item.get(Item.uuid == item_id)
         except Item.DoesNotExist:
             return None, client.NOT_FOUND
 
