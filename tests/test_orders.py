@@ -41,7 +41,7 @@ class TestOrders(TestCase):
         resp = self.app.get('/orders/')
 
         expected_data = [{
-            'order_id': str(order.order_id),
+            'uuid': str(order.uuid),
             'date': str(order.created_at),
             'total_price': 40.40,
             'user_uuid': str(user_A.uuid),
@@ -98,7 +98,7 @@ class TestOrders(TestCase):
         order2.add_item(item1).add_item(item2, 2)
 
         expected_data = {
-            'order_id': str(order1.order_id),
+            'uuid': str(order1.uuid),
             'date': str(order1.created_at),
             'user_uuid': str(user.uuid),
             'total_price': 40.40,
@@ -112,7 +112,7 @@ class TestOrders(TestCase):
             }]
         }
 
-        resp = self.app.get('/orders/{}'.format(order1.order_id))
+        resp = self.app.get('/orders/{}'.format(order1.uuid))
         assert resp.status_code == OK
         assert json.loads(resp.data) == expected_data
 
@@ -141,7 +141,7 @@ class TestOrders(TestCase):
                     {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'price': 30.20, 'quantity': 10}
                 ],
-                'delivery_address': addr_A.json()["address_id"],
+                'delivery_address': addr_A.json()["uuid"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
         }
@@ -162,8 +162,8 @@ class TestOrders(TestCase):
         data = json.loads(resp.data)
 
         assert data['total_price'] == total_price
-        assert data['delivery_address']['address_id'] == order['order']['delivery_address']
-        assert Order.get().json()['order_id'] == data['order_id']
+        assert data['delivery_address']['uuid'] == order['order']['delivery_address']
+        assert Order.get().json()['uuid'] == data['uuid']
 
     def test_create_order__not_json_failure(self):
         Item.create(
@@ -190,7 +190,7 @@ class TestOrders(TestCase):
                     {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'price': 30.20, 'quantity': 10}
                 ],
-                'delivery_address': addr_A.json()["address_id"],
+                'delivery_address': addr_A.json()["uuid"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
         }
@@ -224,7 +224,7 @@ class TestOrders(TestCase):
                         'quantity': 3,
                     }
                 ],
-                'delivery_address': addr_A.json()["address_id"],
+                'delivery_address': addr_A.json()["uuid"],
             }
         }
         user_A = add_user('123@email.com', TEST_USER_PSW)
@@ -345,7 +345,7 @@ class TestOrders(TestCase):
         order = {
             'order': {
                 'items': [],
-                'delivery_address': addr.json()["address_id"],
+                'delivery_address': addr.json()["uuid"],
                 'user': str(user.uuid)
             }
         }
@@ -374,7 +374,7 @@ class TestOrders(TestCase):
                     {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf034r3',
                      'price': 20.0, 'quantity': 10}
                 ],
-                'delivery_address': addr_A.json()["address_id"],
+                'delivery_address': addr_A.json()["uuid"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
         }
@@ -408,29 +408,29 @@ class TestOrders(TestCase):
         order1 = Order.create(delivery_address=addr_A, user=user_A)
         order1.add_item(item1, 2)
 
-        order_id = str(order1.order_id)
+        order_id = str(order1.uuid)
 
         order = {
             "order": {
-                "order_id": order_id,
+                "uuid": order_id,
                 'items': [
                     {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.0, 'quantity': 5},
                     {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'price': 30.2, 'quantity': 10},
                 ],
-                'delivery_address': addr_B.json()["address_id"],
+                'delivery_address': addr_B.json()["uuid"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
         }
-        path = 'orders/{}'.format(order1.order_id)
+        path = 'orders/{}'.format(order1.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order))
         assert resp.status_code == OK
-        resp_order = Order.get(order_id=order1.order_id).json(include_items=True)
-        assert resp_order['order_id'] == order['order']['order_id']
-        assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
+        resp_order = Order.get(uuid=order1.uuid).json(include_items=True)
+        assert resp_order['uuid'] == order['order']['uuid']
+        assert resp_order['delivery_address']['uuid'] == order['order']['delivery_address']
         order_items = [o.json() for o in OrderItem.select()]
         assert str(order_items[0]['item_uuid']) == item1.uuid
         assert str(order_items[1]['item_uuid']) == item2.uuid
@@ -458,27 +458,27 @@ class TestOrders(TestCase):
         order1 = Order.create(delivery_address=addr_A, user=user_A)
         order1.add_item(item1, 2).add_item(item2)
 
-        order_id = str(order1.order_id)
+        order_id = str(order1.uuid)
 
         order = {
             "order": {
-                "order_id": order_id,
+                "uuid": order_id,
                 'items': [
                     {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.0, 'quantity': 0},
                 ],
-                'delivery_address': addr_B.json()["address_id"],
+                'delivery_address': addr_B.json()["uuid"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
         }
-        path = 'orders/{}'.format(order1.order_id)
+        path = 'orders/{}'.format(order1.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order))
         assert resp.status_code == OK
-        resp_order = Order.get(order_id=order1.order_id).json(include_items=True)
-        assert resp_order['order_id'] == order['order']['order_id']
-        assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
+        resp_order = Order.get(uuid=order1.uuid).json(include_items=True)
+        assert resp_order['uuid'] == order['order']['uuid']
+        assert resp_order['delivery_address']['uuid'] == order['order']['delivery_address']
         assert len(resp_order['items']) == 1
         assert str(OrderItem.get().item.uuid) == item2.uuid
 
@@ -505,27 +505,27 @@ class TestOrders(TestCase):
         order1 = Order.create(delivery_address=addr_A, user=user_A)
         order1.add_item(item1, 10).add_item(item2, 20)
 
-        order_id = str(order1.order_id)
+        order_id = str(order1.uuid)
 
         order = {
             "order": {
-                "order_id": order_id,
+                "uuid": order_id,
                 'items': [
                     {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.0, 'quantity': 5},
                 ],
-                'delivery_address': addr_B.json()["address_id"],
+                'delivery_address': addr_B.json()["uuid"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
         }
-        path = 'orders/{}'.format(order1.order_id)
+        path = 'orders/{}'.format(order1.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order))
         assert resp.status_code == OK
-        resp_order = Order.get(order_id=order1.order_id).json(include_items=True)
-        assert resp_order['order_id'] == order['order']['order_id']
-        assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
+        resp_order = Order.get(uuid=order1.uuid).json(include_items=True)
+        assert resp_order['uuid'] == order['order']['uuid']
+        assert resp_order['delivery_address']['uuid'] == order['order']['delivery_address']
         order_items = [o.json() for o in OrderItem.select()]
         assert str(order_items[0]['item_uuid']) == item1.uuid
         assert str(order_items[1]['item_uuid']) == item2.uuid
@@ -555,27 +555,27 @@ class TestOrders(TestCase):
         order1 = Order.create(delivery_address=addr_A, user=user_A)
         order1.add_item(item1, 5).add_item(item2, 20)
 
-        order_id = str(order1.order_id)
+        order_id = str(order1.uuid)
 
         order = {
             "order": {
-                "order_id": order_id,
+                "uuid": order_id,
                 'items': [
                     {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.0, 'quantity': 10},
                 ],
-                'delivery_address': addr_B.json()["address_id"],
+                'delivery_address': addr_B.json()["uuid"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
         }
-        path = 'orders/{}'.format(order1.order_id)
+        path = 'orders/{}'.format(order1.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order))
         assert resp.status_code == OK
-        resp_order = Order.get(order_id=order1.order_id).json(include_items=True)
-        assert resp_order['order_id'] == order['order']['order_id']
-        assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
+        resp_order = Order.get(uuid=order1.uuid).json(include_items=True)
+        assert resp_order['uuid'] == order['order']['uuid']
+        assert resp_order['delivery_address']['uuid'] == order['order']['delivery_address']
         order_items = [o.json() for o in OrderItem.select()]
         assert str(order_items[0]['item_uuid']) == item1.uuid
         assert str(order_items[1]['item_uuid']) == item2.uuid
@@ -608,11 +608,11 @@ class TestOrders(TestCase):
         order2 = Order.create(delivery_address=addr_B, user=user_A)
         order2.add_item(item2)
 
-        order_id = str(order1.order_id)
+        order_id = str(order1.uuid)
 
         order = {
             "order": {
-                "order_id": order_id,
+                "uuid": order_id,
                 'items': [
                     {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.0, 'quantity': 5},
@@ -621,14 +621,14 @@ class TestOrders(TestCase):
                 ],
             }
         }
-        path = 'orders/{}'.format(order1.order_id)
+        path = 'orders/{}'.format(order1.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order))
 
         assert resp.status_code == OK
-        resp_order = Order.get(order_id=order1.order_id).json()
-        assert resp_order['order_id'] == order['order']['order_id']
+        resp_order = Order.get(uuid=order1.uuid).json()
+        assert resp_order['uuid'] == order['order']['uuid']
 
     def test_update_order__non_existing_items(self):
         item1 = Item.create(
@@ -653,11 +653,11 @@ class TestOrders(TestCase):
         order1 = Order.create(delivery_address=addr_A, user=user_A)
         order1.add_item(item1, 2).add_item(item2)
         order_item_before = [o.json() for o in OrderItem.select()]
-        order_id = str(order1.order_id)
+        order_id = str(order1.uuid)
 
         order = {
             "order": {
-                "order_id": order_id,
+                "uuid": order_id,
                 'items': [
                     {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf00000',
                      'price': 30.20, 'quantity': 1},
@@ -666,11 +666,11 @@ class TestOrders(TestCase):
                     {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf9999',
                      'price': 90.20, 'quantity': 2}
                 ],
-                'delivery_address': addr_B.json()["address_id"],
+                'delivery_address': addr_B.json()["uuid"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
         }
-        path = 'orders/{}'.format(order1.order_id)
+        path = 'orders/{}'.format(order1.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order))
@@ -700,11 +700,11 @@ class TestOrders(TestCase):
         order1 = Order.create(delivery_address=addr_A, user=user_A)
         order1.add_item(item1, 2).add_item(item2)
         order_item_before = [o.json() for o in OrderItem.select()]
-        order_id = str(order1.order_id)
+        order_id = str(order1.uuid)
 
         order = {
             "order": {
-                "order_id": order_id,
+                "uuid": order_id,
                 'items': [
                     {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf00000',
                      'price': 30.20, 'quantity': 1},
@@ -715,7 +715,7 @@ class TestOrders(TestCase):
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
         }
-        path = 'orders/{}'.format(order1.order_id)
+        path = 'orders/{}'.format(order1.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(order))
@@ -749,33 +749,33 @@ class TestOrders(TestCase):
         order2 = Order.create(delivery_address=addr_B, user=user_A)
         order2.add_item(item2)
 
-        order_id = str(order1.order_id)
+        order_id = str(order1.uuid)
 
         order = {
             "order": {
-                "order_id": order_id,
+                "uuid": order_id,
                 'items': [
                     {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.0, 'quantity': 5},
                     {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'price': 30.20, 'quantity': 1}
                 ],
-                'delivery_address': addr_B.json()["address_id"],
+                'delivery_address': addr_B.json()["uuid"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
 
             }
         }
 
         user_B = add_admin_user('admin_user@email.com', TEST_USER_PSW)
-        path = 'orders/{}'.format(order1.order_id)
+        path = 'orders/{}'.format(order1.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               user_B.email, TEST_USER_PSW, 'application/json',
                               json.dumps(order))
 
         assert resp.status_code == OK
-        resp_order = Order.get(order_id=order1.order_id).json()
-        assert resp_order['order_id'] == order['order']['order_id']
-        assert resp_order['delivery_address']['address_id'] == order['order']['delivery_address']
+        resp_order = Order.get(uuid=order1.uuid).json()
+        assert resp_order['uuid'] == order['order']['uuid']
+        assert resp_order['delivery_address']['uuid'] == order['order']['delivery_address']
 
     def test_update_order_empty_items_list__fail(self):
         item1 = Item.create(
@@ -793,13 +793,13 @@ class TestOrders(TestCase):
             user=user
         ).add_item(item1, 2)
 
-        order_id = str(order.order_id)
+        order_id = str(order.uuid)
 
         order_data = {
             "order": {
-                "order_id": order_id,
+                "uuid": order_id,
                 'items': [],
-                'delivery_address': addr.json()["address_id"],
+                'delivery_address': addr.json()["uuid"],
                 'user': str(user.uuid)
 
             }
@@ -821,14 +821,14 @@ class TestOrders(TestCase):
 
         order = {
             "order": {
-                "order_id": order_id,
+                "uuid": order_id,
                 'items': [
                     {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 100.0, 'quantity': 5},
                     {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'price': 2222.0, 'quantity': 1}
                 ],
-                'delivery_address': addr_A.json()["address_id"]
+                'delivery_address': addr_A.json()["uuid"]
             }
         }
 
@@ -863,16 +863,16 @@ class TestOrders(TestCase):
 
         update_order = {
             "order": {
-                "order_id": str(order.order_id),
+                "uuid": str(order.uuid),
                 'items': [
                     {'item_uuid': str(item.uuid),
                         'price': 30.30, 'quantity': 4},
                 ],
-                'delivery_address': addr_A.json()["address_id"]
+                'delivery_address': addr_A.json()["uuid"]
             }
         }
 
-        path = 'orders/{}'.format(order.order_id)
+        path = 'orders/{}'.format(order.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               '12345@email.com', TEST_USER_PSW, 'application/json',
                               json.dumps(update_order))
@@ -891,14 +891,14 @@ class TestOrders(TestCase):
         order_id = str(uuid4())
         order = {
             "order": {
-                "order_id": order_id,
+                "uuid": order_id,
                 'items': [
                     {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 100.0, 'quantity': 5},
                     {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'price': 2222.0, 'quantity': 1}
                 ],
-                'delivery_address': addr.json()["address_id"],
+                'delivery_address': addr.json()["uuid"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
             }
         }
@@ -935,24 +935,24 @@ class TestOrders(TestCase):
         order2 = Order.create(delivery_address=addr_B, user=user_A)
         order2.add_item(item2)
 
-        order_id = str(order1.order_id)
+        order_id = str(order1.uuid)
 
         order = {
             "order": {
-                "order_id": order_id,
+                "uuid": order_id,
                 'items': [
                     {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.0, 'quantity': 5},
                     {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'price': 30.20, 'quantity': 1}
                 ],
-                'delivery_address': addr_B.json()["address_id"],
+                'delivery_address': addr_B.json()["uuid"],
                 'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
 
             }
         }
         user_B = add_user('wrong_user@email.com', TEST_USER_PSW)
-        path = 'orders/{}'.format(order1.order_id)
+        path = 'orders/{}'.format(order1.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               user_B.email, TEST_USER_PSW, 'application/json',
                               json.dumps(order))
@@ -976,7 +976,7 @@ class TestOrders(TestCase):
 
         order2 = Order.create(delivery_address=addr_B, user=user_A)
 
-        path = 'orders/{}'.format(order1.order_id)
+        path = 'orders/{}'.format(order1.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'DELETE',
                               '12345@email.com', TEST_USER_PSW, None,
                               None)
@@ -984,7 +984,7 @@ class TestOrders(TestCase):
         assert resp.status_code == NO_CONTENT
         assert len(Order.select()) == 1
         assert len(OrderItem.select()) == 0
-        assert Order.get(order_id=order2.order_id)
+        assert Order.get(uuid=order2.uuid)
 
     def test_delete_order__success_admin_not_own_order(self):
         user_A = add_user('12345@email.com', TEST_USER_PSW)
@@ -1004,7 +1004,7 @@ class TestOrders(TestCase):
         order2 = Order.create(delivery_address=addr_B, user=user_A)
 
         user_B = add_admin_user('admin_user@email.com', TEST_USER_PSW)
-        path = 'orders/{}'.format(order1.order_id)
+        path = 'orders/{}'.format(order1.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'DELETE',
                               user_B.email, TEST_USER_PSW, None,
                               None)
@@ -1012,7 +1012,7 @@ class TestOrders(TestCase):
         assert resp.status_code == NO_CONTENT
         assert len(Order.select()) == 1
         assert len(OrderItem.select()) == 0
-        assert Order.get(order_id=order2.order_id)
+        assert Order.get(uuid=order2.uuid)
 
     def test_delete_order__fail_not_own_order(self):
         user_A = add_user('12345@email.com', TEST_USER_PSW)
@@ -1029,7 +1029,7 @@ class TestOrders(TestCase):
         order1.add_item(item1, 2)
 
         user_B = add_user('admin_user@email.com', TEST_USER_PSW)
-        path = 'orders/{}'.format(order1.order_id)
+        path = 'orders/{}'.format(order1.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'DELETE',
                               user_B.email, TEST_USER_PSW, None,
                               None)

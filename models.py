@@ -167,7 +167,7 @@ class Address(BaseModel):
     """ The model Address represent a user address.
         Each address is releated to one user, but one user can have
         more addresses."""
-    address_id = UUIDField(unique=True)
+    uuid = UUIDField(unique=True)
     user = ForeignKeyField(User, related_name='addresses')
     country = CharField()
     city = CharField()
@@ -177,7 +177,7 @@ class Address(BaseModel):
 
     def json(self):
         return {
-            'address_id': str(self.address_id),
+            'uuid': str(self.uuid),
             'user_first_name': self.user.first_name,
             'user_last_name': self.user.last_name,
             'country': self.country,
@@ -191,12 +191,12 @@ class Address(BaseModel):
 class Order(BaseModel):
     """ The model Order contains a list of orders - one row per order.
     Each order will be place by one client.
-    An order is represented by an order_id, which is a UUID,
+    An order is represented by an uuid,
     a dateTimeField which is the date of the order, a FloatField which
     is the total price of the order. Finally, there is the delivery address,
     if it's different from the customers address from their record.
     """
-    order_id = UUIDField(unique=True, default=uuid4)
+    uuid = UUIDField(unique=True, default=uuid4)
     total_price = DecimalField(default=0)
     delivery_address = ForeignKeyField(Address, related_name="orders")
     user = ForeignKeyField(User, related_name="orders")
@@ -214,7 +214,7 @@ class Order(BaseModel):
             OrderItem
             .select(OrderItem, Order)
             .join(Order)
-            .where(Order.order_id == self.order_id)
+            .where(Order.uuid == self.uuid)
         )
 
         return [orderitem for orderitem in query]
@@ -314,7 +314,7 @@ class Order(BaseModel):
         """
 
         order_json = {
-            'order_id': str(self.order_id),
+            'uuid': str(self.uuid),
             'date': str(self.created_at),
             'total_price': float(self.total_price),
             'delivery_address': self.delivery_address.json(),
@@ -358,7 +358,7 @@ class OrderItem(BaseModel):
 
     def json(self):
         return {
-            'order_id': self.order.order_id,
+            'order_uuid': self.order.uuid,
             'item_uuid': self.item.uuid,
             'quantity': str(self.quantity),
             'subtotal': float(self.subtotal)

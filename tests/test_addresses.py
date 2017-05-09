@@ -12,7 +12,7 @@ TEST_USER_PSW = '123'
 def get_test_addr_dict(user, country='Italy', city='Pistoia', post_code='51100',
                        address='Via Verdi 12', phone='3294882773'):
     return {
-        'address_id': uuid4(),
+        'uuid': uuid4(),
         'user': user,
         'user_first_name': user.first_name,
         'user_last_name': user.last_name,
@@ -116,7 +116,7 @@ class TestAddresses(TestCase):
                                                    post_code='50132', address="Via Rossi 10"))
         Address.create(**get_test_addr_dict(user))
 
-        resp = open_with_auth(self.app, '/addresses/{}'.format(addr.address_id), 'GET',
+        resp = open_with_auth(self.app, '/addresses/{}'.format(addr.uuid), 'GET',
                               user.email, TEST_USER_PSW, None, None)
 
         assert resp.status_code == OK
@@ -133,12 +133,12 @@ class TestAddresses(TestCase):
         addr = Address.create(**get_test_addr_dict(user, city="Firenze",
                                                    post_code='50132', address="Via Rossi 10"))
 
-        resp = open_with_auth(self.app, '/addresses/{}'.format(addr.address_id), 'PATCH',
+        resp = open_with_auth(self.app, '/addresses/{}'.format(addr.uuid), 'PATCH',
                               user.email, TEST_USER_PSW, data=json.dumps(
                                   {'city': "Genova"}),
                               content_type='application/json')
         assert resp.status_code == OK
-        address = Address.get(Address.address_id == addr.address_id).json()
+        address = Address.get(Address.uuid == addr.uuid).json()
         assert address['country'] == addr.country
         assert address['city'] == 'Genova'
         assert address['address'] == addr.address
@@ -151,14 +151,14 @@ class TestAddresses(TestCase):
         addr = Address.create(**get_test_addr_dict(user, city="Firenze",
                                                    post_code='50132', address="Via Rossi 10"))
 
-        resp = open_with_auth(self.app, '/addresses/{}'.format(addr.address_id), 'PATCH',
+        resp = open_with_auth(self.app, '/addresses/{}'.format(addr.uuid), 'PATCH',
                               user.email, TEST_USER_PSW, data=json.dumps(
                                   {"country": "Germany", "city": "Genova",
                                    "address": "Via XX Settembre, 30", "phone": "01050675",
                                    "post_code": "16100"}),
                               content_type='application/json')
         assert resp.status_code == OK
-        address = Address.get(Address.address_id == addr.address_id).json()
+        address = Address.get(Address.uuid == addr.uuid).json()
         assert address['country'] == "Germany"
         assert address['city'] == "Genova"
         assert address['address'] == "Via XX Settembre, 30"
@@ -184,7 +184,7 @@ class TestAddresses(TestCase):
         addr = Address.create(**get_test_addr_dict(user, city="Firenze",
                                                    post_code='50132', address="Via Rossi 10"))
 
-        resp = open_with_auth(self.app, '/addresses/{}'.format(addr.address_id), 'DELETE',
+        resp = open_with_auth(self.app, '/addresses/{}'.format(addr.uuid), 'DELETE',
                               user.email, TEST_USER_PSW, None, None)
         assert resp.status_code == NO_CONTENT
         assert not Address.select().exists()

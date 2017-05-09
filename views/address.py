@@ -32,7 +32,7 @@ class AddressesHandler(Resource):
             required_fields=['country', 'city', 'post_code', 'address', 'phone'])
 
         addr = Address.create(
-            address_id=uuid.uuid4(),
+            uuid=uuid.uuid4(),
             user=user,
             country=res['country'],
             city=res['city'],
@@ -50,7 +50,7 @@ class AddressHandler(Resource):
         user = g.user
 
         try:
-            return Address.get(Address.user == user, Address.address_id == address_id).json(), OK
+            return Address.get(Address.user == user, Address.uuid == address_id).json(), OK
         except Address.DoesNotExist:
             return None, NOT_FOUND
 
@@ -59,7 +59,7 @@ class AddressHandler(Resource):
         user = g.user
 
         try:
-            obj = Address.get(Address.user == user, Address.address_id == address_id)
+            obj = Address.get(Address.user == user, Address.uuid == address_id)
         except Address.DoesNotExist:
             return None, NOT_FOUND
 
@@ -94,7 +94,7 @@ class AddressHandler(Resource):
     def delete(self, address_id):
         user = g.user
         result = Address.delete().where(Address.user == user,
-                                        Address.address_id == address_id).execute()
+                                        Address.uuid == address_id).execute()
         if result == 0:
             return None, NOT_FOUND
 

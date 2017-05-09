@@ -44,7 +44,7 @@ class OrdersHandler(Resource):
 
         # Check that the address exist
         try:
-            address = Address.get(Address.address_id == res['order']['delivery_address'])
+            address = Address.get(Address.uuid == res['order']['delivery_address'])
         except Address.DoesNotExist:
             abort(BAD_REQUEST)
 
@@ -74,7 +74,7 @@ class OrderHandler(Resource):
     def get(self, order_id):
         """ Get a specific order, including all the related Item(s)."""
         try:
-            order = Order.get(Order.order_id == order_id)
+            order = Order.get(Order.uuid == order_id)
         except Order.DoesNotExist:
             return None, NOT_FOUND
 
@@ -93,13 +93,13 @@ class OrderHandler(Resource):
 
         with database.transaction() as txn:
             try:
-                order = Order.get(order_id=str(order_id))
+                order = Order.get(uuid=str(order_id))
             except Order.DoesNotExist:
                 abort(NOT_FOUND)
 
             if res_address:
                 try:
-                    address = Address.get(Address.address_id == res_address)
+                    address = Address.get(Address.uuid == res_address)
                     order.delivery_address = address
                 except Address.DoesNotExist:
                     abort(BAD_REQUEST)
@@ -134,7 +134,7 @@ class OrderHandler(Resource):
     def delete(self, order_id):
         """ Delete a specific order. """
         try:
-            obj = Order.get(order_id=str(order_id))
+            obj = Order.get(uuid=str(order_id))
         except Order.DoesNotExist:
             return None, NOT_FOUND
 
