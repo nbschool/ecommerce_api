@@ -140,25 +140,25 @@ def order_item_creator():
             order.add_item(an_item, quantity)
 
 
-def create_db():
+def create_db(num_items, num_users, num_orders, num_addrs):
     db = SqliteDatabase('database.db', autocommit=True)
     if db.is_closed():
         db.connect()
     set_db(db)
     create_tables()
-    write_db()
+    write_db(num_items, num_users, num_orders, num_addrs)
     good_bye('created')
 
 
-def write_db():
+def write_db(num_items, num_users, num_orders, num_addrs):
     """
     Given the SEED 9623954 the first user email is
     'fatima.caputo@tiscali.it', and its password is '9J0.'
     """
-    user_creator(10)
-    address_creator(10)
-    item_creator(10)
-    order_creator(10)
+    user_creator(num_users)
+    address_creator(num_addrs)
+    item_creator(num_items)
+    order_creator(num_orders)
     order_item_creator(10)
 
 
@@ -198,7 +198,7 @@ def good_bye(word, default='has'):
     sys.exit()
 
 
-def overwrite_db():
+def overwrite_db(num_items, num_users, num_orders, num_addrs):
     print(WARNING_OVERWRITE, '\n')
     print('Are you sure to overwrite?')
     choice = input('If YES press(1) or [ENTER] to exit without change. >'
@@ -210,7 +210,7 @@ def overwrite_db():
         set_db(db)
         drops_all_tables(db)
         create_tables()
-        write_db()
+        write_db(num_items, num_users, num_orders, num_addrs)
         good_bye('overwritten')
     if choice == '':
         good_bye('deleted', default='hasn\'t')
@@ -234,10 +234,10 @@ def main():
                         help='Set up the number of insertions in Order table.', default=10)
 
     args = parser.parse_args()
-    num_u = args.users
-    num_a = args.addresses
-    num_i = args.items
-    num_o = args.orders
+    num_users = args.users
+    num_addrs = args.addresses
+    num_items = args.items
+    num_orders = args.orders
 
     print(TEXT_DISPLAY)
     list_db = get_databases()
@@ -246,7 +246,7 @@ def main():
         choice = input('If YES press(1) or [ENTER] to exit without change. >'
                        + Fore.YELLOW + Style.BRIGHT + ' ').strip()
         if choice == '1':
-            create_db()
+            create_db(num_items, num_users, num_orders, num_addrs)
         if choice == '':
             good_bye('be created', default='hasn\'t')
         else:
@@ -256,9 +256,9 @@ def main():
         print(MENU_TEXT)
         choice = input(Fore.YELLOW + Style.BRIGHT + ' > ').strip()
         if choice == '1':
-            overwrite_db()
+            overwrite_db(num_items, num_users, num_orders, num_addrs)
         if choice == '2':
-            write_db(user_num, order_num)
+            write_db(num_items, num_users, num_orders, num_addrs)
         if choice is '':
             good_bye('change', default='hasn\'t')
         else:
