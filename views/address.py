@@ -25,14 +25,14 @@ class AddressesHandler(Resource):
     @auth.login_required
     def post(self):
         user = g.user
-        res = request.get_json()
+        res = request.get_json(force=True)
 
         check_required_fields(
             request_data=res,
             required_fields=['country', 'city', 'post_code', 'address', 'phone'])
 
         addr = Address.create(
-            address_id=uuid.uuid4(),
+            uuid=uuid.uuid4(),
             user=user,
             country=res['country'],
             city=res['city'],
@@ -46,24 +46,24 @@ class AddressesHandler(Resource):
 class AddressHandler(Resource):
     """ Address endpoint. """
     @auth.login_required
-    def get(self, address_id):
+    def get(self, address_uuid):
         user = g.user
 
         try:
-            return Address.get(Address.user == user, Address.address_id == address_id).json(), OK
+            return Address.get(Address.user == user, Address.uuid == address_uuid).json(), OK
         except Address.DoesNotExist:
             return None, NOT_FOUND
 
     @auth.login_required
-    def patch(self, address_id):
+    def patch(self, address_uuid):
         user = g.user
 
         try:
-            obj = Address.get(Address.user == user, Address.address_id == address_id)
+            obj = Address.get(Address.user == user, Address.uuid == address_uuid)
         except Address.DoesNotExist:
             return None, NOT_FOUND
 
-        res = request.get_json()
+        res = request.get_json(force=True)
 
         country = res.get('country')
         city = res.get('city')
@@ -91,10 +91,10 @@ class AddressHandler(Resource):
         return obj.json(), OK
 
     @auth.login_required
-    def delete(self, address_id):
+    def delete(self, address_uuid):
         user = g.user
         result = Address.delete().where(Address.user == user,
-                                        Address.address_id == address_id).execute()
+                                        Address.uuid == address_uuid).execute()
         if result == 0:
             return None, NOT_FOUND
 

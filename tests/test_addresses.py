@@ -1,13 +1,10 @@
 import json
-import uuid
-
-from peewee import SqliteDatabase
-
-from app import app
-from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
-from models import Address, User
-from tests.test_utils import add_user, open_with_auth
 from uuid import uuid4
+
+from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
+from models import Address
+from tests.test_case import TestCase
+from tests.test_utils import add_user, open_with_auth, wrong_dump
 
 TEST_USER_PSW = '123'
 
@@ -15,7 +12,7 @@ TEST_USER_PSW = '123'
 def get_test_addr_dict(user, country='Italy', city='Pistoia', post_code='51100',
                        address='Via Verdi 12', phone='3294882773'):
     return {
-        'address_id': uuid.uuid4(),
+        'uuid': uuid4(),
         'user': user,
         'user_first_name': user.first_name,
         'user_last_name': user.last_name,
@@ -30,7 +27,7 @@ def get_test_addr_dict(user, country='Italy', city='Pistoia', post_code='51100',
 def new_addr(user, country='Italy', city='Pistoia', post_code='51100',
              address='Via Verdi 12', phone='3294882773'):
     return {
-        'user_id': str(user.user_id),
+        'user_uuid': str(user.uuid),
         'country': country,
         'city': city,
         'post_code': post_code,
@@ -39,20 +36,18 @@ def new_addr(user, country='Italy', city='Pistoia', post_code='51100',
     }
 
 
-class TestAddresses:
-    @classmethod
-    def setup_class(cls):
-        test_db = SqliteDatabase(':memory:')
-        Address._meta.database = test_db
-        User._meta.database = test_db
-        test_db.connect()
-        Address.create_table()
-        User.create_table()
-        cls.app = app.test_client()
+class TestAddresses(TestCase):
 
-    def setup_method(self):
-        Address.delete().execute()
-        User.delete().execute()
+    def test_create_address__not_json_failure(self):
+        user = add_user('mariorossi@gmail.com', '123')
+        addr = new_addr(user)
+
+        resp = open_with_auth(self.app, '/addresses/', 'POST',
+                              user.email, TEST_USER_PSW, 'application/json',
+                              wrong_dump(addr))
+
+        assert resp.status_code == BAD_REQUEST
+        assert len(Address.select()) == 0
 
     def test_get_addresses__empty(self):
         user = add_user('mariorossi@gmail.com', TEST_USER_PSW)
@@ -84,7 +79,7 @@ class TestAddresses:
 
         assert resp.status_code == CREATED
         assert len(Address.select()) == 1
-        assert str(Address.get().user.user_id) == addr['user_id']
+        assert str(Address.get().user.uuid) == addr['user_uuid']
         address = Address.get().json()
         assert address['country'] == addr['country']
         assert address['city'] == addr['city']
@@ -121,7 +116,7 @@ class TestAddresses:
                                                    post_code='50132', address="Via Rossi 10"))
         Address.create(**get_test_addr_dict(user))
 
-        resp = open_with_auth(self.app, '/addresses/{}'.format(addr.address_id), 'GET',
+        resp = open_with_auth(self.app, '/addresses/{}'.format(addr.uuid), 'GET',
                               user.email, TEST_USER_PSW, None, None)
 
         assert resp.status_code == OK
@@ -138,12 +133,12 @@ class TestAddresses:
         addr = Address.create(**get_test_addr_dict(user, city="Firenze",
                                                    post_code='50132', address="Via Rossi 10"))
 
-        resp = open_with_auth(self.app, '/addresses/{}'.format(addr.address_id), 'PATCH',
+        resp = open_with_auth(self.app, '/addresses/{}'.format(addr.uuid), 'PATCH',
                               user.email, TEST_USER_PSW, data=json.dumps(
                                   {'city': "Genova"}),
                               content_type='application/json')
         assert resp.status_code == OK
-        address = Address.get(Address.address_id == addr.address_id).json()
+        address = Address.get(Address.uuid == addr.uuid).json()
         assert address['country'] == addr.country
         assert address['city'] == 'Genova'
         assert address['address'] == addr.address
@@ -156,14 +151,14 @@ class TestAddresses:
         addr = Address.create(**get_test_addr_dict(user, city="Firenze",
                                                    post_code='50132', address="Via Rossi 10"))
 
-        resp = open_with_auth(self.app, '/addresses/{}'.format(addr.address_id), 'PATCH',
+        resp = open_with_auth(self.app, '/addresses/{}'.format(addr.uuid), 'PATCH',
                               user.email, TEST_USER_PSW, data=json.dumps(
                                   {"country": "Germany", "city": "Genova",
                                    "address": "Via XX Settembre, 30", "phone": "01050675",
                                    "post_code": "16100"}),
                               content_type='application/json')
         assert resp.status_code == OK
-        address = Address.get(Address.address_id == addr.address_id).json()
+        address = Address.get(Address.uuid == addr.uuid).json()
         assert address['country'] == "Germany"
         assert address['city'] == "Genova"
         assert address['address'] == "Via XX Settembre, 30"
@@ -171,7 +166,7 @@ class TestAddresses:
         assert address['post_code'] == "16100"
         assert json.loads(resp.data) == address
 
-    def test_patch_address__wrong_id(self):
+    def test_patch_address__wrong_uuid(self):
         user = add_user('mariorossi@gmail.com', '123')
         Address.create(**get_test_addr_dict(user, city="Firenze",
                                             post_code='50132', address="Via Rossi 10"))
@@ -189,7 +184,7 @@ class TestAddresses:
         addr = Address.create(**get_test_addr_dict(user, city="Firenze",
                                                    post_code='50132', address="Via Rossi 10"))
 
-        resp = open_with_auth(self.app, '/addresses/{}'.format(addr.address_id), 'DELETE',
+        resp = open_with_auth(self.app, '/addresses/{}'.format(addr.uuid), 'DELETE',
                               user.email, TEST_USER_PSW, None, None)
         assert resp.status_code == NO_CONTENT
         assert not Address.select().exists()

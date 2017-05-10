@@ -1,3 +1,4 @@
+from functools import reduce
 from models import Address, User
 from base64 import b64encode
 import uuid
@@ -5,6 +6,14 @@ import os
 import random
 import shutil
 from utils import get_image_folder
+
+
+def wrong_dump(data):
+    """
+    Give a wrong encoding (urlencode-like) to the given dictionary
+    """
+    return reduce(lambda x, y: "{}&{}".format(x, y), [
+        "{}={}".format(k, v) for k, v in zip(data.keys(), data.values())])
 
 
 def add_user(email, psw):
@@ -20,7 +29,7 @@ def add_user(email, psw):
         last_name='Doe',
         email=email,
         password=User.hash_password(psw),
-        user_id=uuid.uuid4()
+        uuid=uuid.uuid4()
     )
 
 
@@ -37,7 +46,7 @@ def add_admin_user(email, psw):
         last_name='Doe',
         email=email,
         password=User.hash_password(psw),
-        user_id=uuid.uuid4(),
+        uuid=uuid.uuid4(),
         admin=True
     )
 
@@ -46,7 +55,7 @@ def add_address(user, country='Italy', city='Pistoia', post_code='51100',
                 address='Via Verdi 12', phone='3294882773'):
 
     return Address.create(
-        address_id=uuid.uuid4(),
+        uuid=uuid.uuid4(),
         user=user,
         country=country,
         city=city,

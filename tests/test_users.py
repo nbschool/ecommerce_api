@@ -3,7 +3,7 @@ Test suite for User(s) resources.
 """
 
 from models import User, Address, Item, Order
-from tests.test_utils import open_with_auth, add_user, add_address
+from tests.test_utils import open_with_auth, add_user, add_address, wrong_dump
 from tests.test_case import TestCase
 from http.client import (OK, NOT_FOUND, NO_CONTENT, BAD_REQUEST,
                          CREATED, CONFLICT, UNAUTHORIZED)
@@ -53,16 +53,16 @@ class TestUser(TestCase):
 
         resp_user = json.loads(resp.data)
 
-        assert 'user_id' in resp_user
+        assert 'uuid' in resp_user
 
         del user['password']  # user inside response does not have the password
-        del resp_user['user_id']  # sent user data does not have the id field
+        del resp_user['uuid']  # sent user data does not have the id field
         assert resp_user == user
         assert User.select().count() == 1
         for user in User.select():
             assert user.admin is False
 
-    def test_post_new_user_no_json__fail(self):
+    def test_post_new_user__not_json_failure(self):
         user = {
             'first_name': 'Mario',
             'last_name': 'Rossi',
@@ -70,9 +70,11 @@ class TestUser(TestCase):
             'password': 'aksdg',
         }
         resp = self.app.post(API_ENDPOINT.format('users/'),
-                             data=json.dumps(user))
+                             data=wrong_dump(user),
+                             content_type='application/json')
 
         assert resp.status_code == BAD_REQUEST
+        assert User.select().count() == 0
 
     def test_post_new_user_email_exists__fail(self):
         add_user('mail@gmail.com', TEST_USER_PSW)
@@ -123,7 +125,7 @@ class TestUser(TestCase):
         email = 'mail@email.it'
         user = add_user(email, TEST_USER_PSW)
 
-        user_path = 'users/{}'.format(user.user_id)
+        user_path = 'users/{}'.format(user.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
                               email, TEST_USER_PSW, None, None)
         assert resp.status_code == NO_CONTENT
@@ -131,14 +133,14 @@ class TestUser(TestCase):
 
     def test_delete_user__cascade(self):
         Item.create(
-            item_id='429994bf-784e-47cc-a823-e0c394b823e8',
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
             name='mario',
             price=20.20,
             description='svariati mariii',
             availability=1,
         )
         Item.create(
-            item_id='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
@@ -152,7 +154,7 @@ class TestUser(TestCase):
         Order.create(delivery_address=addr, user=user)
         order1 = Order.create(delivery_address=addr1, user=user1)
 
-        user_path = 'users/{}'.format(user.user_id)
+        user_path = 'users/{}'.format(user.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
                               email, TEST_USER_PSW, None, None)
         assert resp.status_code == NO_CONTENT
@@ -169,7 +171,7 @@ class TestUser(TestCase):
     def test_delete_user_dont_exists__fail(self):
         user = add_user(None, TEST_USER_PSW)
 
-        wrong_uuid = uuid.UUID(int=user.user_id.int + 1)
+        wrong_uuid = uuid.UUID(int=user.uuid.int + 1)
         user_path = 'users/{}'.format(wrong_uuid)
 
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
@@ -182,9 +184,9 @@ class TestUser(TestCase):
         user_A = add_user('user.a@users.com', TEST_USER_PSW)
         user_B = add_user('user.b@users.com', TEST_USER_PSW)
 
-        path = 'users/{}'.format(user_A.user_id)
+        path = 'users/{}'.format(user_A.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'DELETE',
-                              user_B.user_id, TEST_USER_PSW, None, None)
+                              user_B.uuid, TEST_USER_PSW, None, None)
 
         assert resp.status_code == UNAUTHORIZED
         assert User.get(User.email == user_A.email)
@@ -194,7 +196,7 @@ class TestUser(TestCase):
     def test_delete_user_auth_does_not_exists__fail(self):
         user = add_user(None, TEST_USER_PSW)
 
-        path = 'users/{}'.format(user.user_id)
+        path = 'users/{}'.format(user.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'DELETE',
                               'donot@exists.com', 'unused_psw', None, None)
 

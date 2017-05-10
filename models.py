@@ -13,6 +13,7 @@ from uuid import uuid4
 from exceptions import InsufficientAvailabilityException, WrongQuantity
 from utils import remove_image
 
+
 database = SqliteDatabase('database.db')
 
 
@@ -39,7 +40,7 @@ class Item(BaseModel):
         description: product description text
         availability: number of available products of this kind
     """
-    item_id = UUIDField(unique=True)
+    uuid = UUIDField(unique=True)
     name = CharField()
     price = DecimalField(auto_round=True)
     description = TextField()
@@ -47,14 +48,14 @@ class Item(BaseModel):
 
     def __str__(self):
         return '{}, {}, {}, {}'.format(
-            self.item_id,
+            self.uuid,
             self.name,
             self.price,
             self.description)
 
     def json(self):
         return {
-            'item_id': str(self.item_id),
+            'uuid': str(self.uuid),
             'name': self.name,
             'price': float(self.price),
             'description': self.description,
@@ -67,7 +68,7 @@ class Item(BaseModel):
 def on_delete_item_handler(model_class, instance):
     """Delete item pictures in cascade"""
     pictures = Picture.select().join(Item).where(
-        Item.item_id == instance.item_id)
+        Item.uuid == instance.uuid)
     for pic in pictures:
         pic.delete_instance()
 
@@ -75,38 +76,38 @@ def on_delete_item_handler(model_class, instance):
 class Picture(BaseModel):
     """
     Picture model
-        picture_id: picture identifier and file name stored
+        uuid: picture identifier and file name stored
         extension: picture type
         item: referenced item
     """
-    picture_id = UUIDField(unique=True)
+    uuid = UUIDField(unique=True)
     extension = CharField()
     item = ForeignKeyField(Item, related_name='pictures')
 
     def filename(self):
         return '{}.{}'.format(
-            self.picture_id,
+            self.uuid,
             self.extension)
 
     def json(self):
         return {
-            'picture_id': str(self.picture_id),
+            'uuid': str(self.uuid),
             'extension': self.extension,
-            'item_id': str(self.item.item_id)
+            'item_uuid': str(self.item.uuid)
         }
 
     def __str__(self):
         return '{}.{} -> item: {}'.format(
-            self.picture_id,
+            self.uuid,
             self.extension,
-            self.item.item_id)
+            self.item.uuid)
 
 
 @post_delete(sender=Picture)
 def on_delete_picture_handler(model_class, instance):
     """Delete file picture"""
     # TODO log eventual inconsistency
-    remove_image(instance.picture_id, instance.extension)
+    remove_image(instance.uuid, instance.extension)
 
 
 class User(BaseModel):
@@ -114,7 +115,7 @@ class User(BaseModel):
     User represents an user for the application.
     Users created are always as role "normal" (admin field = False)
     """
-    user_id = UUIDField(unique=True)
+    uuid = UUIDField(unique=True)
     first_name = CharField()
     last_name = CharField()
     email = CharField(unique=True)
@@ -155,7 +156,7 @@ class User(BaseModel):
         """
 
         return {
-            'user_id': str(self.user_id),
+            'uuid': str(self.uuid),
             'first_name': self.first_name,
             'last_name': self.last_name,
             'email': self.email,
@@ -166,7 +167,7 @@ class Address(BaseModel):
     """ The model Address represent a user address.
         Each address is releated to one user, but one user can have
         more addresses."""
-    address_id = UUIDField(unique=True)
+    uuid = UUIDField(unique=True)
     user = ForeignKeyField(User, related_name='addresses')
     country = CharField()
     city = CharField()
@@ -176,7 +177,7 @@ class Address(BaseModel):
 
     def json(self):
         return {
-            'address_id': str(self.address_id),
+            'uuid': str(self.uuid),
             'user_first_name': self.user.first_name,
             'user_last_name': self.user.last_name,
             'country': self.country,
@@ -190,12 +191,12 @@ class Address(BaseModel):
 class Order(BaseModel):
     """ The model Order contains a list of orders - one row per order.
     Each order will be place by one client.
-    An order is represented by an order_id, which is a UUID,
+    An order is represented by an uuid,
     a dateTimeField which is the date of the order, a FloatField which
     is the total price of the order. Finally, there is the delivery address,
     if it's different from the customers address from their record.
     """
-    order_id = UUIDField(unique=True, default=uuid4)
+    uuid = UUIDField(unique=True, default=uuid4)
     total_price = DecimalField(default=0)
     delivery_address = ForeignKeyField(Address, related_name="orders")
     user = ForeignKeyField(User, related_name="orders")
@@ -213,7 +214,7 @@ class Order(BaseModel):
             OrderItem
             .select(OrderItem, Order)
             .join(Order)
-            .where(Order.order_id == self.order_id)
+            .where(Order.uuid == self.uuid)
         )
 
         return [orderitem for orderitem in query]
@@ -312,11 +313,11 @@ class Order(BaseModel):
         """
 
         order_json = {
-            'order_id': str(self.order_id),
+            'uuid': str(self.uuid),
             'date': str(self.created_at),
             'total_price': float(self.total_price),
             'delivery_address': self.delivery_address.json(),
-            'user_id': str(self.user.user_id)
+            'user_uuid': str(self.user.uuid)
         }
         if include_items:
             order_json['items'] = self.get_order_items()
@@ -356,8 +357,8 @@ class OrderItem(BaseModel):
 
     def json(self):
         return {
-            'order_id': self.order.order_id,
-            'item_id': self.item.item_id,
+            'order_uuid': self.order.uuid,
+            'item_uuid': self.item.uuid,
             'quantity': str(self.quantity),
             'subtotal': float(self.subtotal)
         }
@@ -401,14 +402,3 @@ class OrderItem(BaseModel):
     def _calculate_subtotal(self):
         """Calculate the subtotal value of the item(s) in the order."""
         self.subtotal = self.item.price * self.quantity
-
-
-# Check if the table exists in the database; if not create it.
-# TODO: Use database migration
-
-User.create_table(fail_silently=True)
-Item.create_table(fail_silently=True)
-Order.create_table(fail_silently=True)
-OrderItem.create_table(fail_silently=True)
-Picture.create_table(fail_silently=True)
-Address.create_table(fail_silently=True)
