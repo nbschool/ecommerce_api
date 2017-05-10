@@ -3,10 +3,10 @@ Test case for setup and teardown methods
 """
 
 from app import app
-from models import Address, Item, Order, OrderItem, Picture, User
+from models import Address, Item, Order, OrderItem, Picture, User, Favorite
 from peewee import SqliteDatabase
 
-TABLES = [Address, Item, Order, OrderItem, Picture, User]
+TABLES = [Address, Item, Order, OrderItem, Picture, User, Favorite]
 
 
 class TestCase:
