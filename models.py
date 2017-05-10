@@ -10,7 +10,7 @@ from peewee import UUIDField, ForeignKeyField, IntegerField
 from playhouse.signals import Model, post_delete, pre_delete
 from uuid import uuid4
 
-from exceptions import InsufficientAvailabilityException
+from exceptions import InsufficientAvailabilityException, WrongQuantity
 from utils import remove_image
 
 
@@ -290,7 +290,6 @@ class Order(BaseModel):
         (OrderItem.quantity == 0).
         It also restores the item availability.
         """
-
         for orderitem in self.order_items:
             if orderitem.item == item:
                 removed_items = orderitem.remove_item(quantity)
@@ -386,16 +385,18 @@ class OrderItem(BaseModel):
 
         :returns: int - quantity of items really removed.
         """
-        if self.quantity <= quantity:
-            # If asked to remove more items than existing, set `quantity` as
-            # the total count of items before deleting the row.
-            quantity = self.quantity
-            self.delete_instance()
-        else:
+
+        if self.quantity < quantity:
+            raise WrongQuantity('Quantity of items to be removed ({}) higher than availability ({})'
+                                .format(quantity, self.quantity))
+
+        elif self.quantity > quantity:
             self.quantity -= quantity
             self._calculate_subtotal()
             self.save()
-
+        else:  # elif self.quantity == quantity
+            quantity = self.quantity
+            self.delete_instance()
         return quantity
 
     def _calculate_subtotal(self):

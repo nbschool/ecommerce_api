@@ -2,13 +2,14 @@
 Test suite.
 """
 
-from models import Order, OrderItem, Item
+from models import Order, OrderItem, Item, WrongQuantity
 from tests.test_utils import (add_user, add_address,
                               add_admin_user, open_with_auth, wrong_dump)
 from tests.test_case import TestCase
 from http.client import (CREATED, NO_CONTENT, NOT_FOUND,
                          OK, BAD_REQUEST, UNAUTHORIZED)
 import json
+import pytest
 from uuid import uuid4
 
 # main endpoint for API
@@ -1089,8 +1090,8 @@ class TestOrders(TestCase):
         )
         item3 = Item.create(
             uuid=uuid4(),
-            name='Item 2',
-            description='Item 2 description',
+            name='Item 3',
+            description='Item 3 description',
             price=15,
             availability=2
         )
@@ -1107,18 +1108,19 @@ class TestOrders(TestCase):
         assert count_items(order) == 3
 
         # remove more item1 than existing in order
-        order.remove_item(item1, 5)
-        assert len(order.order_items) == 1
-        assert OrderItem.select().count() == 1
-        assert count_items(order) == 2
+        with pytest.raises(WrongQuantity):
+            order.remove_item(item1, 5)
+            assert len(order.order_items) == 2
+            assert OrderItem.select().count() == 2
+            assert count_items(order) == 4
 
         # Check that the total price is correctly updated
-        assert order.total_price == item2.price * 2
+        assert order.total_price == item1.price + item2.price + item3.price
 
         # remove non existing item3 from order
         order.remove_item(item3)
-        assert count_items(order) == 2
-        assert len(order.order_items) == 1
+        assert count_items(order) == 3
+        assert len(order.order_items) == 2
 
         order.empty_order()
         assert len(order.order_items) == 0
