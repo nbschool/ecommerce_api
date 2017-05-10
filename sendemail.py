@@ -5,6 +5,7 @@ KEY = os.getenv('MAILGUN_API_KEY')
 SANDBOX = os.getenv('MAILGUN_DOMAIN')
 ENVIRONMENT = os.getenv('ENVIRONMENT')
 
+
 def send_email(subject, body):
 
     if ENVIRONMENT == 'dev':
@@ -28,4 +29,3 @@ def send_email(subject, body):
         'html': body
     })
     return request
-
