@@ -6,11 +6,15 @@ and supply a new one db with new down-to-earth data.
 from peewee import SqliteDatabase, fn
 from faker import Factory
 from colorama import init, Fore, Style
-from models import User, Item, Order, OrderItem, Address
+from models import User, Item, Order, OrderItem, Address, Picture
+import utils
 import argparse
 import sys
 import glob
 import random
+import os
+import shutil
+
 
 
 init(autoreset=True)
@@ -41,12 +45,33 @@ WARNING_OVERWRITE = Fore.YELLOW + Style.BRIGHT + """
                 """
 
 
+<<<<<<< HEAD
+=======
+def get_random_row(table):
+    total_rows = table.select().count()
+    lucky_row = random.randint(1, total_rows)
+    return table.select().where(table.id == lucky_row).get()
+
+def get_random_pictures(num_pictures):
+    pictures = []
+    path = "scripts/testdata/"
+    for i in range(0, num_pictures):
+        full_path = '{}{}'.format(path, random.choice(os.listdir(path)))
+        pictures.append(full_path)
+    return pictures
+
+def count_rows(table):
+    return table.select().count()
+
+
+>>>>>>> demo contento now works with real images
 def set_db(database):
     Order._meta.database = database
     Item._meta.database = database
     OrderItem._meta.database = database
     User._meta.database = database
     Address._meta.database = database
+    Picture._meta.database = database
 
 
 def user_creator(num_user):
@@ -80,6 +105,23 @@ def item_creator(num_item):
             description=fake.paragraph(nb_sentences=3, variable_nb_sentences=True),
             availability=random.randint(35, 60),
         )
+
+def picture_creator(num_picture):
+    ALLOWED_EXTENSION = ['jpg', 'jpeg', 'png', 'gif']
+    pictures_path = get_random_pictures(num_picture)
+    for i in range(0, num_picture):
+        picture_id = fake.uuid4()
+        extension = random.choice(ALLOWED_EXTENSION)
+        item_id = count_rows(Item)
+        Picture.create(
+            uuid=picture_id,
+            extension=extension,
+            item_id=item_id
+        )
+        image_folder = utils.get_image_folder()
+        if not os.path.exists(image_folder):
+            os.makedirs(image_folder)
+        shutil.copy2(pictures_path[i], '/{}/{}.{}'.format(image_folder, picture_id, extension))
 
 
 def address_creator(num_addr):
@@ -119,17 +161,17 @@ def order_item_creator(num_items):
             order.add_item(an_item, quantity)
 
 
-def create_db(num_items, num_users, num_orders, num_addrs):
+def create_db(num_items, num_users, num_orders, num_addrs, num_pictures):
     db = SqliteDatabase('database.db', autocommit=True)
     if db.is_closed():
         db.connect()
     set_db(db)
     create_tables()
-    write_db(num_items, num_users, num_orders, num_addrs)
+    write_db(num_items, num_users, num_orders, num_addrs, num_pictures)
     good_bye('created')
 
 
-def write_db(num_items, num_users, num_orders, num_addrs):
+def write_db(num_items, num_users, num_orders, num_addrs, num_pictures):
     """
     Given the SEED 9623954 the first user email is
     'fatima.caputo@tiscali.it', and its password is '9J0.'
@@ -137,6 +179,7 @@ def write_db(num_items, num_users, num_orders, num_addrs):
     user_creator(num_users)
     address_creator(num_addrs)
     item_creator(num_items)
+    picture_creator(num_pictures)
     order_creator(num_orders)
     order_item_creator(random.randint(1, 7))
 
@@ -161,6 +204,8 @@ def drops_all_tables(database):
             OrderItem.drop_table()
         if table == 'address':
             Address.drop_table()
+        if table == 'picture':
+            Picture.drop_table()
 
 
 def create_tables():
@@ -169,6 +214,7 @@ def create_tables():
     Order.create_table(fail_silently=True)
     OrderItem.create_table(fail_silently=True)
     Address.create_table(fail_silently=True)
+    Picture.create_table(fail_silently=True)
 
 
 def good_bye(word, default='has'):
@@ -177,7 +223,7 @@ def good_bye(word, default='has'):
     sys.exit()
 
 
-def overwrite_db(num_items, num_users, num_orders, num_addrs):
+def overwrite_db(num_items, num_users, num_orders, num_addrs, num_pictures):
     print(WARNING_OVERWRITE, '\n')
     print('Are you sure to overwrite?')
     choice = input('If YES press(1) or [ENTER] to exit without change. >'
@@ -189,7 +235,7 @@ def overwrite_db(num_items, num_users, num_orders, num_addrs):
         set_db(db)
         drops_all_tables(db)
         create_tables()
-        write_db(num_items, num_users, num_orders, num_addrs)
+        write_db(num_items, num_users, num_orders, num_addrs, num_pictures)
         good_bye('overwritten')
     if choice == '':
         good_bye('deleted', default='hasn\'t')
@@ -237,21 +283,23 @@ def main():
                         help='Set up the number of insertions in Item table.', default=10)
     parser.add_argument('-o', '--orders', type=check_range,
                         help='Set up the number of insertions in Order table.', default=10)
-
+    parser.add_argument('-p', '--pictures', type=check_range,
+                        help='Set up the number of insertions in Picture table.', default=10)                    
     args = parser.parse_args()
     num_users = args.users
     num_addrs = args.addresses
     num_items = args.items
     num_orders = args.orders
+    num_pictures = args.pictures
 
     OVERWRITE_ACTIONS = {
         '1': {
             'key': '1', 'text': 'Overwrite the database',
-            'action': lambda: overwrite_db(num_items, num_users, num_orders, num_addrs)
+            'action': lambda: overwrite_db(num_items, num_users, num_orders, num_addrs, num_pictures)
         },
         '2': {
             'key': '2', 'text': 'Add data to the current database',
-            'action': lambda: write_db(num_items, num_users, num_orders, num_addrs)
+            'action': lambda: write_db(num_items, num_users, num_orders, num_addrs, num_pictures)
         },
         '': {
             'key': 'Enter', 'text': 'Just exit',
@@ -260,7 +308,7 @@ def main():
     }
 
     NEW_DB_ACTIONS = {
-        '1': lambda: create_db(num_items, num_users, num_orders, num_addrs),
+        '1': lambda: create_db(num_items, num_users, num_orders, num_addrs, num_pictures),
         '': lambda: good_bye('be created', default='hasn\'t')
     }
 
