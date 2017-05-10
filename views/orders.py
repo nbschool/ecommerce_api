@@ -8,6 +8,11 @@ from http.client import (BAD_REQUEST, CREATED, NO_CONTENT, NOT_FOUND, OK,
 from flask import abort, g, request
 from flask_restful import Resource
 
+from models import database, Address, Order, Item
+from sendemail import send_email
+from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST, UNAUTHORIZED
+from flask import abort, request, g, render_template
+
 from auth import auth
 from models import database, Address, Item, Order
 from utils import generate_response
@@ -62,6 +67,10 @@ class OrdersHandler(Resource):
                         if str(item.uuid) == req_item['id']:
                             order.add_item(item, req_item['quantity'])
                             break
+                body = render_template('new_order.html',
+                                       address=order.delivery_address,
+                                       user=order.user)
+
             except InsufficientAvailabilityException:
                 txn.rollback()
                 return None, BAD_REQUEST
@@ -75,6 +84,7 @@ class OrdersHandler(Resource):
                 }
                 return msg, BAD_REQUEST
 
+        send_email("Nuovo Ordine", body)
         return generate_response(order.json(), CREATED)
 
 
