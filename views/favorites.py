@@ -31,7 +31,7 @@ class FavoritesHandler(Resource):
         fav = Favorite.add_favorite(self, res)
 
         new_fav = Favorite.create(
-            favorite_id=uuid.uuid4(),
+            uuid=uuid.uuid4(),
             item_id=fav['item_id'],
             user_id=fav['user_id']
             )
