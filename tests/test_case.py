@@ -3,12 +3,12 @@ Test case for setup and teardown methods
 """
 
 import pytest
-from peewee import SqliteDatabase
 
 from app import app
-from models import Address, Item, Order, OrderItem, Picture, User
+from models import Address, Item, Order, OrderItem, Picture, User, Favorite
+from peewee import SqliteDatabase
 
-TABLES = [Address, Item, Order, OrderItem, Picture, User]
+TABLES = [Address, Item, Order, OrderItem, Picture, User, Favorite]
 
 
 @pytest.mark.usefixtures('mockuuid4')
