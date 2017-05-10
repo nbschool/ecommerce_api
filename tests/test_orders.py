@@ -432,7 +432,6 @@ class TestOrders(TestCase):
         resp_order = Order.get(uuid=order1.uuid).json(include_items=True)
         assert resp_order['uuid'] == order['order']['uuid']
         assert resp_order['delivery_address']['uuid'] == order['order']['delivery_address']
-        
         order_items = [o.json() for o in OrderItem.select()]
         assert str(order_items[0]['item_uuid']) == item1.uuid
         assert str(order_items[1]['item_uuid']) == item2.uuid
@@ -528,7 +527,6 @@ class TestOrders(TestCase):
         resp_order = Order.get(uuid=order1.uuid).json(include_items=True)
         assert resp_order['uuid'] == order['order']['uuid']
         assert resp_order['delivery_address']['uuid'] == order['order']['delivery_address']
-        
         order_items = [o.json() for o in OrderItem.select()]
         assert str(order_items[0]['item_uuid']) == item1.uuid
         assert str(order_items[1]['item_uuid']) == item2.uuid
@@ -579,7 +577,6 @@ class TestOrders(TestCase):
         resp_order = Order.get(uuid=order1.uuid).json(include_items=True)
         assert resp_order['uuid'] == order['order']['uuid']
         assert resp_order['delivery_address']['uuid'] == order['order']['delivery_address']
-        
         order_items = [o.json() for o in OrderItem.select()]
         assert str(order_items[0]['item_uuid']) == item1.uuid
         assert str(order_items[1]['item_uuid']) == item2.uuid
