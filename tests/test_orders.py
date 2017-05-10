@@ -3,13 +3,14 @@ Test suite.
 """
 
 from models import Order, OrderItem, Item
-from tests.test_utils import (add_user, add_address,
-                              add_admin_user, open_with_auth, wrong_dump)
+from tests.test_utils import (open_with_auth, add_user, count_order_items,
+                              add_address, add_admin_user)
 from tests.test_case import TestCase
 from http.client import (CREATED, NO_CONTENT, NOT_FOUND,
                          OK, BAD_REQUEST, UNAUTHORIZED)
 import json
 from uuid import uuid4
+import pytest
 
 # main endpoint for API
 API_ENDPOINT = '/{}'
@@ -1059,19 +1060,13 @@ class TestOrders(TestCase):
         assert resp.status_code == NOT_FOUND
         assert Order.select().count() == 1
 
-    def test_order_items_management(self):
+    def test_order_add_remove_item(self):
         """
         Test add_item and remove_item function from Order and OrderItem
         models.
         """
         user = add_user(None, TEST_USER_PSW)
         addr = add_address(user=user)
-
-        def count_items(order):
-            tot = 0
-            for oi in order.order_items:
-                tot += oi.quantity
-            return tot
 
         item1 = Item.create(
             uuid=uuid4(),
@@ -1099,27 +1094,71 @@ class TestOrders(TestCase):
 
         assert len(order.order_items) == 2
         assert OrderItem.select().count() == 2
-        assert count_items(order) == 4
+        assert count_order_items(order) == 4
 
         # test removing one of two item1
         order.remove_item(item1)
         assert len(order.order_items) == 2
-        assert count_items(order) == 3
+        assert count_order_items(order) == 3
 
         # remove more item1 than existing in order
         order.remove_item(item1, 5)
         assert len(order.order_items) == 1
         assert OrderItem.select().count() == 1
-        assert count_items(order) == 2
+        assert count_order_items(order) == 2
 
         # Check that the total price is correctly updated
         assert order.total_price == item2.price * 2
 
         # remove non existing item3 from order
-        order.remove_item(item3)
-        assert count_items(order) == 2
-        assert len(order.order_items) == 1
+        with pytest.raises(Order.OrderItemNotFound):
+            order.remove_item(item3)
 
         order.empty_order()
         assert len(order.order_items) == 0
         assert OrderItem.select().count() == 0
+
+    def test_order_add_remove_items(self):
+        """
+        Test Order.add_items and remove_items for handling add/remove in
+        bulk
+        """
+        user = add_user(None, TEST_USER_PSW)
+        addr = add_address(user=user)
+        item1 = Item.create(
+            item_id=uuid4(),
+            name='Item',
+            description='Item description',
+            price=10
+        )
+        item2 = Item.create(
+            item_id=uuid4(),
+            name='Item 2',
+            description='Item 2 description',
+            price=15
+        )
+        item3 = Item.create(
+            item_id=uuid4(),
+            name='Item 3',
+            description='Item 3 description',
+            price=15
+        )
+
+        order = Order.create(delivery_address=addr, user=user)
+
+        # add some items in the order
+        order.add_items({item1: 3, item2: 5})
+        assert count_order_items(order) == 8
+
+        # remove arbitatry number of items from the order
+        order.remove_items({item1: 2, item2: 1})
+        assert count_order_items(order) == 5
+
+        with pytest.raises(Order.OrderItemNotFound):
+            # test removing item that does not exist in the order
+            order.remove_items({item3: 1, item2: 2})
+
+        assert count_order_items(order) == 5
+        # check assumed total price. there should be 1 item1 and 4 item2 left
+        total_price = item1.price + (item2.price * 4)
+        assert order.total_price == total_price

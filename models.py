@@ -204,6 +204,13 @@ class Order(BaseModel):
     class Meta:
         order_by = ('created_at',)
 
+    class OrderItemNotFound(Exception):
+        """
+        Exception raised when trying to access an OrderItem related to the
+        order (i.e. in remove_item(s)) but it cannot be found
+        """
+        pass
+
     @property
     def order_items(self):
         """
@@ -232,40 +239,68 @@ class Order(BaseModel):
         self.save()
         return self
 
-    def add_item(self, item, quantity=1):
+    def add_items(self, items):
         """
-        Add one item to the order.
-        Creates one OrderItem row if the item is not present in the order yet,
-        or increasing the count of the existing OrderItem. It also updates the
-        item availability counter and raise InsufficientAvailability if
-        quantity is less than item availability.
+        Add items to the order from a dict {<Item>: <int:quantity>}. Handles
+        creating or updating the OrderItem cross table and the Order total.
+        It also updates the item availability counter and raise
+        InsufficientAvailability if quantity is less than an item availability.
+        :param dict items: {<Item>: <quantity:int>}
 
-        :param item Item: instance of models.Item
+        :raises: InsufficientAvailabilityException if a requested quantity is
+                 higher than the item availability. If the exception is raised
+                 all the changes are reverted.
         """
+        orderitems = self.order_items
+        with database.atomic():
+            for item, quantity in items.items():
+                for orderitem in orderitems:
+                    # Looping all the OrderItem related to this order,
+                    # if one with the same item is found we update that row.
+                    if orderitem.item == item:
+                        orderitem.add_item(quantity)
+                        continue
 
-        for orderitem in self.order_items:
-            # Looping all the OrderItem related to this order, if one with the
-            # same item is found we update that row.
-            if orderitem.item == item:
-                orderitem.add_item(quantity)
+                if quantity > item.availability:
+                    raise InsufficientAvailabilityException(item, quantity)
+                # if no matching existing OrderItem is found
+                # create a new row in the OrderItem table
+                OrderItem.create(
+                    order=self,
+                    item=item,
+                    quantity=quantity,
+                    subtotal=item.price * quantity
+                )
 
                 self.total_price += (item.price * quantity)
-                self.save()
-                return self
+            self.save()
+        return self
 
-        if quantity > item.availability:
-            raise InsufficientAvailabilityException(item, quantity)
-        # if no existing OrderItem is found with this order and this Item,
-        # create a new row in the OrderItem table
-        OrderItem.create(
-            order=self,
-            item=item,
-            quantity=quantity,
-            subtotal=item.price * quantity
-        )
+    def remove_items(self, items):
+        """
+        Remove items from an order, handling the relative OrderItem row and
+        the Order total price update.
+        :param dict items: {<Item>: <quantity:int>}
 
-        self.total_price += (item.price * quantity)
-        self.save()
+        :raises: Order.OrderItemNotFound if one of the items does not exists in
+                 the order.
+                 If the exception is raised all the changes are reverted
+        """
+        orderitems = self.order_items
+
+        with database.atomic():
+            for item, quantity in items.items():
+                removed = False
+                for orderitem in orderitems:
+                    if orderitem.item == item:
+                        removed_items = orderitem.remove_item(quantity)
+                        self.total_price -= (item.price * removed_items)
+                        removed = True
+                if not removed:
+                    raise Order.OrderItemNotFound(
+                        'Item {} is not in the order'.format(item.item_id))
+
+            self.save()
         return self
 
     def update_item(self, item, quantity):
@@ -283,12 +318,25 @@ class Order(BaseModel):
         else:
             self.add_item(item, quantity)
 
+    def add_item(self, item, quantity=1):
+        """
+        Legacy method to add just one item to the order.
+
+        :param Item item: the Item to add
+        :param int quantity: how many to add
+        """
+
+        return self.add_items({item: quantity})
+
     def remove_item(self, item, quantity=1):
         """
+        Legacy method.
         Remove the given item from the order, reducing quantity of the relative
         OrderItem entity or deleting it if removing the last item
         (OrderItem.quantity == 0).
         It also restores the item availability.
+        :param Item item: the Item to remove
+        :param int quantity: how many to remove
         """
 
         for orderitem in self.order_items:
@@ -300,9 +348,7 @@ class Order(BaseModel):
                 self.save()
                 return self
 
-        # No OrderItem found for this item
-        # TODO: Raise or return something more explicit
-        return self
+        return self.remove_items({item: quantity})
 
     def json(self, include_items=False):
         """

@@ -55,12 +55,13 @@ class OrdersHandler(Resource):
                     user=user,
                 )
 
-                for item in items:
-                    for res_item in res_items:
-                        # if names match add item and quantity, once per res_item
-                        if str(item.uuid) == res_item['item_uuid']:
-                            order.add_item(item, res_item['quantity'])
-                            break
+                # Generate the dict of {<Item>: <int:quantity>} to call Order.add_items
+                items_to_add = {}
+                for res_item in res_items:
+                    item = next(i for i in items if str(i.item_id) == res_item['item_id'])
+                    items_to_add[item] = res_item['quantity']
+
+                order.add_items(items_to_add)
             except InsufficientAvailabilityException:
                 txn.rollback()
                 return None, BAD_REQUEST
@@ -85,47 +86,43 @@ class OrderHandler(Resource):
         """ Modify a specific order. """
         res = request.get_json(force=True)
 
-        res_items = res['order'].get('items')
-        res_address = res['order'].get('delivery_address')
-
-        if res_items is not None and len(res_items) == 0:
-            return None, BAD_REQUEST
-
+        for key in ('items', 'delivery_address', 'order_id'):
+            if not res['order'].get(key):
+                return None, BAD_REQUEST
+        
         with database.transaction() as txn:
             try:
                 order = Order.get(uuid=str(order_uuid))
             except Order.DoesNotExist:
                 abort(NOT_FOUND)
+            try:
+                address = Address.get(Address.uuid == res['order']['delivery_address'])
+            except Address.DoesNotExist:
+                abort(BAD_REQUEST)
+            order.delivery_address = address
 
-            if res_address:
-                try:
-                    address = Address.get(Address.uuid == res_address)
-                    order.delivery_address = address
-                except Address.DoesNotExist:
-                    abort(BAD_REQUEST)
-
-            if res_items:
-                items_uuids = [e['item_uuid'] for e in res_items]
-                items_query = Item.select().where(Item.uuid << items_uuids)
-                items = {str(item.uuid): item for item in items_query}
-
-                if len(items) != len(items_uuids):
-                    return None, BAD_REQUEST
-
-                for res_item in res_items:
-                    try:
-                        order.update_item(items[res_item['item_uuid']], res_item['quantity'])
-                    except InsufficientAvailabilityException:
-                        txn.rollback()
-                        return None, BAD_REQUEST
             # get the user from the flask.g global object registered inside the
             # auth.py::verify() function, called by @auth.login_required decorator
             # and match it against the found user.
-            # This is to prevent uses from modify other users' order.
+            # This is to prevent users from modify other users' order.
             if g.user != order.user and g.user.admin is False:
                 return ({'message': "You can't delete another user's order"},
                         UNAUTHORIZED)
 
+            # Clear the order of all items before adding the new items
+            # that came with the PATCH request
+            order.empty_order()
+
+            # Generate the dict of {<Item>: <int:quantity>} to call Order.add_items
+            items_to_add = {}
+            for _i in res['order']['items']:
+                item = next(i for i in items if str(i.item_id) == _i['item_id'])
+                items_to_add[item] = _i['quantity']
+
+            if len(items) != len(items_uuids):
+                return None, BAD_REQUEST
+
+            order.add_items(items_to_add)
             order.save()
 
         return order.json(include_items=True), OK

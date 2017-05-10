@@ -93,3 +93,11 @@ def setup_images():
     """
     if not os.path.exists(get_image_folder()):
         os.makedirs(get_image_folder())
+
+
+def count_order_items(order):
+    """ Given an Order instance count the total items in the order. """
+    tot = 0
+    for oi in order.order_items:
+        tot += oi.quantity
+    return tot
