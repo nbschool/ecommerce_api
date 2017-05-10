@@ -6,7 +6,7 @@ and supply a new one db with new down-to-earth data.
 from peewee import SqliteDatabase
 from faker import Factory
 from colorama import init, Fore, Style
-from models import User, Item, Order, OrderItem, Address
+from models import User, Item, Order, OrderItem, Address, Favorite
 import argparse
 import sys
 import glob
@@ -57,6 +57,7 @@ def set_db(database):
     OrderItem._meta.database = database
     User._meta.database = database
     Address._meta.database = database
+    Favorite._meta.database = database
 
 
 def user_creator(num_user):
@@ -132,6 +133,17 @@ def order_item_creator(num_items):
             order.add_item(an_item, quantity)
 
 
+def favorite_creator(num_order_fav=1):
+    for i in range(0, num_order_fav):
+        user_id = count_rows(User)
+        item_id = count_rows(Item)
+        Favorite.create(
+            favorite_id=fake.uuid4(),
+            item_id=random.choice(range(1, item_id+1)),
+            user_id=random.choice(range(1, user_id+1))
+            )
+
+
 def create_db(num_items, num_users, num_orders, num_addrs):
     db = SqliteDatabase('database.db', autocommit=True)
     if db.is_closed():
@@ -152,6 +164,7 @@ def write_db(num_items, num_users, num_orders, num_addrs):
     item_creator(num_items)
     order_creator(num_orders)
     order_item_creator(random.randint(1, 7))
+    favorite_creator(100)
 
 
 def get_databases():
@@ -174,6 +187,8 @@ def drops_all_tables(database):
             OrderItem.drop_table()
         if table == 'address':
             Address.drop_table()
+        if table == 'favorite':
+            Favorite.drop_table()
 
 
 def create_tables():
@@ -182,7 +197,7 @@ def create_tables():
     Order.create_table(fail_silently=True)
     OrderItem.create_table(fail_silently=True)
     Address.create_table(fail_silently=True)
-
+    Favorite.create_table(fail_silently=True)
 
 def good_bye(word, default='has'):
     print(Fore.BLUE + Style.BRIGHT + '*-* Your database {1} been {0}. *-*'.format(word, default))
