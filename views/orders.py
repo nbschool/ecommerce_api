@@ -58,7 +58,7 @@ class OrdersHandler(Resource):
                 # Generate the dict of {<Item>: <int:quantity>} to call Order.add_items
                 items_to_add = {}
                 for res_item in res_items:
-                    item = next(i for i in items if str(i.item_id) == res_item['item_id'])
+                    item = next(i for i in items if str(i.uuid) == res_item['item_uuid'])
                     items_to_add[item] = res_item['quantity']
 
                 order.add_items(items_to_add)
@@ -86,7 +86,7 @@ class OrderHandler(Resource):
         """ Modify a specific order. """
         res = request.get_json(force=True)
 
-        for key in ('items', 'delivery_address', 'order_id'):
+        for key in ('items', 'delivery_address', 'uuid'):
             if not res['order'].get(key):
                 return None, BAD_REQUEST
         
@@ -95,6 +95,7 @@ class OrderHandler(Resource):
                 order = Order.get(uuid=str(order_uuid))
             except Order.DoesNotExist:
                 abort(NOT_FOUND)
+
             try:
                 address = Address.get(Address.uuid == res['order']['delivery_address'])
             except Address.DoesNotExist:
@@ -113,16 +114,21 @@ class OrderHandler(Resource):
             # that came with the PATCH request
             order.empty_order()
 
-            # Generate the dict of {<Item>: <int:quantity>} to call Order.add_items
-            items_to_add = {}
-            for _i in res['order']['items']:
-                item = next(i for i in items if str(i.item_id) == _i['item_id'])
-                items_to_add[item] = _i['quantity']
-
+            items_uuids = [e['item_uuid'] for e in res['order']['items']]
+            items = list(Item.select().where(Item.uuid << items_uuids))
             if len(items) != len(items_uuids):
                 return None, BAD_REQUEST
 
-            order.add_items(items_to_add)
+            # Generate the dict of {<Item>: <int:quantity>} to call Order.add_items
+            items_to_add = {item: req_item['quantity']
+                for item in items for req_item in res['order']['items']
+                if str(item.uuid) == req_item['item_uuid']}
+            try:
+                order.add_items(items_to_add)
+            except InsufficientAvailabilityException:
+                txn.rollback()
+                abort(BAD_REQUEST)
+
             order.save()
 
         return order.json(include_items=True), OK

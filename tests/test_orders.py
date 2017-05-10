@@ -4,7 +4,7 @@ Test suite.
 
 from models import Order, OrderItem, Item
 from tests.test_utils import (open_with_auth, add_user, count_order_items,
-                              add_address, add_admin_user)
+                              add_address, add_admin_user, wrong_dump)
 from tests.test_case import TestCase
 from http.client import (CREATED, NO_CONTENT, NOT_FOUND,
                          OK, BAD_REQUEST, UNAUTHORIZED)
