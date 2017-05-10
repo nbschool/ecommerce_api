@@ -16,7 +16,6 @@ import os
 import shutil
 
 
-
 init(autoreset=True)
 
 SEED = 9623954
@@ -52,6 +51,7 @@ def get_random_row(table):
     lucky_row = random.randint(1, total_rows)
     return table.select().where(table.id == lucky_row).get()
 
+
 def get_random_pictures(num_pictures):
     pictures = []
     path = "scripts/testdata/"
@@ -59,6 +59,7 @@ def get_random_pictures(num_pictures):
         full_path = '{}{}'.format(path, random.choice(os.listdir(path)))
         pictures.append(full_path)
     return pictures
+
 
 def count_rows(table):
     return table.select().count()
@@ -105,6 +106,7 @@ def item_creator(num_item):
             description=fake.paragraph(nb_sentences=3, variable_nb_sentences=True),
             availability=random.randint(35, 60),
         )
+
 
 def picture_creator(num_picture):
     ALLOWED_EXTENSION = ['jpg', 'jpeg', 'png', 'gif']
@@ -284,7 +286,7 @@ def main():
     parser.add_argument('-o', '--orders', type=check_range,
                         help='Set up the number of insertions in Order table.', default=10)
     parser.add_argument('-p', '--pictures', type=check_range,
-                        help='Set up the number of insertions in Picture table.', default=10)                    
+                        help='Set up the number of insertions in Picture table.', default=10)
     args = parser.parse_args()
     num_users = args.users
     num_addrs = args.addresses
@@ -295,7 +297,8 @@ def main():
     OVERWRITE_ACTIONS = {
         '1': {
             'key': '1', 'text': 'Overwrite the database',
-            'action': lambda: overwrite_db(num_items, num_users, num_orders, num_addrs, num_pictures)
+            'action': lambda: overwrite_db(
+                num_items, num_users, num_orders, num_addrs, num_pictures)
         },
         '2': {
             'key': '2', 'text': 'Add data to the current database',
