@@ -357,7 +357,7 @@ class Favorite(BaseModel):
 
     def json(self):
         return {
-            'uuid': str(self.favorite_id),
+            'uuid': str(self.uuid),
             'item_id': str(self.item_id),
             'user_id': str(self.user_id)
         }
