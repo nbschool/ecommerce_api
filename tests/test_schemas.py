@@ -10,8 +10,6 @@ import copy
 
 from datetime import datetime
 
-import simplejson as json
-
 from models import Item, Order, Address
 from schemas import OrderSchema, UserSchema, AddressSchema, ItemSchema
 from tests.test_utils import (add_address, add_user, format_jsonapi_request,
