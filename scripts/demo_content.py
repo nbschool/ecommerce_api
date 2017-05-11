@@ -41,16 +41,6 @@ WARNING_OVERWRITE = Fore.YELLOW + Style.BRIGHT + """
                 """
 
 
-def get_random_row(table):
-    total_rows = table.select().count()
-    lucky_row = random.randint(1, total_rows)
-    return table.select().where(table.id == lucky_row).get()
-
-
-def count_rows(table):
-    return table.select().count()
-
-
 def set_db(database):
     Order._meta.database = database
     Item._meta.database = database
