@@ -1,12 +1,13 @@
-from flask import request, abort, g
-from flask_restful import Resource
-from http.client import (CREATED, NO_CONTENT, NOT_FOUND, OK,
-                         BAD_REQUEST, CONFLICT, UNAUTHORIZED)
 import uuid
+from http.client import (BAD_REQUEST, CONFLICT, CREATED, NO_CONTENT, NOT_FOUND,
+                         OK, UNAUTHORIZED)
+
+from flask import g, request
+from flask_restful import Resource
 
 from auth import auth
 from models import User
-from utils import non_empty_str
+from utils import generate_response
 
 
 class UsersHandler(Resource):
@@ -19,42 +20,37 @@ class UsersHandler(Resource):
     """
 
     def get(self):
-        return [user.json() for user in User.select()], OK
+        data = User.json_list(User.get_all())
+        return generate_response(data, OK)
 
     def post(self):
         """ Add an user to the database."""
-        # required fields for an User. All fields must be inside the post
-        # request and not be empty strings.
-        required_fields = ['first_name', 'last_name', 'email', 'password']
+        data = request.get_json(force=True)
 
-        request_data = request.get_json(force=True)
+        errors = User.validate_input(data)
+        if errors:
+            return errors, BAD_REQUEST
 
-        # For every field required for creating a new user try to get the
-        # value from the json data of the request.
-        # If the field is missing (KeyError) or the value is an empty
-        # string (ValueError) return a BAD_REQUEST
-        for field in required_fields:
-            try:
-                value = request_data[field]
-                non_empty_str(value, field)
-            except (KeyError, ValueError):
-                abort(BAD_REQUEST)
+        # Extract the user attributes to check and generate the User row
+        data = data['data']['attributes']
 
         # If email is present in the database return a BAD_REQUEST response.
-        if User.exists(request_data['email']):
+        if User.exists(data['email']):
             msg = {'message': 'email already present.'}
             return msg, CONFLICT
 
         new_user = User.create(
             uuid=uuid.uuid4(),
-            first_name=request_data['first_name'],
-            last_name=request_data['last_name'],
-            email=request_data['email'],
-            password=User.hash_password(request_data['password'])
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            email=data['email'],
+            password=User.hash_password(data['password'])
         )
 
         # If everything went OK return the newly created user and CREATED code
-        return new_user.json(), CREATED
+        # TODO: Handle json() return value (data, errors) and handle errors not
+        # empty
+        return generate_response(new_user.json(), CREATED)
 
 
 class UserHandler(Resource):
