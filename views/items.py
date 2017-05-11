@@ -19,7 +19,7 @@ class ItemsHandler(Resource):
 
     def get(self):
         """Retrieve every item"""
-        data = Item.json_list(Item.get_all())
+        data = Item.json_list(Item.select())
         return generate_response(data, client.OK)
 
     def post(self):

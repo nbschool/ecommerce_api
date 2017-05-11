@@ -24,6 +24,7 @@ class UsersHandler(Resource):
 
         if not g.user.admin:
             return ({'message': "You can't get the list users."}, UNAUTHORIZED)
+
         data = User.json_list(User.select())
         return generate_response(data, OK)
 
@@ -50,7 +51,8 @@ class UsersHandler(Resource):
             email=data['email'],
             password=User.hash_password(data['password'])
         )
-        notify_new_user(first_name=new_user.first_name, last_name=new_user.last_name)
+        notify_new_user(first_name=new_user.first_name,
+                        last_name=new_user.last_name)
 
         # If everything went OK return the newly created user and CREATED code
         # TODO: Handle json() return value (data, errors) and handle errors not
