@@ -138,6 +138,7 @@ class TestUser(TestCase):
             price=20.20,
             description='svariati mariii',
             availability=1,
+            category='scarpe'
         )
         Item.create(
             uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
@@ -145,6 +146,7 @@ class TestUser(TestCase):
             price=30.20,
             description='svariati GINIIIII',
             availability=1,
+            category='accessori'
         )
         email = 'mail@email.it'
         user = add_user(email, TEST_USER_PSW)

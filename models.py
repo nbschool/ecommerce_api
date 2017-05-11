@@ -39,19 +39,22 @@ class Item(BaseModel):
         price: product price
         description: product description text
         availability: number of available products of this kind
+        category: product category
     """
     uuid = UUIDField(unique=True)
     name = CharField()
     price = DecimalField(auto_round=True)
     description = TextField()
     availability = IntegerField()
+    category = TextField()
 
     def __str__(self):
         return '{}, {}, {}, {}'.format(
             self.uuid,
             self.name,
             self.price,
-            self.description)
+            self.description,
+            self.category)
 
     def json(self):
         return {
@@ -60,6 +63,7 @@ class Item(BaseModel):
             'price': float(self.price),
             'description': self.description,
             'availability': self.availability,
+            'category': self.category,
         }
 
 
@@ -336,7 +340,8 @@ class Order(BaseModel):
                 'price': float(orderitem.item.price),
                 'subtotal': float(orderitem.subtotal),
                 'name': orderitem.item.name,
-                'description': orderitem.item.description
+                'description': orderitem.item.description,
+                'category': orderitem.item.category
             })
         return items
 

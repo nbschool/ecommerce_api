@@ -21,6 +21,7 @@ TEST_ITEM = {
     'price': 20.20,
     'description': 'svariati mariii',
     'availability': 1,
+    'category': 'scarpe',
 }
 TEST_ITEM2 = {
     'uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
@@ -28,6 +29,7 @@ TEST_ITEM2 = {
     'price': 30.20,
     'description': 'svariati GINIIIII',
     'availability': 2,
+    'category': 'accessori',
 }
 TEST_ITEM_WRONG = {
     'uuid': '19b4c6dc-e393-4e76-bf0f-72559dd5d32e',
@@ -35,6 +37,7 @@ TEST_ITEM_WRONG = {
     'price': 30.20,
     'description': 'svariati GINIIIII',
     'availability': 3,
+    'category': 'scarpe',
 }
 TEST_ITEM_PRECISION = {
     'uuid': '68e587f7-3982-4b6a-a882-dd43b89134fe',
@@ -42,6 +45,7 @@ TEST_ITEM_PRECISION = {
     'price': 30.222222,
     'description': 'lorem ipsum',
     'availability': 1,
+    'category': 'scarpe',
 }
 TEST_ITEM_AVAILABILITY = {
     'uuid': '68e587f7-3982-4b6a-a882-dd43b89134fe',
@@ -49,6 +53,7 @@ TEST_ITEM_AVAILABILITY = {
     'price': 30.00,
     'description': 'lorem ipsum',
     'availability': -1,
+    'category': 'scarpe',
 }
 TEST_PICTURE = {
     'uuid': 'df690434-a488-419f-899e-8853cba1a22b',
@@ -86,6 +91,7 @@ class TestItems(TestCase):
         assert item['price'] == TEST_ITEM['price']
         assert item['description'] == TEST_ITEM['description']
         assert item['availability'] == TEST_ITEM['availability']
+        assert item['category'] == TEST_ITEM['category']
         try:
             uuid.UUID(item['uuid'], version=4)
         except ValueError:
@@ -112,6 +118,7 @@ class TestItems(TestCase):
         assert TEST_ITEM_PRECISION['name'] == item.name
         assert TEST_ITEM_PRECISION['description'] == item.description
         assert TEST_ITEM_PRECISION['availability'] == item.availability
+        assert TEST_ITEM_PRECISION['category'] == item.category
 
     def test_post_item__availability(self):
         resp = self.app.post('/items/',
@@ -151,6 +158,7 @@ class TestItems(TestCase):
         assert json_item['price'] == TEST_ITEM['price']
         assert json_item['description'] == TEST_ITEM['description']
         assert json_item['availability'] == TEST_ITEM['availability']
+        assert json_item['category'] == TEST_ITEM['category']
         assert json_item['uuid'] == item.uuid
         assert json.loads(resp.data) == json_item
 
@@ -160,7 +168,8 @@ class TestItems(TestCase):
                               data=json.dumps(
                                   {'name': 'new-name', 'price': 40.20,
                                    'description': 'new-description',
-                                   'availability': 2}),
+                                   'availability': 2,
+                                   'category': 'new-category'}),
                               content_type='application/json')
         assert resp.status_code == client.OK
         json_item = Item.get(Item.uuid == item.uuid).json()
@@ -168,6 +177,7 @@ class TestItems(TestCase):
         assert json_item['price'] == 40.20
         assert json_item['description'] == 'new-description'
         assert json_item['availability'] == 2
+        assert json_item['category'] == 'new-category'
         assert json_item['uuid'] == item.uuid
         assert json.loads(resp.data) == json_item
 

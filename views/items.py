@@ -28,7 +28,7 @@ class ItemsHandler(Resource):
         request_data = request.get_json(force=True)
         check_required_fields(
             request_data=request_data,
-            required_fields=['name', 'price', 'description', 'availability'])
+            required_fields=['name', 'price', 'description', 'availability', 'category'])
 
         if int(request_data['availability']) < 0:
             return None, client.BAD_REQUEST
@@ -38,7 +38,8 @@ class ItemsHandler(Resource):
             name=request_data['name'],
             price=float(request_data['price']),
             description=request_data['description'],
-            availability=int(request_data['availability']))
+            availability=int(request_data['availability']),
+            category=request_data['category'])
         item = obj.json()
 
         return item, client.CREATED
@@ -66,6 +67,7 @@ class ItemHandler(Resource):
         price = request_data.get('price')
         description = request_data.get('description')
         availability = request_data.get('availability')
+        category = request_data.get('category')
 
         if name and name != obj.name:
             obj.name = request_data['name']
@@ -78,6 +80,9 @@ class ItemHandler(Resource):
 
         if availability and availability != obj.availability:
             obj.availability = request_data['availability']
+
+        if category and category != obj.category:
+            obj.category = request_data['category']
 
         obj.save()
 
