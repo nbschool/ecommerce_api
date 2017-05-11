@@ -22,6 +22,7 @@ TEST_ITEM = {
     'price': 20.20,
     'description': 'svariati mariii',
     'availability': 1,
+    'category': 'scarpe',
 }
 
 TEST_ITEM2 = {
@@ -30,6 +31,7 @@ TEST_ITEM2 = {
     'price': 30.20,
     'description': 'svariati GINIIIII',
     'availability': 1,
+    'category': 'accessori',
 }
 
 TEST_PICTURE = {
