@@ -3,7 +3,7 @@ Drop any test database tables (user, item, order, orderitem)
 and supply a new one db with new down-to-earth data.
 """
 
-from peewee import SqliteDatabase
+from peewee import SqliteDatabase, fn
 from faker import Factory
 from colorama import init, Fore, Style
 from models import User, Item, Order, OrderItem, Address
@@ -89,7 +89,7 @@ def address_creator(num_addr):
         country = random.choice(LIST_COUNTRIES)
         Address.create(
             uuid=fake.uuid4(),
-            user=User.get(User.id == i),
+            user=User.select().order_by(fn.Random()).get(),
             country=country,
             city=fake.city(),
             post_code=fake.postcode(),
@@ -102,10 +102,10 @@ def order_creator(num_order):
     for i in range(1, num_order + 1):
         order_id = fake.uuid4()
         Order.create(
-            order_id=order_id,
-            user_id=User.get(User.id == i),
+            uuid=order_id,
+            user=User.select().order_by(fn.Random()).get(),
             total_price=0,
-            delivery_address=Address.get(Address.id == i),
+            delivery_address=Address.select().order_by(fn.Random()).get(),
             items=[]
         )
 
@@ -114,7 +114,7 @@ def order_item_creator(num_items):
     orders = Order.select()
     for order in orders:
         for e in range(1, num_items + 1):
-            an_item = Item.get(Item.id == e)
+            an_item = Item.select().order_by(fn.Random()).get()
             quantity = random.randint(1, 5)
             order.add_item(an_item, quantity)
 
