@@ -112,14 +112,16 @@ def picture_creator(num_picture):
     ALLOWED_EXTENSION = ['jpg', 'jpeg', 'png', 'gif']
     pictures_path = get_random_pictures(num_picture)
     for i in range(0, num_picture):
+        count = i+1
+        item = Item.select().where(Item.id == count).get()
         picture_id = fake.uuid4()
         extension = random.choice(ALLOWED_EXTENSION)
-        item_id = count_rows(Item)
         Picture.create(
             uuid=picture_id,
             extension=extension,
-            item_id=item_id
+            item=item
         )
+
         image_folder = utils.get_image_folder()
         if not os.path.exists(image_folder):
             os.makedirs(image_folder)
