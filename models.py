@@ -283,7 +283,7 @@ class Order(BaseModel):
         """
         to_create = {}
         to_remove = {}
-        to_patch = {}
+        to_edit = {}
 
         # split items in insert, delete and update sets
         for item, difference in items.items():
@@ -298,7 +298,7 @@ class Order(BaseModel):
                     elif new_quantity < 0:
                         raise Exception
                     else:
-                        to_patch[item] = difference
+                        to_edit[item] = difference
                 else:
                     if difference <= 0:
                         raise Exception
@@ -310,40 +310,42 @@ class Order(BaseModel):
                 self.total_price += (item.price * difference)
 
         with database.atomic():
-            self.patch_items(to_patch)
+            self.edit_items_quantity(to_edit)
             self.create_items(to_create)
             self.delete_items(to_remove)
             self.save()
 
-    @database.atomic()
-    def patch_items(self, items):
+    def edit_items_quantity(self, items):
         """
         TODO docstring...
         :param dict items: {<Item>: <difference:int>}
         """
-        for item, difference in items.items():
-            item.availability += difference
-            item.save()
-            self.orderitems.get(OrderItem.item == item).update(
-                quantity=OrderItem.quantity + difference).execute()
+        if not items:
+            return
+        with database.atomic():
+            for item, difference in items.items():
+                item.availability += difference
+                item.save()
+                OrderItem.get(
+                    OrderItem.item == item, OrderItem.order == self
+                ).update(quantity=OrderItem.quantity + difference).execute()
 
-    @database.atomic()
     def delete_items(self, items):
         """
         TODO docstring...
         :param dict items: {<Item>: <quantity:int>}
         """
-        for item, quantity in items.items():
-            item.availability += quantity
-            item.save()
+        if not items:
+            return
 
-        self.orderitems.delete([
-            {
-                'order': self.uuid,
-                'item': item.uuid,
-                'quantity': quantity,
-                'subtotal': item.price * quantity
-            } for item, quantity in items.items()])
+        with database.atomic():
+            or_where = True
+            for item, quantity in items.items():
+                item.availability += quantity
+                item.save()
+                or_where = or_where | OrderItem.item == item
+            OrderItem.delete().where(
+                OrderItem.order == self and or_where).execute()
 
     @database.atomic()
     def create_items(self, items):
@@ -351,11 +353,14 @@ class Order(BaseModel):
         TODO docstring...
         :param dict items: {<Item>: <quantity:int>}
         """
+        if not items:
+            return
+
         for item, quantity in items.items():
             item.availability -= quantity
             item.save()
 
-        self.orderitems.insert_many([
+        OrderItem.insert_many([
             {
                 'order': self.uuid,
                 'item': item.uuid,
