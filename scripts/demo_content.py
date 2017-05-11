@@ -95,12 +95,11 @@ def item_creator(num_item):
 def address_creator(num_addr):
     LIST_COUNTRIES = ['Belgium', 'France', 'Germany',
                       'Greece', 'Italy', 'Portugal', 'Spain']
-    for i in range(0, num_addr):
+    for i in range(1, num_addr + 1):
         country = random.choice(LIST_COUNTRIES)
-        user_id = count_rows(User)
         Address.create(
             uuid=fake.uuid4(),
-            user_id=random.randint(1, user_id),
+            user=User.get(User.id == i),
             country=country,
             city=fake.city(),
             post_code=fake.postcode(),
@@ -110,15 +109,13 @@ def address_creator(num_addr):
 
 
 def order_creator(num_order):
-    for i in range(0, num_order):
-        user_id = count_rows(User)
+    for i in range(1, num_order + 1):
         order_id = fake.uuid4()
-        address = count_rows(Address)
         Order.create(
             order_id=order_id,
-            user_id=random.randint(1, user_id),
+            user_id=User.get(User.id == i),
             total_price=0,
-            delivery_address=random.randint(1, address),
+            delivery_address=Address.get(Address.id == i),
             items=[]
         )
 
@@ -126,8 +123,8 @@ def order_creator(num_order):
 def order_item_creator(num_items):
     orders = Order.select()
     for order in orders:
-        for e in range(1, num_items):
-            an_item = get_random_row(Item)
+        for e in range(1, num_items + 1):
+            an_item = Item.get(Item.id == e)
             quantity = random.randint(1, 5)
             order.add_item(an_item, quantity)
 
