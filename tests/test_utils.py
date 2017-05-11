@@ -51,8 +51,6 @@ class MockModelCreate:
     def __call__(self, created_at=mock_datetime(), uuid=None, **query):
         query['created_at'] = created_at
         query['uuid'] = uuid or next(self.uuid_generator)
-        # import pdb
-        # pdb.set_trace()
         return self.original(**query)
 
 
