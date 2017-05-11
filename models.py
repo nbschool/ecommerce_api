@@ -276,6 +276,93 @@ class Order(BaseModel):
             self.save()
         return self
 
+    def update_items(self, items):
+        """
+        TODO docstring...
+        :param dict items: {<Item>: <difference:int>}
+        """
+        to_create = {}
+        to_remove = {}
+        to_patch = {}
+
+        # split items in insert, delete and update sets
+        for item, difference in items.items():
+            for orderitem in self.order_items:
+                if orderitem.item == item:
+                    new_quantity = orderitem.quantity + difference
+                    if new_quantity == 0:
+                        to_remove[item] = difference
+                    elif new_quantity > item.availability:
+                        raise InsufficientAvailabilityException(
+                            item, difference)
+                    elif new_quantity < 0:
+                        raise Exception
+                    else:
+                        to_patch[item] = difference
+                else:
+                    if difference <= 0:
+                        raise Exception
+                    elif difference > item.availability:
+                        raise InsufficientAvailabilityException(
+                            item, difference)
+                    else:
+                        to_create[item] = difference
+                self.total_price += (item.price * difference)
+
+        with database.atomic():
+            self.patch_items(to_patch)
+            self.create_items(to_create)
+            self.delete_items(to_remove)
+            self.save()
+
+    @database.atomic()
+    def patch_items(self, items):
+        """
+        TODO docstring...
+        :param dict items: {<Item>: <difference:int>}
+        """
+        for item, difference in items.items():
+            item.availability += difference
+            item.save()
+            self.orderitems.get(OrderItem.item == item).update(
+                quantity=OrderItem.quantity + difference).execute()
+
+    @database.atomic()
+    def delete_items(self, items):
+        """
+        TODO docstring...
+        :param dict items: {<Item>: <quantity:int>}
+        """
+        for item, quantity in items.items():
+            item.availability += quantity
+            item.save()
+
+        self.orderitems.delete([
+            {
+                'order': self.uuid,
+                'item': item.uuid,
+                'quantity': quantity,
+                'subtotal': item.price * quantity
+            } for item, quantity in items.items()])
+
+    @database.atomic()
+    def create_items(self, items):
+        """
+        TODO docstring...
+        :param dict items: {<Item>: <quantity:int>}
+        """
+        for item, quantity in items.items():
+            item.availability -= quantity
+            item.save()
+
+        self.orderitems.insert_many([
+            {
+                'order': self.uuid,
+                'item': item.uuid,
+                'quantity': quantity,
+                'subtotal': item.price * quantity
+            } for item, quantity in items.items()])
+
     def remove_items(self, items):
         """
         Remove items from an order, handling the relative OrderItem row and
