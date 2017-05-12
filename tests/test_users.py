@@ -208,7 +208,6 @@ class TestUser(TestCase):
 
         resp = self.app.get(API_ENDPOINT.format('users/'))
         assert resp.status_code == UNAUTHORIZED
-        assert json.loads(resp.data) == []
 
     def test_get_users_list_authenticated_not_admin__unauthorized(self):
         user1 = add_user(None, TEST_USER_PSW)
@@ -219,4 +218,3 @@ class TestUser(TestCase):
 
         assert user.admin is False
         assert resp.status_code == UNAUTHORIZED
-        assert json.loads(resp.data) == []
