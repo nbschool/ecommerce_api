@@ -1,20 +1,14 @@
 
-from flask import request, abort, g
+from flask import request, g
 from flask_restful import Resource
 from http.client import (CREATED, NO_CONTENT, NOT_FOUND, OK,
                          BAD_REQUEST, CONFLICT, UNAUTHORIZED)
 import uuid
-from http.client import (BAD_REQUEST, CONFLICT, CREATED, NO_CONTENT, NOT_FOUND,
-                         OK, UNAUTHORIZED)
-
-from flask import g, request
-from flask_restful import Resource
 
 from auth import auth
 from models import User
 from utils import generate_response
 from notifications import notify_new_user
-from utils import non_empty_str
 
 
 class UsersHandler(Resource):

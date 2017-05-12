@@ -10,10 +10,7 @@ from flask_restful import Resource
 
 from models import database, Address, Order, Item
 from notifications import notify_new_order
-from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST, UNAUTHORIZED
-from flask import abort, request, g
 from auth import auth
-from models import database, Address, Item, Order
 from utils import generate_response
 
 from exceptions import InsufficientAvailabilityException
