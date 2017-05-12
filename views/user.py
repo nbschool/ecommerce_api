@@ -17,9 +17,12 @@ class UsersHandler(Resource):
     * `get` method to retrieve the list of all the users
     * `post` method to add a new user to the database.
     """
-
+    @auth.login_required
     def get(self):
-        return [user.json() for user in User.select()], OK
+        if g.user.admin:
+            return [user.json() for user in User.select()], OK
+        return ({'message': "You can't get the list users."},
+                UNAUTHORIZED)
 
     def post(self):
         """ Add an user to the database."""
