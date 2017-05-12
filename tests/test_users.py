@@ -3,7 +3,7 @@ Test suite for User(s) resources.
 """
 
 from models import User, Address, Item, Order
-from tests.test_utils import open_with_auth, add_user, add_address, wrong_dump
+from tests.test_utils import open_with_auth, add_user, add_admin_user, add_address, wrong_dump
 from tests.test_case import TestCase
 from http.client import (OK, NOT_FOUND, NO_CONTENT, BAD_REQUEST,
                          CREATED, CONFLICT, UNAUTHORIZED)
@@ -21,22 +21,17 @@ class TestUser(TestCase):
     Implements py.test suite for User Resource endpoints.
     """
 
-    def test_get_empty_list__success(self):
-        resp = self.app.get(API_ENDPOINT.format('users/'))
-
-        assert resp.status_code == OK
-        assert json.loads(resp.data) == []
-        assert User.select().count() == 0
-
     def test_get_users_list__success(self):
+        user = add_admin_user(None, TEST_USER_PSW)
         user1 = add_user(None, TEST_USER_PSW)
         user2 = add_user(None, TEST_USER_PSW)
 
-        resp = self.app.get(API_ENDPOINT.format('users/'))
+        resp = open_with_auth(self.app, API_ENDPOINT.format('users/'), 'GET',
+                              user.email, TEST_USER_PSW, None, None)
 
         assert resp.status_code == OK
-        assert json.loads(resp.data) == [user1.json(), user2.json()]
-        assert User.select().count() == 2
+        assert json.loads(resp.data) == [user.json(), user1.json(), user2.json()]
+        assert User.select().count() == 3
 
     def test_post_new_user__success(self):
         user = {
