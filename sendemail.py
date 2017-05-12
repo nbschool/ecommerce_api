@@ -9,8 +9,8 @@ ENVIRONMENT = os.getenv('ENVIRONMENT')
 def send_email(subject, body):
 
     if ENVIRONMENT == 'dev':
-        print('Status: 200')
-        print('Body: Trying send email')
+        print('***email***')
+        print(body)
         return
 
     elif ENVIRONMENT == 'staging':
