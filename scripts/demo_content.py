@@ -150,7 +150,6 @@ def main():
     parser.add_argument(
         '-o', '--orders', help='Set up the number of insertions in Order table.', default=10)
 
-
     args = parser.parse_args()
     num_users = args.users
     num_addrs = args.addresses

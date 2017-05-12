@@ -34,16 +34,6 @@ def set_db(database):
     Address._meta.database = database
 
 
-def create_db(num_items, num_users, num_orders, num_addrs):
-    db = SqliteDatabase('database.db', autocommit=True)
-    if db.is_closed():
-        db.connect()
-    set_db(db)
-    create_tables()
-    write_db(num_items, num_users, num_orders, num_addrs)
-    good_bye('created')
-
-
 def user_creator(num_user):
     """Create users from an Italian-like context. Due to param in factory create 'it_iT'."""
     for i in range(0, num_user):
