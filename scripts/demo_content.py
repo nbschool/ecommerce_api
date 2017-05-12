@@ -139,7 +139,6 @@ def write_db(num_items, num_users, num_orders, num_addrs):
     item_creator(num_items)
     order_creator(num_orders)
     order_item_creator(random.randint(1, 7))
-    import pdb; pdb.set_trace()
 
 
 def get_databases():
