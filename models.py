@@ -63,6 +63,11 @@ class Item(BaseModel):
             'availability': self.availability,
         }
 
+    def is_favorite(self, user):
+        for favorite in user.favorites:
+            if favorite.item.uuid == self.uuid:
+                return True
+        return False
 
 @database.atomic()
 @pre_delete(sender=Item)
@@ -413,8 +418,8 @@ class Favorite(BaseModel):
     def json(self):
         return {
             'uuid': str(self.uuid),
-            'item_id': str(self.item_id),
-            'user_id': str(self.user_id)
+            'item_uuid': str(self.item.uuid),
+            'user_uuid': str(self.user.uuid),
         }
 
     def add_favorite(self, res):

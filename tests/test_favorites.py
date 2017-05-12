@@ -1,7 +1,7 @@
 from tests.test_utils import add_user, open_with_auth, add_favorite, add_item
 from tests.test_case import TestCase
 # from models import User, Favorite
-from http.client import OK, NOT_FOUND, UNAUTHORIZED
+from http.client import OK, NOT_FOUND, UNAUTHORIZED, CREATED
 import json
 
 USER1 = 'fatima.caputo@tiscali.it'
@@ -50,3 +50,18 @@ class TestFavorites(TestCase):
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'GET',
                               user1.email, PASS2, None, None)
         assert resp.status_code == UNAUTHORIZED
+
+    def test_post_favorites_success(self):
+        user = add_user(USER1, PASS1)
+        data = {"item_id": "7","user_id": "1"}
+        user_path = 'favorites/'
+        resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'POST',
+                              user.email, PASS1, 'application/json',
+                              json.dumps(data))
+        # import pdb; set_trace()
+        assert resp.status_code == CREATED
+
+
+
+
+
