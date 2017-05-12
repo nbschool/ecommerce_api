@@ -3,7 +3,7 @@ Drop any test database tables (user, item, order, orderitem)
 and supply a new one db with new down-to-earth data.
 """
 
-from peewee import SqliteDatabase
+from peewee import SqliteDatabase, fn
 from faker import Factory
 from colorama import init, Fore, Style
 from models import User, Item, Order, OrderItem, Address
@@ -41,16 +41,6 @@ WARNING_OVERWRITE = Fore.YELLOW + Style.BRIGHT + """
                 """
 
 
-def get_random_row(table):
-    total_rows = table.select().count()
-    lucky_row = random.randint(1, total_rows)
-    return table.select().where(table.id == lucky_row).get()
-
-
-def count_rows(table):
-    return table.select().count()
-
-
 def set_db(database):
     Order._meta.database = database
     Item._meta.database = database
@@ -61,7 +51,7 @@ def set_db(database):
 
 def user_creator(num_user):
     """Create users from an Italian-like context. Due to param in factory create 'it_iT'."""
-    for i in range(0, num_user):
+    for i in range(num_user):
         user_uuid = fake.uuid4()
         first_name = fake.first_name()
         last_name = fake.last_name()
@@ -79,7 +69,7 @@ def user_creator(num_user):
 
 
 def item_creator(num_item):
-    for i in range(0, num_item):
+    for i in range(num_item):
         item_id = fake.uuid4()
         item_name = fake.sentence(nb_words=3, variable_nb_words=True)
         item_price = fake.pyfloat(left_digits=2, right_digits=2, positive=True)
@@ -95,12 +85,11 @@ def item_creator(num_item):
 def address_creator(num_addr):
     LIST_COUNTRIES = ['Belgium', 'France', 'Germany',
                       'Greece', 'Italy', 'Portugal', 'Spain']
-    for i in range(0, num_addr):
+    for i in range(num_addr):
         country = random.choice(LIST_COUNTRIES)
-        user_id = count_rows(User)
         Address.create(
             uuid=fake.uuid4(),
-            user_id=random.randint(1, user_id),
+            user=User.select().order_by(fn.Random()).get(),
             country=country,
             city=fake.city(),
             post_code=fake.postcode(),
@@ -110,15 +99,13 @@ def address_creator(num_addr):
 
 
 def order_creator(num_order):
-    for i in range(0, num_order):
-        user_id = count_rows(User)
+    for i in range(num_order):
         order_id = fake.uuid4()
-        address = count_rows(Address)
         Order.create(
-            order_id=order_id,
-            user_id=random.randint(1, user_id),
+            uuid=order_id,
+            user=User.select().order_by(fn.Random()).get(),
             total_price=0,
-            delivery_address=random.randint(1, address),
+            delivery_address=Address.select().order_by(fn.Random()).get(),
             items=[]
         )
 
@@ -126,8 +113,8 @@ def order_creator(num_order):
 def order_item_creator(num_items):
     orders = Order.select()
     for order in orders:
-        for e in range(1, num_items):
-            an_item = get_random_row(Item)
+        for e in range(num_items):
+            an_item = Item.select().order_by(fn.Random()).get()
             quantity = random.randint(1, 5)
             order.add_item(an_item, quantity)
 
