@@ -199,13 +199,13 @@ class TestUser(TestCase):
         assert User.exists(user.email)
 
     def test_get_users_list_not_authenticated__unauthorized(self):
-        user1 = add_user(None, TEST_USER_PSW)
+        add_user(None, TEST_USER_PSW)
 
         resp = self.app.get(API_ENDPOINT.format('users/'))
         assert resp.status_code == UNAUTHORIZED
 
     def test_get_users_list_authenticated_not_admin__unauthorized(self):
-        user1 = add_user(None, TEST_USER_PSW)
+        add_user(None, TEST_USER_PSW)
 
         user = add_user(None, TEST_USER_PSW)
         resp = open_with_auth(self.app, API_ENDPOINT.format('users/'), 'GET',
