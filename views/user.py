@@ -3,7 +3,6 @@ from flask import request, abort, g
 from flask_restful import Resource
 from http.client import (CREATED, NO_CONTENT, NOT_FOUND, OK,
                          BAD_REQUEST, CONFLICT, UNAUTHORIZED)
-from flask import render_template
 import uuid
 from http.client import (BAD_REQUEST, CONFLICT, CREATED, NO_CONTENT, NOT_FOUND,
                          OK, UNAUTHORIZED)
@@ -14,7 +13,7 @@ from flask_restful import Resource
 from auth import auth
 from models import User
 from utils import generate_response
-from notifications import send_email
+from notifications import notify_new_user
 from utils import non_empty_str
 
 
@@ -54,11 +53,8 @@ class UsersHandler(Resource):
             email=data['email'],
             password=User.hash_password(data['password'])
         )
-        body = render_template('new_user.html',
-                               first_name=new_user.first_name,
-                               last_name=new_user.last_name)
+        notify_new_user(first_name=new_user.first_name, last_name=new_user.last_name)
 
-        send_email("Nuovo Utente", body)
         # If everything went OK return the newly created user and CREATED code
         # TODO: Handle json() return value (data, errors) and handle errors not
         # empty

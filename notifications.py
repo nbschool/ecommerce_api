@@ -1,3 +1,4 @@
+from flask import render_template
 import requests
 import os
 
@@ -29,3 +30,13 @@ def send_email(subject, body):
         'html': body
     })
     return request
+
+
+def notify_new_order(address, user):
+    body = render_template('new_order.html', address=address, user=user)
+    send_email("Nuovo Ordine", body)
+
+
+def notify_new_user(first_name, last_name):
+    body = render_template('new_user.html', first_name=first_name, last_name=last_name)
+    send_email("Nuovo Utente", body)
