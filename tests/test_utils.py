@@ -1,6 +1,7 @@
 from functools import reduce
-from models import Address, User
+from models import Address, User, Favorite, Item
 from base64 import b64encode
+from faker import Factory
 import uuid
 import os
 import random
@@ -93,3 +94,20 @@ def setup_images():
     """
     if not os.path.exists(get_image_folder()):
         os.makedirs(get_image_folder())
+
+def add_favorite(user, item):
+    return Favorite.create(
+            uuid=uuid.uuid4(),
+            item_id=item.id,
+            user_id=user.id
+            )
+
+def add_item():
+    fake = Factory.create('it_IT')
+    return Item.create(
+            uuid=uuid.uuid4(),
+            name=fake.sentence(nb_words=3, variable_nb_words=True),
+            price=fake.pyfloat(left_digits=2, right_digits=2, positive=True),
+            description=fake.paragraph(nb_sentences=3, variable_nb_sentences=True),
+            availability=random.randint(35, 60),
+        )
