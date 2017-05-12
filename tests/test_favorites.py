@@ -1,7 +1,8 @@
-from tests.test_utils import add_user, open_with_auth
+from tests.test_utils import add_user, open_with_auth, add_favorite, add_item
 from tests.test_case import TestCase
-from models import Favorite
+# from models import User, Favorite
 from http.client import OK, NOT_FOUND, UNAUTHORIZED
+import json
 
 USER1 = 'fatima.caputo@tiscali.it'
 PASS1 = '9J0'
@@ -19,6 +20,19 @@ class TestFavorites(TestCase):
                       user.email, PASS1, None, None)
         assert resp.status_code == NOT_FOUND
         assert resp.data == EXPECTED_MSG
+
+    def test_get_favorites__success(self):
+        user = add_user(USER1, PASS1)
+        item = add_item()
+        favorite = add_favorite(user, item)
+        user_path = 'favorites/'       
+        resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'GET',
+                      user.email, PASS1, None, None)
+        data = json.loads(resp.data)
+        assert resp.status_code == OK
+        assert data[0]['user_id'] == str(user.id)
+        assert data[0]['item_id'] == str(item.id)
+        assert data[0]['uuid'] == str(favorite.uuid)
 
     def test_get_favorites_pass__wrong(self):
         user = add_user(USER1, PASS1)
