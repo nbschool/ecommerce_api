@@ -8,8 +8,9 @@ from http.client import (BAD_REQUEST, CREATED, NO_CONTENT, NOT_FOUND, OK,
 from flask import abort, g, request
 from flask_restful import Resource
 
+from models import database, Address, Order, Item
+from notifications import notify_new_order
 from auth import auth
-from models import database, Address, Item, Order
 from utils import generate_response
 
 from exceptions import InsufficientAvailabilityException
@@ -62,6 +63,8 @@ class OrdersHandler(Resource):
                         if str(item.uuid) == req_item['id']:
                             order.add_item(item, req_item['quantity'])
                             break
+                notify_new_order(address=order.delivery_address, user=order.user)
+
             except InsufficientAvailabilityException:
                 txn.rollback()
                 return None, BAD_REQUEST

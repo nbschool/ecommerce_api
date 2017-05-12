@@ -12,6 +12,7 @@ peewee==2.9.1
 pytest==3.0.7
 pytest-cov==2.4.0
 pytest-mock==1.6.0
+requests==2.13.0
 jsonschema==2.6.0
 marshmallow==2.13.4
 marshmallow-jsonapi==0.11.0
