@@ -116,7 +116,7 @@ def order_creator(num_order):
         order_id = fake.uuid4()
         address = count_rows(Address)
         Order.create(
-            order_id=order_id,
+            uuid=order_id,
             user_id=random.randint(1, user_id),
             total_price=0,
             delivery_address=random.randint(1, address),
@@ -138,7 +138,7 @@ def favorite_creator(num_order_fav=1):
         user_id = count_rows(User)
         item_id = count_rows(Item)
         Favorite.create(
-            favorite_id=fake.uuid4(),
+            uuid=fake.uuid4(),
             item_id=random.choice(range(1, item_id+1)),
             user_id=random.choice(range(1, user_id+1))
             )
