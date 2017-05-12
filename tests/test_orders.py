@@ -82,7 +82,7 @@ class TestOrders(TestCase):
             name='mario',
             price=20.20,
             description='svariati mariii',
-            availability=2
+            availability=3
         )
         item2 = Item.create(
             uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
@@ -116,6 +116,31 @@ class TestOrders(TestCase):
         resp = self.app.get('/orders/{}'.format(order1.uuid))
         assert resp.status_code == OK
         assert json.loads(resp.data) == expected_data
+
+        expected_data2 = {
+            'uuid': str(order2.uuid),
+            'date': str(order2.created_at),
+            'user_uuid': str(user.uuid),
+            'total_price': 80.60,
+            'delivery_address': addr_B.json(),
+            'items': [{
+                'quantity': 1,
+                'subtotal': 20.20,
+                'price': 20.20,
+                'name': 'mario',
+                'description': 'svariati mariii'
+            }, {
+                'quantity': 2,
+                'subtotal': 60.40,
+                'price': 30.20,
+                'name': 'GINO',
+                'description': 'svariati GINIIIII'
+            }]
+        }
+
+        resp2 = self.app.get('/orders/{}'.format(order2.uuid))
+        assert resp.status_code == OK
+        assert json.loads(resp2.data) == expected_data2
 
     def test_create_order__success(self):
         Item.create(
@@ -596,7 +621,7 @@ class TestOrders(TestCase):
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
-            availability=1
+            availability=2
         )
 
         user_A = add_user('12345@email.com', TEST_USER_PSW)
@@ -612,14 +637,15 @@ class TestOrders(TestCase):
         order_uuid = str(order1.uuid)
 
         order = {
-            "order": {
-                "uuid": order_uuid,
+            'order': {
+                'uuid': order_uuid,
                 'items': [
                     {'item_uuid': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'price': 20.0, 'quantity': 5},
                     {'item_uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
                      'price': 30.20, 'quantity': 1}
                 ],
+                'delivery_address': addr_A.json()['uuid'],
             }
         }
         path = 'orders/{}'.format(order1.uuid)
@@ -737,7 +763,7 @@ class TestOrders(TestCase):
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
-            availability=1
+            availability=2
         )
 
         user_A = add_user('12345@email.com', TEST_USER_PSW)
@@ -923,7 +949,7 @@ class TestOrders(TestCase):
             name='GINO',
             price=30.20,
             description='svariati GINIIIII',
-            availability=1
+            availability=2
         )
 
         user_A = add_user('12345@email.com', TEST_USER_PSW)
@@ -1097,22 +1123,23 @@ class TestOrders(TestCase):
         assert count_order_items(order) == 4
 
         # test removing one of two item1
-        order.remove_item(item1)
+        order.update_items({item1: 1})
         assert len(order.order_items) == 2
         assert count_order_items(order) == 3
 
         # remove more item1 than existing in order
-        order.remove_item(item1, 5)
-        assert len(order.order_items) == 1
-        assert OrderItem.select().count() == 1
-        assert count_order_items(order) == 2
+        with pytest.raises(Exception):
+            order.update_items({item1: -1})
+        assert len(order.order_items) == 2
+        assert OrderItem.select().count() == 2
+        assert count_order_items(order) == 3
 
         # Check that the total price is correctly updated
-        assert order.total_price == item2.price * 2
+        assert order.total_price == item1.price + item2.price * 2
 
         # remove non existing item3 from order
-        with pytest.raises(Order.OrderItemNotFound):
-            order.remove_item(item3)
+        with pytest.raises(Exception):
+            order.update_items({item3: 0})
 
         order.empty_order()
         assert len(order.order_items) == 0
@@ -1126,39 +1153,48 @@ class TestOrders(TestCase):
         user = add_user(None, TEST_USER_PSW)
         addr = add_address(user=user)
         item1 = Item.create(
-            item_id=uuid4(),
+            uuid=uuid4(),
             name='Item',
             description='Item description',
-            price=10
+            price=10,
+            availability=5,
         )
         item2 = Item.create(
-            item_id=uuid4(),
+            uuid=uuid4(),
             name='Item 2',
             description='Item 2 description',
-            price=15
+            price=15,
+            availability=5,
         )
         item3 = Item.create(
-            item_id=uuid4(),
+            uuid=uuid4(),
             name='Item 3',
             description='Item 3 description',
-            price=15
+            price=15,
+            availability=5,
         )
 
         order = Order.create(delivery_address=addr, user=user)
 
         # add some items in the order
-        order.add_items({item1: 3, item2: 5})
+        order.update_items({item1: 3, item2: 5})
         assert count_order_items(order) == 8
 
-        # remove arbitatry number of items from the order
-        order.remove_items({item1: 2, item2: 1})
+        # update arbitatry number of items in the order
+        order.update_items({item1: 4, item2: 1})
         assert count_order_items(order) == 5
 
-        with pytest.raises(Order.OrderItemNotFound):
+        # remove item1 from order
+        order.update_items({item1: 0})
+        assert count_order_items(order) == 1
+
+        with pytest.raises(Exception):
             # test removing item that does not exist in the order
-            order.remove_items({item3: 1, item2: 2})
+            order.update_items({item3: 0, item2: 2})
 
-        assert count_order_items(order) == 5
-        # check assumed total price. there should be 1 item1 and 4 item2 left
-        total_price = item1.price + (item2.price * 4)
+        assert count_order_items(order) == 1
+
+        order.update_items({item1: 1, item2: 2, item3: 3})
+        # check assumed total price
+        total_price = item1.price + item2.price * 2 + item3.price * 3
         assert order.total_price == total_price

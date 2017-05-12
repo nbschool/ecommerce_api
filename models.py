@@ -276,44 +276,47 @@ class Order(BaseModel):
             self.save()
         return self
 
+    @database.atomic()
     def update_items(self, items):
         """
         TODO docstring...
-        :param dict items: {<Item>: <difference:int>}
+        :param dict items: {<Item>: <quantity:int>}
         """
         to_create = {}
         to_remove = {}
         to_edit = {}
 
         # split items in insert, delete and update sets
-        for item, difference in items.items():
+        for item, quantity in items.items():
             for orderitem in self.order_items:
                 if orderitem.item == item:
-                    new_quantity = orderitem.quantity + difference
-                    if new_quantity == 0:
-                        to_remove[item] = difference
-                    elif new_quantity > item.availability:
+                    difference = quantity - orderitem.quantity
+                    if quantity == 0:
+                        to_remove[item] = orderitem.quantity
+                    elif difference > item.availability:
                         raise InsufficientAvailabilityException(
-                            item, difference)
-                    elif new_quantity < 0:
+                            item, quantity)
+                    elif quantity < 0:
                         raise Exception
                     else:
                         to_edit[item] = difference
+                    self.total_price += (item.price * difference)
+                    break
+            else:
+                if quantity <= 0:
+                    raise Exception
+                elif quantity > item.availability:
+                    raise InsufficientAvailabilityException(
+                        item, quantity)
                 else:
-                    if difference <= 0:
-                        raise Exception
-                    elif difference > item.availability:
-                        raise InsufficientAvailabilityException(
-                            item, difference)
-                    else:
-                        to_create[item] = difference
-                self.total_price += (item.price * difference)
+                    to_create[item] = quantity
+                self.total_price += (item.price * quantity)
 
-        with database.atomic():
-            self.edit_items_quantity(to_edit)
-            self.create_items(to_create)
-            self.delete_items(to_remove)
-            self.save()
+        self.edit_items_quantity(to_edit)
+        self.create_items(to_create)
+        self.delete_items(to_remove)
+        self.save()
+        return self
 
     def edit_items_quantity(self, items):
         """
@@ -322,13 +325,17 @@ class Order(BaseModel):
         """
         if not items:
             return
+
         with database.atomic():
             for item, difference in items.items():
-                item.availability += difference
+                item.availability -= difference
                 item.save()
-                OrderItem.get(
-                    OrderItem.item == item, OrderItem.order == self
-                ).update(quantity=OrderItem.quantity + difference).execute()
+                orderitem = OrderItem.get(
+                    OrderItem.item == item, OrderItem.order == self)
+                orderitem.quantity += difference
+                orderitem._calculate_subtotal()
+                orderitem.save()
+                self.save()
 
     def delete_items(self, items):
         """
@@ -339,13 +346,12 @@ class Order(BaseModel):
             return
 
         with database.atomic():
-            or_where = True
             for item, quantity in items.items():
                 item.availability += quantity
                 item.save()
-                or_where = or_where | OrderItem.item == item
             OrderItem.delete().where(
-                OrderItem.order == self and or_where).execute()
+                OrderItem.order == self).where(
+                OrderItem.item << [k for k in items.keys()]).execute()
 
     @database.atomic()
     def create_items(self, items):
@@ -356,17 +362,19 @@ class Order(BaseModel):
         if not items:
             return
 
-        for item, quantity in items.items():
-            item.availability -= quantity
-            item.save()
+        with database.atomic():
+            for item, quantity in items.items():
+                item.availability -= quantity
+                item.save()
+                self.save()
 
-        OrderItem.insert_many([
-            {
-                'order': self.uuid,
-                'item': item.uuid,
-                'quantity': quantity,
-                'subtotal': item.price * quantity
-            } for item, quantity in items.items()])
+            OrderItem.insert_many([
+                {
+                    'order': self,
+                    'item': item,
+                    'quantity': quantity,
+                    'subtotal': item.price * quantity,
+                } for item, quantity in items.items()]).execute()
 
     def remove_items(self, items):
         """
@@ -385,8 +393,6 @@ class Order(BaseModel):
                 removed = False
                 for orderitem in orderitems:
                     if orderitem.item == item:
-                        removed_items = orderitem.remove_item(quantity)
-                        self.total_price -= (item.price * removed_items)
                         removed = True
                 if not removed:
                     raise Order.OrderItemNotFound(
@@ -417,8 +423,8 @@ class Order(BaseModel):
         :param Item item: the Item to add
         :param int quantity: how many to add
         """
-
-        return self.add_items({item: quantity})
+        return self.update_items({item: quantity})
+        # return self.add_items({item: quantity})
 
     def remove_item(self, item, quantity=1):
         """
@@ -430,6 +436,7 @@ class Order(BaseModel):
         :param Item item: the Item to remove
         :param int quantity: how many to remove
         """
+        return self.update_items({item: -quantity})
 
         for orderitem in self.order_items:
             if orderitem.item == item:
