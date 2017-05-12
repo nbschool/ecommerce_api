@@ -1,4 +1,5 @@
 from functools import reduce
+<<<<<<< HEAD
 import datetime
 import inspect
 import json
@@ -8,9 +9,9 @@ import shutil
 import sys
 import uuid
 from base64 import b64encode
-
-from models import Address, User
+from models import Address, User, Favorite, Item
 from utils import get_image_folder
+from faker import Factory
 
 
 # ###########################################################
@@ -269,3 +270,22 @@ def wrong_dump(data):
     """
     return reduce(lambda x, y: "{}&{}".format(x, y), [
         "{}={}".format(k, v) for k, v in zip(data.keys(), data.values())])
+
+
+def add_favorite(user, item):
+    return Favorite.create(
+            uuid=uuid.uuid4(),
+            item_id=item.id,
+            user_id=user.id
+            )
+
+
+def add_item():
+    fake = Factory.create('it_IT')
+    return Item.create(
+            uuid=uuid.uuid4(),
+            name=fake.sentence(nb_words=3, variable_nb_words=True),
+            price=fake.pyfloat(left_digits=2, right_digits=2, positive=True),
+            description=fake.paragraph(nb_sentences=3, variable_nb_sentences=True),
+            availability=random.randint(35, 60),
+        )
