@@ -28,7 +28,6 @@ class UsersHandler(Resource):
         return ({'message': "You can't get the list users."},
                 UNAUTHORIZED)
 
-
     def post(self):
         """ Add an user to the database."""
         data = request.get_json(force=True)

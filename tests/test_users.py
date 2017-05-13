@@ -2,18 +2,14 @@
 Test suite for User(s) resources.
 """
 from models import User, Address, Item, Order
-from tests.test_utils import open_with_auth, add_user, add_admin_user, add_address, wrong_dump
+from tests.test_utils import (add_address, add_user, add_admin_user, format_jsonapi_request,
+                              RESULTS, open_with_auth, wrong_dump)
 from tests.test_case import TestCase
 
 import json
 import uuid
 from http.client import (BAD_REQUEST, CONFLICT, CREATED, NO_CONTENT, NOT_FOUND,
                          OK, UNAUTHORIZED)
-
-from models import Address, Item, Order, User
-
-from tests.test_utils import (add_address, add_user, format_jsonapi_request,
-                              RESULTS, open_with_auth, wrong_dump)
 
 # main endpoint for API
 API_ENDPOINT = '/{}'
