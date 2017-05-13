@@ -24,15 +24,6 @@ class TestUser(TestCase):
     Implements py.test suite for User Resource endpoints.
     """
 
-    def test_get_empty_list__success(self):
-        user = add_admin_user('user@email.com', TEST_USER_PSW)
-        resp = open_with_auth(self.app, API_ENDPOINT.format('users/'), 'GET',
-                              user.email, TEST_USER_PSW, None, None)
-
-        assert resp.status_code == OK
-        expected_result = EXPECTED_RESULTS['get_empty_list__success']
-        assert json.loads(resp.data) == expected_result
-
     def test_get_users_list__success(self):
         user = add_admin_user('user@email.com', TEST_USER_PSW)
         add_user('user1@email.com', TEST_USER_PSW,
