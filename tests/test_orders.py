@@ -1181,18 +1181,17 @@ class TestOrders(TestCase):
         assert count_order_items(order) == 8
 
         # update arbitatry number of items in the order
-        order.update_items({item1: 4, item2: 1})
-        assert count_order_items(order) == 5
+        order.update_items({item1: 4, item2: 2})
+        assert count_order_items(order) == 6
 
         # remove item1 from order
         order.update_items({item1: 0})
-        assert count_order_items(order) == 1
+        assert count_order_items(order) == 2
 
         with pytest.raises(Exception):
             # test removing item that does not exist in the order
-            order.update_items({item3: 0, item2: 2})
-
-        assert count_order_items(order) == 1
+            order.update_items({item3: 0, item1: 1})
+        assert count_order_items(order) == 2
 
         order.update_items({item1: 1, item2: 2, item3: 3})
         # check assumed total price
