@@ -44,14 +44,6 @@ WARNING_OVERWRITE = Fore.YELLOW + Style.BRIGHT + """
                 """
 
 
-<<<<<<< HEAD
-=======
-def get_random_row(table):
-    total_rows = table.select().count()
-    lucky_row = random.randint(1, total_rows)
-    return table.select().where(table.id == lucky_row).get()
-
-
 def get_random_pictures(num_pictures):
     pictures = []
     path = os.path.join('scripts', 'testdata')
@@ -61,11 +53,6 @@ def get_random_pictures(num_pictures):
     return pictures
 
 
-def count_rows(table):
-    return table.select().count()
-
-
->>>>>>> demo contento now works with real images
 def set_db(database):
     Order._meta.database = database
     Item._meta.database = database
@@ -99,21 +86,20 @@ def item_creator(num_item):
         item_id = fake.uuid4()
         item_name = fake.sentence(nb_words=3, variable_nb_words=True)
         item_price = fake.pyfloat(left_digits=2, right_digits=2, positive=True)
-        Item.create(
+        item = Item.create(
             uuid=item_id,
             name=item_name,
             price=item_price,
             description=fake.paragraph(nb_sentences=3, variable_nb_sentences=True),
             availability=random.randint(35, 60),
         )
-        picture_creator(num_item, i)
+        picture_creator(num_item, i, item)
 
 
-def picture_creator(num_picture, index):
+def picture_creator(num_picture, index, item):
     ALLOWED_EXTENSION = ['jpg', 'jpeg', 'png', 'gif']
     pictures_path = get_random_pictures(num_picture)
-    count = index+1
-    item = Item.select().where(Item.id == count).get()
+    item = item
     picture_id = fake.uuid4()
     extension = random.choice(ALLOWED_EXTENSION)
     Picture.create(
@@ -121,7 +107,6 @@ def picture_creator(num_picture, index):
         extension=extension,
         item=item
     )
-
     image_folder = utils.get_image_folder()
     if not os.path.exists(image_folder):
         os.makedirs(image_folder)
