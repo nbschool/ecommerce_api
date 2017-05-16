@@ -13,6 +13,10 @@ from models import Address, User, Favorite, Item
 from utils import get_image_folder
 from faker import Factory
 
+SEED = 9623954
+fake = Factory.create('it_IT')
+fake.seed(SEED)
+
 
 # ###########################################################
 # Mocking utilities
@@ -158,6 +162,7 @@ def setup_images():
         os.makedirs(get_image_folder())
 
 
+<<<<<<< HEAD
 # ###########################################################
 # JSONAPI testing utilities
 
@@ -272,16 +277,17 @@ def wrong_dump(data):
         "{}={}".format(k, v) for k, v in zip(data.keys(), data.values())])
 
 
+=======
+>>>>>>> a2a47ec... Add SEED, Fix property id.
 def add_favorite(user, item):
     return Favorite.create(
             uuid=uuid.uuid4(),
-            item_id=item.id,
-            user_id=user.id
+            item_id=item,
+            user_id=user,
             )
 
 
 def add_item():
-    fake = Factory.create('it_IT')
     return Item.create(
             uuid=uuid.uuid4(),
             name=fake.sentence(nb_words=3, variable_nb_words=True),
