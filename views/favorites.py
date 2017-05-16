@@ -21,7 +21,7 @@ class FavoritesHandler(Resource):
     @auth.login_required
     def post(self):
         user = g.user
-        item_uuid = request.json[0]['item_uuid']
+        item_uuid = request.json['item_uuid']
         check_required_fields(
             request_data=request.get_json(),
             required_fields=('item_uuid', 'user_uuid'),
@@ -31,7 +31,7 @@ class FavoritesHandler(Resource):
         has_already = Item.is_favorite(self, user, item)
 
         if has_already:
-            return { "message" : "ALREADY_INSERTED" }.json() , OK
+            return {"message" : "ALREADY_INSERTED"}, OK
 
         favorite = Favorite.create(
                 uuid=uuid.uuid4(),
