@@ -32,7 +32,7 @@ TEXT_DISPLAY = Fore.MAGENTA + Style.BRIGHT + """
                 """
 
 
-def write_db(num_items, num_users, num_orders, num_addrs):
+def write_db(num_items, num_users, num_orders, num_addrs, num_pictures):
     """
     Given the SEED 9623954 the first user email is
     'fatima.caputo@tiscali.it', and its password is '9J0.'
@@ -157,12 +157,10 @@ def order_item_creator(num_items):
             order.add_item(an_item, quantity)
 
 
-
 def good_bye(word, default='has'):
     print(Fore.BLUE + Style.BRIGHT + '*-* Your database {1} been {0}. *-*'.format(word, default))
     print(Fore.CYAN + Style.BRIGHT + '*_* Have a nice day! *_*')
     sys.exit()
-
 
 
 def prompt_menu_1(actions):
@@ -213,9 +211,8 @@ def main():
 
     print(TEXT_DISPLAY)
     list_db = get_databases()
-    if len(list_db) != 0:
-        print(Fore.YELLOW + Style.BRIGHT + 'You have already a database.')
-        prompt_menu_1(ACTIONS)
+    print(Fore.YELLOW + Style.BRIGHT + 'You have already a database.')
+    prompt_menu_1(ACTIONS)
 
 
 if __name__ == '__main__':
