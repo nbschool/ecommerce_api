@@ -53,7 +53,7 @@ class TestFavorites(TestCase):
 
     def test_post_favorites__fail(self):
         user = add_user(USER1, PASS1)
-        data = {"item_uuid": "3","user_uuid": "1"}
+        data = {"item_uuid": "3","user_uuid": str(user.uuid)}
         user_path = 'favorites/'
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'POST',
                               user.email, PASS1, 'application/json',
