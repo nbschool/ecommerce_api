@@ -109,15 +109,6 @@ def order_item_creator(num_items):
             order.add_item(an_item, quantity)
 
 
-def create_db(num_items, num_users, num_orders, num_addrs):
-    db = SqliteDatabase('database.db', autocommit=True)
-    if db.is_closed():
-        db.connect()
-    set_db(db)
-    create_tables()
-    good_bye('created')
-
-
 def get_databases():
     """create a list with the name of each .db file from main folder."""
     list_of_db = glob.glob('*.db')

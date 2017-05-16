@@ -200,7 +200,7 @@ def main():
     num_orders = args.orders
     num_pictures = args.pictures
 
-    OVERWRITE_ACTIONS = {
+    ACTIONS = {
         '1': {
             'key': '1', 'text': 'Add data to the current database',
             'action': lambda: write_db(num_items, num_users, num_orders, num_addrs, num_pictures)
@@ -215,7 +215,7 @@ def main():
     list_db = get_databases()
     if len(list_db) != 0:
         print(Fore.YELLOW + Style.BRIGHT + 'You have already a database.')
-        prompt_menu_1(OVERWRITE_ACTIONS)
+        prompt_menu_1(ACTIONS)
 
 
 if __name__ == '__main__':
