@@ -56,7 +56,7 @@ def get_random_pictures(num_pictures):
     pictures = []
     path = os.path.join('scripts', 'testdata')
     for i in range(0, num_pictures):
-        testdata_path = '{}{}'.format(path, random.choice(os.listdir(path)))
+        testdata_path = '{}/{}'.format(path, random.choice(os.listdir(path)))
         pictures.append(testdata_path)
     return pictures
 
@@ -106,26 +106,26 @@ def item_creator(num_item):
             description=fake.paragraph(nb_sentences=3, variable_nb_sentences=True),
             availability=random.randint(35, 60),
         )
+        picture_creator(num_item, i)
 
 
-def picture_creator(num_picture):
+def picture_creator(num_picture, index):
     ALLOWED_EXTENSION = ['jpg', 'jpeg', 'png', 'gif']
     pictures_path = get_random_pictures(num_picture)
-    for i in range(0, num_picture):
-        count = i+1
-        item = Item.select().where(Item.id == count).get()
-        picture_id = fake.uuid4()
-        extension = random.choice(ALLOWED_EXTENSION)
-        Picture.create(
-            uuid=picture_id,
-            extension=extension,
-            item=item
-        )
+    count = index+1
+    item = Item.select().where(Item.id == count).get()
+    picture_id = fake.uuid4()
+    extension = random.choice(ALLOWED_EXTENSION)
+    Picture.create(
+        uuid=picture_id,
+        extension=extension,
+        item=item
+    )
 
-        image_folder = utils.get_image_folder()
-        if not os.path.exists(image_folder):
-            os.makedirs(image_folder)
-        shutil.copy2(pictures_path[i], '/{}/{}.{}'.format(image_folder, picture_id, extension))
+    image_folder = utils.get_image_folder()
+    if not os.path.exists(image_folder):
+        os.makedirs(image_folder)
+    shutil.copy2(pictures_path[index], '/{}/{}.{}'.format(image_folder, picture_id, extension))
 
 
 def address_creator(num_addr):
@@ -183,7 +183,6 @@ def write_db(num_items, num_users, num_orders, num_addrs, num_pictures):
     user_creator(num_users)
     address_creator(num_addrs)
     item_creator(num_items)
-    picture_creator(num_pictures)
     order_creator(num_orders)
     order_item_creator(random.randint(1, 7))
 
