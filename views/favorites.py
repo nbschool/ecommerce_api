@@ -30,12 +30,12 @@ class FavoritesHandler(Resource):
         try:
             item = Item.select().where(Item.uuid == item_uuid).get()
         except:
-            return {"message" : "ITEM DOESN'T EXIST"}, OK
-            
+            return {"message": "ITEM DOESN'T EXIST"}, OK
+
         has_already = Item.is_favorite(self, user, item)
 
         if has_already:
-            return {"message" : "ALREADY INSERTED"}, OK
+            return {"message": "ALREADY INSERTED"}, OK
 
         favorite = Favorite.create(
                 uuid=uuid.uuid4(),
