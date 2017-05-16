@@ -3,7 +3,7 @@ Drop any test database tables (user, item, order, orderitem)
 and supply a new one db with new down-to-earth data.
 """
 
-from peewee import SqliteDatabase, fn
+from peewee import fn
 from faker import Factory
 from colorama import init, Fore, Style
 from models import User, Item, Order, OrderItem, Address, Picture
@@ -31,17 +31,23 @@ TEXT_DISPLAY = Fore.MAGENTA + Style.BRIGHT + """
                 Here you could create a new simulated database.
                 """
 
-WARNING_DELETE = Fore.YELLOW + Style.BRIGHT + """
-                ##################################################
-                #   WARNING: YOU WILL DELETE FILES PERMANENTLY   #
-                ##################################################
-                """
 
-WARNING_OVERWRITE = Fore.YELLOW + Style.BRIGHT + """
-                ##################################################
-                #   WARNING: YOU WILL CHANGE FILES PERMANENTLY   #
-                ##################################################
-                """
+def write_db(num_items, num_users, num_orders, num_addrs):
+    """
+    Given the SEED 9623954 the first user email is
+    'fatima.caputo@tiscali.it', and its password is '9J0.'
+    """
+    user_creator(num_users)
+    address_creator(num_addrs)
+    item_creator(num_items)
+    order_creator(num_orders)
+    order_item_creator(random.randint(1, 7))
+
+
+def get_databases():
+    """create a list with the name of each .db file from main folder."""
+    list_of_db = glob.glob('*.db')
+    return list_of_db
 
 
 def get_random_pictures(num_pictures):
@@ -69,7 +75,8 @@ def user_creator(num_user):
         first_name = fake.first_name()
         last_name = fake.last_name()
         email_provider = fake.free_email_domain()
-        email_user = '{}.{}@{}'.format(first_name.lower(), last_name.lower(), email_provider)
+        email_user = '{}.{}@{}'.format(
+            first_name.lower(), last_name.lower(), email_provider)
         password = fake.password(length=3, special_chars=False, digits=True,
                                  upper_case=True, lower_case=False)
         User.create(
@@ -90,7 +97,8 @@ def item_creator(num_item):
             uuid=item_id,
             name=item_name,
             price=item_price,
-            description=fake.paragraph(nb_sentences=3, variable_nb_sentences=True),
+            description=fake.paragraph(
+                nb_sentences=3, variable_nb_sentences=True),
             availability=random.randint(35, 60),
         )
         picture_creator(num_item, i, item)
@@ -149,83 +157,12 @@ def order_item_creator(num_items):
             order.add_item(an_item, quantity)
 
 
-def create_db(num_items, num_users, num_orders, num_addrs, num_pictures):
-    db = SqliteDatabase('database.db', autocommit=True)
-    if db.is_closed():
-        db.connect()
-    set_db(db)
-    create_tables()
-    write_db(num_items, num_users, num_orders, num_addrs, num_pictures)
-    good_bye('created')
-
-
-def write_db(num_items, num_users, num_orders, num_addrs, num_pictures):
-    """
-    Given the SEED 9623954 the first user email is
-    'fatima.caputo@tiscali.it', and its password is '9J0.'
-    """
-    user_creator(num_users)
-    address_creator(num_addrs)
-    item_creator(num_items)
-    order_creator(num_orders)
-    order_item_creator(random.randint(1, 7))
-
-
-def get_databases():
-    """create a list with the name of each .db file from main folder."""
-    list_of_db = glob.glob('*.db')
-    return list_of_db
-
-
-def drops_all_tables(database):
-    """Doesn't drop unknown tables."""
-    tables = database.get_tables()
-    for table in tables:
-        if table == 'item':
-            Item.drop_table()
-        if table == 'order':
-            Order.drop_table()
-        if table == 'user':
-            User.drop_table()
-        if table == 'orderitem':
-            OrderItem.drop_table()
-        if table == 'address':
-            Address.drop_table()
-        if table == 'picture':
-            Picture.drop_table()
-
-
-def create_tables():
-    User.create_table(fail_silently=True)
-    Item.create_table(fail_silently=True)
-    Order.create_table(fail_silently=True)
-    OrderItem.create_table(fail_silently=True)
-    Address.create_table(fail_silently=True)
-    Picture.create_table(fail_silently=True)
-
 
 def good_bye(word, default='has'):
     print(Fore.BLUE + Style.BRIGHT + '*-* Your database {1} been {0}. *-*'.format(word, default))
     print(Fore.CYAN + Style.BRIGHT + '*_* Have a nice day! *_*')
     sys.exit()
 
-
-def overwrite_db(num_items, num_users, num_orders, num_addrs, num_pictures):
-    print(WARNING_OVERWRITE, '\n')
-    print('Are you sure to overwrite?')
-    choice = input('If YES press(1) or [ENTER] to exit without change. >'
-                   + Fore.YELLOW + Style.BRIGHT + ' ').strip()
-    if choice == '1':
-        db = SqliteDatabase('database.db', autocommit=False)
-        if db.is_closed():
-            db.connect()
-        set_db(db)
-        drops_all_tables(db)
-        create_tables()
-        write_db(num_items, num_users, num_orders, num_addrs, num_pictures)
-        good_bye('overwritten')
-    if choice == '':
-        good_bye('deleted', default='hasn\'t')
 
 
 def prompt_menu_1(actions):
@@ -242,36 +179,20 @@ def prompt_menu_1(actions):
     actions[choice]['action']()
 
 
-def prompt_menu_0(actions):
-    print(Fore.GREEN + Style.BRIGHT + 'Do you want a database?')
-    choice = None
-    while choice not in actions.keys():
-        choice = input(Fore.YELLOW + Style.BRIGHT +
-                       'If YES press(1) or [ENTER] to exit without change. > ').strip()
-
-    actions[choice]()
-
-
 def main():
-    def check_range(value):
-        int_value = abs(int(value))
-        if int_value > 100:
-            raise argparse.ArgumentTypeError("{} is a big number. Maximum accepted is 100."
-                                             .format(int_value))
-        return int_value
+    parser = argparse.ArgumentParser(
+        description='Set up the number of rows' + 'to insert in each table from CLI.')
+    parser.add_argument(
+        '-u', '--users', help='Set up the number' + 'of insertions in User table.', default=10)
+    parser.add_argument(
+        '-a', '--addresses', help='Set up the number of insertions in Address table.', default=10)
+    parser.add_argument(
+        '-i', '--items', help='Set up the number of insertions in Item table.', default=10)
+    parser.add_argument(
+        '-o', '--orders', help='Set up the number of insertions in Order table.', default=10)
+    parser.add_argument(
+        '-p', '--pictures', help='Set up the number of insertions in Picture table.', default=10)
 
-    parser = argparse.ArgumentParser(description='Set up the number of rows' +
-                                     'to insert in each table from CLI.')
-    parser.add_argument('-u', '--users', type=check_range, help='Set up the number' +
-                        'of insertions in User table.', default=10)
-    parser.add_argument('-a', '--addresses', type=check_range,
-                        help='Set up the number of insertions in Address table.', default=10)
-    parser.add_argument('-i', '--items', type=check_range,
-                        help='Set up the number of insertions in Item table.', default=10)
-    parser.add_argument('-o', '--orders', type=check_range,
-                        help='Set up the number of insertions in Order table.', default=10)
-    parser.add_argument('-p', '--pictures', type=check_range,
-                        help='Set up the number of insertions in Picture table.', default=10)
     args = parser.parse_args()
     num_users = args.users
     num_addrs = args.addresses
@@ -281,12 +202,7 @@ def main():
 
     OVERWRITE_ACTIONS = {
         '1': {
-            'key': '1', 'text': 'Overwrite the database',
-            'action': lambda: overwrite_db(
-                num_items, num_users, num_orders, num_addrs, num_pictures)
-        },
-        '2': {
-            'key': '2', 'text': 'Add data to the current database',
+            'key': '1', 'text': 'Add data to the current database',
             'action': lambda: write_db(num_items, num_users, num_orders, num_addrs, num_pictures)
         },
         '': {
@@ -295,15 +211,8 @@ def main():
         },
     }
 
-    NEW_DB_ACTIONS = {
-        '1': lambda: create_db(num_items, num_users, num_orders, num_addrs, num_pictures),
-        '': lambda: good_bye('be created', default='hasn\'t')
-    }
-
     print(TEXT_DISPLAY)
     list_db = get_databases()
-    if len(list_db) == 0:
-        prompt_menu_0(NEW_DB_ACTIONS)
     if len(list_db) != 0:
         print(Fore.YELLOW + Style.BRIGHT + 'You have already a database.')
         prompt_menu_1(OVERWRITE_ACTIONS)
