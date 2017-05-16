@@ -10,8 +10,7 @@ from peewee import UUIDField, ForeignKeyField, IntegerField
 from playhouse.signals import Model, post_delete, pre_delete
 from uuid import uuid4
 
-from exceptions import (InsufficientAvailabilityException,
-                        ItemAlreadyUserFavoritesException)
+from exceptions import InsufficientAvailabilityException
 from utils import remove_image
 
 
@@ -52,7 +51,8 @@ class Item(BaseModel):
             self.uuid,
             self.name,
             self.price,
-            self.description)
+            self.description
+        )
 
     def json(self):
         return {
@@ -63,9 +63,9 @@ class Item(BaseModel):
             'availability': self.availability,
         }
 
-    def is_favorite(self, user):
-        for favorite in user.favorites:
-            if favorite.item.uuid == self.uuid:
+    def is_favorite(self, user, item):
+        for f in user.favorites:
+            if f.item_id == item.id:
                 return True
         return False
 
@@ -421,34 +421,3 @@ class Favorite(BaseModel):
             'item_uuid': str(self.item.uuid),
             'user_uuid': str(self.user.uuid),
         }
-
-    def add_favorite(self, res):
-        """
-        It doesn't allow duplicated items as favorites
-        """
-        self.item = res['item_id']
-        self.user = res['user_id']
-
-        list_item = Favorite.select().where(Favorite.user == self.user)
-
-        for item in list_item:
-            if str(item.item_id) == self.item:
-                raise ItemAlreadyUserFavoritesException(self.item, self.user)
-
-        self.fav = {
-            'item_id': str(self.item),
-            'user_id': str(self.user)
-           }
-
-        return self.fav
-
-    def remove_favorite(self, item):
-        """
-        TODO Docstring
-        """
-        if item:
-            self.delete_instance()
-        else:
-            self.save()
-
-        return
