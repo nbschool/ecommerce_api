@@ -48,19 +48,15 @@ class OrdersHandler(Resource):
         except Address.DoesNotExist:
             abort(BAD_REQUEST)
 
+        # Generate the dict of {<Item>: <int:quantity>} to call Order.add_items
+        items_to_add = {}
+        for res_item in res_items:
+            item = next(i for i in items if str(i.uuid) == res_item['item_uuid'])
+            items_to_add[item] = res_item['quantity']
+
         with database.atomic():
             try:
-                order = Order.create(
-                    delivery_address=address,
-                    user=user,
-                )
-
-                # Generate the dict of {<Item>: <int:quantity>} to call Order.add_items
-                items_to_add = {}
-                for res_item in res_items:
-                    item = next(i for i in items if str(i.uuid) == res_item['item_uuid'])
-                    items_to_add[item] = res_item['quantity']
-                order.update_items(items_to_add)
+                order = Order.create_order(user, address, items_to_add)
             except InsufficientAvailabilityException:
                 abort(BAD_REQUEST)
 

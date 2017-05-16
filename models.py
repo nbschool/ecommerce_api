@@ -276,7 +276,25 @@ class Order(BaseModel):
             self.save()
         return self
 
-    def update_items(self, items):
+    @staticmethod
+    def create_order(user, address, items):
+        """
+        TODO docstring...
+        :param dict items: {<Item>: <quantity:int>}
+        """
+        total_price = sum([
+            item.price * quantity for item, quantity in items.items()])
+
+        with database.atomic():
+            order = Order.create(
+                delivery_address=address,
+                user=user,
+                total_price=total_price,
+            )
+            order.update_items(items, update_total=False)
+            return order
+
+    def update_items(self, items, update_total=True):
         """
         TODO docstring...
         :param dict items: {<Item>: <quantity:int>}
@@ -316,8 +334,9 @@ class Order(BaseModel):
             self.edit_items_quantity(to_edit)
             self.create_items(to_create)
             self.delete_items(to_remove)
-            self.total_price += total_price_difference
-            self.save()
+            if update_total:
+                self.total_price += total_price_difference
+                self.save()
         return self
 
     def edit_items_quantity(self, items):
