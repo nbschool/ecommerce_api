@@ -8,6 +8,10 @@ import random
 import shutil
 from utils import get_image_folder
 
+SEED = 9623954
+fake = Factory.create('it_IT')
+fake.seed(SEED)
+
 
 def wrong_dump(data):
     """
@@ -95,15 +99,16 @@ def setup_images():
     if not os.path.exists(get_image_folder()):
         os.makedirs(get_image_folder())
 
+
 def add_favorite(user, item):
     return Favorite.create(
             uuid=uuid.uuid4(),
-            item_id=item.id,
-            user_id=user.id
+            item_id=item,
+            user_id=user,
             )
 
+
 def add_item():
-    fake = Factory.create('it_IT')
     return Item.create(
             uuid=uuid.uuid4(),
             name=fake.sentence(nb_words=3, variable_nb_words=True),
