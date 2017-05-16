@@ -22,11 +22,10 @@ class UsersHandler(Resource):
     @auth.login_required
     def get(self):
 
-        if g.user.admin:
-            data = User.json_list(User.select())
-            return generate_response(data, OK)
-        return ({'message': "You can't get the list users."},
-                UNAUTHORIZED)
+        if not g.user.admin:
+            return ({'message': "You can't get the list users."}, UNAUTHORIZED)
+        data = User.json_list(User.select())
+        return generate_response(data, OK)
 
     def post(self):
         """ Add an user to the database."""
