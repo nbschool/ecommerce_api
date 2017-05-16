@@ -48,7 +48,7 @@ class OrdersHandler(Resource):
         except Address.DoesNotExist:
             abort(BAD_REQUEST)
 
-        with database.transaction() as txn:
+        with database.atomic():
             try:
                 order = Order.create(
                     delivery_address=address,
@@ -62,8 +62,7 @@ class OrdersHandler(Resource):
                     items_to_add[item] = res_item['quantity']
                 order.update_items(items_to_add)
             except InsufficientAvailabilityException:
-                txn.rollback()
-                return None, BAD_REQUEST
+                abort(BAD_REQUEST)
 
         return order.json(include_items=True), CREATED
 
@@ -88,7 +87,7 @@ class OrderHandler(Resource):
             if not res['order'].get(key):
                 return None, BAD_REQUEST
 
-        with database.transaction() as txn:
+        with database.atomic():
             try:
                 order = Order.get(uuid=str(order_uuid))
             except Order.DoesNotExist:
@@ -108,16 +107,11 @@ class OrderHandler(Resource):
                 return ({'message': "You can't delete another user's order"},
                         UNAUTHORIZED)
 
-            # Clear the order of all items before adding the new items
-            # that came with the PATCH request
-            # order.empty_order()
-
+            # Generate the dict of {<Item>: <int:difference>} to call Order.update_items
             items_uuids = [e['item_uuid'] for e in res['order']['items']]
             items = list(Item.select().where(Item.uuid << items_uuids))
             if len(items) != len(items_uuids):
-                return None, BAD_REQUEST
-
-            # Generate the dict of {<Item>: <int:difference>} to call Order.update_items
+                abort(BAD_REQUEST)
             items_to_add = {
                 item: req_item['quantity']
                 for item in items for req_item in res['order']['items']
@@ -126,10 +120,7 @@ class OrderHandler(Resource):
             try:
                 order.update_items(items_to_add)
             except InsufficientAvailabilityException:
-                txn.rollback()
                 abort(BAD_REQUEST)
-
-            order.save()
 
         return order.json(include_items=True), OK
 

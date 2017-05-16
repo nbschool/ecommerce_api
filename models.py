@@ -276,7 +276,6 @@ class Order(BaseModel):
             self.save()
         return self
 
-    @database.atomic()
     def update_items(self, items):
         """
         TODO docstring...
@@ -285,6 +284,7 @@ class Order(BaseModel):
         to_create = {}
         to_remove = {}
         to_edit = {}
+        total_price_difference = 0
 
         # split items in insert, delete and update sets
         for item, quantity in items.items():
@@ -300,7 +300,7 @@ class Order(BaseModel):
                         raise Exception
                     else:
                         to_edit[item] = difference
-                    self.total_price += (item.price * difference)
+                    total_price_difference += (item.price * difference)
                     break
             else:
                 if quantity <= 0:
@@ -310,12 +310,14 @@ class Order(BaseModel):
                         item, quantity)
                 else:
                     to_create[item] = quantity
-                self.total_price += (item.price * quantity)
+                total_price_difference += (item.price * quantity)
 
-        self.edit_items_quantity(to_edit)
-        self.create_items(to_create)
-        self.delete_items(to_remove)
-        self.save()
+        with database.atomic():
+            self.edit_items_quantity(to_edit)
+            self.create_items(to_create)
+            self.delete_items(to_remove)
+            self.total_price += total_price_difference
+            self.save()
         return self
 
     def edit_items_quantity(self, items):
