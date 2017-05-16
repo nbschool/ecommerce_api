@@ -99,7 +99,6 @@ def item_creator(num_item):
 def picture_creator(num_picture, index, item):
     ALLOWED_EXTENSION = ['jpg', 'jpeg', 'png', 'gif']
     pictures_path = get_random_pictures(num_picture)
-    item = item
     picture_id = fake.uuid4()
     extension = random.choice(ALLOWED_EXTENSION)
     Picture.create(
