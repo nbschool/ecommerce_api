@@ -56,8 +56,8 @@ def get_random_pictures(num_pictures):
     pictures = []
     path = "scripts/testdata/"
     for i in range(0, num_pictures):
-        full_path = '{}{}'.format(path, random.choice(os.listdir(path)))
-        pictures.append(full_path)
+        testdata_path = '{}{}'.format(path, random.choice(os.listdir(path)))
+        pictures.append(testdata_path)
     return pictures
 
 
