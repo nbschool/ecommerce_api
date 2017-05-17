@@ -442,7 +442,7 @@
                 },
                 "attributes": {
                     "date": "2017-02-20T10:16:50.140620+00:00",
-                    "total_price": 403.0
+                    "total_price": 403
                 },
                 "id": "00000000-0000-0000-0000-000000000001",
                 "links": {
@@ -517,7 +517,7 @@
                     }
                 },
                 "attributes": {
-                    "total_price": 604.0,
+                    "total_price": 604,
                     "date": "2017-02-20T10:16:50.140620+00:00"
                 },
                 "id": "00000000-0000-0000-0000-000000000001",
@@ -559,7 +559,7 @@
                     }
                 },
                 "attributes": {
-                    "total_price": 806.0,
+                    "total_price": 806,
                     "date": "2017-02-20T10:16:50.140620+00:00"
                 },
                 "id": "00000000-0000-0000-0000-000000000001",
@@ -583,6 +583,11 @@
                     "name": "mario"
                 },
                 "id": "00000000-0000-0000-0000-000000000001",
+                "relationships": {
+                    "pictures": {
+                        "data": []
+                    }
+                },
                 "links": {
                     "self": "/items/00000000-0000-0000-0000-000000000001"
                 }
@@ -599,6 +604,11 @@
                     "price": 30.222222,
                     "name": "Anna Pannocchia",
                     "availability": 1
+                },
+                "relationships": {
+                    "pictures": {
+                        "data": []
+                    }
                 },
                 "id": "00000000-0000-0000-0000-000000000001",
                 "links": {
@@ -619,6 +629,11 @@
                         "name": "mario",
                         "availability": 1
                     },
+                    "relationships": {
+                        "pictures": {
+                            "data": []
+                        }
+                    },
                     "id": "429994bf-784e-47cc-a823-e0c394b823e8",
                     "links": {
                         "self": "/items/429994bf-784e-47cc-a823-e0c394b823e8"
@@ -636,6 +651,11 @@
                         "price": 30.2,
                         "name": "GINO",
                         "availability": 2
+                    },
+                    "relationships": {
+                        "pictures": {
+                            "data": []
+                        }
                     },
                     "id": "577ad826-a79d-41e9-a5b2-7955bcf03499",
                     "links": {
@@ -656,6 +676,11 @@
                     "name": "mario",
                     "availability": 1
                 },
+                "relationships": {
+                    "pictures": {
+                        "data": []
+                    }
+                },
                 "id": "429994bf-784e-47cc-a823-e0c394b823e8",
                 "links": {
                     "self": "/items/429994bf-784e-47cc-a823-e0c394b823e8"
@@ -673,6 +698,11 @@
                     "price": 20.2,
                     "name": "new-name",
                     "availability": 1
+                },
+                "relationships": {
+                    "pictures": {
+                        "data": []
+                    }
                 },
                 "id": "429994bf-784e-47cc-a823-e0c394b823e8",
                 "links": {
@@ -692,6 +722,11 @@
                     "price": 40.2,
                     "name": "new-name",
                     "description": "new-description"
+                },
+                "relationships": {
+                    "pictures": {
+                        "data": []
+                    }
                 },
                 "links": {
                     "self": "/items/429994bf-784e-47cc-a823-e0c394b823e8"
@@ -1464,9 +1499,14 @@
                     "type": "item",
                     "attributes": {
                         "availability": 5,
+                        "name": "Item 1",
                         "price": 5.24,
-                        "description": "Item 1 description",
-                        "name": "Item 1"
+                        "description": "Item 1 description"
+                    },
+                    "relationships": {
+                        "pictures": {
+                            "data": []
+                        }
                     },
                     "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a",
                     "links": {
@@ -1482,10 +1522,15 @@
                     "data": {
                         "type": "item",
                         "attributes": {
-                            "availability": 5,
                             "price": 5.24,
-                            "description": "Item 1 description",
-                            "name": "Item 1"
+                            "availability": 5,
+                            "name": "Item 1",
+                            "description": "Item 1 description"
+                        },
+                        "relationships": {
+                            "pictures": {
+                                "data": []
+                            }
                         },
                         "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a",
                         "links": {
@@ -1500,10 +1545,15 @@
                     "data": {
                         "type": "item",
                         "attributes": {
-                            "availability": 10,
                             "price": 8,
-                            "description": "Item 2 description",
-                            "name": "Item 2"
+                            "availability": 10,
+                            "name": "Item 2",
+                            "description": "Item 2 description"
+                        },
+                        "relationships": {
+                            "pictures": {
+                                "data": []
+                            }
                         },
                         "id": "08bd8de0-a4ac-459d-956f-cf6d8b8a7507",
                         "links": {
