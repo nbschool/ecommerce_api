@@ -1,5 +1,4 @@
 from functools import reduce
-<<<<<<< HEAD
 import datetime
 import inspect
 import json
@@ -162,7 +161,6 @@ def setup_images():
         os.makedirs(get_image_folder())
 
 
-<<<<<<< HEAD
 # ###########################################################
 # JSONAPI testing utilities
 
@@ -277,8 +275,6 @@ def wrong_dump(data):
         "{}={}".format(k, v) for k, v in zip(data.keys(), data.values())])
 
 
-=======
->>>>>>> a2a47ec... Add SEED, Fix property id.
 def add_favorite(user, item):
     return Favorite.create(
             uuid=uuid.uuid4(),
