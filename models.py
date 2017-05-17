@@ -227,7 +227,11 @@ class Order(BaseModel):
     @staticmethod
     def create_order(user, address, items):
         """
-        TODO docstring...
+        Create an Order and respective OrderItems. OrderItems are created
+        in a single query as well as the Order. It also updates Items'
+        availability.
+        :param User user:
+        :param Address address:
         :param dict items: {<Item>: <quantity:int>}
         """
         total_price = sum([
