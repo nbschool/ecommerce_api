@@ -218,47 +218,52 @@ def format_jsonapi_request(type_, data):
     return retval
 
 
-def _sort_data_lists(result, key, sortFn):
-    """
-    Sort a list of the given (expected) result or list of results,
-    found at <key>, using <sortFn>.
-    """
-    def sort_(r):
-        if r.get(key):
-            r[key] = sorted(r[key], key=sortFn)
-
-    if type(result) is list:
-        for r in result:
-            sort_(r)
-    else:
-        sort_(result)
-    return result
-
-
-def validate_response(resp_data, expected):
+def assert_valid_response(data, expected):
     """
     Take a flask app response.data and the expected test result, normalize them
     sorting the `included` and `errors` lists if present, then confront, the
     response data and the expected result, returning True or False wether the
     structures are the same or not.
     """
+    def sort_data_lists(data, attribute, key):
+        """
+        sort a given data structure's attribute (list) using the given key function
+        """
+        try:
+            data[attribute] = sorted(data[attribute], key=key)
+        except (KeyError, TypeError):
+            pass
+
+    # sort functions for included and errors attributes
+    def included_sorter(i): return i['type']
+
+    def errors_sorter(e): return e['source']['pointer']
+
     try:
         # lazy load of the response data, so we can pass either the parsed json
         # response or the json string
-        resp_data = json.loads(resp_data)
+        data = json.loads(data)
     except TypeError:
-        # resp_data has already been parsed
+        # data has already been parsed
         pass
 
-    # Sort the included and errors lists of the response.data if present
-    resp_data = _sort_data_lists(resp_data, 'included', lambda i: i['type'])
-    resp_data = _sort_data_lists(resp_data, 'errors', lambda e: e['source']['pointer'])
+    # ensure that both `data` and `expected` are lists
+    if not isinstance(data, list):
+        data = [data]
+    if not isinstance(expected, list):
+        expected = [expected]
 
-    # Sort the lists of the expected results if present
-    expected = _sort_data_lists(expected, 'included', lambda i: i['type'])
-    expected = _sort_data_lists(expected, 'errors', lambda e: e['source']['pointer'])
+    for item in data:
+        # Sort the included and errors lists of the response.data if present
+        sort_data_lists(item, 'included', included_sorter)
+        sort_data_lists(item, 'errors', errors_sorter)
 
-    return resp_data == expected
+    for item in expected:
+        # Sort the lists of the expected results if present
+        sort_data_lists(item, 'included', included_sorter)
+        sort_data_lists(item, 'errors', errors_sorter)
+
+    assert data == expected
 
 
 def wrong_dump(data):

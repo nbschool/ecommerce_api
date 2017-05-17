@@ -13,7 +13,7 @@ from models import Item, Order, OrderItem, WrongQuantity
 from tests.test_case import TestCase
 from tests.test_utils import (RESULTS, add_address, add_admin_user, add_user,
                               format_jsonapi_request, open_with_auth,
-                              validate_response, wrong_dump)
+                              assert_valid_response, wrong_dump)
 
 # main endpoint for API
 API_ENDPOINT = '/{}'
@@ -57,7 +57,7 @@ class TestOrders(TestCase):
         expected_result = EXPECTED_RESULTS['get_orders__success']
 
         assert resp.status_code == OK
-        assert validate_response(resp.data, expected_result)
+        assert_valid_response(resp.data, expected_result)
 
     def test_get_order__non_existing_empty_orders(self):
         resp = self.app.get('/orders/{}'.format(uuid4()))
@@ -108,7 +108,7 @@ class TestOrders(TestCase):
 
         expected_result = EXPECTED_RESULTS['get_order__success']
         assert resp.status_code == OK
-        assert validate_response(resp.data, expected_result)
+        assert_valid_response(resp.data, expected_result)
 
     def test_create_order__success(self):
         Item.create(
@@ -161,7 +161,7 @@ class TestOrders(TestCase):
         assert len(OrderItem.select()) == 2
         order = Order.get()
         expected_result = EXPECTED_RESULTS['create_order__success']
-        assert validate_response(resp.data, expected_result)
+        assert_valid_response(resp.data, expected_result)
 
     def test_create_order__not_json_failure(self):
         Item.create(
@@ -277,7 +277,7 @@ class TestOrders(TestCase):
                               json.dumps(data))
         assert resp.status_code == BAD_REQUEST
         expected_result = EXPECTED_RESULTS['create_order__failure_missing_field']
-        assert validate_response(resp.data, expected_result)
+        assert_valid_response(resp.data, expected_result)
         assert len(Order.select()) == 0
 
     def test_create_order__non_existing_address(self):
@@ -504,7 +504,7 @@ class TestOrders(TestCase):
         order = Order.get()
         expected_result = EXPECTED_RESULTS['update_order__new_item']
 
-        assert validate_response(resp.data, expected_result)
+        assert_valid_response(resp.data, expected_result)
 
     def test_update_order__item_quantity_zero(self):
         item1 = Item.create(
@@ -548,7 +548,7 @@ class TestOrders(TestCase):
 
         expected_result = EXPECTED_RESULTS['update_order__item_quantity_zero']
 
-        assert validate_response(resp.data, expected_result)
+        assert_valid_response(resp.data, expected_result)
 
         # test remove with quantity=0 functionality, item1 is not present.
         assert len(order.order_items) == 1
@@ -600,7 +600,7 @@ class TestOrders(TestCase):
 
         expected_result = EXPECTED_RESULTS['update_order__remove_item_without_delete']
 
-        assert validate_response(resp.data, expected_result)
+        assert_valid_response(resp.data, expected_result)
         assert len(order.order_items) == 1
         assert order.order_items[0].quantity == 20
 
@@ -645,7 +645,7 @@ class TestOrders(TestCase):
 
         expected_result = EXPECTED_RESULTS['update_order__add_item']
 
-        assert validate_response(resp.data, expected_result)
+        assert_valid_response(resp.data, expected_result)
 
     def test_update_order__success(self):
         item1 = Item.create(
@@ -702,7 +702,7 @@ class TestOrders(TestCase):
         expected_result = EXPECTED_RESULTS['update_order__success']
 
         assert resp.status_code == OK
-        assert validate_response(resp.data, expected_result)
+        assert_valid_response(resp.data, expected_result)
 
     def test_update_order__non_existing_items(self):
         item1 = Item.create(
@@ -844,7 +844,7 @@ class TestOrders(TestCase):
         assert resp.status_code == OK
 
         expected_result = EXPECTED_RESULTS['update_order__success_admin_not_owner']
-        assert validate_response(resp.data, expected_result)
+        assert_valid_response(resp.data, expected_result)
 
     def test_update_order_empty_items_list__fail(self):
         item1 = Item.create(

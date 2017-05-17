@@ -10,7 +10,7 @@ from models import Address, Item, Order, User
 from tests.test_case import TestCase
 from tests.test_utils import (RESULTS, add_address, add_admin_user, add_user,
                               format_jsonapi_request, open_with_auth,
-                              validate_response, wrong_dump)
+                              assert_valid_response, wrong_dump)
 
 # main endpoint for API
 API_ENDPOINT = '/{}'
@@ -37,7 +37,7 @@ class TestUser(TestCase):
 
         assert resp.status_code == OK
         expected_result = EXPECTED_RESULTS['get_users_list__success']
-        assert validate_response(resp.data, expected_result)
+        assert_valid_response(resp.data, expected_result)
 
     def test_post_new_user__success(self):
         user = format_jsonapi_request('user', {
@@ -53,7 +53,7 @@ class TestUser(TestCase):
         assert resp.status_code == CREATED
 
         expected_result = EXPECTED_RESULTS['post_new_user__success']
-        assert validate_response(resp.data, expected_result)
+        assert_valid_response(resp.data, expected_result)
 
         assert User.select().count() == 1
         assert User.get().admin is False
@@ -103,7 +103,7 @@ class TestUser(TestCase):
         # email
         assert resp.status_code == BAD_REQUEST
         expected_result = EXPECTED_RESULTS['post_new_user_no_email__fail']
-        assert validate_response(resp.data, expected_result)
+        assert_valid_response(resp.data, expected_result)
 
         assert User.select().count() == 0
 
