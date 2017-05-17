@@ -346,3 +346,17 @@ class OrderItem(BaseModel):
     def _calculate_subtotal(self):
         """Calculate the subtotal value of the item(s) in the order."""
         self.subtotal = self.item.price * self.quantity
+
+
+class Favorite(BaseModel):
+    """ Many to many table to relate an item with a user."""
+    uuid = UUIDField(unique=True, default=uuid4)
+    user = ForeignKeyField(User, related_name="favorites")
+    item = ForeignKeyField(Item, related_name="favorites")
+
+    def json(self):
+        return {
+            'uuid': str(self.uuid),
+            'item_uuid': str(self.item.uuid),
+            'user_uuid': str(self.user.uuid),
+        }
