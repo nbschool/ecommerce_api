@@ -24,7 +24,6 @@ from views.address import AddressesHandler, AddressHandler
 from views.orders import OrdersHandler, OrderHandler
 from views.items import ItemHandler, ItemsHandler
 from views.user import UsersHandler, UserHandler
-from views.address import AddressesHandler, AddressHandler
 from views.pictures import PictureHandler, ItemPictureHandler
 from views.favorites import FavoritesHandler, FavoriteHandler
 
