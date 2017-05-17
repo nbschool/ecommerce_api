@@ -247,15 +247,15 @@ def assert_valid_response(data, expected):
         pass
 
     # ensure that both `data` and `expected` are lists while working on them
-    data_ = data if isinstance(data, list) else [data]
-    expected_ = expected if isinstance(expected, list) else [expected]
+    data_items = data if isinstance(data, list) else [data]
+    expected_items = expected if isinstance(expected, list) else [expected]
 
-    for item in data_:
+    for item in data_items:
         # Sort the included and errors lists of the response.data if present
         sort_data_lists(item, 'included', included_sorter)
         sort_data_lists(item, 'errors', errors_sorter)
 
-    for item in expected_:
+    for item in expected_items:
         # Sort the lists of the expected results if present
         sort_data_lists(item, 'included', included_sorter)
         sort_data_lists(item, 'errors', errors_sorter)
