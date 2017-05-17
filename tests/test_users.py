@@ -1,15 +1,16 @@
 """
 Test suite for User(s) resources.
 """
-from models import User, Address, Item, Order
-from tests.test_utils import (add_address, add_user, add_admin_user, format_jsonapi_request,
-                              RESULTS, open_with_auth, wrong_dump)
-from tests.test_case import TestCase
-
 import json
 import uuid
 from http.client import (BAD_REQUEST, CONFLICT, CREATED, NO_CONTENT, NOT_FOUND,
                          OK, UNAUTHORIZED)
+
+from models import Address, Item, Order, User
+from tests.test_case import TestCase
+from tests.test_utils import (RESULTS, add_address, add_admin_user, add_user,
+                              format_jsonapi_request, open_with_auth,
+                              assert_valid_response, wrong_dump)
 
 # main endpoint for API
 API_ENDPOINT = '/{}'
@@ -36,7 +37,7 @@ class TestUser(TestCase):
 
         assert resp.status_code == OK
         expected_result = EXPECTED_RESULTS['get_users_list__success']
-        assert json.loads(resp.data) == expected_result
+        assert_valid_response(resp.data, expected_result)
 
     def test_post_new_user__success(self):
         user = format_jsonapi_request('user', {
@@ -50,11 +51,9 @@ class TestUser(TestCase):
                              content_type='application/json')
 
         assert resp.status_code == CREATED
-        resp_user = json.loads(resp.data)
 
         expected_result = EXPECTED_RESULTS['post_new_user__success']
-
-        assert resp_user == expected_result
+        assert_valid_response(resp.data, expected_result)
 
         assert User.select().count() == 1
         assert User.get().admin is False
@@ -104,7 +103,7 @@ class TestUser(TestCase):
         # email
         assert resp.status_code == BAD_REQUEST
         expected_result = EXPECTED_RESULTS['post_new_user_no_email__fail']
-        assert json.loads(resp.data) == expected_result
+        assert_valid_response(resp.data, expected_result)
 
         assert User.select().count() == 0
 

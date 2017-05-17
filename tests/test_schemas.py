@@ -10,14 +10,10 @@ import copy
 
 from datetime import datetime
 
-import simplejson as json
-
 from models import Item, Order, Address
 from schemas import OrderSchema, UserSchema, AddressSchema, ItemSchema
-from tests.test_utils import _test_res_sort_included as sort_included
-from tests.test_utils import _test_res_sort_errors as sort_errors
 from tests.test_utils import (add_address, add_user, format_jsonapi_request,
-                              RESULTS)
+                              RESULTS, assert_valid_response)
 
 USER_TEST_DICT = {
     "first_name": "Monty",
@@ -69,7 +65,7 @@ class TestUserSchema(TestCase):
 
         assert type(parsed_user) is str
 
-        assert json.loads(parsed_user) == expected_result
+        assert_valid_response(parsed_user, expected_result)
         assert errors == {}
 
     def test_get_users_list_json__success(self):
@@ -77,14 +73,14 @@ class TestUserSchema(TestCase):
 
         assert type(parsed) is str
         expected_result = EXPECTED_USERS['get_users_list_json__success']
-        assert json.loads(parsed) == expected_result
+        assert_valid_response(parsed, expected_result)
 
     def test_user_include_orders__success(self):
         parsed_user, _ = UserSchema.jsonapi(
             self.user1, include_data=['orders'])
 
         expected_result = EXPECTED_USERS['user_include_orders__success']
-        assert json.loads(parsed_user) == expected_result
+        assert_valid_response(parsed_user, expected_result)
 
     def test_user_validate_input__success(self):
         post_data = format_jsonapi_request('user', USER_TEST_DICT)
@@ -103,7 +99,7 @@ class TestUserSchema(TestCase):
         errors = UserSchema.validate_input(post_data)
 
         expected_result = EXPECTED_USERS['user_validate_input__fail']
-        assert sort_errors(errors) == expected_result
+        assert_valid_response(errors, expected_result)
 
 
 class TestOrderSchema(TestCase):
@@ -144,8 +140,7 @@ class TestOrderSchema(TestCase):
         assert type(parsed) == str
 
         expected_result = EXPECTED_ORDERS['order_json__success']
-        parsed = sort_included(json.loads(parsed))
-        assert parsed == expected_result
+        assert_valid_response(parsed, expected_result)
 
     def test_order_validate_input__success(self):
         data = {
@@ -193,7 +188,7 @@ class TestOrderSchema(TestCase):
         assert type(parsed) is str
 
         expected_result = EXPECTED_ORDERS['get_orders_list__success']
-        assert json.loads(parsed) == expected_result
+        assert_valid_response(parsed, expected_result)
 
     def test_order_validate_fields__fail(self):
         order = {
@@ -211,7 +206,7 @@ class TestOrderSchema(TestCase):
         errors = OrderSchema.validate_input(post_data)
 
         expected_result = EXPECTED_ORDERS['order_validate_fields__fail']
-        assert sort_errors(errors) == expected_result
+        assert_valid_response(errors, expected_result)
 
 
 class TestAddressSchema(TestCase):
@@ -247,7 +242,7 @@ class TestAddressSchema(TestCase):
         errors = AddressSchema.validate_input(post_data)
 
         expected_result = EXPECTED_ADDRESSES['address_validate_input__fail']
-        assert sort_errors(errors) == expected_result
+        assert_valid_response(errors, expected_result)
 
     def test_get_address_json__success(self):
 
@@ -257,7 +252,7 @@ class TestAddressSchema(TestCase):
         assert type(data) is str
 
         expected_result = EXPECTED_ADDRESSES['get_address_json__success']
-        assert json.loads(data) == expected_result
+        assert_valid_response(data, expected_result)
 
     def test_address_json_include_user__success(self):
         data, errors = AddressSchema.jsonapi(self.addr, include_data=['user'])
@@ -266,7 +261,7 @@ class TestAddressSchema(TestCase):
         assert type(data) is str
 
         expected_result = EXPECTED_ADDRESSES['get_address_json_include_user__success']
-        assert json.loads(data) == expected_result
+        assert_valid_response(data, expected_result)
 
     def test_get_addresses_list__success(self):
         add_address(
@@ -276,7 +271,7 @@ class TestAddressSchema(TestCase):
         data = AddressSchema.jsonapi_list(addr_list)
 
         expected_result = EXPECTED_ADDRESSES['get_addresses_list__success']
-        assert json.loads(data) == expected_result
+        assert_valid_response(data, expected_result)
 
 
 class TestItemSchema(TestCase):
@@ -320,17 +315,17 @@ class TestItemSchema(TestCase):
         errors = ItemSchema.validate_input(post_data)
 
         expected_result = EXPECTED_ITEMS['item_validate_input__fail']
-        assert sort_errors(errors) == expected_result
+        assert_valid_response(errors, expected_result)
 
     def test_get_item_json__success(self):
         data, errors = ItemSchema.jsonapi(self.item1)
 
         assert errors == {}
         expected_result = EXPECTED_ITEMS['get_item_json__success']
-        assert json.loads(data) == expected_result
+        assert_valid_response(data, expected_result)
 
     def test_get_items_list__success(self):
         data = ItemSchema.jsonapi_list([self.item1, self.item2])
 
         expected_result = EXPECTED_ITEMS['get_items_list__success']
-        assert json.loads(data) == expected_result
+        assert_valid_response(data, expected_result)
