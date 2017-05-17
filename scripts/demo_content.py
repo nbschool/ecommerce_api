@@ -210,7 +210,6 @@ def main():
     }
 
     print(TEXT_DISPLAY)
-    list_db = get_databases()
     print(Fore.YELLOW + Style.BRIGHT + 'You have already a database.')
     prompt_menu_1(ACTIONS)
 
