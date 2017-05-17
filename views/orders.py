@@ -64,7 +64,7 @@ class OrdersHandler(Resource):
         except Address.DoesNotExist:
             abort(BAD_REQUEST)
 
-        # Generate the dict of {<Item>: <int:quantity>} to call Order.add_items
+        # Generate the dict of {<Item>: <int:quantity>} to call Order.create_order
         items_to_add = {}
         for req_item in req_items:
             item = next(i for i in items if str(i.uuid) == req_item['id'])

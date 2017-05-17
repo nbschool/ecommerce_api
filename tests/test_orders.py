@@ -1267,7 +1267,7 @@ class TestOrders(TestCase):
 
     def test_order_add_remove_items(self):
         """
-        Test Order.add_items and remove_items for handling add/remove in
+        Test Order.update_items and remove_items for handling add/remove in
         bulk
         """
         user = add_user(None, TEST_USER_PSW)

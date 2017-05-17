@@ -221,49 +221,11 @@ class Order(BaseModel):
         Remove all the items from the order.
         Delete all OrderItem related to this order and reset the total_price
         value to 0.
-
         """
 
         self.total_price = 0
         OrderItem.delete().where(OrderItem.order == self).execute()
         self.save()
-        return self
-
-    def add_items(self, items):
-        """
-        Add items to the order from a dict {<Item>: <int:quantity>}. Handles
-        creating or updating the OrderItem cross table and the Order total.
-        It also updates the item availability counter and raise
-        InsufficientAvailability if quantity is less than an item availability.
-        :param dict items: {<Item>: <quantity:int>}
-
-        :raises: InsufficientAvailabilityException if a requested quantity is
-                 higher than the item availability. If the exception is raised
-                 all the changes are reverted.
-        """
-        orderitems = self.order_items
-        with database.atomic():
-            for item, quantity in items.items():
-                for orderitem in orderitems:
-                    # Looping all the OrderItem related to this order,
-                    # if one with the same item is found we update that row.
-                    if orderitem.item == item:
-                        orderitem.add_item(quantity)
-                        continue
-
-                if quantity > item.availability:
-                    raise InsufficientAvailabilityException(item, quantity)
-                # if no matching existing OrderItem is found
-                # create a new row in the OrderItem table
-                OrderItem.create(
-                    order=self,
-                    item=item,
-                    quantity=quantity,
-                    subtotal=item.price * quantity
-                )
-
-                self.total_price += (item.price * quantity)
-            self.save()
         return self
 
     @staticmethod
@@ -286,8 +248,14 @@ class Order(BaseModel):
 
     def update_items(self, items, update_total=True, new_address=None):
         """
-        TODO docstring...
+        Update Order and respective OrderItems by splitting in creation,
+        deletion and updating queries, minimizing the interactions with the
+        database. It also updates Items' availability.
         :param dict items: {<Item>: <quantity:int>}
+        :param bool update_total: if True the procedure updates order's
+            total price
+        :param Address new_address: if not None the procedure updates the
+            order with the given address
         """
         to_create = {}
         to_remove = {}
@@ -334,7 +302,8 @@ class Order(BaseModel):
 
     def edit_items_quantity(self, items):
         """
-        TODO docstring...
+        Update orderitems using a query for each item, and updates
+        items' availability.
         :param dict items: {<Item>: <difference:int>}
         """
         if not items:
@@ -353,7 +322,7 @@ class Order(BaseModel):
 
     def delete_items(self, items):
         """
-        TODO docstring...
+        Delete orderitems in a single query and updates items' availability.
         :param dict items: {<Item>: <quantity:int>}
         """
         if not items:
@@ -367,10 +336,9 @@ class Order(BaseModel):
                 OrderItem.order == self).where(
                 OrderItem.item << [k for k in items.keys()]).execute()
 
-    @database.atomic()
     def create_items(self, items):
         """
-        TODO docstring...
+        Creates orderitems in a single query and updates items' availability.
         :param dict items: {<Item>: <quantity:int>}
         """
         if not items:
@@ -390,59 +358,17 @@ class Order(BaseModel):
                     'subtotal': item.price * quantity,
                 } for item, quantity in items.items()]).execute()
 
-    def remove_items(self, items):
-        """
-        Remove items from an order, handling the relative OrderItem row and
-        the Order total price update.
-        :param dict items: {<Item>: <quantity:int>}
-
-        :raises: Order.OrderItemNotFound if one of the items does not exists in
-                 the order.
-                 If the exception is raised all the changes are reverted
-        """
-        orderitems = self.order_items
-
-        with database.atomic():
-            for item, quantity in items.items():
-                removed = False
-                for orderitem in orderitems:
-                    if orderitem.item == item:
-                        removed = True
-                if not removed:
-                    raise Order.OrderItemNotFound(
-                        'Item {} is not in the order'.format(item.item_id))
-
-            self.save()
-        return self
-
-    def update_item(self, item, quantity):
-        """
-        Update the quantity of the orderitem of the given item.
-        """
-        for order_item in self.order_items:
-            if order_item.item == item:
-                diff = quantity - order_item.quantity
-                if diff > 0:
-                    self.add_item(item, abs(diff))
-                elif diff < 0:
-                    self.remove_item(item, abs(diff))
-                break
-        else:
-            self.add_item(item, quantity)
-
     def add_item(self, item, quantity=1):
         """
-        Legacy method to add just one item to the order.
+        Add items to the order. It updates item availability.
 
         :param Item item: the Item to add
         :param int quantity: how many to add
         """
         return self.update_items({item: quantity})
-        # return self.add_items({item: quantity})
 
     def remove_item(self, item, quantity=1):
         """
-        Legacy method.
         Remove the given item from the order, reducing quantity of the relative
         OrderItem entity or deleting it if removing the last item
         (OrderItem.quantity == 0).
@@ -451,17 +377,6 @@ class Order(BaseModel):
         :param int quantity: how many to remove
         """
         return self.update_items({item: -quantity})
-
-        for orderitem in self.order_items:
-            if orderitem.item == item:
-                removed_items = orderitem.remove_item(quantity)
-                item.availability += quantity
-                item.save()
-                self.total_price -= (item.price * removed_items)
-                self.save()
-                return self
-
-        return self.remove_items({item: quantity})
 
 
 class OrderItem(BaseModel):
