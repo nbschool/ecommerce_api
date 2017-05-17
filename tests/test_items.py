@@ -22,6 +22,7 @@ TEST_ITEM = {
     'price': 20.20,
     'description': 'svariati mariii',
     'availability': 1,
+    'category': 'scarpe',
 }
 TEST_ITEM2 = {
     'uuid': '577ad826-a79d-41e9-a5b2-7955bcf03499',
@@ -29,6 +30,7 @@ TEST_ITEM2 = {
     'price': 30.20,
     'description': 'svariati GINIIIII',
     'availability': 2,
+    'category': 'accessori',
 }
 TEST_ITEM_WRONG = {
     'uuid': '19b4c6dc-e393-4e76-bf0f-72559dd5d32e',
@@ -43,6 +45,7 @@ TEST_ITEM_PRECISION = {
     'price': 30.222222,
     'description': 'lorem ipsum',
     'availability': 1,
+    'category': 'scarpe',
 }
 TEST_ITEM_AVAILABILITY = {
     'uuid': '68e587f7-3982-4b6a-a882-dd43b89134fe',

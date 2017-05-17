@@ -89,10 +89,13 @@ def user_creator(num_user):
 
 
 def item_creator(num_item):
+    LIST_CATEGORIES = ['scarpe', 'accessori', 'abbigliamento uomo',
+                      'abbigliamento donna']
     for i in range(num_item):
         item_id = fake.uuid4()
         item_name = fake.sentence(nb_words=3, variable_nb_words=True)
         item_price = fake.pyfloat(left_digits=2, right_digits=2, positive=True)
+        item_category = random.choice(LIST_CATEGORIES)
         item = Item.create(
             uuid=item_id,
             name=item_name,
@@ -100,6 +103,7 @@ def item_creator(num_item):
             description=fake.paragraph(
                 nb_sentences=3, variable_nb_sentences=True),
             availability=random.randint(35, 60),
+            category=item_category,
         )
         picture_creator(num_item, i, item)
 
