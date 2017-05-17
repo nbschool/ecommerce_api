@@ -63,8 +63,3 @@ def image_fullpath(picture_uuid, extension):
     return os.path.join(
         get_image_folder(),
         '{}.{}'.format(str(picture_uuid), extension))
-
-def to_json(string):
-    """Encapsule a string as a value of a json with key message."""
-    return [{"Message": "{}".format(string)}]
-
