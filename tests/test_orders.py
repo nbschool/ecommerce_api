@@ -238,12 +238,64 @@ class TestOrders(TestCase):
             }
         }
 
+        data = format_jsonapi_request('order', order)
         path = 'orders/'
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'POST',
                               user.email, TEST_USER_PSW, 'application/json',
-                              json.dumps(order))
+                              json.dumps(data))
         assert resp.status_code == BAD_REQUEST
         assert len(Order.select()) == 0
+
+    def test_create_order__failure_user_auth(self):
+        Item.create(
+            uuid='429994bf-784e-47cc-a823-e0c394b823e8',
+            name='mario',
+            price=20.20,
+            description='svariati mariii',
+            availability=4
+        )
+        Item.create(
+            uuid='577ad826-a79d-41e9-a5b2-7955bcf03499',
+            name='GINO',
+            price=30.20,
+            description='svariati GINIIIII',
+            availability=10
+        )
+        user = add_user('123@email.com', TEST_USER_PSW,
+                        id='e736a9a6-448b-4b92-9e38-4cf745b066db')
+        other_user = add_user('456@email.com', TEST_USER_PSW,
+                              id='d41ad9db-9d60-45c6-9fa6-51f66cd3d99a')
+        add_address(user=user, id='8473fbaa-94f0-46db-939f-faae898f001c')
+
+        order = {
+            'relationships': {
+                'items': [{
+                    'id': '429994bf-784e-47cc-a823-e0c394b823e8',
+                    'type': 'item', 'quantity': 4
+                }, {
+                    'id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
+                    'type': 'item', 'quantity': 10
+                }],
+                'delivery_address': {
+                    'type': 'address',
+                    'id': '8473fbaa-94f0-46db-939f-faae898f001c'
+                },
+                'user': {
+                    'type': 'user',
+                    'id': str(other_user.uuid)
+                }
+            }
+        }
+        data = format_jsonapi_request('order', order)
+
+        path = 'orders/'
+        resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'POST',
+                              user.email, TEST_USER_PSW, 'application/json',
+                              json.dumps(data))
+
+        assert resp.status_code == UNAUTHORIZED
+        assert len(Order.select()) == 0
+        assert len(OrderItem.select()) == 0
 
     def test_create_order__failure_missing_field(self):
         Item.create(
@@ -304,21 +356,28 @@ class TestOrders(TestCase):
         )
         user = add_user('12345@email.com', TEST_USER_PSW)
         order = {
-            'order': {
+            'relationships': {
                 'items': [
                     {'id': '429994bf-784e-47cc-a823-e0c394b823e8',
                      'type': 'item', 'quantity': 4},
                     {'id': '577ad826-a79d-41e9-a5b2-7955bcf03499',
-                     'type': 'item', 'quantity': 10}
+                     'type': 'item', 'quantity': 10},
                 ],
-                'delivery_address': '577ad826-a79d-41e9-a5b2-7955bcf09043',
-                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+                'delivery_address': {
+                    'type': 'address',
+                    'id': '577ad826-a79d-41e9-a5b2-7955bcf09043',
+                },
+                'user': {
+                    'type': 'user',
+                    'id': str(user.uuid),
+                }
             }
         }
+        data = format_jsonapi_request('order', order)
         path = 'orders/'
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'POST',
                               user.email, TEST_USER_PSW, 'application/json',
-                              json.dumps(order))
+                              json.dumps(data))
         assert resp.status_code == BAD_REQUEST
         assert len(Order.select()) == 0
 
@@ -456,14 +515,15 @@ class TestOrders(TestCase):
                 },
                 'user': {
                     'type': 'user',
-                    'id': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+                    'id': str(user.uuid)
                 }
             }
         }
+        data = format_jsonapi_request('order', order)
         path = 'orders/'
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'POST',
                               user.email, TEST_USER_PSW, 'application/json',
-                              json.dumps(order))
+                              json.dumps(data))
         assert resp.status_code == BAD_REQUEST
         assert len(Order.select()) == 0
 
@@ -735,11 +795,10 @@ class TestOrders(TestCase):
         order1 = Order.create(delivery_address=addr, user=user)
         order1.add_item(item1, 2).add_item(item2)
         order_item_before = [o.json() for o in OrderItem.select()]
-        order_uuid = str(order1.uuid)
+        # order_uuid = str(order1.uuid)
 
         order = {
-            "order": {
-                "uuid": order_uuid,
+            'relationships': {
                 'items': [
                     {'id': '577ad826-a79d-41e9-a5b2-7955bcf00000',
                      'type': 'item', 'quantity': 1},
@@ -748,14 +807,21 @@ class TestOrders(TestCase):
                     {'id': '577ad826-a79d-41e9-a5b2-7955bcf9999',
                      'type': 'item', 'quantity': 2}
                 ],
-                'delivery_address': '429994bf-784e-47cc-a823-e0c394b823e8',
-                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+                'delivery_address': {
+                    'type': 'address',
+                    'id': '429994bf-784e-47cc-a823-e0c394b823e8'
+                },
+                'user': {
+                    'type': 'user',
+                    'id': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+                }
             }
         }
+        data = format_jsonapi_request('order', order)
         path = 'orders/{}'.format(order1.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               user.email, TEST_USER_PSW, 'application/json',
-                              json.dumps(order))
+                              json.dumps(data))
         order_item_after = [o.json() for o in OrderItem.select()]
         assert resp.status_code == BAD_REQUEST
         assert order_item_before == order_item_after
@@ -785,21 +851,28 @@ class TestOrders(TestCase):
         order_item_before = order1.order_items
 
         order = {
-            "order": {
+            'relationships': {
                 'items': [
                     {'id': '577ad826-a79d-41e9-a5b2-7955bcf00000',
                      'type': 'item', 'quantity': 1},
                     {'id': '577ad826-a79d-41e9-a5b2-7955bcf2222',
                      'type': 'item', 'quantity': 1},
                 ],
-                'delivery_address': '577ad826-a79d-41e9-a5b2-7955bcf5423',
-                'user': '86ba7e70-b3c0-4c9c-8d26-a14f49360e47'
+                'delivery_address': {
+                    'type': 'address',
+                    'id': '817c8747-dfb7-4c2d-8a24-82dae23d250b',
+                },
+                'user': {
+                    'type': 'user',
+                    'id': str(user.uuid),
+                }
             }
         }
+        data = format_jsonapi_request('order', order)
         path = 'orders/{}'.format(order1.uuid)
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'PATCH',
                               '12345@email.com', TEST_USER_PSW, 'application/json',
-                              json.dumps(order))
+                              json.dumps(data))
 
         assert resp.status_code == BAD_REQUEST
         assert order_item_before == order1.order_items

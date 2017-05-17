@@ -27,7 +27,6 @@ class OrdersHandler(Resource):
     @auth.login_required
     def post(self):
         """ Insert a new order."""
-
         res = request.get_json(force=True)
 
         errors = Order.validate_input(res)
@@ -95,7 +94,6 @@ class OrderHandler(Resource):
     @auth.login_required
     def patch(self, order_uuid):
         """ Modify a specific order. """
-
         res = request.get_json(force=True)
 
         errors = Order.validate_input(res, partial=True)
@@ -103,7 +101,7 @@ class OrderHandler(Resource):
             return errors, BAD_REQUEST
 
         data = res['data']['relationships']
-        req_items = data.get('items')
+        req_items = data.get('items', {})
         req_address = data.get('delivery_address')
 
         with database.atomic():
@@ -128,7 +126,7 @@ class OrderHandler(Resource):
                 return ({'message': "You can't delete another user's order"},
                         UNAUTHORIZED)
 
-            # Generate the dict of {<Item>: <int:difference>} to call Order.update_items
+            # Generate the dict of {<Item>: <int:quantity>} to call Order.update_items
             items_uuids = [e['id'] for e in req_items.get('data', [])]
             items = list(Item.select().where(Item.uuid << items_uuids))
             if len(items) != len(items_uuids):
