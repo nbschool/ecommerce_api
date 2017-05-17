@@ -1,11 +1,10 @@
 from tests.test_utils import add_user, open_with_auth, add_favorite, add_item
 from tests.test_case import TestCase
-# from models import User, Favorite
-from http.client import OK, NOT_FOUND, UNAUTHORIZED, CREATED
-# from faker import Factory
+from http.client import OK, UNAUTHORIZED, CREATED, NOT_FOUND
 import json
 
 USER1 = 'fatima.caputo@tiscali.it'
+USER2 = 'pepito.pepon@gmail.com'
 PASS1 = '9J0'
 PASS2 = '0J9'
 # main endpoint for API
@@ -61,7 +60,7 @@ class TestFavorites(TestCase):
 
     def test_post_favorites__fail(self):
         user = add_user(USER1, PASS1)
-        data = {"item_uuid": "3","user_uuid": str(user.uuid)}
+        data = {"item_uuid": "3", "user_uuid": str(user.uuid)}
         user_path = 'favorites/'
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'POST',
                               user.email, PASS1, 'application/json',
@@ -85,3 +84,34 @@ class TestFavorites(TestCase):
         assert len(json.loads(resp.get_data())['uuid']) == 36
         assert len(json.loads(resp.get_data())) == 3
 
+    def test_delete_favorites__success(self):
+        user = add_user(USER1, PASS1)
+        item = add_item()
+        add_favorite(user, item)
+        user_path = 'favorites/{}'.format(str(item.uuid))
+        resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
+                              user.email, PASS1, None, None)
+
+        assert resp.status_code == OK
+        assert len(resp.data) == 67
+
+    def test_delete_favorites__fail(self):
+        user = add_user(USER1, PASS1)
+        item = add_item()
+        add_favorite(user, item)
+        user_path = 'favorites/{}'.format(str(item.uuid))
+        resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
+                              user.email, PASS2, None, None)
+
+        assert resp.status_code == UNAUTHORIZED
+
+    def test_delete_alien_favorites__fail(self):
+        user1 = add_user(USER1, PASS1)
+        user2 = add_user(USER2, PASS2)
+        item = add_item()
+        add_favorite(user2, item)
+        user_path = 'favorites/{}'.format(str(item.uuid))
+        resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
+                              user1.email, PASS1, None, None)
+
+        assert resp.status_code == NOT_FOUND
