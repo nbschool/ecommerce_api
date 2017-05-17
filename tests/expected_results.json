@@ -580,7 +580,8 @@
                     "description": "svariati mariii",
                     "price": 20.2,
                     "availability": 1,
-                    "name": "mario"
+                    "name": "mario",
+                    "category": "scarpe"
                 },
                 "id": "00000000-0000-0000-0000-000000000001",
                 "relationships": {
@@ -603,7 +604,8 @@
                     "description": "lorem ipsum",
                     "price": 30.222222,
                     "name": "Anna Pannocchia",
-                    "availability": 1
+                    "availability": 1,
+                    "category": "scarpe"
                 },
                 "relationships": {
                     "pictures": {
@@ -627,7 +629,8 @@
                         "description": "svariati mariii",
                         "price": 20.2,
                         "name": "mario",
-                        "availability": 1
+                        "availability": 1,
+                        "category": "scarpe"
                     },
                     "relationships": {
                         "pictures": {
@@ -650,7 +653,8 @@
                         "description": "svariati GINIIIII",
                         "price": 30.2,
                         "name": "GINO",
-                        "availability": 2
+                        "availability": 2,
+                        "category": "accessori"
                     },
                     "relationships": {
                         "pictures": {
@@ -674,7 +678,8 @@
                     "description": "svariati mariii",
                     "price": 20.2,
                     "name": "mario",
-                    "availability": 1
+                    "availability": 1,
+                    "category": "scarpe"
                 },
                 "relationships": {
                     "pictures": {
@@ -697,7 +702,8 @@
                     "description": "svariati mariii",
                     "price": 20.2,
                     "name": "new-name",
-                    "availability": 1
+                    "availability": 1,
+                    "category": "scarpe"
                 },
                 "relationships": {
                     "pictures": {
@@ -721,7 +727,8 @@
                     "availability": 2,
                     "price": 40.2,
                     "name": "new-name",
-                    "description": "new-description"
+                    "description": "new-description",
+                    "category": "new-category"
                 },
                 "relationships": {
                     "pictures": {
@@ -1529,6 +1536,12 @@
                     {
                         "detail": "Field cannot be blank",
                         "source": {
+                            "pointer": "/data/attributes/category"
+                        }
+                    },
+                    {
+                        "detail": "Field cannot be blank",
+                        "source": {
                             "pointer": "/data/attributes/description"
                         }
                     },
@@ -1553,7 +1566,8 @@
                         "description": "Item 1 description",
                         "name": "Item 1",
                         "availability": 5,
-                        "price": 5.24
+                        "price": 5.24,
+                        "category": "scarpe"
                     },
                     "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a",
                     "relationships": {
@@ -1582,7 +1596,8 @@
                             "description": "Item 1 description",
                             "name": "Item 1",
                             "availability": 5,
-                            "price": 5.24
+                            "price": 5.24,
+                            "category": "scarpe"
                         },
                         "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a",
                         "relationships": {
@@ -1610,7 +1625,8 @@
                             "price": 8,
                             "availability": 10,
                             "name": "Item 2",
-                            "description": "Item 2 description"
+                            "description": "Item 2 description",
+                            "category": "accessori"
                         },
                         "relationships": {
                             "pictures": {
@@ -1634,7 +1650,8 @@
                         "description": "Item 1 description",
                         "name": "Item 1",
                         "availability": 5,
-                        "price": 5.24
+                        "price": 5.24,
+                        "category": "scarpe"
                     },
                     "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a",
                     "relationships": {

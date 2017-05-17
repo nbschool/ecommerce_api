@@ -305,7 +305,7 @@ class TestItemSchema(TestCase):
             description='Item 2 description',
             price=8,
             availability=10,
-            category='scarpe',
+            category='accessori',
         )
         self.picture = Picture.create(
             item=self.item1,
@@ -325,6 +325,7 @@ class TestItemSchema(TestCase):
             'price': -2,         # more than 0
             'availability': -2,  # more than 0
             'description': '',   # not empty
+            'category': '',      # not empty
         }
         post_data = format_jsonapi_request('item', data)
         errors = ItemSchema.validate_input(post_data)
@@ -341,7 +342,6 @@ class TestItemSchema(TestCase):
 
     def test_get_items_list__success(self):
         data = ItemSchema.jsonapi_list([self.item1, self.item2])
-
         expected_result = EXPECTED_ITEMS['get_items_list__success']
         assert_valid_response(data, expected_result)
 
@@ -369,6 +369,7 @@ class TestPictureSchema(TestCase):
             description='Item 1 description',
             price=5.24,
             availability=5,
+            category='scarpe',
         )
         self.picture = Picture.create(
             item=self.item,

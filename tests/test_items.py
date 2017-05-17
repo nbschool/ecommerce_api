@@ -38,6 +38,7 @@ TEST_ITEM_WRONG = {
     'price': 30.20,
     'description': 'svariati GINIIIII',
     'availability': 3,
+    'category': 'scarpe',
 }
 TEST_ITEM_PRECISION = {
     'uuid': '68e587f7-3982-4b6a-a882-dd43b89134fe',
@@ -53,6 +54,7 @@ TEST_ITEM_AVAILABILITY = {
     'price': 30.00,
     'description': 'lorem ipsum',
     'availability': -1,
+    'category': 'scarpe',
 }
 TEST_PICTURE = {
     'uuid': 'df690434-a488-419f-899e-8853cba1a22b',
@@ -181,6 +183,7 @@ class TestItems(TestCase):
             'price': 40.20,
             'description': 'new-description',
             'availability': 2,
+            'category': 'new-category'
         })
         resp = self.app.patch('/items/{uuid}'.format(uuid=item.uuid),
                               data=json.dumps(post_data),
