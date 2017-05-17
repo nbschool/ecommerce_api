@@ -89,8 +89,7 @@ def user_creator(num_user):
 
 
 def item_creator(num_item):
-    LIST_CATEGORIES = ['scarpe', 'accessori', 'abbigliamento uomo',
-                      'abbigliamento donna']
+    LIST_CATEGORIES = ['scarpe', 'accessori', 'abbigliamento uomo', 'abbigliamento donna']
     for i in range(num_item):
         item_id = fake.uuid4()
         item_name = fake.sentence(nb_words=3, variable_nb_words=True)
