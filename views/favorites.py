@@ -31,7 +31,7 @@ class FavoritesHandler(Resource):
         except:
             return {"message": "ITEM DOESN'T EXIST"}, OK
 
-        has_already = Item.is_favorite(self, user, item)
+        has_already = Item.is_favorite(self, user)
 
         if has_already:
             return {"message": "ALREADY INSERTED"}, OK

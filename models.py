@@ -84,7 +84,6 @@ class Item(BaseModel):
                 return True
 
 
-
 @database.atomic()
 @pre_delete(sender=Item)
 def on_delete_item_handler(model_class, instance):
