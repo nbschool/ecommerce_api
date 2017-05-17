@@ -38,7 +38,7 @@ class OrdersHandler(Resource):
         req_items = res['data']['relationships']['items']['data']
         req_address = res['data']['relationships']['delivery_address']['data']
         req_user = res['data']['relationships']['user']['data']
-        
+
         # Check that the address exist
         try:
             user = User.get(User.uuid == req_user['id'])
@@ -70,10 +70,10 @@ class OrdersHandler(Resource):
         for req_item in req_items:
             item = next(i for i in items if str(i.uuid) == req_item['id'])
             items_to_add[item] = req_item['quantity']
-
         with database.atomic():
             try:
                 order = Order.create_order(g.user, address, items_to_add)
+                notify_new_order(address=order.delivery_address, user=order.user)
             except InsufficientAvailabilityException:
                 abort(BAD_REQUEST)
 
