@@ -51,6 +51,14 @@ class TestFavorites(TestCase):
                               user1.email, PASS2, None, None)
         assert resp.status_code == UNAUTHORIZED
 
+    def test_get_favorites_pass3__wrong(self):
+        """Forced case where a users uses the password of another user."""
+        user_path = 'favorites/'
+        resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'GET',
+                              None, None, None, None)
+        assert resp.status_code == UNAUTHORIZED
+        assert resp.get_data() == b'Unauthorized Access'
+
     def test_post_favorites__fail(self):
         user = add_user(USER1, PASS1)
         data = {"item_uuid": "3","user_uuid": str(user.uuid)}
