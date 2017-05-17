@@ -2,7 +2,7 @@ from auth import auth
 from flask import g, request
 from flask_restful import Resource
 from models import Favorite, Item
-from utils import check_required_fields, to_json
+from utils import check_required_fields
 from http.client import (CREATED, NOT_FOUND, OK, BAD_REQUEST)
 import uuid
 
