@@ -1,17 +1,18 @@
 """
 Test suite for ItemHandler and ItemListHandler
 """
-
-import json
-import os
-import uuid
+from tests.test_case import TestCase
 
 import http.client as client
+import os
+
+import simplejson as json
+
+import utils
 
 from models import Item, Picture
-from tests.test_case import TestCase
 from tests import test_utils
-import utils
+from tests.test_utils import format_jsonapi_request, RESULTS
 
 TEST_IMAGE_FOLDER = 'test_images'
 
@@ -67,6 +68,8 @@ TEST_PICTURE3 = {
 
 WRONG_UUID = '04f2f213-1a0f-443d-a5ab-79097ba725ba'
 
+EXPECTED_RESULTS = RESULTS['items']
+
 
 class TestItems(TestCase):
 
@@ -77,19 +80,15 @@ class TestItems(TestCase):
         test_utils.get_image_folder = utils.get_image_folder
 
     def test_post_item__success(self):
-        resp = self.app.post('/items/', data=json.dumps(TEST_ITEM),
+        data = format_jsonapi_request('item', TEST_ITEM)
+        resp = self.app.post('/items/', data=json.dumps(data),
                              content_type='application/json')
+
         assert resp.status_code == client.CREATED
         assert len(Item.select()) == 1
-        item = Item.select()[0].json()
-        assert item['name'] == TEST_ITEM['name']
-        assert item['price'] == TEST_ITEM['price']
-        assert item['description'] == TEST_ITEM['description']
-        assert item['availability'] == TEST_ITEM['availability']
-        try:
-            uuid.UUID(item['uuid'], version=4)
-        except ValueError:
-            assert False
+
+        expected_result = EXPECTED_RESULTS['post_item__success']
+        assert json.loads(resp.data) == expected_result
 
     def test_post_item__not_json_failure(self):
         resp = self.app.post('/items/', data=test_utils.wrong_dump(TEST_ITEM),
@@ -98,43 +97,61 @@ class TestItems(TestCase):
         assert len(Item.select()) == 0
 
     def test_post_item__failed(self):
-        resp = self.app.post('/items/', data=json.dumps(TEST_ITEM_WRONG),
+        data = format_jsonapi_request('item', TEST_ITEM_WRONG)
+        resp = self.app.post('/items/', data=json.dumps(data),
                              content_type='application/json')
+
         assert resp.status_code == client.BAD_REQUEST
+        assert Item.select().count() == 0
 
     def test_post_item__round_price(self):
-        resp = self.app.post('/items/', data=json.dumps(TEST_ITEM_PRECISION),
+        data = format_jsonapi_request('item', TEST_ITEM_PRECISION)
+        resp = self.app.post('/items/', data=json.dumps(data),
                              content_type='application/json')
         assert resp.status_code == client.CREATED
-        item = Item.select().get()
+
+        expected_result = EXPECTED_RESULTS['post_item__round_price']
+        assert json.loads(resp.data) == expected_result
+
+        item = Item.select()[0]
         assert round(TEST_ITEM_PRECISION['price'], 5) == float(item.price)
         assert not TEST_ITEM_PRECISION['price'] == item.price
-        assert TEST_ITEM_PRECISION['name'] == item.name
-        assert TEST_ITEM_PRECISION['description'] == item.description
         assert TEST_ITEM_PRECISION['availability'] == item.availability
 
     def test_post_item__availability(self):
-        resp = self.app.post('/items/',
-                             data=json.dumps(TEST_ITEM_AVAILABILITY),
+        data = format_jsonapi_request('item', TEST_ITEM_AVAILABILITY)
+        resp = self.app.post('/items/', data=json.dumps(data),
                              content_type='application/json')
         assert resp.status_code == client.BAD_REQUEST
         assert not Item.select().exists()
 
+    def test_post_item_missing_field__fail(self):
+        item = TEST_ITEM.copy()
+        del item['price']
+        data = format_jsonapi_request('item', item)
+
+        resp = self.app.post('/items/', data=json.dumps(data),
+                             content_type='application/json')
+
+        assert resp.status_code == client.BAD_REQUEST
+        expected_result = EXPECTED_RESULTS['post_item_missing_field__fail']
+        assert json.loads(resp.data) == expected_result
+
     def test_get_items__success(self):
         Item.create(**TEST_ITEM)
         Item.create(**TEST_ITEM2)
+
         resp = self.app.get('/items/')
-        items = json.loads(resp.data)
+
         assert resp.status_code == client.OK
-        assert len(items) == 2
-        assert TEST_ITEM in items
-        assert TEST_ITEM2 in items
+        assert json.loads(resp.data) == EXPECTED_RESULTS['get_items__success']
 
     def test_get_item__success(self):
         item = Item.create(**TEST_ITEM)
         resp = self.app.get('/items/{item_uuid}'.format(item_uuid=item.uuid))
+
         assert resp.status_code == client.OK
-        assert json.loads(resp.data) == TEST_ITEM
+        assert json.loads(resp.data) == EXPECTED_RESULTS['get_item__success']
 
     def test_get_item__failed(self):
         resp = self.app.get('/items/{item_uuid}'.format(item_uuid=WRONG_UUID))
@@ -142,45 +159,52 @@ class TestItems(TestCase):
 
     def test_patch_change1item__success(self):
         item = Item.create(**TEST_ITEM)
-        resp = self.app.patch('/items/{item_uuid}'.format(item_uuid=item.uuid),
-                              data=json.dumps({'name': 'new-name'}),
-                              content_type='application/json')
-        assert resp.status_code == client.OK
-        json_item = Item.get(Item.uuid == item.uuid).json()
-        assert json_item['name'] == 'new-name'
-        assert json_item['price'] == TEST_ITEM['price']
-        assert json_item['description'] == TEST_ITEM['description']
-        assert json_item['availability'] == TEST_ITEM['availability']
-        assert json_item['uuid'] == item.uuid
-        assert json.loads(resp.data) == json_item
 
-    def test_patch_allitems_success(self):
-        item = Item.create(**TEST_ITEM)
+        post_data = format_jsonapi_request('item', {'name': 'new-name'})
         resp = self.app.patch('/items/{item_uuid}'.format(item_uuid=item.uuid),
-                              data=json.dumps(
-                                  {'name': 'new-name', 'price': 40.20,
-                                   'description': 'new-description',
-                                   'availability': 2}),
+                              data=json.dumps(post_data),
                               content_type='application/json')
+
         assert resp.status_code == client.OK
-        json_item = Item.get(Item.uuid == item.uuid).json()
-        assert json_item['name'] == 'new-name'
-        assert json_item['price'] == 40.20
-        assert json_item['description'] == 'new-description'
-        assert json_item['availability'] == 2
-        assert json_item['uuid'] == item.uuid
-        assert json.loads(resp.data) == json_item
+        expected_result = EXPECTED_RESULTS['patch_change1item__success']
+        assert json.loads(resp.data) == expected_result
+
+        assert Item.get().name == 'new-name'
+
+    def test_patch_allitems__success(self):
+        item = Item.create(**TEST_ITEM)
+        post_data = format_jsonapi_request('item', {
+            'name': 'new-name',
+            'price': 40.20,
+            'description': 'new-description',
+            'availability': 2,
+        })
+        resp = self.app.patch('/items/{uuid}'.format(uuid=item.uuid),
+                              data=json.dumps(post_data),
+                              content_type='application/json')
+
+        assert resp.status_code == client.OK
+        expected_result = EXPECTED_RESULTS['patch_allitems__success']
+        assert json.loads(resp.data) == expected_result
+
+        # validate patch functionality checking for updated values
+        item = Item.get()
+        assert item.name == 'new-name'
+        assert float(item.price) == 40.20
+        assert item.description == 'new-description'
 
     def test_patch_item__wrong_uuid(self):
         Item.create(**TEST_ITEM)
+        post_data = format_jsonapi_request('item', TEST_ITEM2)
         resp = self.app.patch('/items/{item_uuid}'.format(item_uuid=WRONG_UUID),
-                              data=json.dumps(TEST_ITEM2),
+                              data=json.dumps(post_data),
                               content_type='application/json')
         assert resp.status_code == client.NOT_FOUND
 
     def test_patch_item__failed(self):
+        post_data = format_jsonapi_request('item', TEST_ITEM)
         resp = self.app.patch('/items/{item_uuid}'.format(item_uuid=WRONG_UUID),
-                              data=json.dumps(TEST_ITEM),
+                              data=json.dumps(post_data),
                               content_type='application/json')
         assert resp.status_code == client.NOT_FOUND
 
@@ -200,14 +224,15 @@ class TestItems(TestCase):
         picture = Picture.create(item=item, **TEST_PICTURE)
         picture2 = Picture.create(item=item, **TEST_PICTURE2)
         picture3 = Picture.create(item=item2, **TEST_PICTURE3)
-        path_pic = os.path.join(utils.get_image_folder(), "{picture_uuid}.{extension}".format(
-            picture_uuid=picture.uuid,
+        imgfolder = utils.get_image_folder()
+        path_pic = os.path.join(imgfolder, "{uuid}.{extension}".format(
+            uuid=picture.uuid,
             extension=picture.extension))
-        path_pic2 = os.path.join(utils.get_image_folder(), "{picture_uuid}.{extension}".format(
-            picture_uuid=picture2.uuid,
+        path_pic2 = os.path.join(imgfolder, "{uuid}.{extension}".format(
+            uuid=picture2.uuid,
             extension=picture2.extension))
-        path_pic3 = os.path.join(utils.get_image_folder(), "{picture_uuid}.{extension}".format(
-            picture_uuid=picture3.uuid,
+        path_pic3 = os.path.join(imgfolder, "{uuid}.{extension}".format(
+            uuid=picture3.uuid,
             extension=picture3.extension))
         open(path_pic, "wb")
         open(path_pic2, "wb")

@@ -12,9 +12,9 @@ This document explains our an e-commerce API. The API structure:
 * **.env** it contains all the environment variables that we use, the content of which is a list of variables = value
 
 ## Installing
- 
+
 What you need to install (can be found in the file **requirements.txt**)
- 
+
 ## Running the server
 
 To start the server in normal mode:
@@ -84,6 +84,18 @@ To perform the test of the project:
 pytest
 ```
 
+## Running demo-content
+
+Demo-content is a script which allows the user to generate fake (but realistic) data for all the database tables.
+
+To run the script, use the command:
+```
+PYTHONPATH=. python3 scripts/demo_content.py
+```
+
+At the beginning, if the database file doesn’t exists, a new one is created, tables are created and then populated.
+If the database file exists a menu is shown: you can overwrite the old database dropping the tables and populating them again, add data to the existing tables and, finally, exit.
+There are several *creator* functions which create every record of each table.
 
 ## Built With
 
