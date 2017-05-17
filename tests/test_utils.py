@@ -246,18 +246,16 @@ def assert_valid_response(data, expected):
         # data has already been parsed
         pass
 
-    # ensure that both `data` and `expected` are lists
-    if not isinstance(data, list):
-        data = [data]
-    if not isinstance(expected, list):
-        expected = [expected]
+    # ensure that both `data` and `expected` are lists while working on them
+    data_ = data if isinstance(data, list) else [data]
+    expected_ = expected if isinstance(expected, list) else [expected]
 
-    for item in data:
+    for item in data_:
         # Sort the included and errors lists of the response.data if present
         sort_data_lists(item, 'included', included_sorter)
         sort_data_lists(item, 'errors', errors_sorter)
 
-    for item in expected:
+    for item in expected_:
         # Sort the lists of the expected results if present
         sort_data_lists(item, 'included', included_sorter)
         sort_data_lists(item, 'errors', errors_sorter)
