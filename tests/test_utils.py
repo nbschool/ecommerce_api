@@ -221,9 +221,8 @@ def format_jsonapi_request(type_, data):
 def assert_valid_response(data, expected):
     """
     Take a flask app response.data and the expected test result, normalize them
-    sorting the `included` and `errors` lists if present, then confront, the
-    response data and the expected result, returning True or False wether the
-    structures are the same or not.
+    sorting the `included` and `errors` lists if present, then assert their
+    equality
     """
     def sort_data_lists(data, attribute, key):
         """
