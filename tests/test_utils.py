@@ -230,7 +230,7 @@ def assert_valid_response(data, expected):
         """
         try:
             data[attribute] = sorted(data[attribute], key=key)
-        except (KeyError, TypeError):
+        except KeyError:
             pass
 
     # sort functions for included and errors attributes
