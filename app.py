@@ -26,7 +26,7 @@ from views.items import ItemHandler, ItemsHandler
 from views.user import UsersHandler, UserHandler
 from views.address import AddressesHandler, AddressHandler
 from views.pictures import PictureHandler, ItemPictureHandler
-from views.favorites import FavoritesHandler
+from views.favorites import FavoritesHandler, FavoriteHandler
 
 
 app = Flask(__name__)
@@ -58,4 +58,4 @@ api.add_resource(UsersHandler, '/users/')
 api.add_resource(UserHandler, '/users/<uuid:user_uuid>')
 api.add_resource(PictureHandler, '/pictures/<uuid:picture_uuid>')
 api.add_resource(FavoritesHandler, '/favorites/')
-# api.add_resource(FavoriteHandler, 'favorites/<uuid:favorite_uuid>')
+api.add_resource(FavoriteHandler, '/favorites/<uuid:favorite_uuid>')
