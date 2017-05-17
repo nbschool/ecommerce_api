@@ -59,6 +59,15 @@ def get_random_pictures(num_pictures):
     return pictures
 
 
+def set_db(database):
+    Order._meta.database = database
+    Item._meta.database = database
+    OrderItem._meta.database = database
+    User._meta.database = database
+    Address._meta.database = database
+    Picture._meta.database = database
+
+
 def user_creator(num_user):
     """Create users from an Italian-like context. Due to param in factory create 'it_iT'."""
     for i in range(num_user):
