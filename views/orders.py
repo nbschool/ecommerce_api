@@ -21,7 +21,7 @@ class OrdersHandler(Resource):
 
     def get(self):
         """ Get all the orders."""
-        data = Order.json_list(Order.get_all())
+        data = Order.json_list(Order.select())
         return generate_response(data, OK)
 
     @auth.login_required

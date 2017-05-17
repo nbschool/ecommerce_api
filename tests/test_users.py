@@ -1,17 +1,16 @@
 """
 Test suite for User(s) resources.
 """
-from tests.test_case import TestCase
-
 import json
 import uuid
 from http.client import (BAD_REQUEST, CONFLICT, CREATED, NO_CONTENT, NOT_FOUND,
                          OK, UNAUTHORIZED)
 
 from models import Address, Item, Order, User
-
-from tests.test_utils import (add_address, add_user, format_jsonapi_request,
-                              RESULTS, open_with_auth, wrong_dump)
+from tests.test_case import TestCase
+from tests.test_utils import (RESULTS, add_address, add_admin_user, add_user,
+                              format_jsonapi_request, open_with_auth,
+                              assert_valid_response, wrong_dump)
 
 # main endpoint for API
 API_ENDPOINT = '/{}'
@@ -26,23 +25,19 @@ class TestUser(TestCase):
     Implements py.test suite for User Resource endpoints.
     """
 
-    def test_get_empty_list__success(self):
-        resp = self.app.get(API_ENDPOINT.format('users/'))
-
-        assert resp.status_code == OK
-        assert json.loads(resp.data) == []
-
     def test_get_users_list__success(self):
+        user = add_admin_user('user@email.com', TEST_USER_PSW)
         add_user('user1@email.com', TEST_USER_PSW,
                  id='4373d5d7-cae5-42bc-b218-d6fc6d18626f')
         add_user('user2@email.com', TEST_USER_PSW,
                  id='9630b105-ca99-4a27-a51d-ab3430bf52d1')
 
-        resp = self.app.get(API_ENDPOINT.format('users/'))
+        resp = open_with_auth(self.app, API_ENDPOINT.format('users/'), 'GET',
+                              user.email, TEST_USER_PSW, None, None)
 
         assert resp.status_code == OK
         expected_result = EXPECTED_RESULTS['get_users_list__success']
-        assert json.loads(resp.data) == expected_result
+        assert_valid_response(resp.data, expected_result)
 
     def test_post_new_user__success(self):
         user = format_jsonapi_request('user', {
@@ -56,11 +51,9 @@ class TestUser(TestCase):
                              content_type='application/json')
 
         assert resp.status_code == CREATED
-        resp_user = json.loads(resp.data)
 
         expected_result = EXPECTED_RESULTS['post_new_user__success']
-
-        assert resp_user == expected_result
+        assert_valid_response(resp.data, expected_result)
 
         assert User.select().count() == 1
         assert User.get().admin is False
@@ -110,7 +103,7 @@ class TestUser(TestCase):
         # email
         assert resp.status_code == BAD_REQUEST
         expected_result = EXPECTED_RESULTS['post_new_user_no_email__fail']
-        assert json.loads(resp.data) == expected_result
+        assert_valid_response(resp.data, expected_result)
 
         assert User.select().count() == 0
 
@@ -211,3 +204,19 @@ class TestUser(TestCase):
 
         assert resp.status_code == UNAUTHORIZED
         assert User.exists(user.email)
+
+    def test_get_users_list_not_authenticated__unauthorized(self):
+        add_user(None, TEST_USER_PSW)
+
+        resp = self.app.get(API_ENDPOINT.format('users/'))
+        assert resp.status_code == UNAUTHORIZED
+
+    def test_get_users_list_authenticated_not_admin__unauthorized(self):
+        add_user(None, TEST_USER_PSW)
+
+        user = add_user(None, TEST_USER_PSW)
+        resp = open_with_auth(self.app, API_ENDPOINT.format('users/'), 'GET',
+                              user.email, TEST_USER_PSW, None, None)
+
+        assert user.admin is False
+        assert resp.status_code == UNAUTHORIZED

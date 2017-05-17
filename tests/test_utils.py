@@ -51,8 +51,6 @@ class MockModelCreate:
     def __call__(self, created_at=mock_datetime(), uuid=None, **query):
         query['created_at'] = created_at
         query['uuid'] = uuid or next(self.uuid_generator)
-        # import pdb
-        # pdb.set_trace()
         return self.original(**query)
 
 
@@ -227,40 +225,49 @@ def format_jsonapi_request(type_, data):
     return retval
 
 
-def _test_res_sort_included(result, sortFn=lambda x: x['type']):
+def assert_valid_response(data, expected):
     """
-    Given a jsonapi response with included data(i.e. an Order that includes
-    user, address and items), return the same result with the list of `included`
-    sorted using ``sortFn``.
-
-    : param result: jsonapi structure that needs normalization
-    : param sortFn: sorting function called on every ``included`` resource.
-                   default takes the attribute ``type`` to sort the resources.
-    : type sortFn: ``function``
+    Take a flask app response.data and the expected test result, normalize them
+    sorting the `included` and `errors` lists if present, then assert their
+    equality
     """
-    # safety check.
-    if 'included' not in result:
-        return result
+    def sort_data_lists(data, attribute, key):
+        """
+        sort a given data structure's attribute (list) using the given key function
+        """
+        try:
+            data[attribute] = sorted(data[attribute], key=key)
+        except KeyError:
+            pass
 
-    def sort(r):
-        r['included'] = sorted(r['included'], key=sortFn)
-        return r
-    if type(result) is list:
-        result = [sort(r) for r in result]
-    else:
-        result = sort(result)
+    # sort functions for included and errors attributes
+    def included_sorter(i): return i['type']
 
-    return result
+    def errors_sorter(e): return e['source']['pointer']
 
+    try:
+        # lazy load of the response data, so we can pass either the parsed json
+        # response or the json string
+        data = json.loads(data)
+    except TypeError:
+        # data has already been parsed
+        pass
 
-def _test_res_sort_errors(e):
-    """
-    Returns the list of errors from a validate_input call, sorted by the
-    errors / source / pointer attribute, allowing proper testing.
-    """
+    # ensure that both `data` and `expected` are lists while working on them
+    data_items = data if isinstance(data, list) else [data]
+    expected_items = expected if isinstance(expected, list) else [expected]
 
-    e['errors'] = sorted(e['errors'], key=lambda e: e['source']['pointer'])
-    return e
+    for item in data_items:
+        # Sort the included and errors lists of the response.data if present
+        sort_data_lists(item, 'included', included_sorter)
+        sort_data_lists(item, 'errors', errors_sorter)
+
+    for item in expected_items:
+        # Sort the lists of the expected results if present
+        sort_data_lists(item, 'included', included_sorter)
+        sort_data_lists(item, 'errors', errors_sorter)
+
+    assert data == expected
 
 
 def wrong_dump(data):

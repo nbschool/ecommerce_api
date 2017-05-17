@@ -12,7 +12,7 @@ import utils
 
 from models import Item, Picture
 from tests import test_utils
-from tests.test_utils import format_jsonapi_request, RESULTS
+from tests.test_utils import format_jsonapi_request, RESULTS, assert_valid_response
 
 TEST_IMAGE_FOLDER = 'test_images'
 
@@ -88,7 +88,7 @@ class TestItems(TestCase):
         assert len(Item.select()) == 1
 
         expected_result = EXPECTED_RESULTS['post_item__success']
-        assert json.loads(resp.data) == expected_result
+        assert_valid_response(resp.data, expected_result)
 
     def test_post_item__not_json_failure(self):
         resp = self.app.post('/items/', data=test_utils.wrong_dump(TEST_ITEM),
@@ -111,7 +111,7 @@ class TestItems(TestCase):
         assert resp.status_code == client.CREATED
 
         expected_result = EXPECTED_RESULTS['post_item__round_price']
-        assert json.loads(resp.data) == expected_result
+        assert_valid_response(resp.data, expected_result)
 
         item = Item.select()[0]
         assert round(TEST_ITEM_PRECISION['price'], 5) == float(item.price)
@@ -135,7 +135,7 @@ class TestItems(TestCase):
 
         assert resp.status_code == client.BAD_REQUEST
         expected_result = EXPECTED_RESULTS['post_item_missing_field__fail']
-        assert json.loads(resp.data) == expected_result
+        assert_valid_response(resp.data, expected_result)
 
     def test_get_items__success(self):
         Item.create(**TEST_ITEM)
@@ -144,14 +144,14 @@ class TestItems(TestCase):
         resp = self.app.get('/items/')
 
         assert resp.status_code == client.OK
-        assert json.loads(resp.data) == EXPECTED_RESULTS['get_items__success']
+        assert_valid_response(resp.data, EXPECTED_RESULTS['get_items__success'])
 
     def test_get_item__success(self):
         item = Item.create(**TEST_ITEM)
         resp = self.app.get('/items/{item_uuid}'.format(item_uuid=item.uuid))
 
         assert resp.status_code == client.OK
-        assert json.loads(resp.data) == EXPECTED_RESULTS['get_item__success']
+        assert_valid_response(resp.data, EXPECTED_RESULTS['get_item__success'])
 
     def test_get_item__failed(self):
         resp = self.app.get('/items/{item_uuid}'.format(item_uuid=WRONG_UUID))
@@ -167,7 +167,7 @@ class TestItems(TestCase):
 
         assert resp.status_code == client.OK
         expected_result = EXPECTED_RESULTS['patch_change1item__success']
-        assert json.loads(resp.data) == expected_result
+        assert_valid_response(resp.data, expected_result)
 
         assert Item.get().name == 'new-name'
 
@@ -185,7 +185,7 @@ class TestItems(TestCase):
 
         assert resp.status_code == client.OK
         expected_result = EXPECTED_RESULTS['patch_allitems__success']
-        assert json.loads(resp.data) == expected_result
+        assert_valid_response(resp.data, expected_result)
 
         # validate patch functionality checking for updated values
         item = Item.get()

@@ -759,19 +759,45 @@
             {
                 "data": {
                     "type": "user",
+                    "attributes": {
+                        "first_name": "John Admin",
+                        "last_name": "Doe",
+                        "email": "user@email.com",
+                        "admin": true
+                    },
                     "relationships": {
-                        "orders": {
+                        "addresses": {
                             "data": []
                         },
-                        "addresses": {
+                        "orders": {
                             "data": []
                         }
                     },
+                    "id": "00000000-0000-0000-0000-000000000001",
+                    "links": {
+                        "self": "/users/00000000-0000-0000-0000-000000000001"
+                    }
+                },
+                "links": {
+                    "self": "/users/00000000-0000-0000-0000-000000000001"
+                }
+            },
+            {
+                "data": {
+                    "type": "user",
                     "attributes": {
-                        "admin": false,
-                        "email": "user1@email.com",
+                        "first_name": "John",
                         "last_name": "Doe",
-                        "first_name": "John"
+                        "email": "user1@email.com",
+                        "admin": false
+                    },
+                    "relationships": {
+                        "addresses": {
+                            "data": []
+                        },
+                        "orders": {
+                            "data": []
+                        }
                     },
                     "id": "4373d5d7-cae5-42bc-b218-d6fc6d18626f",
                     "links": {
@@ -785,19 +811,19 @@
             {
                 "data": {
                     "type": "user",
+                    "attributes": {
+                        "first_name": "John",
+                        "last_name": "Doe",
+                        "email": "user2@email.com",
+                        "admin": false
+                    },
                     "relationships": {
-                        "orders": {
-                            "data": []
-                        },
                         "addresses": {
                             "data": []
+                        },
+                        "orders": {
+                            "data": []
                         }
-                    },
-                    "attributes": {
-                        "admin": false,
-                        "email": "user2@email.com",
-                        "last_name": "Doe",
-                        "first_name": "John"
                     },
                     "id": "9630b105-ca99-4a27-a51d-ab3430bf52d1",
                     "links": {

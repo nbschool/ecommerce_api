@@ -35,10 +35,6 @@ class BaseModel(Model):
         database = database
 
     @classmethod
-    def get_all(cls):
-        return [o for o in cls.select()]
-
-    @classmethod
     def json_list(cls, objs_list):
         return cls._schema.jsonapi_list(objs_list)
 

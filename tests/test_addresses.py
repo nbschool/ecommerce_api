@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from models import Address
 from tests.test_case import TestCase
-from tests.test_utils import (add_address, add_user, RESULTS,
+from tests.test_utils import (add_address, add_user, RESULTS, assert_valid_response,
                               open_with_auth, format_jsonapi_request, wrong_dump)
 
 TEST_USER_PSW = '123'
@@ -64,7 +64,7 @@ class TestAddresses(TestCase):
         assert resp.status_code == OK
 
         expected_result = EXPECTED_RESULTS['get_addresses__success']
-        assert json.loads(resp.data) == expected_result
+        assert_valid_response(resp.data, expected_result)
 
     def test_create_address__success(self):
         user = add_user('mariorossi@gmail.com', '123',
@@ -79,7 +79,7 @@ class TestAddresses(TestCase):
         assert len(Address.select()) == 1
 
         expected_result = EXPECTED_RESULTS['create_address__success']
-        assert json.loads(resp.data) == expected_result
+        assert_valid_response(resp.data, expected_result)
 
     def test_create_address__failure_missing_field(self):
         user = add_user('mariorossi@gmail.com', '123')
@@ -94,7 +94,7 @@ class TestAddresses(TestCase):
         assert resp.status_code == BAD_REQUEST
         assert len(Address.select()) == 0
         expected_result = EXPECTED_RESULTS['create_address__failure_missing_field']
-        assert json.loads(resp.data) == expected_result
+        assert_valid_response(resp.data, expected_result)
 
     def test_create_address__failure_empty_field(self):
         user = add_user('mariorossi@gmail.com', '123')
@@ -109,7 +109,7 @@ class TestAddresses(TestCase):
         assert resp.status_code == BAD_REQUEST
         assert len(Address.select()) == 0
         expected_result = EXPECTED_RESULTS['create_address__failure_empty_field']
-        assert json.loads(resp.data) == expected_result
+        assert_valid_response(resp.data, expected_result)
 
     def test_get_address(self):
         user = add_user('mariorossi@gmail.com', '123',
@@ -122,7 +122,7 @@ class TestAddresses(TestCase):
                               user.email, TEST_USER_PSW, None, None)
 
         assert resp.status_code == OK
-        assert json.loads(resp.data) == EXPECTED_RESULTS['get_address']
+        assert_valid_response(resp.data, EXPECTED_RESULTS['get_address'])
 
     def test_get_address__failed(self):
         user = add_user('mariorossi@gmail.com', '123')
@@ -152,7 +152,8 @@ class TestAddresses(TestCase):
         expected_result = EXPECTED_RESULTS['put_address__success']
         # Check that the response data is what is expected and is also
         # the same as what has ben actually saved
-        assert json.loads(resp.data) == expected_result == json.loads(upd_addr)
+        assert_valid_response(resp.data, expected_result)
+        assert expected_result == json.loads(upd_addr)
 
     def test_patch_address__wrong_uuid(self):
         user = add_user('mariorossi@gmail.com', '123')
