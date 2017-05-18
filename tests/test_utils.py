@@ -20,12 +20,13 @@ SEED = 9623954
 fake = Factory.create('it_IT')
 fake.seed(SEED)
 
+
 def add_favorite(user, item):
     return Favorite.create(
             uuid=uuid.uuid4(),
             item=item,
             user=user,
-            )
+        )
 
 
 def add_item():
@@ -36,6 +37,7 @@ def add_item():
             description=fake.paragraph(nb_sentences=3, variable_nb_sentences=True),
             availability=random.randint(35, 60),
         )
+
 
 # ###########################################################
 # Mocking utilities
