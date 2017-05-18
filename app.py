@@ -20,7 +20,7 @@ from flask_login import LoginManager
 from flask_restful import Api
 from flask_cors import CORS
 
-from models import database
+from models import database, User
 from views.address import AddressesHandler, AddressHandler
 from views.auth import LoginHandler
 from views.orders import OrdersHandler, OrderHandler
@@ -33,6 +33,27 @@ CORS(app)
 api = Api(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    try:
+        return User.get(User.id == user_id)
+    except User.DoesNotExist:
+        return None
+
+
+@login_manager.request_loader
+def load_user_from_request(request):
+    # basic auth
+    try:
+        user = User.get(User.email == request.authorization.username)
+    except User.DoesNotExist:
+        return None
+
+    if user.verify_password(request.authorization.password):
+        return user
+    return None
 
 
 @app.before_request
