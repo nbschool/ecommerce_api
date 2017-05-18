@@ -190,13 +190,6 @@ class Order(BaseModel):
     class Meta:
         order_by = ('created_at',)
 
-    class OrderItemNotFound(Exception):
-        """
-        Exception raised when trying to access an OrderItem related to the
-        order (i.e. in remove_item(s)) but it cannot be found
-        """
-        pass
-
     @property
     def order_items(self):
         """
