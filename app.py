@@ -16,11 +16,13 @@ can be retrieved making a GET to `/api/users/`
 """
 
 from flask import Flask
+from flask_login import LoginManager
 from flask_restful import Api
 from flask_cors import CORS
 
 from models import database
 from views.address import AddressesHandler, AddressHandler
+from views.auth import LoginHandler
 from views.orders import OrdersHandler, OrderHandler
 from views.items import ItemHandler, ItemsHandler
 from views.user import UsersHandler, UserHandler
@@ -29,6 +31,8 @@ from views.pictures import ItemPictureHandler, PictureHandler
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 
 @app.before_request
@@ -46,6 +50,7 @@ def database_disconnect(response):
 
 api.add_resource(AddressesHandler, "/addresses/")
 api.add_resource(AddressHandler, "/addresses/<uuid:address_uuid>")
+api.add_resource(LoginHandler, "/auth/login/")
 api.add_resource(ItemsHandler, "/items/")
 api.add_resource(ItemHandler, "/items/<uuid:item_uuid>")
 api.add_resource(ItemPictureHandler, '/items/<uuid:item_uuid>/pictures/')
