@@ -23,8 +23,8 @@ fake.seed(SEED)
 def add_favorite(user, item):
     return Favorite.create(
             uuid=uuid.uuid4(),
-            item_id=item,
-            user_id=user,
+            item=item,
+            user=user,
             )
 
 
