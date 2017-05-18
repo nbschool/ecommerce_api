@@ -1,6 +1,6 @@
 from peewee import SqliteDatabase
 from colorama import init, Fore, Style
-from models import User, Item, Order, OrderItem, Address, Picture
+from models import User, Item, Order, OrderItem, Address, Picture, Favorite
 import sys
 
 
@@ -23,6 +23,8 @@ def drops_all_tables(database):
             Address.drop_table()
         if table == 'picture':
             Picture.drop_table()
+        if table == 'favorite':
+            Favorite.drop_table()
 
 
 def create_tables():
@@ -32,7 +34,7 @@ def create_tables():
     OrderItem.create_table(fail_silently=True)
     Address.create_table(fail_silently=True)
     Picture.create_table(fail_silently=True)
-
+    Favorite.create_table(fail_silently=True)
 
 def good_bye(word, default='has'):
     print(Fore.BLUE + Style.BRIGHT +
