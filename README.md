@@ -86,7 +86,7 @@ pytest
 
 ## Running init_db and demo-content
 
-The init_db is a script that it creates the database with blank tables, or if the database file exists, deleting the database and its tables and create the database with clean tables. There are no parameters and there are no confirmation requests.
+The init_db is a script that creates the database with empty tables, removing them if already present. The script does not accept any parameters and does not ask for user confirmation.
 
 To run the script, use the command:
 ```
@@ -99,8 +99,6 @@ To run the script, use the command:
 ```
 PYTHONPATH=. python3 scripts/demo_content.py
 ```
-
-There are several * creator * functions that create each record of each table.
 
 ## Built With
 
