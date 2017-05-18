@@ -227,8 +227,8 @@ class Order(BaseModel):
         :param Address address:
         :param dict items: {<Item>: <quantity:int>}
         """
-        total_price = sum([
-            item.price * quantity for item, quantity in items.items()])
+        total_price = sum(
+            item.price * quantity for item, quantity in items.items())
 
         with database.atomic():
             order = Order.create(
@@ -254,10 +254,11 @@ class Order(BaseModel):
         to_remove = {}
         to_edit = {}
         total_price_difference = 0
+        orderitems = self.order_items
 
         # split items in insert, delete and update sets
         for item, quantity in items.items():
-            for orderitem in self.order_items:
+            for orderitem in orderitems:
                 if orderitem.item == item:
                     difference = quantity - orderitem.quantity
                     if quantity == 0:
@@ -266,20 +267,20 @@ class Order(BaseModel):
                         raise InsufficientAvailabilityException(
                             item, quantity)
                     elif quantity < 0:
-                        raise WrongQuantity
+                        raise WrongQuantity()
                     else:
                         to_edit[item] = difference
-                    total_price_difference += (item.price * difference)
+                    total_price_difference += item.price * difference
                     break
             else:
                 if quantity <= 0:
-                    raise WrongQuantity
+                    raise WrongQuantity()
                 elif quantity > item.availability:
                     raise InsufficientAvailabilityException(
                         item, quantity)
                 else:
                     to_create[item] = quantity
-                total_price_difference += (item.price * quantity)
+                total_price_difference += item.price * quantity
 
         with database.atomic():
             self.edit_items_quantity(to_edit)
@@ -311,7 +312,6 @@ class Order(BaseModel):
                 orderitem.quantity += difference
                 orderitem._calculate_subtotal()
                 orderitem.save()
-                self.save()
 
     def delete_items(self, items):
         """
@@ -341,7 +341,6 @@ class Order(BaseModel):
             for item, quantity in items.items():
                 item.availability -= quantity
                 item.save()
-                self.save()
 
             OrderItem.insert_many([
                 {
