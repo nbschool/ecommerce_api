@@ -84,7 +84,14 @@ To perform the test of the project:
 pytest
 ```
 
-## Running demo-content
+## Running init_db and demo-content
+
+The init_db is a script that it creates the database with blank tables, or if the database file exists, deleting the database and its tables and create the database with clean tables. There are no parameters and there are no confirmation requests.
+
+To run the script, use the command:
+```
+PYTHONPATH=. python3 scripts/init_db.py
+```
 
 Demo-content is a script which allows the user to generate fake (but realistic) data for all the database tables.
 
@@ -93,13 +100,11 @@ To run the script, use the command:
 PYTHONPATH=. python3 scripts/demo_content.py
 ```
 
-At the beginning, if the database file doesn’t exists, a new one is created, tables are created and then populated.
-If the database file exists a menu is shown: you can overwrite the old database dropping the tables and populating them again, add data to the existing tables and, finally, exit.
-There are several *creator* functions which create every record of each table.
+There are several * creator * functions that create each record of each table.
 
 ## Built With
 
- Python - Used to create the back-end of API
+Python - Used to create the back-end of API
 
 
 ## License
