@@ -46,12 +46,14 @@ def load_user(user_id):
 @login_manager.request_loader
 def load_user_from_request(request):
     # basic auth
+    if not request.authorization:
+        return None
     try:
-        user = User.get(User.email == request.authorization.username)
+        user = User.get(User.email == request.authorization['username'])
     except User.DoesNotExist:
         return None
 
-    if user.verify_password(request.authorization.password):
+    if user.verify_password(request.authorization['password']):
         return user
     return None
 
