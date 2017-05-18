@@ -1,0 +1,8 @@
+{
+  "name": "ecommerce_api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/ceskomira90/ecommerce_api.git",
+  "author": "Francesco Mirabelli <ceskomira90@gmail.com>",
+  "license": "MIT"
+}
