@@ -53,3 +53,12 @@ def generate_response(data, status, mimetype='application/vnd.api+json'):
         status=status,
         mimetype=mimetype
     )
+
+
+def non_empty_str(val, name):
+    """
+    Check if a string is empty. If not, raise a ValueError exception.
+    """
+    if not str(val).strip():
+        raise ValueError('The argument {} is not empty'.format(name))
+    return str(val)
