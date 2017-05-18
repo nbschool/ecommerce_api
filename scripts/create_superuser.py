@@ -1,4 +1,5 @@
 import click
+import sys
 import uuid
 from models import User
 from utils import non_empty_str
@@ -37,12 +38,12 @@ def main(first_name, last_name, email, password):
             non_empty_str(value, field)
         except ValueError:
             print('ERROR! Some fields are empty or required')
-            return
+            sys.exit(-1)
 
     # If email is present in the database return a ERROR and close the program.
     if User.exists(request_data['email']):
-        print('ERROR! email already present')
-        return
+        print('ERROR! email already exists')
+        sys.exit(-1)
 
     User.create(
         uuid=uuid.uuid4(),
