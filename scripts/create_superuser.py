@@ -35,7 +35,7 @@ def main(first_name, last_name, email, password):
         try:
             value = request_data[field]
             non_empty_str(value, field)
-        except (ValueError):
+        except ValueError:
             print('ERROR! Some fields are empty or required')
             return
 
