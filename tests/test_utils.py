@@ -24,6 +24,7 @@ SEED = 9623954
 fake = Factory.create('it_IT')
 fake.seed(SEED)
 
+
 def add_favorite(user, item):
     return Favorite.create(
             uuid=uuid.uuid4(),

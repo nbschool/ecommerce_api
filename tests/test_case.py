@@ -16,6 +16,7 @@ TABLES = list(BaseModel)
 All the tables that the tests needs to work with.
 """
 
+
 @pytest.mark.usefixtures('mockuuid4')
 @pytest.mark.usefixtures('mock_create')
 class TestCase:

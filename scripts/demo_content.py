@@ -67,7 +67,7 @@ def set_db(database):
     User._meta.database = database
     Address._meta.database = database
     Picture._meta.database = database
-    Favorites._meta.database = database
+    Favorite._meta.database = database
 
 
 def user_creator(num_user):
@@ -216,7 +216,8 @@ def main():
     ACTIONS = {
         '1': {
             'key': '1', 'text': 'Add data to the current database',
-            'action': lambda: write_db(num_items, num_users, num_orders, num_addrs, num_pictures, num_favorites)
+            'action': lambda: write_db(num_items, num_users, num_orders,
+                                       num_addrs, num_pictures, num_favorites)
         },
         '': {
             'key': 'Enter', 'text': 'Just exit',
