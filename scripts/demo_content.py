@@ -6,7 +6,7 @@ and supply a new one db with new down-to-earth data.
 from peewee import fn
 from faker import Factory
 from colorama import init, Fore, Style
-from models import User, Item, Order, OrderItem, Address, Picture
+from models import User, Item, Order, OrderItem, Address, Picture, Favorite
 import utils
 import argparse
 import sys
@@ -32,7 +32,7 @@ TEXT_DISPLAY = Fore.MAGENTA + Style.BRIGHT + """
                 """
 
 
-def write_db(num_items, num_users, num_orders, num_addrs, num_pictures):
+def write_db(num_items, num_users, num_orders, num_addrs, num_pictures, num_favorites):
     """
     Given the SEED 9623954 the first user email is
     'fatima.caputo@tiscali.it', and its password is '9J0.'
@@ -42,6 +42,7 @@ def write_db(num_items, num_users, num_orders, num_addrs, num_pictures):
     item_creator(num_items)
     order_creator(num_orders)
     order_item_creator(random.randint(1, 7))
+    favorite_creator(num_favorites)
 
 
 def get_databases():
@@ -66,6 +67,7 @@ def set_db(database):
     User._meta.database = database
     Address._meta.database = database
     Picture._meta.database = database
+    Favorites._meta.database = database
 
 
 def user_creator(num_user):
@@ -160,6 +162,15 @@ def order_item_creator(num_items):
             order.add_item(an_item, quantity)
 
 
+def favorite_creator(num_favorites):
+    for i in range(num_favorites):
+        Favorite.create(
+            uuid=fake.uuid4(),
+            item=Item.select().order_by(fn.Random()).get(),
+            user=User.select().order_by(fn.Random()).get(),
+            )
+
+
 def good_bye(word, default='has'):
     print(Fore.BLUE + Style.BRIGHT + '*-* Your database {1} been {0}. *-*'.format(word, default))
     print(Fore.CYAN + Style.BRIGHT + '*_* Have a nice day! *_*')
@@ -200,11 +211,12 @@ def main():
     num_items = args.items
     num_orders = args.orders
     num_pictures = args.pictures
+    num_favorites = 10
 
     ACTIONS = {
         '1': {
             'key': '1', 'text': 'Add data to the current database',
-            'action': lambda: write_db(num_items, num_users, num_orders, num_addrs, num_pictures)
+            'action': lambda: write_db(num_items, num_users, num_orders, num_addrs, num_pictures, num_favorites)
         },
         '': {
             'key': 'Enter', 'text': 'Just exit',
