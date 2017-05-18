@@ -6,15 +6,15 @@ import pytest
 from peewee import SqliteDatabase
 
 from app import app
-from models import Address, Item, Order, OrderItem, Picture, User
+from models import Address, Item, Order, OrderItem, Picture, User, Favorite
 
-TABLES = [Address, Item, Order, OrderItem, Picture, User]
+
+TABLES = [Address, Item, Order, OrderItem, Picture, User, Favorite]
 """
 TABLES = list(BaseModel)
 
 All the tables that the tests needs to work with.
 """
-
 
 @pytest.mark.usefixtures('mockuuid4')
 @pytest.mark.usefixtures('mock_create')
