@@ -43,12 +43,11 @@ class FavoritesHandler(Resource):
 class FavoriteHandler(Resource):
     @auth.login_required
     def delete(self, favorite_uuid):
-        user_id = g.user.id
         try:
-            favorite = Favorite.get(Favorite.user_id == user_id)
+            favorite = Favorite.get(Favorite.user_id == g.user.id)
         except Favorite.DoesNotExist:
             return {'message': 'item `{}` not found'.format(favorite_uuid)}, NOT_FOUND
 
-        if favorite.user_id == user_id:
-            favorite.delete_instance(recursive=True)
+        if favorite.user_id == g.user.id:
+            g.user.delete_favorite()
             return {'message': 'item `{}` deleted'.format(favorite_uuid)}, OK
