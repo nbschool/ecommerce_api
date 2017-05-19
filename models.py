@@ -665,6 +665,7 @@ class Favorite(BaseModel):
     uuid = UUIDField(unique=True, default=uuid4)
     user = ForeignKeyField(User, related_name="favorites")
     item = ForeignKeyField(Item, related_name="favorites")
+    _schema = FavoriteSchema
 
     def json(self):
         return {
