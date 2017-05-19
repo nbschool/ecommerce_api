@@ -1,5 +1,5 @@
 
-from flask import request, g
+from flask import request
 from flask_restful import Resource
 from http.client import (CREATED, NO_CONTENT, NOT_FOUND, OK,
                          BAD_REQUEST, CONFLICT, UNAUTHORIZED)

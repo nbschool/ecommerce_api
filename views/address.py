@@ -26,7 +26,6 @@ class AddressesHandler(Resource):
 
         data = res['data']['attributes']
 
-        import pdb; pdb.set_trace()
         addr = Address.create(
             uuid=uuid.uuid4(),
             user=current_user.id,
