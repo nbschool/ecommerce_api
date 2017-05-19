@@ -164,6 +164,14 @@ class User(BaseModel):
         """
         return pbkdf2_sha256.verify(password, self.password)
 
+    def add_favorite(self, item):
+        """Link the favorite item to user."""
+        Favorite.create(
+                uuid=uuid4(),
+                item=item,
+                user=self,
+                )
+
 
 class Address(BaseModel):
     """ The model Address represent a user address.
@@ -367,19 +375,9 @@ class Favorite(BaseModel):
             'user_uuid': str(self.user.uuid),
         }
 
-    def add_favorite(self, item, user):
-        return Favorite.create(
-                    uuid=uuid4(),
-                    item=item,
-                    user=user,
-                )
-
-    def remove_favorite(self, favorite_uuid, user_id):
-        try:
-            favorite = Favorite.get(Favorite.user_id == user_id)
-        except Favorite.DoesNotExist:
-            return {'message': 'item `{}` not found'.format(favorite_uuid)}, 'NOT_FOUND'
-
-        if favorite.user_id == user_id:
-            favorite.delete_instance(recursive=True)
-            return {'message': 'item `{}` deleted'.format(favorite_uuid)}, 'OK'
+    # def add_favorite(self, item, user):
+    #     return Favorite.create(
+    #                 uuid=uuid4(),
+    #                 item=item,
+    #                 user=user,
+    #             )
