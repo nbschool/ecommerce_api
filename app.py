@@ -15,6 +15,9 @@ User can be deleted using `/api/users/<email>` and a list of all existing users
 can be retrieved making a GET to `/api/users/`
 """
 
+import os
+import dotenv
+
 from flask import Flask
 from flask_login import LoginManager
 from flask_restful import Api
@@ -28,11 +31,14 @@ from views.items import ItemHandler, ItemsHandler
 from views.user import UsersHandler, UserHandler
 from views.pictures import ItemPictureHandler, PictureHandler
 
+dotenv.load()
+
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
+app.secret_key = os.getenv('SECRET_KEY')
 
 
 @login_manager.user_loader
