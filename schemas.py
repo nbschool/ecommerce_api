@@ -79,6 +79,7 @@ class BaseSchema(Schema):
             str: json representing a list of resources in the form of
             ``[{resource}, ...]``
         """
+        # import pdb; pdb.set_trace()
         json_string = ','.join(o.json(include_data) for o in obj_list)
         json_string = '[{}]'.format(json_string)
 

@@ -1,7 +1,7 @@
 from auth import auth
 from flask import g, request
 from flask_restful import Resource
-from models import Favorite, Item
+from models import Favorite, Item, Address
 from utils import check_required_fields
 from http.client import (CREATED, NOT_FOUND, OK)
 from utils import generate_response
@@ -11,11 +11,17 @@ class FavoritesHandler(Resource):
     @auth.login_required
     def get(self):
         user = g.user
-        favorites = user.favorites
-        result = []
-        for favorite in favorites:
-            result.append(favorite.json())
-        return result, OK
+        # favorites = user.favorites
+        # result = []
+        # for favorite in favorites:
+        #     result.append(favorite.json())
+        # data = Favorite.json_list(user.favorites)
+        
+        # return generate_response(data, OK)
+        # return result, OK
+        user_addrs = list(Favorite.select().where(Favorite.user == g.user))
+        import pdb; pdb.set_trace()
+        return generate_response(Address.json_list(user_addrs), OK)
 
     @auth.login_required
     def post(self):

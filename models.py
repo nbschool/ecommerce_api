@@ -14,7 +14,7 @@ from playhouse.signals import Model, post_delete, pre_delete
 
 from exceptions import InsufficientAvailabilityException, WrongQuantity
 from schemas import (ItemSchema, UserSchema, OrderSchema, OrderItemSchema,
-                     BaseSchema, AddressSchema, PictureSchema)
+                     BaseSchema, AddressSchema, PictureSchema, FavoriteSchema)
 from utils import remove_image
 
 
