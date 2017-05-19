@@ -11,32 +11,6 @@ from base64 import b64encode
 
 from models import Address, User, Favorite, Item
 from utils import get_image_folder
-from faker import Factory
-
-# ###########################################################
-# Seed for test_favorite
-
-SEED = 9623954
-fake = Factory.create('it_IT')
-fake.seed(SEED)
-
-
-def add_favorite(user, item):
-    return Favorite.create(
-            uuid=uuid.uuid4(),
-            item=item,
-            user=user,
-        )
-
-
-def add_item():
-    return Item.create(
-            uuid=uuid.uuid4(),
-            name=fake.sentence(nb_words=3, variable_nb_words=True),
-            price=fake.pyfloat(left_digits=2, right_digits=2, positive=True),
-            description=fake.paragraph(nb_sentences=3, variable_nb_sentences=True),
-            availability=random.randint(35, 60),
-        )
 
 
 # ###########################################################
@@ -142,6 +116,24 @@ def add_address(user, country='Italy', city='Pistoia', post_code='51100',
         address=address,
         phone=phone,
     )
+
+
+def add_favorite(user, item):
+    return Favorite.create(
+            uuid=uuid.uuid4(),
+            item=item,
+            user=user,
+        )
+
+
+def add_item(name='Item Test', price='15.99', description='test test test'):
+    return Item.create(
+            uuid=uuid.uuid4(),
+            name=name,
+            price=price,
+            description=description,
+            availability=random.randint(35, 60),
+            )
 
 
 # ###########################################################
