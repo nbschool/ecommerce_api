@@ -1,32 +1,28 @@
-"""
-Flask Auth implementation
-"""
+from flask_login import LoginManager
 
-from flask import g
-from flask_httpauth import HTTPBasicAuth
 from models import User
 
-auth = HTTPBasicAuth()
+
+login_manager = LoginManager()
 
 
-@auth.verify_password
-def verify(email, password):
-    """
-    Verify the request to api users endpoints, trying to get the user with the
-    provided email and verifying the password against the stored hashed one.
-
-    If the user is verified it will be stored inside `Flask.g` to be used from
-    the enpoint handler if needed, for example to allow `delete` or `put` only
-    on the user's own account.
-    """
-
+@login_manager.user_loader
+def load_user(user_id):
     try:
-        user = User.get(User.email == email)
-        if user.verify_password(password):
-            # if the user is found and verified, register it inside the flask.g
-            # global object for further use inside the request handler
-            g.user = user
-            return True
-
+        return User.get(User.id == user_id)
     except User.DoesNotExist:
-        return False
+        return None
+
+
+@login_manager.request_loader
+def load_user_from_request(request):
+    if not request.authorization:
+        return None
+    try:
+        user = User.get(User.email == request.authorization['username'])
+    except User.DoesNotExist:
+        return None
+
+    if user.verify_password(request.authorization['password']):
+        return user
+    return None
