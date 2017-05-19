@@ -69,6 +69,20 @@ class Item(BaseModel):
             self.price,
             self.description)
 
+    def json(self):
+        return {
+            'uuid': str(self.uuid),
+            'name': self.name,
+            'price': float(self.price),
+            'description': self.description,
+            'availability': self.availability,
+        }
+
+    def is_favorite(self, user):
+        for favorite in user.favorites:
+            if favorite.item.uuid == self.uuid:
+                return True
+
 
 @database.atomic()
 @pre_delete(sender=Item)
@@ -346,3 +360,30 @@ class OrderItem(BaseModel):
     def _calculate_subtotal(self):
         """Calculate the subtotal value of the item(s) in the order."""
         self.subtotal = self.item.price * self.quantity
+
+
+class Favorite(BaseModel):
+    """ Many to many table to relate an item with a user."""
+    uuid = UUIDField(unique=True, default=uuid4)
+    user = ForeignKeyField(User, related_name="favorites")
+    item = ForeignKeyField(Item, related_name="favorites")
+
+    def json(self):
+        return {
+            'uuid': str(self.uuid),
+            'item_uuid': str(self.item.uuid),
+            'user_uuid': str(self.user.uuid),
+        }
+
+
+# Check if the table exists in the database; if not create it.
+# TODO: Use database migration
+
+
+User.create_table(fail_silently=True)
+Item.create_table(fail_silently=True)
+Order.create_table(fail_silently=True)
+OrderItem.create_table(fail_silently=True)
+Picture.create_table(fail_silently=True)
+Address.create_table(fail_silently=True)
+Favorite.create_table(fail_silently=True)

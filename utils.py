@@ -12,6 +12,27 @@ def get_image_folder():
     return os.path.join(get_project_root(), IMAGE_FOLDER)
 
 
+def check_required_fields(required_fields, request_data):
+    """
+    Check whether request_data provides all fields in
+    required_fields and they are not empty, bad request
+    is raised otherwise
+    """
+    for field in required_fields:
+        try:
+            value = request_data[field]
+            non_empty_str(value, field)
+        except (KeyError, ValueError):
+            abort(BAD_REQUEST)
+
+
+def non_empty_str(val, name):
+    """ Custom type for reqparser, blocking empty strings """
+    if not str(val).strip():
+        raise ValueError('The argument {} cannot be empty'.format(name))
+    return str(val)
+
+
 def save_image(file, picture_uuid, extension):
     """
     Create an image folder if not exist and then save in the
