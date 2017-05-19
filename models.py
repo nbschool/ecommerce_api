@@ -373,3 +373,13 @@ class Favorite(BaseModel):
                     item=item,
                     user=user,
                 )
+
+    def remove_favorite(self, favorite_uuid, user_id):
+        try:
+            favorite = Favorite.get(Favorite.user_id == user_id)
+        except Favorite.DoesNotExist:
+            return {'message': 'item `{}` not found'.format(favorite_uuid)}, 'NOT_FOUND'
+
+        if favorite.user_id == user_id:
+            favorite.delete_instance(recursive=True)
+            return {'message': 'item `{}` deleted'.format(favorite_uuid)}, 'OK'
