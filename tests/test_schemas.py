@@ -357,6 +357,7 @@ class TestPictureSchema(TestCase):
         test_utils.get_image_folder = utils.get_image_folder
 
     def setup_method(self):
+        super(TestPictureSchema, self).setup_method()
         self.item = Item.create(
             uuid='25da606b-dbd3-45e1-bb23-ff1f84a5622a',
             name='Item 1',
