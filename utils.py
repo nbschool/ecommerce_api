@@ -5,6 +5,8 @@ import dotenv
 import os
 
 from flask import Response
+import dotenv
+dotenv.load()
 
 dotenv.load()
 
