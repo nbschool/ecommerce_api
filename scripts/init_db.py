@@ -1,7 +1,6 @@
-from peewee import SqliteDatabase
 from colorama import init, Fore, Style
-from models import User, Item, Order, OrderItem, Address, Picture
 import sys
+from models import User, Item, Order, OrderItem, Address, Picture, database
 
 
 init(autoreset=True)
@@ -28,9 +27,9 @@ def drops_all_tables(database):
 def create_tables():
     User.create_table(fail_silently=True)
     Item.create_table(fail_silently=True)
+    Address.create_table(fail_silently=True)
     Order.create_table(fail_silently=True)
     OrderItem.create_table(fail_silently=True)
-    Address.create_table(fail_silently=True)
     Picture.create_table(fail_silently=True)
 
 
@@ -42,10 +41,9 @@ def good_bye(word, default='has'):
 
 
 def create_db():
-    db = SqliteDatabase('database.db', autocommit=False)
-    if db.is_closed():
-        db.connect()
-    drops_all_tables(db)
+    if database.is_closed():
+        database.connect()
+    drops_all_tables(database)
     create_tables()
     good_bye('created')
 
