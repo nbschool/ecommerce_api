@@ -35,8 +35,7 @@ class FavoritesHandler(Resource):
         if has_already:
             return {"message": "ALREADY INSERTED"}, OK
 
-        user.add_favorite(item)
-        favorite = user.favorites.get()
+        favorite = user.add_favorite(item)
 
         return favorite.json(), CREATED
 

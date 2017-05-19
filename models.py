@@ -267,7 +267,7 @@ class User(BaseModel, UserMixin):
 
     def add_favorite(self, item):
         """Link the favorite item to user."""
-        Favorite.create(
+        return Favorite.create(
                 uuid=uuid4(),
                 item=item,
                 user=self,
