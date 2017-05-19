@@ -7,20 +7,24 @@ from flask_restful import Resource
 import http.client as client
 
 from models import User
+from utils import generate_response
 
 
 class LoginHandler(Resource):
     """Handler of the login authentication"""
 
     def post(self):
-
         request_data = request.get_json(force=True)
-        # TODO validate request data
-        email = request_data['data']['attributes']['email']
-        # password = request_data['data']['attributes']['password']
+        email = request_data['email']
+        password = request_data['password']
 
         try:
             user = User.get(User.email == email)
         except User.DoesNotExist:
             abort(client.BAD_REQUEST)
+
+        if not user.verify_password(password):
+            abort(client.UNAUTHORIZED)
+
         login_user(user)
+        return generate_response({}, client.OK)
