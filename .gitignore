@@ -102,3 +102,5 @@ images/
 test_images/
 
 \.DS_Store
+
+docs/_build_html/

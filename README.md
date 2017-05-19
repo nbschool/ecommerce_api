@@ -100,6 +100,11 @@ To run the script, use the command:
 PYTHONPATH=. python3 scripts/demo_content.py
 ```
 
+## Building documentation
+
+from the `docs` folder run `make html` to manually build the documentation with sphinx.
+For development purposes `sphinx-autobuild ./source _build_html` can be used to hot reload the documentation that will served at `127.0.0.1:8000` (default)
+
 ## Built With
 
 Python - Used to create the back-end of API
