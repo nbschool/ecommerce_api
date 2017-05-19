@@ -38,7 +38,10 @@ CORS(app)
 api = Api(app)
 
 login_manager.init_app(app)
-app.secret_key = os.getenv('SECRET_KEY')
+app.secret_key = os.getenv(
+    'SECRET_KEY',
+    'development_secret_key',
+)
 
 
 @app.before_request
