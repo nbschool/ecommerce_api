@@ -1498,17 +1498,22 @@
                 "data": {
                     "type": "item",
                     "attributes": {
-                        "availability": 5,
+                        "description": "Item 1 description",
                         "name": "Item 1",
-                        "price": 5.24,
-                        "description": "Item 1 description"
-                    },
-                    "relationships": {
-                        "pictures": {
-                            "data": []
-                        }
+                        "availability": 5,
+                        "price": 5.24
                     },
                     "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a",
+                    "relationships": {
+                        "pictures": {
+                            "data": [
+                                {
+                                    "type": "picture",
+                                    "id": "08bd8de0-a4ac-459d-956f-cf6d8b8a7507"
+                                }
+                            ]
+                        }
+                    },
                     "links": {
                         "self": "/items/25da606b-dbd3-45e1-bb23-ff1f84a5622a"
                     }
@@ -1522,17 +1527,22 @@
                     "data": {
                         "type": "item",
                         "attributes": {
-                            "price": 5.24,
-                            "availability": 5,
+                            "description": "Item 1 description",
                             "name": "Item 1",
-                            "description": "Item 1 description"
-                        },
-                        "relationships": {
-                            "pictures": {
-                                "data": []
-                            }
+                            "availability": 5,
+                            "price": 5.24
                         },
                         "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a",
+                        "relationships": {
+                            "pictures": {
+                                "data": [
+                                    {
+                                        "type": "picture",
+                                        "id": "08bd8de0-a4ac-459d-956f-cf6d8b8a7507"
+                                    }
+                                ]
+                            }
+                        },
                         "links": {
                             "self": "/items/25da606b-dbd3-45e1-bb23-ff1f84a5622a"
                         }
@@ -1564,7 +1574,82 @@
                         "self": "/items/08bd8de0-a4ac-459d-956f-cf6d8b8a7507"
                     }
                 }
-            ]
+            ],
+            "get_item_include_pictures__success": {
+                "data": {
+                    "type": "item",
+                    "attributes": {
+                        "description": "Item 1 description",
+                        "name": "Item 1",
+                        "availability": 5,
+                        "price": 5.24
+                    },
+                    "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a",
+                    "relationships": {
+                        "pictures": {
+                            "data": [
+                                {
+                                    "type": "picture",
+                                    "id": "08bd8de0-a4ac-459d-956f-cf6d8b8a7507"
+                                }
+                            ]
+                        }
+                    },
+                    "links": {
+                        "self": "/items/25da606b-dbd3-45e1-bb23-ff1f84a5622a"
+                    }
+                },
+                "links": {
+                    "self": "/items/25da606b-dbd3-45e1-bb23-ff1f84a5622a"
+                },
+                "included": [
+                    {
+                        "type": "picture",
+                        "attributes": {
+                            "extension": "png",
+                            "filename": "08bd8de0-a4ac-459d-956f-cf6d8b8a7507.png"
+                        },
+                        "id": "08bd8de0-a4ac-459d-956f-cf6d8b8a7507",
+                        "relationships": {
+                            "item": {
+                                "data": {
+                                    "type": "item",
+                                    "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a"
+                                }
+                            }
+                        },
+                        "links": {
+                            "self": "/pictures/08bd8de0-a4ac-459d-956f-cf6d8b8a7507"
+                        }
+                    }
+                ]
+            }
+        },
+        "pictures": {
+            "get_picture_json__success": {
+                "data": {
+                    "type": "picture",
+                    "attributes": {
+                        "filename": "08bd8de0-a4ac-459d-956f-cf6d8b8a7507.png",
+                        "extension": "png"
+                    },
+                    "relationships": {
+                        "item": {
+                            "data": {
+                                "type": "item",
+                                "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a"
+                            }
+                        }
+                    },
+                    "id": "08bd8de0-a4ac-459d-956f-cf6d8b8a7507",
+                    "links": {
+                        "self": "/pictures/08bd8de0-a4ac-459d-956f-cf6d8b8a7507"
+                    }
+                },
+                "links": {
+                    "self": "/pictures/08bd8de0-a4ac-459d-956f-cf6d8b8a7507"
+                }
+            }
         }
     }
 }
