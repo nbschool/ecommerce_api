@@ -4,16 +4,17 @@ Tests run with no flask involvment and are used to check validation
 of inputs (post/put request data) and output from the Schemas dump method, that
 will be used as return value for Flask-Restful endpoint handlers.
 """
-from tests.test_case import TestCase
-
 import copy
-
 from datetime import datetime
 
-from models import Item, Order, Address
-from schemas import OrderSchema, UserSchema, AddressSchema, ItemSchema
-from tests.test_utils import (add_address, add_user, format_jsonapi_request,
-                              RESULTS, assert_valid_response)
+import utils
+from models import Address, Item, Order, Picture
+from schemas import (AddressSchema, ItemSchema, OrderSchema, PictureSchema,
+                     UserSchema)
+from tests import test_utils
+from tests.test_case import TestCase
+from tests.test_utils import (RESULTS, add_address, add_user,
+                              assert_valid_response, format_jsonapi_request)
 
 USER_TEST_DICT = {
     "first_name": "Monty",
@@ -26,6 +27,10 @@ EXPECTED_ORDERS = EXPECTED_RESULTS['orders']
 EXPECTED_USERS = EXPECTED_RESULTS['users']
 EXPECTED_ADDRESSES = EXPECTED_RESULTS['addresses']
 EXPECTED_ITEMS = EXPECTED_RESULTS['items']
+EXPECTED_PICTURES = EXPECTED_RESULTS['pictures']
+
+
+TEST_IMAGE_FOLDER = 'test_images'
 
 
 class TestUserSchema(TestCase):
@@ -297,6 +302,11 @@ class TestItemSchema(TestCase):
             price=8,
             availability=10,
         )
+        self.picture = Picture.create(
+            item=self.item1,
+            uuid='08bd8de0-a4ac-459d-956f-cf6d8b8a7507',
+            extension='png',
+        )
 
     def test_item_validate_input__success(self):
         post_data = format_jsonapi_request('item', self.data)
@@ -328,4 +338,40 @@ class TestItemSchema(TestCase):
         data = ItemSchema.jsonapi_list([self.item1, self.item2])
 
         expected_result = EXPECTED_ITEMS['get_items_list__success']
+        assert_valid_response(data, expected_result)
+
+    def test_get_item_include_pictures__success(self):
+        data, errors = ItemSchema.jsonapi(
+            self.item1, include_data=['pictures'])
+
+        assert errors == {}
+        expected_result = EXPECTED_ITEMS['get_item_include_pictures__success']
+        assert_valid_response(data, expected_result)
+
+
+class TestPictureSchema(TestCase):
+    @classmethod
+    def setup_class(cls):
+        super(TestPictureSchema, cls).setup_class()
+        utils.get_image_folder = lambda: TEST_IMAGE_FOLDER
+        test_utils.get_image_folder = utils.get_image_folder
+
+    def setup_method(self):
+        super(TestPictureSchema, self).setup_method()
+        self.item = Item.create(
+            uuid='25da606b-dbd3-45e1-bb23-ff1f84a5622a',
+            name='Item 1',
+            description='Item 1 description',
+            price=5.24,
+            availability=5,
+        )
+        self.picture = Picture.create(
+            item=self.item,
+            uuid='08bd8de0-a4ac-459d-956f-cf6d8b8a7507',
+            extension='png',
+        )
+
+    def test_get_picture_json__success(self):
+        data, _ = PictureSchema.jsonapi(self.picture)
+        expected_result = EXPECTED_PICTURES['get_picture_json__success']
         assert_valid_response(data, expected_result)

@@ -12,7 +12,7 @@ from playhouse.signals import Model, post_delete, pre_delete
 
 from exceptions import InsufficientAvailabilityException, WrongQuantity
 from schemas import (ItemSchema, UserSchema, OrderSchema, OrderItemSchema,
-                     BaseSchema, AddressSchema)
+                     BaseSchema, AddressSchema, PictureSchema)
 from utils import remove_image
 
 
@@ -90,18 +90,13 @@ class Picture(BaseModel):
     uuid = UUIDField(unique=True)
     extension = CharField()
     item = ForeignKeyField(Item, related_name='pictures')
+    _schema = PictureSchema
 
+    @property
     def filename(self):
         return '{}.{}'.format(
             self.uuid,
             self.extension)
-
-    def json(self):
-        return {
-            'uuid': str(self.uuid),
-            'extension': self.extension,
-            'item_uuid': str(self.item.uuid)
-        }
 
     def __str__(self):
         return '{}.{} -> item: {}'.format(
