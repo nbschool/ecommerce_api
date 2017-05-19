@@ -182,6 +182,12 @@ class UserSchema(BaseSchema):
         dump_only=True, id_field='uuid',
     )
 
+    # favorites = fields.Relationship(
+    #     many= True, include_resource_linkage=True,
+    #     type_='favorite', schema='FavoriteSchema',
+    #     dump_only=True, id_field='uuid',
+    # )
+
 
 class AddressSchema(BaseSchema):
     """
@@ -201,6 +207,27 @@ class AddressSchema(BaseSchema):
     post_code = fields.Str(required=True, validate=NOT_BLANK)
     address = fields.Str(required=True, validate=NOT_BLANK)
     phone = fields.Str(required=True, validate=NOT_BLANK)
+
+    user = fields.Relationship(
+        include_resource_linkage=True,
+        type_='user', schema='UserSchema',
+        id_field='uuid', required=True,
+    )
+
+class FavoriteSchema(BaseSchema):
+    """Schema for models.Favorite"""
+
+    class Meta:
+        type_ = 'favorite'
+        self_url = '/favorites/{uuid}'
+        self_url_many = '/favorites/'
+        self_url_kwargs = {'uuid': '<id>'}
+        json_module = simplejson
+
+    id = fields.Str(dump_only=True, attribute='uuid')
+    name = fields.Str(attribute='item.name')
+    description = fields.Str(attribute='item.description')
+    price = fields.Float(attribute='item.price')
 
     user = fields.Relationship(
         include_resource_linkage=True,

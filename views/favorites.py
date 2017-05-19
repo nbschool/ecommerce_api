@@ -4,6 +4,7 @@ from flask_restful import Resource
 from models import Favorite, Item
 from utils import check_required_fields
 from http.client import (CREATED, NOT_FOUND, OK)
+from utils import generate_response
 
 
 class FavoritesHandler(Resource):
@@ -37,7 +38,8 @@ class FavoritesHandler(Resource):
 
         favorite = user.add_favorite(item)
 
-        return favorite.json(), CREATED
+        # return favorite.json(), CREATED
+        return generate_response(favorite.json(), CREATED)
 
 
 class FavoriteHandler(Resource):
