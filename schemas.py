@@ -47,6 +47,7 @@ class BaseSchema(Schema):
         the rows of the table.
         return value is a string `[{resource}, ...]`
         """
+        # import pdb; pdb.set_trace()
         json_string = ','.join(o.json(include_data) for o in obj_list)
         json_string = '[{}]'.format(json_string)
 
