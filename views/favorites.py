@@ -45,11 +45,10 @@ class FavoriteHandler(Resource):
     def delete(self, favorite_uuid):
         user_id = g.user.id
 
-        try:
-            favorite = Favorite.get(Favorite.user_id == g.user.id)
-        except Favorite.DoesNotExist:
-            return ({'message': 'item `{}` not found'.format(favorite_uuid)}, NOT_FOUND)
+        result = Favorite.remove_favorite(self, favorite_uuid, user_id)
+        if result[1] == 'NOT_FOUND':
+            return result[0], NOT_FOUND
+        if result[1] == 'OK':
+            return result[0], OK
 
-        if favorite.user_id == user_id:
-            favorite.delete_instance(recursive=True)
-            return ({'message': 'item `{}` deleted'.format(favorite_uuid)}, OK)
+        
