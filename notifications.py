@@ -8,19 +8,18 @@ ENVIRONMENT = os.getenv('ENVIRONMENT')
 
 
 def send_email(subject, body):
-
-    if ENVIRONMENT == 'dev':
-        print('***email***')
-        print(body)
-        return
+    if ENVIRONMENT == 'production':
+        email = os.getenv('ADMIN_MAIL')
+        recipient = os.getenv('NOTIFICATION_MAIL')
 
     elif ENVIRONMENT == 'staging':
         email = os.getenv('ADMIN_MAIL_STAGING')
         recipient = os.getenv('NOTIFICATION_MAIL_STAGING')
 
     else:
-        email = os.getenv('ADMIN_MAIL')
-        recipient = os.getenv('NOTIFICATION_MAIL')
+        print('***email***')
+        print(body)
+        return
 
     request_url = 'https://api.mailgun.net/v2/{0}/messages'.format(SANDBOX)
     request = requests.post(request_url, auth=('api', KEY), data={
