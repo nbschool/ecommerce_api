@@ -4,7 +4,6 @@ from flask_restful import Resource
 from models import Favorite, Item
 from utils import check_required_fields
 from http.client import (CREATED, NOT_FOUND, OK)
-import uuid
 
 
 class FavoritesHandler(Resource):
@@ -36,11 +35,8 @@ class FavoritesHandler(Resource):
         if has_already:
             return {"message": "ALREADY INSERTED"}, OK
 
-        favorite = Favorite.create(
-                uuid=uuid.uuid4(),
-                item=item,
-                user=user,
-        )
+        favorite = Favorite.add_favorite(self, item, user)
+
         return favorite.json(), CREATED
 
 

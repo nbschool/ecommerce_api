@@ -36,6 +36,7 @@ def create_tables():
     Picture.create_table(fail_silently=True)
     Favorite.create_table(fail_silently=True)
 
+
 def good_bye(word, default='has'):
     print(Fore.BLUE + Style.BRIGHT +
           '*-* Your database {1} been {0}. *-*'.format(word, default))
