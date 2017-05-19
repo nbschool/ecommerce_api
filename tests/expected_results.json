@@ -865,6 +865,58 @@
             ]
         }
     },
+    "pictures": {
+        "get_item_pictures__success": [
+            {
+                "data": {
+                    "type": "picture",
+                    "attributes": {
+                        "filename": "df690434-a488-419f-899e-8853cba1a22b.jpg",
+                        "extension": "jpg"
+                    },
+                    "relationships": {
+                        "item": {
+                            "data": {
+                                "type": "item",
+                                "id": "429994bf-784e-47cc-a823-e0c394b823e8"
+                            }
+                        }
+                    },
+                    "id": "df690434-a488-419f-899e-8853cba1a22b",
+                    "links": {
+                        "self": "/pictures/df690434-a488-419f-899e-8853cba1a22b"
+                    }
+                },
+                "links": {
+                    "self": "/pictures/df690434-a488-419f-899e-8853cba1a22b"
+                }
+            },
+            {
+                "data": {
+                    "type": "picture",
+                    "attributes": {
+                        "filename": "c0001a48-10a3-43c1-b87b-eabac0b2d42f.png",
+                        "extension": "png"
+                    },
+                    "relationships": {
+                        "item": {
+                            "data": {
+                                "type": "item",
+                                "id": "429994bf-784e-47cc-a823-e0c394b823e8"
+                            }
+                        }
+                    },
+                    "id": "c0001a48-10a3-43c1-b87b-eabac0b2d42f",
+                    "links": {
+                        "self": "/pictures/c0001a48-10a3-43c1-b87b-eabac0b2d42f"
+                    }
+                },
+                "links": {
+                    "self": "/pictures/c0001a48-10a3-43c1-b87b-eabac0b2d42f"
+                }
+            }
+        ]
+    },
     "schemas": {
         "users": {
             "user_json__success": {

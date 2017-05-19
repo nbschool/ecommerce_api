@@ -98,13 +98,6 @@ class Picture(BaseModel):
             self.uuid,
             self.extension)
 
-    def json(self):
-        return {
-            'uuid': str(self.uuid),
-            'extension': self.extension,
-            'item_uuid': str(self.item.uuid)
-        }
-
     def __str__(self):
         return '{}.{} -> item: {}'.format(
             self.uuid,
