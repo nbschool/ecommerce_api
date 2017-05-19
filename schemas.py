@@ -225,6 +225,7 @@ class PictureSchema(BaseSchema):
     id = fields.Str(dump_only=True, attribute='uuid')
     # TODO: Make extensions validation rule oneOf
     extension = fields.Str(required=True, validate=NOT_BLANK)
+    filename = fields.Str(dump_only=True)
 
     item = fields.Relationship(
         include_resource_linkage=True,

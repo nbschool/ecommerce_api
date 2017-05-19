@@ -92,6 +92,7 @@ class Picture(BaseModel):
     item = ForeignKeyField(Item, related_name='pictures')
     _schema = PictureSchema
 
+    @property
     def filename(self):
         return '{}.{}'.format(
             self.uuid,
