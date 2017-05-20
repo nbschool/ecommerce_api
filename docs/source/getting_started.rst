@@ -6,24 +6,57 @@ Getting started with the project is pretty straightforward.
 Installing
 ----------
 
-``pip install -r requirements.txt``
+After setting up a ``virtualenv`` to work with, simply do:
+
+.. code-block:: console
+
+    $ pip install -r requirements.txt
 
 
 Running the server
 ------------------
 
-Server can be run with
+Application server can be run either directly from flask or through heroku.
 
-* flask using ``Flask_APP=app.py flask run`` 
-* gunicorn, through heroku, using ``heroku local``
+Flask
+^^^^^
+.. code-block:: console
 
-.. NOTE::
-    using heroku requires to setting up your ``.env`` file.
+    $ Flask_APP=app.py flask run
 
-    .. code-block:: none
+Heroku & Gunicorn
+^^^^^^^^^^^^^^^^^
 
-        FLASK_APP=app.py
+.. TODO::
+    .env example
+
+Setup your ``.env`` file with all the needed variables
+
+.. code-block:: none
+
+    FLASK_APP=app.py
+
+then
+
+.. code-block:: console
+
+    $ heroku local
+
+To startup the development server 
+
+.. code-block:: console
+
+    $ heroku local -f Procfile.dev
 
 
+Running test suite
+------------------
 
+Tests are built with ``pytest``, so just execute
 
+.. code-block:: console
+
+    $ pytest
+
+You may also refer to `Pytest documentation <https://docs.pytest.org/>`_
+for a complete guide on pytest arguments.
