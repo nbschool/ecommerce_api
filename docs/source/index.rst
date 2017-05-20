@@ -33,15 +33,30 @@ the linked documentation and specifications.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Content
+   :caption: Getting started
 
-   getting_started
-   dev_guide/index
-   doc_contrib
+   Quick startup <getting_started>
    heroku_integration
-   api/index
 
+.. toctree::
+    :maxdepth: 2
+    :caption: Developer's Guide
+    :glob:
+    
+    dev_guide/index
+    dev_guide/*
+    dev_guide/scripts/index
+    dev_guide/scripts/*
+    doc_contrib
 
+.. toctree::
+    :maxdepth: 1
+    :caption: API Documentation
+    :glob:
+
+    api/index
+    api/*
+    api/quick_reference/index
 
 
 Indices and tables
