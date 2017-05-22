@@ -1,4 +1,4 @@
-from tests.test_utils import add_user, open_with_auth, add_favorite, add_item
+from tests.test_utils import RESULTS, add_user, open_with_auth, add_favorite, add_item, assert_valid_response
 from tests.test_case import TestCase
 from http.client import OK, UNAUTHORIZED, CREATED, NOT_FOUND
 import json
@@ -9,6 +9,7 @@ PASS1 = '9J0'
 PASS2 = '0J9'
 # main endpoint for API
 API_ENDPOINT = '/{}'
+EXPECTED_RESULTS = RESULTS['favorites']
 
 
 class TestFavorites(TestCase):
@@ -28,11 +29,25 @@ class TestFavorites(TestCase):
         user_path = 'favorites/'
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'GET',
                               user.email, PASS1, None, None)
-        # data = json.loads(resp.data)
         assert resp.status_code == OK
-        # assert data[0]['user_uuid'] == str(user.uuid)
-        # assert data[0]['item_uuid'] == str(item.uuid)
-        # assert data[0]['uuid'] == str(favorite.uuid)
+        expected_result = EXPECTED_RESULTS['get_favorites__success']
+        assert_valid_response(resp.data, expected_result)
+
+    def test_get_favorites2__success(self):
+        user = add_user(USER1, PASS1)
+        user2 = add_user(USER2, PASS2)
+        item = add_item()
+        item2 = add_item()
+        item3 = add_item()
+        favorite = add_favorite(user, item)
+        favorite2 = add_favorite(user2, item2)
+        favorite3 = add_favorite(user, item3)
+        user_path = 'favorites/'
+        resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'GET',
+                              user.email, PASS1, None, None)
+        assert resp.status_code == OK
+        expected_result = EXPECTED_RESULTS['get_favorites2__success']
+        assert_valid_response(resp.data, expected_result)
 
     def test_get_favorites_pass__wrong(self):
         user = add_user(USER1, PASS1)
@@ -51,7 +66,6 @@ class TestFavorites(TestCase):
         assert resp.status_code == UNAUTHORIZED
 
     def test_get_favorites_pass3__wrong(self):
-        """Forced case where a users uses the password of another user."""
         user_path = 'favorites/'
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'GET',
                               None, None, None, None)
@@ -66,7 +80,7 @@ class TestFavorites(TestCase):
                               user.email, PASS1, 'application/json',
                               json.dumps(data))
         assert resp.status_code == OK
-        assert resp.get_data() == b'{"message": "ITEM DOESN\'T EXIST"}\n'
+        assert resp.data == b'{"message": "Item 3 doesn\'t exist."}\n'
 
     def test_post_favorites_success(self):
         user = add_user(USER1, PASS1)
@@ -78,11 +92,11 @@ class TestFavorites(TestCase):
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'POST',
                               user.email, PASS1, 'application/json',
                               json.dumps(data))
+        # import pdb; pdb.set_trace()
         assert resp.status_code == CREATED
-        # assert json.loads(resp.get_data())['item_uuid'] == str(item.uuid)
-        # assert json.loads(resp.get_data())['user_uuid'] == str(user.uuid)
-        # assert len(json.loads(resp.get_data())['uuid']) == 36
-        # assert len(json.loads(resp.get_data())) == 3c
+        expected_result = EXPECTED_RESULTS['post_favorites__success']
+        assert_valid_response(resp.data, expected_result)
+
 
     def test_delete_favorites__success(self):
         user = add_user(USER1, PASS1)
