@@ -1,5 +1,5 @@
 """
-Models contains the database models for the application.
+Application ORM Models built with Peewee
 """
 import datetime
 from uuid import uuid4
@@ -21,14 +21,32 @@ database = SqliteDatabase('database.db')
 
 
 class BaseModel(Model):
-    """ Base model for all the database models. """
+    """
+    BaseModel implements all the common logic for all the application models,
+    Acting as interface for the ``_schema`` methods and implementing common
+    fields and methods for each model.
 
+    .. NOTE::
+        All models **must** inherit from BaseModel to work properly.
+
+    """
+
+    #: Datetime representing the creation date of the resource.
     created_at = DateTimeField(default=datetime.datetime.now)
+
+    #: Datetime field updated every time the resource is saved.
     updated_at = DateTimeField(default=datetime.datetime.now)
+
+    #: Private attribute that each class that extends ``BaseModel`` should override
+    #: with a schema that describe how the model is to be validated and parsed for
+    #: output.
     _schema = BaseSchema
 
     def save(self, *args, **kwargs):
-        """Automatically update updated_at time during save"""
+        """
+        Overrides Peewee ``save`` method to automatically update
+        ``updated_at`` time during save.
+        """
         self.updated_at = datetime.datetime.now()
         return super(BaseModel, self).save(*args, **kwargs)
 
@@ -37,30 +55,65 @@ class BaseModel(Model):
 
     @classmethod
     def json_list(cls, objs_list):
+        """
+        Transform a list of instances of callee class into a jsonapi string
+
+        .. NOTE::
+            If overridden (while developing or for other reason) the method
+            should always return a ``string``.
+
+        Args:
+            objs_list (iterable): Model instances to serialize into a json list
+
+        Return:
+            string: jsonapi compliant list representation of all the given resources
+        """
         return cls._schema.jsonapi_list(objs_list)
 
     def json(self, include_data=[]):
+        """
+        Interface for the class defined ``_schema`` that returns a JSONAPI compliant
+        string representing the resource.
+
+        Args:
+            include_data (list): List of attribute names to be included
+
+        Returns:
+            string: JSONAPI representation of the resource, including optional
+            included resources (if any requested and present)
+        """
         parsed, errors = self._schema.jsonapi(self, include_data)
         return parsed
 
     @classmethod
     def validate_input(cls, data, partial=False):
+        """
+        Validate any python structure against the defined ``_schema`` for the class.
+
+        Args:
+            data (dict|list): The data to validate against the ``class._schema``
+            partial(bool): Allows to validate partial data structure (missing fields
+            will be ignored, useful to validate ``PATCH`` requests.)
+
+        Return:
+            ``list``, with errors if any, empty if validation passed
+        """
         return cls._schema.validate_input(data, partial=partial)
 
 
 class Item(BaseModel):
     """
-    Product model
-        name: product unique name
-        price: product price
-        description: product description text
-        availability: number of available products of this kind
-        category: product category
+    Item describes a product for the e-commerce platform.
     """
+    #: UUID: Item UUID
     uuid = UUIDField(unique=True)
+    #: str: Name for the product
     name = CharField()
+    #: decimal.Decimal: Price for a single product
     price = DecimalField(auto_round=True)
+    #: str: Product description
     description = TextField()
+    #: int: Quantity of items available
     availability = IntegerField()
     category = TextField()
     _schema = ItemSchema
@@ -90,13 +143,19 @@ class Picture(BaseModel):
         extension: picture type
         item: referenced item
     """
+    #: UUID: Picture's uuid
     uuid = UUIDField(unique=True)
+    #: str: Extension of the image file the Picture's model refer to
     extension = CharField()
+    #: Item: Foreign key referencing the Item related to the Picture.
+    #: A ``pictures`` field can be used from ``Item`` to access the Item resource
+    #: pictures
     item = ForeignKeyField(Item, related_name='pictures')
     _schema = PictureSchema
 
     @property
     def filename(self):
+        """Full name (uuid.ext) of the file that the Picture model reference."""
         return '{}.{}'.format(
             self.uuid,
             self.extension)
@@ -118,20 +177,28 @@ def on_delete_picture_handler(model_class, instance):
 class User(BaseModel, UserMixin):
     """
     User represents an user for the application.
-    Users created are always as role "normal" (admin field = False)
+    Users created are always as role "normal" (admin field=False)
     """
     uuid = UUIDField(unique=True)
+    #: str: User's first name
     first_name = CharField()
+    #: str: User's last name
     last_name = CharField()
+    #: str: User's **valid** email
     email = CharField(unique=True)
+    #: str: User's password
     password = CharField()
+    #: bool: User's admin status
     admin = BooleanField(default=False)
     _schema = UserSchema
 
     @staticmethod
     def exists(email):
         """
-        Check that an user exists by checking the email field (unique).
+        Check that an user exists by checking the email field(unique).
+
+        Args:
+            email (str): User's email to check
         """
         try:
             User.get(User.email == email)
@@ -141,9 +208,14 @@ class User(BaseModel, UserMixin):
 
     @staticmethod
     def hash_password(password):
-        """Use passlib to get a crypted password.
+        """
+        Use passlib to get a crypted password.
 
-        :returns: str
+        Args:
+            password (str): password to hash
+
+        Returns:
+            str: hashed password
         """
         return pbkdf2_sha256.hash(password)
 
@@ -152,36 +224,55 @@ class User(BaseModel, UserMixin):
         Verify a clear password against the stored hashed password of the user
         using passlib.
 
-        :returns: bool
+        Args:
+            password (str): Password to verify against the hashed stored password
+        Returns:
+            bool: wether the given email matches the stored one
         """
         return pbkdf2_sha256.verify(password, self.password)
 
 
 class Address(BaseModel):
-    """ The model Address represent a user address.
-        Each address is releated to one user, but one user can have
-        more addresses."""
+    """
+    The model Address represent a user address.
+    Each address is releated to one user, but one user can have
+    more addresses.
+    """
+    #: Address unique uuid
     uuid = UUIDField(unique=True)
+    #: User: Foreign key pointing to a ``User`` resource that "owns" the address
     user = ForeignKeyField(User, related_name='addresses')
+    #: str: Country for the address, i.e. ``Italy``
     country = CharField()
+    #: str: City name
     city = CharField()
+    #: str: Postal code for the address
     post_code = CharField()
+    #: str: Full address for the Address resource
     address = CharField()
+    # str: Phone number for the Address
     phone = CharField()
+
     _schema = AddressSchema
 
 
 class Order(BaseModel):
-    """ The model Order contains a list of orders - one row per order.
+    """
+    Orders represent an order placed by a ``User``, containing one or more ``Item``
+    that have to be delivered to one of the user's ``Address``.
     Each order will be place by one client.
     An order is represented by an uuid,
     a dateTimeField which is the date of the order, a FloatField which
     is the total price of the order. Finally, there is the delivery address,
     if it's different from the customers address from their record.
     """
+    #: UUID: Order's unique id
     uuid = UUIDField(unique=True, default=uuid4)
+    #: decimal.Decimal: Total price for the order
     total_price = DecimalField(default=0)
+    #: Address: Foreign key pointing to the address specified for the delivery
     delivery_address = ForeignKeyField(Address, related_name="orders")
+    #: User: Foreign key pointing to the order's creator
     user = ForeignKeyField(User, related_name="orders")
     _schema = OrderSchema
 
@@ -191,7 +282,11 @@ class Order(BaseModel):
     @property
     def order_items(self):
         """
-        Returns the list of OrderItem related to the order.
+        Property that execute a cross-table query against :class:`models.OrderItem`
+        to get a list of all OrderItem related to the callee order.
+
+        Returns:
+            list: :class:`models.OrderItem` related to the order.
         """
 
         query = (
@@ -205,10 +300,11 @@ class Order(BaseModel):
 
     def empty_order(self):
         """
-        Remove all the items from the order.
-        Delete all OrderItem related to this order and reset the total_price
-        value to 0.
+        Remove all the items from the order deleting all OrderItem related
+        to this order and resetting the order's total_price value to 0.
 
+        Returns:
+            Order: callee order instance
         """
 
         self.total_price = 0
@@ -224,7 +320,11 @@ class Order(BaseModel):
         item availability counter and raise InsufficientAvailability if
         quantity is less than item availability.
 
-        :param item Item: instance of models.Item
+        Args:
+            item (Item): The Item to be added
+            quantity(int, optional): How many items to add
+        Returns:
+            Order: callee instance
         """
         for orderitem in self.order_items:
             # Looping all the OrderItem related to this order, if one with the
@@ -255,7 +355,17 @@ class Order(BaseModel):
 
     def update_item(self, item, quantity):
         """
-        Update the quantity of the orderitem of the given item.
+        Update the Order with the new quantity of the given item. Takes care
+        of creating a new :class:`models.OrderItem` if needed or, adding or removing
+        the correct quantity for an existing OrderItem.
+
+        Args:
+            item (Item): Item to update for this order
+            quantity (int): **new** quantity for the item
+
+        Returns:
+            None
+
         """
         for order_item in self.order_items:
             if order_item.item == item:
@@ -272,8 +382,16 @@ class Order(BaseModel):
         """
         Remove the given item from the order, reducing quantity of the relative
         OrderItem entity or deleting it if removing the last item
-        (OrderItem.quantity == 0).
+        ``(OrderItem.quantity == 0)``.
         It also restores the item availability.
+
+        Args:
+            item (Item): Item to be removed
+            quantity (int): How many item to remove
+
+        Returns:
+            Order: callee instance
+
         """
         for orderitem in self.order_items:
             if orderitem.item == item:
@@ -291,16 +409,18 @@ class Order(BaseModel):
 
 class OrderItem(BaseModel):
     """ The model OrderItem is a cross table that contains the order
-        items - one row for each item on an order (so each order can
+        items - one row for each item on an order(so each order can
         generate multiple rows).
-        It contains two reference field. The first one is a reference
-        of the model Order and the other one is for the Item.
-        It contains also the quantity of the item and the total price
-        of that item.
+        Upon creation it needs to know which :class:`models.Order` and
+        :class:`models.Item` are put in relation.
     """
+    #: Order: Foreign key pointing to the order that created the ``OrderItem``
     order = ForeignKeyField(Order)
+    #: Item: Foreign key pointing to the Item relative to the OrderItem
     item = ForeignKeyField(Item)
+    #: int: Quantity of this Item for the order
     quantity = IntegerField()
+    #: decimal.Decimal: Calculated subtotal for the OrderItem
     subtotal = DecimalField()
     _schema = OrderItemSchema
 
@@ -308,6 +428,13 @@ class OrderItem(BaseModel):
         """
         Add one item to the OrderItem, increasing the quantity count and
         recalculating the subtotal value for this item(s)
+        Args:
+            quantity (int): How many items to add
+        Returns:
+            None
+        Raises:
+            InsufficientAvailabilityException: If the requested quantity to add
+                is higher than the :attr:`models.Item.availability`
         """
 
         if quantity > self.item.availability:
@@ -325,7 +452,13 @@ class OrderItem(BaseModel):
         Remove one item from the OrderItem, decreasing the quantity count and
         recalculating the subtotal value for this item(s)
 
-        :returns: int - quantity of items really removed.
+        Args:
+            quantity (int): How many items to add
+        Returns:
+            int: quantity of items actually removed
+        Raises:
+            WrongQuantity: If the request for the quantity to remove is higher
+                than the quantity present.
         """
 
         if self.quantity < quantity:
