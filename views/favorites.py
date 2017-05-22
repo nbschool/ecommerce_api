@@ -19,9 +19,8 @@ class FavoritesHandler(Resource):
         
         # return generate_response(data, OK)
         # return result, OK
-        user_addrs = list(Favorite.select().where(Favorite.user == g.user))
-        import pdb; pdb.set_trace()
-        return generate_response(Address.json_list(user_addrs), OK)
+        data = Favorite.json_list(Favorite.select())
+        return generate_response(data, OK)
 
     @auth.login_required
     def post(self):
