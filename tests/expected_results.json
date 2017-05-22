@@ -1,4 +1,32 @@
-{
+{   "favorites": {
+        "get_favorites__success": [
+            {
+                "data": {
+                    "type": "favorite",
+                    "attributes": {
+                        "description": "test test test",
+                        "name": "Item Test",
+                        "price": 15.99
+                    },
+                    "id": "00000000-0000-0000-0000-000000000003",
+                    "relationships": {
+                        "user": {
+                            "data": {
+                                "type": "user",
+                                "id": "00000000-0000-0000-0000-000000000001"
+                            }
+                        }
+                    },
+                    "links": {
+                        "self": "/favorites/00000000-0000-0000-0000-000000000003"
+                    }
+                },
+                "links": {
+                    "self": "/favorites/00000000-0000-0000-0000-000000000003"
+                }
+            }
+        ]
+    },
     "addresses": {
         "get_addresses__success": [
             {
