@@ -51,7 +51,10 @@ class OrdersHandler(Resource):
 
         with database.transaction() as txn:
             try:
-                order = Order.create(delivery_address=address,user=auth.current_user,)
+                order = Order.create(
+                    delivery_address=address,
+                    user=auth.current_user,
+                )
 
                 for item in items:
                     for req_item in req_items:
