@@ -112,6 +112,7 @@ class Item(BaseModel):
         price (decimal.Decimal): Price for a single product
         description (str): Product description
         availability (int): Quantity of items available
+        category (str): Category group of the item
 
     """
     uuid = UUIDField(unique=True)
