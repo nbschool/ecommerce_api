@@ -294,6 +294,7 @@ class Order(BaseModel):
                 self.save()
         return self
 
+    @database.atomic()
     def edit_items_quantity(self, items):
         """
         Update orderitems using a query for each item, and updates
@@ -303,15 +304,19 @@ class Order(BaseModel):
         if not items:
             return
 
-        with database.atomic():
+        orderitems = OrderItem.select().where(
+            OrderItem.item << [k for k in items.keys()],
+            OrderItem.order == self)
+
+        for orderitem in orderitems:
             for item, difference in items.items():
-                item.availability -= difference
-                item.save()
-                orderitem = OrderItem.get(
-                    OrderItem.item == item, OrderItem.order == self)
-                orderitem.quantity += difference
-                orderitem._calculate_subtotal()
-                orderitem.save()
+                if orderitem.item == item:
+                    item.availability -= difference
+                    item.save()
+                    orderitem.quantity += difference
+                    orderitem._calculate_subtotal()
+                    orderitem.save()
+                    break
 
     def delete_items(self, items):
         """
