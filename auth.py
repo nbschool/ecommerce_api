@@ -1,9 +1,24 @@
-from flask_login import LoginManager
+from flask_login import login_required, LoginManager
+from flask_login import current_user
 
 from models import User
 
 
 login_manager = LoginManager()
+
+
+class Auth:
+    @staticmethod
+    def login_required():
+        pass
+
+    @property
+    def current_user(self):
+        return current_user._get_current_object()
+
+
+auth = Auth()
+auth.login_required = login_required
 
 
 @login_manager.user_loader

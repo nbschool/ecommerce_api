@@ -5,7 +5,7 @@ from http.client import (CREATED, NO_CONTENT, NOT_FOUND, OK,
                          BAD_REQUEST, CONFLICT, UNAUTHORIZED)
 import uuid
 
-from flask_login import current_user, login_required
+import auth
 from models import User
 from utils import generate_response
 from notifications import notify_new_user
@@ -19,9 +19,9 @@ class UsersHandler(Resource):
     * `get` method to retrieve the list of all the users
     * `post` method to add a new user to the database.
     """
-    @login_required
+    @auth.login_required
     def get(self):
-        if not current_user.admin:
+        if not auth.current_user.admin:
             return ({'message': "You can't get the list users."}, UNAUTHORIZED)
 
         data = User.json_list(User.select())
@@ -67,7 +67,7 @@ class UserHandler(Resource):
     * `delete` method to remove an existing user from the database.
     """
 
-    @login_required
+    @auth.login_required
     def delete(self, user_uuid):
         """
         Delete an existing user from the database, looking up by user_uuid.
@@ -83,7 +83,7 @@ class UserHandler(Resource):
         # auth.py::verify() function, called by @auth.login_required decorator
         # and match it against the found user.
         # This is to prevent users from deleting other users' account.
-        if current_user != user:
+        if auth.current_user != user:
             return ({'message': "You can't delete another user's account"},
                     UNAUTHORIZED)
 

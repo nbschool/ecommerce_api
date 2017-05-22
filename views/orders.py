@@ -6,9 +6,9 @@ from http.client import (BAD_REQUEST, CREATED, NO_CONTENT, NOT_FOUND, OK,
                          UNAUTHORIZED)
 
 from flask import abort, request
-from flask_login import current_user, login_required
 from flask_restful import Resource
 
+from auth import auth
 from models import database, Address, Order, Item
 from notifications import notify_new_order
 from utils import generate_response
@@ -24,7 +24,7 @@ class OrdersHandler(Resource):
         data = Order.json_list(Order.select())
         return generate_response(data, OK)
 
-    @login_required
+    @auth.login_required
     def post(self):
         """ Insert a new order."""
         res = request.get_json(force=True)
@@ -51,10 +51,7 @@ class OrdersHandler(Resource):
 
         with database.transaction() as txn:
             try:
-                order = Order.create(
-                    delivery_address=address,
-                    user=current_user.id,
-                )
+                order = Order.create(delivery_address=address,user=auth.current_user,)
 
                 for item in items:
                     for req_item in req_items:
@@ -93,7 +90,7 @@ class OrderHandler(Resource):
 
         return generate_response(order.json(), OK)
 
-    @login_required
+    @auth.login_required
     def patch(self, order_uuid):
         """ Modify a specific order. """
         res = request.get_json(force=True)
@@ -116,7 +113,7 @@ class OrderHandler(Resource):
             # auth.py::verify() function, called by @auth.login_required decorator
             # and match it against the found user.
             # This is to prevent uses from modify other users' order.
-            if current_user != order.user and current_user.admin is False:
+            if auth.current_user != order.user and auth.current_user.admin is False:
                 return ({'message': "You can't delete another user's order"},
                         UNAUTHORIZED)
 
@@ -155,7 +152,7 @@ class OrderHandler(Resource):
 
         return generate_response(order.json(), OK)
 
-    @login_required
+    @auth.login_required
     def delete(self, order_uuid):
         """ Delete a specific order. """
         try:
@@ -167,7 +164,7 @@ class OrderHandler(Resource):
         # auth.py::verify() function, called by @auth.login_required decorator
         # and match it against the found user.
         # This is to prevent users from deleting other users' account.
-        if current_user != obj.user and current_user.admin is False:
+        if auth.current_user != obj.user and auth.current_user.admin is False:
             return ({'message': "You can't delete another user's order"},
                     UNAUTHORIZED)
 

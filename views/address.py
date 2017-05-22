@@ -1,5 +1,5 @@
+from auth import auth
 from flask import request
-from flask_login import current_user, login_required
 from flask_restful import Resource
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
 from models import Address
@@ -10,14 +10,14 @@ import uuid
 
 class AddressesHandler(Resource):
     """ Addresses endpoint. """
-    @login_required
+    @auth.login_required
     def get(self):
         user_addrs = list(Address.select().where(
-            Address.user == current_user.id))
+            Address.user == auth.current_user))
 
         return generate_response(Address.json_list(user_addrs), OK)
 
-    @login_required
+    @auth.login_required
     def post(self):
         res = request.get_json(force=True)
         errors = Address.validate_input(res)
@@ -28,7 +28,7 @@ class AddressesHandler(Resource):
 
         addr = Address.create(
             uuid=uuid.uuid4(),
-            user=current_user.id,
+            user=auth.current_user,
             country=data['country'],
             city=data['city'],
             post_code=data['post_code'],
@@ -40,11 +40,11 @@ class AddressesHandler(Resource):
 
 class AddressHandler(Resource):
     """ Address endpoint. """
-    @login_required
+    @auth.login_required
     def get(self, address_uuid):
         try:
             addr = Address.get(
-                Address.user == current_user.id,
+                Address.user == auth.current_user,
                 Address.uuid == address_uuid
             )
             return generate_response(addr.json(), OK)
@@ -52,10 +52,10 @@ class AddressHandler(Resource):
         except Address.DoesNotExist:
             return None, NOT_FOUND
 
-    @login_required
+    @auth.login_required
     def patch(self, address_uuid):
         try:
-            obj = Address.get(Address.user == current_user.id,
+            obj = Address.get(Address.user == auth.current_user,
                               Address.uuid == address_uuid)
         except Address.DoesNotExist:
             return None, NOT_FOUND
@@ -93,10 +93,10 @@ class AddressHandler(Resource):
 
         return generate_response(obj.json(), OK)
 
-    @login_required
+    @auth.login_required
     def delete(self, address_uuid):
         result = Address.delete().where(
-            Address.user == current_user.id,
+            Address.user == auth.current_user,
             Address.uuid == address_uuid,
         ).execute()
 
