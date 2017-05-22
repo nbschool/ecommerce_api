@@ -81,6 +81,13 @@ class ItemSchema(BaseSchema):
     price = fields.Float(required=True, validate=MORE_THAN_ZERO)
     description = fields.Str(required=True, validate=NOT_BLANK)
     availability = fields.Int(required=True, validate=MORE_THAN_ZERO)
+    category = fields.Str(required=True, validate=NOT_BLANK)
+
+    pictures = fields.Relationship(
+        include_resource_linkage=True,
+        type_='picture', schema='PictureSchema',
+        id_field='uuid', many=True,
+    )
 
 
 class OrderSchema(BaseSchema):
@@ -205,5 +212,24 @@ class AddressSchema(BaseSchema):
     user = fields.Relationship(
         include_resource_linkage=True,
         type_='user', schema='UserSchema',
+        id_field='uuid', required=True,
+    )
+
+
+class PictureSchema(BaseSchema):
+    class Meta:
+        type_ = 'picture'
+        self_url = '/pictures/{id}'
+        self_url_kwargs = {'id': '<id>'}
+        json_module = simplejson
+
+    id = fields.Str(dump_only=True, attribute='uuid')
+    # TODO: Make extensions validation rule oneOf
+    extension = fields.Str(required=True, validate=NOT_BLANK)
+    filename = fields.Str(dump_only=True)
+
+    item = fields.Relationship(
+        include_resource_linkage=True,
+        type_='item', schema='ItemSchema',
         id_field='uuid', required=True,
     )
