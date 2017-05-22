@@ -5,13 +5,13 @@ This module implements validation and output generation classes using
 `JSONAPI Standard <http://jsonapi.org/>`_, as well as all the custom validation rules
 used by the classes.
 
-Schemas are used to represent our resource :any:`models` and to validate clients' requests
+Schemas are used to represent our resource :mod:`models` and to validate clients' requests
 data when needed.
 
-Each implemented schemas should inherit from :any:`schemas.BaseSchema`, that implements all the
+Each implemented schemas should inherit from :class:`schemas.BaseSchema`, that implements all the
 logic required for them to work, while each indivual schemas declare the resource description.
 
-While schemas could be used directly they are meant to be inside the related :any:`models` resource
+While schemas could be used directly they are meant to be inside the related :mod:`models` resource
 class.
 
 """
@@ -35,7 +35,7 @@ class BaseSchema(Schema):
     """
     Base class for all Schemas.
     Extends ``marshmallow.Schema`` and implements methods to validate
-    data that can be used to generate new :any:`models` resources, as well as
+    data that can be used to generate new :mod:`models` resources, as well as
     methods to generate output in form of stringified json.
     """
     class Meta:
@@ -70,7 +70,7 @@ class BaseSchema(Schema):
         json stringified list.
 
         Args:
-            obj_list (iterable): An iterable of :any:`models` of the same type.
+            obj_list (iterable): An iterable of :mod:`models` of the same type.
                 Each ``obj`` **must** implements a ``json``.
             include_data (list): A list of :any:`str` describing the name of the
                 resource field that have to be included, if present.
@@ -106,9 +106,17 @@ class BaseSchema(Schema):
 class ItemSchema(BaseSchema):
     """
     Schema describing the Item resources.
-    Can include:
 
-    * ``pictures``
+    Attributes:
+        id (``UUID``): Item's ID
+        name (str): Item's name
+        price (float): Single item price
+        description (str): Item's description
+        availability (int): Quantity of items of this type available in the store
+
+        pictures (``Relationship``):list of :any:`Picture` related to the
+            Currently parsed `Item`. If included it will attach all the
+            pictures information within the `included` attribute of the generated json.
     """
 
     class Meta:
@@ -117,21 +125,13 @@ class ItemSchema(BaseSchema):
         self_url_kwargs = {'id': '<id>'}
         self_url_many = '/items/'
 
-    #: :any:`UUID` Id field
     id = fields.Str(dump_only=True, attribute='uuid')
-    #: str: Item's name
     name = fields.Str(required=True, validate=NOT_BLANK)
-    #: float: Single item price
     price = fields.Float(required=True, validate=MORE_THAN_ZERO)
-    #: str: Item's description
     description = fields.Str(required=True, validate=NOT_BLANK)
-    #: int: Quantity of items of this type available in the store
     availability = fields.Int(required=True, validate=MORE_THAN_ZERO)
     category = fields.Str(required=True, validate=NOT_BLANK)
 
-    #: Relationship fields pointing to a list of :any:`models.Picture` related to the
-    #: Currently parsed `Item`. If included it will attach all the pictures information
-    #: within the `included` attribute of the generated json.
     pictures = fields.Relationship(
         include_resource_linkage=True,
         type_='picture', schema='PictureSchema',
@@ -142,11 +142,24 @@ class ItemSchema(BaseSchema):
 class OrderSchema(BaseSchema):
     """
     Schema describing an Order resource.
-    Can include:
 
-    * ``user``: Author of the order
-    * ``delivery_address``: Resource pointing to the selected delivery address
-    * ``items``: the list of items selected for the order
+    Attributes:
+        id (``UUID``): Order's ID
+
+        date (:any:`datetime`): Order's creation date
+
+        total_price (:any:`decimal.Decimal`): Order's total price,
+            if passed through validation should be at least equal to 0
+
+        delivery_address (``Relationship``): :any:`Address` specified for delivery.
+            Should be `owned` by the order's author.
+
+        items (``Relationship``):list of :any:`Item` in the order.
+            Objects in the relationship list is generated through the
+            :any:`OrderItemSchema`. If passed while validating should not be empty.
+
+        user (``Relationship``): the :any:`models.User` that created the Order.
+
     """
 
     class Meta:
@@ -156,27 +169,18 @@ class OrderSchema(BaseSchema):
         self_url_kwargs = {'id': '<id>'}
         json_module = simplejson
 
-    #: :any:`UUID`: Order's ID
     id = fields.Str(dump_only=True, attribute='uuid')
-    #: :any:`datetime`: Order's creation date
     date = fields.DateTime(attribute='created_at', dump_only=True)
-    #: :any:`decimal.Decimal`: Order's total price, if passed through validation should
-    #: be at least equal to 0
     total_price = fields.Decimal(dump_only=True, places=2,
                                  validate=MORE_THAN_ZERO,
                                  )
 
-    #: Relationship pointing to a :any:`models.Address` that should be `owned` by
-    #: the order's author.
     delivery_address = fields.Relationship(
         required=True, include_resource_linkage=True,
         type_='address', schema='AddressSchema',
         id_field='uuid',
     )
 
-    #: Relationship field for the list of `item` that are in the order.
-    #: Objects in the relationship list is generated through the
-    #: :any:`OrderItemSchema`. If passed while validating should not be empty.
     items = fields.Relationship(
         many=True, include_resource_linkage=True,
         type_='item', schema='OrderItemSchema',
@@ -185,7 +189,6 @@ class OrderSchema(BaseSchema):
         validate=NOT_EMPTY,
     )
 
-    #: Relationship field pointing the the :any:`models.User` that created the Order.
     user = fields.Relationship(
         include_resource_linkage=True,
         type_='user', schema='UserSchema',
@@ -205,6 +208,14 @@ class OrderItemSchema(BaseSchema):
 
     Links generated from the Schema Meta class point to the Item resource, since
     that the :any:`models.OrderItem` does not have a direct resource.
+
+    Attributes:
+        id (``UUID``): ID of the related **Item**
+        name (str): Item's name
+        description (str): Item's description
+        price (float): Item's price
+        quantity (int): Quantity of item's of this type included in the order
+        subtotal (float): Subtotal for all the items of this type in the order
     """
 
     class Meta:
@@ -214,23 +225,29 @@ class OrderItemSchema(BaseSchema):
         self_url_many = '/items/'
         json_module = simplejson
 
-    #: :any:`UUID`: ID of the related **Item**
     id = fields.Str(dump_only=True, attribute='item.uuid')
-    #: str: Item's name
     name = fields.Str(attribute='item.name')
-    #: str: Item's description
     description = fields.Str(attribute='item.description')
-    #: float: Item's price
     price = fields.Float(attribute='item.price')
-    #: int: Quantity of item's of this type included in the order
     quantity = fields.Int()
-    #: float: Subtotal for all the items of this type in the order
     subtotal = fields.Float()
 
 
 class UserSchema(BaseSchema):
     """
-    Schema for models.User, include relationship with user orders
+    Schema representing a :any:`User` resource.
+
+    Attributes:
+     id (``UUID``): User's id
+     first_name (str): User's first name. If present must not be blank
+     last_name (str): User's last name. If present must not be blank
+     email (str): User's email. If present must be a valid email and not be blank
+     password (str): User's password. If present must not be blank.
+     admin (bool): wether the user is registered as admin or not
+
+     orders (``Relationship``): field pointing to all the :any:`Order` created
+        by the user.
+     addresses (``Relationship``): field pointing to the user's :any:`Address` resources
     """
 
     class Meta:
@@ -262,7 +279,19 @@ class UserSchema(BaseSchema):
 
 class AddressSchema(BaseSchema):
     """
-    Schema for models.Address
+    Schema representing :any:`Address` resources.
+    All the fields of the schema, if present, must be not empty strings.
+
+    Attributes:
+        id: (``UUID``): Address id
+        country (str): Address' country (i.e. `Italy`)
+        city (str): Address' city name (i.e. `Florence`)
+        post_code (str): Address' postal code
+        address (str): Address' full address (i.e. `via rossi 10`)
+        phone (str): Phone number registered with the address
+        user (``Relationship``): field pointing to the :any:`User` that
+            created the address.
+
     """
 
     class Meta:
@@ -287,6 +316,17 @@ class AddressSchema(BaseSchema):
 
 
 class PictureSchema(BaseSchema):
+    """
+    Schema for describing :any:`Picture` resources.
+
+    Attributes:
+        id (uuid): Picture's ID
+        extension (str): picture file's extension
+        filename (str): full name for the picture
+        item (``Relationship``): any:`Item` related to the picture
+            resource.
+    """
+
     class Meta:
         type_ = 'picture'
         self_url = '/pictures/{id}'

@@ -7,5 +7,4 @@ Schemas
 
 .. automodule:: schemas
     :members:
-    :exclude-members: BaseSchema
     :member-order: bysource
