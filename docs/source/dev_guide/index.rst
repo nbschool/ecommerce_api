@@ -8,6 +8,11 @@ such as schemas and models integration, how to develop new tests, setup views an
 
 .. contents:: :local:
 
+Project structure
+-----------------
+
+.. TODO:: Describe project structure
+
 Running dev server
 ------------------
 
