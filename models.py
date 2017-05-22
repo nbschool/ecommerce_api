@@ -371,10 +371,3 @@ class Favorite(BaseModel):
     user = ForeignKeyField(User, related_name="favorites")
     item = ForeignKeyField(Item, related_name="favorites")
     _schema = FavoriteSchema
-
-    def json(self):
-        return {
-            'uuid': str(self.uuid),
-            'item_uuid': str(self.item.uuid),
-            'user_uuid': str(self.user.uuid),
-        }
