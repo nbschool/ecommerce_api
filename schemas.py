@@ -81,6 +81,7 @@ class ItemSchema(BaseSchema):
     price = fields.Float(required=True, validate=MORE_THAN_ZERO)
     description = fields.Str(required=True, validate=NOT_BLANK)
     availability = fields.Int(required=True, validate=MORE_THAN_ZERO)
+    category = fields.Str(required=True, validate=NOT_BLANK)
 
     pictures = fields.Relationship(
         include_resource_linkage=True,

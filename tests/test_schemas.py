@@ -123,6 +123,7 @@ class TestOrderSchema(TestCase):
             description='Item 1 description',
             price=5.24,
             availability=10,
+            category='scarpe',
         )
         self.item2 = Item.create(
             uuid='08bd8de0-a4ac-459d-956f-cf6d8b8a7507',
@@ -130,6 +131,7 @@ class TestOrderSchema(TestCase):
             description='Item 2 description',
             price=8,
             availability=10,
+            category='scarpe',
         )
 
     def test_order_json__success(self):
@@ -286,7 +288,8 @@ class TestItemSchema(TestCase):
             'name': 'Test item',
             'price': 10.25,
             'description': 'Test item description',
-            'availability': 73
+            'availability': 73,
+            'category': 'scarpe',
         }
         self.item1 = Item.create(
             uuid='25da606b-dbd3-45e1-bb23-ff1f84a5622a',
@@ -294,6 +297,7 @@ class TestItemSchema(TestCase):
             description='Item 1 description',
             price=5.24,
             availability=5,
+            category='scarpe',
         )
         self.item2 = Item.create(
             uuid='08bd8de0-a4ac-459d-956f-cf6d8b8a7507',
@@ -301,6 +305,7 @@ class TestItemSchema(TestCase):
             description='Item 2 description',
             price=8,
             availability=10,
+            category='accessori',
         )
         self.picture = Picture.create(
             item=self.item1,
@@ -320,6 +325,7 @@ class TestItemSchema(TestCase):
             'price': -2,         # more than 0
             'availability': -2,  # more than 0
             'description': '',   # not empty
+            'category': '',      # not empty
         }
         post_data = format_jsonapi_request('item', data)
         errors = ItemSchema.validate_input(post_data)
@@ -336,7 +342,6 @@ class TestItemSchema(TestCase):
 
     def test_get_items_list__success(self):
         data = ItemSchema.jsonapi_list([self.item1, self.item2])
-
         expected_result = EXPECTED_ITEMS['get_items_list__success']
         assert_valid_response(data, expected_result)
 
@@ -364,6 +369,7 @@ class TestPictureSchema(TestCase):
             description='Item 1 description',
             price=5.24,
             availability=5,
+            category='scarpe',
         )
         self.picture = Picture.create(
             item=self.item,

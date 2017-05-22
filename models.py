@@ -54,12 +54,14 @@ class Item(BaseModel):
         price: product price
         description: product description text
         availability: number of available products of this kind
+        category: product category
     """
     uuid = UUIDField(unique=True)
     name = CharField()
     price = DecimalField(auto_round=True)
     description = TextField()
     availability = IntegerField()
+    category = TextField()
     _schema = ItemSchema
 
     def __str__(self):

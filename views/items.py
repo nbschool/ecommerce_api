@@ -44,6 +44,7 @@ class ItemsHandler(Resource):
             price=float(data['price']),
             description=data['description'],
             availability=int(data['availability']),
+            category=data['category'],
         )
 
         return generate_response(item.json(), client.CREATED)
@@ -79,6 +80,7 @@ class ItemHandler(Resource):
         price = data.get('price')
         description = data.get('description')
         availability = data.get('availability')
+        category = data.get('category')
 
         if name:
             obj.name = name
@@ -91,6 +93,9 @@ class ItemHandler(Resource):
 
         if availability:
             obj.availability = availability
+
+        if category:
+            obj.category = category
 
         obj.save()
 
