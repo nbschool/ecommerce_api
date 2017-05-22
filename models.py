@@ -29,17 +29,17 @@ class BaseModel(Model):
     .. NOTE::
         All models **must** inherit from BaseModel to work properly.
 
+    Attributes:
+        created_at (:any:`datetime.datetime`): creation date of the resource.
+        updated_at (:any:`datetime.datetime`): updated on every :any:`save` call.
+        _schema (:mod:`schemas`): Private attribute that each class
+            that extends ``BaseModel`` should override with a model-specifig schema
+            that describe how the model is to be validated and parsed for output.
+
     """
 
-    #: Datetime representing the creation date of the resource.
     created_at = DateTimeField(default=datetime.datetime.now)
-
-    #: Datetime field updated every time the resource is saved.
     updated_at = DateTimeField(default=datetime.datetime.now)
-
-    #: Private attribute that each class that extends ``BaseModel`` should override
-    #: with a schema that describe how the model is to be validated and parsed for
-    #: output.
     _schema = BaseSchema
 
     def save(self, *args, **kwargs):
@@ -58,9 +58,6 @@ class BaseModel(Model):
         """
         Transform a list of instances of callee class into a jsonapi string
 
-        .. NOTE::
-            If overridden (while developing or for other reason) the method
-            should always return a ``string``.
 
         Args:
             objs_list (iterable): Model instances to serialize into a json list
@@ -74,6 +71,10 @@ class BaseModel(Model):
         """
         Interface for the class defined ``_schema`` that returns a JSONAPI compliant
         string representing the resource.
+
+        .. NOTE::
+            If overridden (while developing or for other reason) the method
+            should always return a ``string``.
 
         Args:
             include_data (list): List of attribute names to be included
@@ -104,16 +105,19 @@ class BaseModel(Model):
 class Item(BaseModel):
     """
     Item describes a product for the e-commerce platform.
+
+    Attributes:
+        uuid (UUID): Item UUID
+        name (str): Name for the product
+        price (decimal.Decimal): Price for a single product
+        description (str): Product description
+        availability (int): Quantity of items available
+
     """
-    #: UUID: Item UUID
     uuid = UUIDField(unique=True)
-    #: str: Name for the product
     name = CharField()
-    #: decimal.Decimal: Price for a single product
     price = DecimalField(auto_round=True)
-    #: str: Product description
     description = TextField()
-    #: int: Quantity of items available
     availability = IntegerField()
     category = TextField()
     _schema = ItemSchema
@@ -138,18 +142,18 @@ def on_delete_item_handler(model_class, instance):
 
 class Picture(BaseModel):
     """
-    Picture model
-        uuid: picture identifier and file name stored
-        extension: picture type
-        item: referenced item
+    A Picture model describes and points to a stored image file. Allows linkage
+    between the image files and one :any:`Item` resource.
+
+    Attributes:
+        uuid (UUID): Picture's uuid
+        extension (str): Extension of the image file the Picture's model refer to
+        item (:any:`Item`): Foreign key referencing the Item related to the Picture.
+            A ``pictures`` field can be used from ``Item`` to access the Item resource
+            pictures
     """
-    #: UUID: Picture's uuid
     uuid = UUIDField(unique=True)
-    #: str: Extension of the image file the Picture's model refer to
     extension = CharField()
-    #: Item: Foreign key referencing the Item related to the Picture.
-    #: A ``pictures`` field can be used from ``Item`` to access the Item resource
-    #: pictures
     item = ForeignKeyField(Item, related_name='pictures')
     _schema = PictureSchema
 
@@ -177,25 +181,33 @@ def on_delete_picture_handler(model_class, instance):
 class User(BaseModel, UserMixin):
     """
     User represents an user for the application.
-    Users created are always as role "normal" (admin field=False)
+
+    Attributes:
+        first_name (str): User's first name
+        last_name (str): User's last name
+        email (str): User's **valid** email
+        password (str): User's password
+        admin (bool): User's admin status. Defaults to ``False``
+
+    .. NOTE::
+        Each User resource must have an unique `email` field, meaning
+        that there cannot be two user's registered with the same email.
+
+        For this reason, when checking for user's existence, the server requires
+        either the `uuid` of the user or its `email`.
     """
     uuid = UUIDField(unique=True)
-    #: str: User's first name
     first_name = CharField()
-    #: str: User's last name
     last_name = CharField()
-    #: str: User's **valid** email
     email = CharField(unique=True)
-    #: str: User's password
     password = CharField()
-    #: bool: User's admin status
     admin = BooleanField(default=False)
     _schema = UserSchema
 
     @staticmethod
     def exists(email):
         """
-        Check that an user exists by checking the email field(unique).
+        Check that an user exists by checking the email field.
 
         Args:
             email (str): User's email to check
@@ -237,20 +249,22 @@ class Address(BaseModel):
     The model Address represent a user address.
     Each address is releated to one user, but one user can have
     more addresses.
+
+    Attributes:
+        uuid (UUID): Address unique uuid
+        user (:any:`User`): Foreign key pointing to the user `owner` of the address
+        country (str): Country for the address, i.e. ``Italy``
+        city (str): City name
+        post_code (str): Postal code for the address
+        address (str): Full address for the Address resource
+        phone (str): Phone number for the Address
     """
-    #: Address unique uuid
     uuid = UUIDField(unique=True)
-    #: User: Foreign key pointing to a ``User`` resource that "owns" the address
     user = ForeignKeyField(User, related_name='addresses')
-    #: str: Country for the address, i.e. ``Italy``
     country = CharField()
-    #: str: City name
     city = CharField()
-    #: str: Postal code for the address
     post_code = CharField()
-    #: str: Full address for the Address resource
     address = CharField()
-    # str: Phone number for the Address
     phone = CharField()
 
     _schema = AddressSchema
@@ -258,21 +272,18 @@ class Address(BaseModel):
 
 class Order(BaseModel):
     """
-    Orders represent an order placed by a ``User``, containing one or more ``Item``
-    that have to be delivered to one of the user's ``Address``.
-    Each order will be place by one client.
-    An order is represented by an uuid,
-    a dateTimeField which is the date of the order, a FloatField which
-    is the total price of the order. Finally, there is the delivery address,
-    if it's different from the customers address from their record.
+    Orders represent an order placed by a `User`, containing one or more `Item`
+    that have to be delivered to one of the user's `Address`.
+
+    Attributes:
+        uuid (UUID): Order's unique id
+        total_price (:any:`decimal.Decimal`): Total price for the order
+        delivery_address (:any:`Address`): Address specified for delivery
+        user (:any:`User`): User that created the order
     """
-    #: UUID: Order's unique id
     uuid = UUIDField(unique=True, default=uuid4)
-    #: decimal.Decimal: Total price for the order
     total_price = DecimalField(default=0)
-    #: Address: Foreign key pointing to the address specified for the delivery
     delivery_address = ForeignKeyField(Address, related_name="orders")
-    #: User: Foreign key pointing to the order's creator
     user = ForeignKeyField(User, related_name="orders")
     _schema = OrderSchema
 
@@ -408,19 +419,22 @@ class Order(BaseModel):
 
 
 class OrderItem(BaseModel):
-    """ The model OrderItem is a cross table that contains the order
-        items - one row for each item on an order(so each order can
-        generate multiple rows).
-        Upon creation it needs to know which :class:`models.Order` and
-        :class:`models.Item` are put in relation.
     """
-    #: Order: Foreign key pointing to the order that created the ``OrderItem``
+    The model OrderItem is a cross table that contains the order
+    items - one row for each item on an order(so each order can
+    generate multiple rows).
+    Upon creation it needs to know which :class:`models.Order` and
+    :class:`models.Item` are put in relation.
+
+    Attributes:
+        order (:any:`Order`): Foreign key pointing to the order that created the `OrderItem`
+        item (:any:`Item`): Foreign key pointing to the Item relative to the OrderItem
+        quantity (int): Quantity of this Item for the order
+        subtotal (:any:`decimal.Decimal`): Calculated subtotal for the OrderItem
+    """
     order = ForeignKeyField(Order)
-    #: Item: Foreign key pointing to the Item relative to the OrderItem
     item = ForeignKeyField(Item)
-    #: int: Quantity of this Item for the order
     quantity = IntegerField()
-    #: decimal.Decimal: Calculated subtotal for the OrderItem
     subtotal = DecimalField()
     _schema = OrderItemSchema
 
@@ -475,5 +489,5 @@ class OrderItem(BaseModel):
         return quantity
 
     def _calculate_subtotal(self):
-        """Calculate the subtotal value of the item(s) in the order."""
+        """Calculate the subtotal value of the item(s) in the order and update the relative attribute."""
         self.subtotal = self.item.price * self.quantity

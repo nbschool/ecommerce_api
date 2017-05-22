@@ -11,6 +11,4 @@ Application ORM Models are built upon Peewee ORM.
 
 .. automodule:: models
     :members:
-    :exclude-members: BaseModel
     :member-order: bysource
-    :inherited-members:
