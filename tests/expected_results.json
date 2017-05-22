@@ -1,4 +1,5 @@
-{   "favorites": {
+{
+    "favorites": {
         "get_favorites__success": [
             {
                 "data": {
@@ -25,7 +26,86 @@
                     "self": "/favorites/00000000-0000-0000-0000-000000000003"
                 }
             }
-        ]
+        ],
+        "get_favorites2__success": [
+            {
+                "data": {
+                    "type": "favorite",
+                    "attributes": {
+                        "name": "Item Test",
+                        "price": 15.99,
+                        "description": "test test test"
+                    },
+                    "relationships": {
+                        "user": {
+                            "data": {
+                                "type": "user",
+                                "id": "00000000-0000-0000-0000-000000000001"
+                            }
+                        }
+                    },
+                    "id": "00000000-0000-0000-0000-000000000006",
+                    "links": {
+                        "self": "/favorites/00000000-0000-0000-0000-000000000006"
+                    }
+                },
+                "links": {
+                    "self": "/favorites/00000000-0000-0000-0000-000000000006"
+                }
+            },
+            {
+                "data": {
+                    "type": "favorite",
+                    "attributes": {
+                        "name": "Item Test",
+                        "price": 15.99,
+                        "description": "test test test"
+                    },
+                    "relationships": {
+                        "user": {
+                            "data": {
+                                "type": "user",
+                                "id": "00000000-0000-0000-0000-000000000001"
+                            }
+                        }
+                    },
+                    "id": "00000000-0000-0000-0000-000000000008",
+                    "links": {
+                        "self": "/favorites/00000000-0000-0000-0000-000000000008"
+                    }
+                },
+                "links": {
+                    "self": "/favorites/00000000-0000-0000-0000-000000000008"
+                }
+            }
+        ],
+        "post_favorites__success": 
+            {
+                "data": {
+                    "type": "favorite",
+                    "attributes": {
+                        "description": "test test test",
+                        "name": "Item Test",
+                        "price": 15.99
+                    },
+                    "relationships": {
+                        "user": {
+                            "data": {
+                                "type": "user",
+                                "id": "00000000-0000-0000-0000-000000000001"
+                            }
+                        }
+                    },
+                    "id": "315458c8-3e7d-480a-a90a-777aab4e8c01",
+                    "links": {
+                        "self": "/favorites/315458c8-3e7d-480a-a90a-777aab4e8c01"
+                    }
+                },
+                "links": {
+                    "self": "/favorites/315458c8-3e7d-480a-a90a-777aab4e8c01"
+                }
+            }
+
     },
     "addresses": {
         "get_addresses__success": [
