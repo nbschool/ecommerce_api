@@ -145,7 +145,7 @@ class Item(BaseModel):
             self.price,
             self.description)
 
-    def is_favorite(self, user, item):
+    def is_favorite(user, item):
         for f in user.favorites:
             if f.item_id == item.id:
                 return True
