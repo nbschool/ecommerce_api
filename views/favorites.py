@@ -3,47 +3,42 @@ from flask import g, request
 from flask_restful import Resource
 from models import Favorite, Item, Address
 from utils import check_required_fields
-from http.client import (CREATED, NOT_FOUND, OK)
+from http.client import (CREATED, NOT_FOUND, OK, BAD_REQUEST)
 from utils import generate_response
 
 
 class FavoritesHandler(Resource):
     @auth.login_required
     def get(self):
-        user = g.user
-        # favorites = user.favorites
-        # result = []
-        # for favorite in favorites:
-        #     result.append(favorite.json())
-        # data = Favorite.json_list(user.favorites)
-        
-        # return generate_response(data, OK)
-        # return result, OK
-        data = Favorite.json_list(Favorite.select())
+        data = Favorite.json_list(g.user.favorites)
+
         return generate_response(data, OK)
+
 
     @auth.login_required
     def post(self):
         user = g.user
-        item_uuid = request.json['item_uuid']
-        check_required_fields(
-            request_data=request.get_json(),
-            required_fields=('item_uuid', 'user_uuid'),
-        )
+        res = request.get_json(force=True)
+        errors = Favorite.validate_input(res)
+
+        if errors: return errors, BAD_REQUEST
+
+        data = res['data']['attributes']
+        # ensure that the item favorited by the user exists.
 
         try:
-            item = Item.select().where(Item.uuid == item_uuid).get()
+            item = Item.get(Item.uuid == data['item_uuid'])
         except:
-            return {"message": "ITEM DOESN'T EXIST"}, OK
+            return {"message": "Item {} doesn't exist.".format(data['item_uuid'])}, OK
 
-        has_already = Item.is_favorite(self, user, item)
+        # Check if the item was already selected as favorite by the user.
 
-        if has_already:
-            return {"message": "ALREADY INSERTED"}, OK
+        has_already = Item.is_favorite(user, item)
+        if has_already: return {"message": "The item {} was already been inserted.".format(
+                                data['item_uuid'])}, OK
 
         favorite = user.add_favorite(item)
 
-        # return favorite.json(), CREATED
         return generate_response(favorite.json(), CREATED)
 
 
