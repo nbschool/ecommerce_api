@@ -2,7 +2,7 @@ from tests.test_utils import (RESULTS, add_user, open_with_auth, add_favorite, a
                               assert_valid_response, json_favorite, format_jsonapi_request)
 from tests.test_case import TestCase
 from http.client import OK, UNAUTHORIZED, CREATED, NOT_FOUND, BAD_REQUEST
-from models import Favorite, Item
+from models import Favorite
 import json
 
 USER1 = 'fatima.caputo@tiscali.it'
@@ -27,7 +27,7 @@ class TestFavorites(TestCase):
     def test_get_favorites__success(self):
         user = add_user(USER1, PASS1)
         item = add_item()
-        favorite = add_favorite(user, item)
+        add_favorite(user, item)
         user_path = 'favorites/'
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'GET',
                               user.email, PASS1, None, None)
@@ -41,12 +41,12 @@ class TestFavorites(TestCase):
         item = add_item()
         item2 = add_item()
         item3 = add_item()
-        favorite = add_favorite(user, item)
-        favorite2 = add_favorite(user2, item2)
-        favorite3 = add_favorite(user, item3)
+        add_favorite(user, item)
+        add_favorite(user2, item2)
+        add_favorite(user, item3)
         user_path = 'favorites/'
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'GET',
-                              user.email, PASS1, None, None)      
+                              user.email, PASS1, None, None)
         assert resp.status_code == OK
         expected_result = EXPECTED_RESULTS['get_favorites2__success']
         assert_valid_response(resp.data, expected_result)
