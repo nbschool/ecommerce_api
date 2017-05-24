@@ -13,6 +13,11 @@ class Auth:
     and to initialize the login manager of the app.
     """
 
+    @staticmethod
+    def login_required(*args, **kwargs):
+        """Forward flask_login login_required method"""
+        return login_required(*args, **kwargs)
+
     @property
     def current_user(self):
         """
@@ -38,9 +43,6 @@ class Auth:
 
 
 auth = Auth()
-
-"""Forward flask_login login_required method"""
-auth.login_required = login_required
 
 
 @login_manager.user_loader
