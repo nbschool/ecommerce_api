@@ -23,14 +23,11 @@ class FavoritesHandler(Resource):
             return errors, BAD_REQUEST
 
         data = res['data']['attributes']
-        # ensure that the item favorited by the user exists.
 
         try:
             item = Item.get(Item.uuid == data['item_uuid'])
         except:
             return {"message": "Item {} doesn't exist.".format(data['item_uuid'])}, NOT_FOUND
-
-        # Check if the item was already selected as favorite by the user.
 
         has_already = Item.is_favorite(user, item)
         if has_already:
