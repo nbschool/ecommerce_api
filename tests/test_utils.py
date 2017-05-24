@@ -130,7 +130,7 @@ def add_favorite(self, item, id=None):
 def json_favorite(item):
     """Link the favorite item to user."""
     return {
-            'item_uuid':item,
+            'item_uuid': item,
     }
 
 

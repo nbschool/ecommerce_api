@@ -215,6 +215,7 @@ class AddressSchema(BaseSchema):
         id_field='uuid', required=True,
     )
 
+
 class FavoriteSchema(BaseSchema):
     """Schema for models.Favorite"""
 

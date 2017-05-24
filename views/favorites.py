@@ -1,8 +1,7 @@
 from auth import auth
 from flask import g, request
 from flask_restful import Resource
-from models import Favorite, Item, Address
-from utils import check_required_fields
+from models import Favorite, Item
 from http.client import (CREATED, NOT_FOUND, OK, BAD_REQUEST)
 from utils import generate_response
 
@@ -13,7 +12,6 @@ class FavoritesHandler(Resource):
         data = Favorite.json_list(g.user.favorites)
 
         return generate_response(data, OK)
-
 
     @auth.login_required
     def post(self):
@@ -35,8 +33,9 @@ class FavoritesHandler(Resource):
         # Check if the item was already selected as favorite by the user.
 
         has_already = Item.is_favorite(user, item)
-        if has_already: return {"message": "The item {} was already been inserted.".format(
-                                data['item_uuid'])}, OK
+        if has_already:
+            return {"message": "The item {} was already been inserted.".format(
+                    data['item_uuid'])}, OK
 
         favorite = user.add_favorite(item)
 
