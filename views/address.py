@@ -1,5 +1,5 @@
 from auth import auth
-from flask import g, request
+from flask import request
 from flask_restful import Resource
 from http.client import CREATED, NO_CONTENT, NOT_FOUND, OK, BAD_REQUEST
 from models import Address
@@ -12,7 +12,8 @@ class AddressesHandler(Resource):
     """ Addresses endpoint. """
     @auth.login_required
     def get(self):
-        user_addrs = list(Address.select().where(Address.user == g.user))
+        user_addrs = list(Address.select().where(
+            Address.user == auth.current_user))
 
         return generate_response(Address.json_list(user_addrs), OK)
 
@@ -27,7 +28,7 @@ class AddressesHandler(Resource):
 
         addr = Address.create(
             uuid=uuid.uuid4(),
-            user=g.user,
+            user=auth.current_user,
             country=data['country'],
             city=data['city'],
             post_code=data['post_code'],
@@ -43,7 +44,7 @@ class AddressHandler(Resource):
     def get(self, address_uuid):
         try:
             addr = Address.get(
-                Address.user == g.user,
+                Address.user == auth.current_user,
                 Address.uuid == address_uuid
             )
             return generate_response(addr.json(), OK)
@@ -54,7 +55,7 @@ class AddressHandler(Resource):
     @auth.login_required
     def patch(self, address_uuid):
         try:
-            obj = Address.get(Address.user == g.user,
+            obj = Address.get(Address.user == auth.current_user,
                               Address.uuid == address_uuid)
         except Address.DoesNotExist:
             return None, NOT_FOUND
@@ -95,7 +96,7 @@ class AddressHandler(Resource):
     @auth.login_required
     def delete(self, address_uuid):
         result = Address.delete().where(
-            Address.user == g.user,
+            Address.user == auth.current_user,
             Address.uuid == address_uuid,
         ).execute()
 

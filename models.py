@@ -4,6 +4,7 @@ Models contains the database models for the application.
 import datetime
 from uuid import uuid4
 
+from flask_login import UserMixin
 from passlib.hash import pbkdf2_sha256
 from peewee import DateTimeField, TextField, CharField, BooleanField
 from peewee import SqliteDatabase, DecimalField
@@ -114,7 +115,7 @@ def on_delete_picture_handler(model_class, instance):
     remove_image(instance.uuid, instance.extension)
 
 
-class User(BaseModel):
+class User(BaseModel, UserMixin):
     """
     User represents an user for the application.
     Users created are always as role "normal" (admin field = False)
