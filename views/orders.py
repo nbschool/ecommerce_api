@@ -5,12 +5,12 @@ Orders-view: this module contains functions for the interaction with the orders.
 from http.client import (BAD_REQUEST, CREATED, NO_CONTENT, NOT_FOUND, OK,
                          UNAUTHORIZED)
 
-from flask import abort, g, request
+from flask import abort, request
 from flask_restful import Resource
 
+from auth import auth
 from models import database, Address, Order, Item, User
 from notifications import notify_new_order
-from auth import auth
 from utils import generate_response
 
 from exceptions import InsufficientAvailabilityException
@@ -48,7 +48,7 @@ class OrdersHandler(Resource):
         # auth.py::verify() function, called by @auth.login_required decorator
         # and match it against the found user.
         # This is to prevent users from creating other users' order.
-        if g.user != user and g.user.admin is False:
+        if auth.current_user != user and auth.current_user.admin is False:
             return ({'message': "You can't create a new order for another user"},
                     UNAUTHORIZED)
 
@@ -71,7 +71,18 @@ class OrdersHandler(Resource):
             items_to_add[item] = req_item['quantity']
         with database.atomic():
             try:
-                order = Order.create_order(g.user, address, items_to_add)
+                order = Order.create(
+                    delivery_address=address,
+                    user=auth.current_user,
+                )
+
+                for item in items:
+                    for req_item in req_items:
+                        # if names match add item and quantity, once per
+                        # req_item
+                        if str(item.uuid) == req_item['id']:
+                            order.add_item(item, req_item['quantity'])
+                            break
                 notify_new_order(address=order.delivery_address, user=order.user)
             except InsufficientAvailabilityException:
                 abort(BAD_REQUEST)
@@ -121,8 +132,8 @@ class OrderHandler(Resource):
             # get the user from the flask.g global object registered inside the
             # auth.py::verify() function, called by @auth.login_required decorator
             # and match it against the found user.
-            # This is to prevent users from modify other users' order.
-            if g.user != order.user and g.user.admin is False:
+            # This is to prevent uses from modify other users' order.
+            if auth.current_user != order.user and auth.current_user.admin is False:
                 return ({'message': "You can't delete another user's order"},
                         UNAUTHORIZED)
 
@@ -155,7 +166,7 @@ class OrderHandler(Resource):
         # auth.py::verify() function, called by @auth.login_required decorator
         # and match it against the found user.
         # This is to prevent users from deleting other users' account.
-        if g.user != obj.user and g.user.admin is False:
+        if auth.current_user != obj.user and auth.current_user.admin is False:
             return ({'message': "You can't delete another user's order"},
                     UNAUTHORIZED)
 
