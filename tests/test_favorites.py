@@ -155,3 +155,18 @@ class TestFavorites(TestCase):
 
         assert resp.status_code == NOT_FOUND
         assert Favorite.select().count() == 1
+
+    def test_delete_only_one_favorites__success(self):
+        user = add_user(USER1, PASS1)
+        item = add_item()
+        item2 = add_item()
+        item3 = add_item()
+        add_favorite(user, item)
+        add_favorite(user, item2)
+        add_favorite(user, item3)
+        user_path = 'favorites/{}'.format(str(item.uuid))
+        resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
+                              user.email, PASS1, None, None)
+
+        assert resp.status_code == OK
+        assert Favorite.select().count() == 2
