@@ -18,10 +18,11 @@ class FavoritesHandler(Resource):
     @auth.login_required
     def post(self):
         user = g.user
+
         res = request.get_json(force=True)
         errors = Favorite.validate_input(res)
-
-        if errors: return errors, BAD_REQUEST
+        if errors:
+            return errors, BAD_REQUEST
 
         data = res['data']['attributes']
         # ensure that the item favorited by the user exists.
@@ -50,6 +51,6 @@ class FavoriteHandler(Resource):
         except Favorite.DoesNotExist:
             return {'message': 'item `{}` not found'.format(favorite_uuid)}, NOT_FOUND
 
-        if favorite.user_id == g.user.id:
-            g.user.delete_favorite()
+        if favorite.user == g.user:
+            favorite.delete_instance()
             return {'message': 'item `{}` deleted'.format(favorite_uuid)}, OK
