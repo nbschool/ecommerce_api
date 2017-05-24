@@ -1,5 +1,5 @@
-Creating new Resources
-======================
+Developing new Resources
+========================
 
 Each `Resource` is described by:
 
@@ -27,7 +27,7 @@ Creating a new simple resource is then as easy as:
 
 .. code-block:: python
 
-    class MyResource(BaseClass):
+    class MyResource(BaseModel):
         my_attribute = CharField()
 
 
@@ -147,6 +147,31 @@ There are a couple of things to notice here:
    `mime-type`. The utility function serves that purpose
 
 
+Requiring authorization
+-----------------------
+
+To implement the authorization on the endpoint, allowing user's to access only their resources (i.e.
+`profile`, `orders` etc, is as simple as importing ``auth`` from :mod:`auth` module and using the
+``@auth.login_required`` decorator on the desired resource method (i.e. `GET`).
+
+The currently authorized user can be found in :any:`auth.current_user`
+
+Assuming that we added a Relationship to ``MyModel``, pointing to a ``User`` model, we can then do
+
+.. code-block:: python
+
+    from auth import auth
+
+    class MyModelHandler(Resource):
+
+        @auth.login_required
+        def get(self):
+            objs = MyModel.get().where(MyModel.user == auth.current_user)
+
+            return generate_response(MyModel.json_list(objs), 200)
+
+
+
 Full Example
 ------------
 
@@ -158,12 +183,14 @@ Full Example
     from flask_restful import Resource
     from marshmallow_jsonapi import fields
     from marshmallow import validate
-    from peewee import CharField
+    from peewee import BooleanField, CharField, ForeignKey, UUIDField
 
+    from auth import auth
     from models import BaseModel
     from schemas import BaseSchema
 
-    # schema definition should go inside ./schemas.py
+    # Schema definition should go inside ./schemas.py
+    # Schema for the User is omitted for brevity but should exist.
 
     class MySchema(BaseSchema):
         class Meta:
@@ -179,24 +206,35 @@ Full Example
 
     # model should go in ./models.py
 
+    class User(BaseModel):
+        uuid = UUIDField(unique=True, default=uuid.uuid4)
+        email = Charfield()
+        password = CharField()
+        admin BooleanField(default=False)
+
     class MyModel(BaseModel):
+        _schema = MySchema
+
         uuid = UUIDField(unique=True, default=uuid.uuid4)
         my_attribute = CharField()
-        _schema = MySchema
-    
+        user = ForeignKey(User, related_name='mymodel')
+
+
     # setup the view in views/myview.py
 
     class MyModelHandler(Resource):
+        @auth.login_required
         def get(self):
-            
-            return generate_response(
-                # select is part of peewee API,
-                # whilst json_list is part of our API
-                MyModel.json_list(MyModel.select()),
-                200,
-            )
+            objects = MyModel.select().where(MyModel.user == auth.current_user)
+
+            return generate_response(MyModel.json_list(objects), 200)
         
+        @auth.login_required
         def post(self):
+            # only admin users should be able to post new resources
+            if not auth.current_user.admin:
+                return None, 401
+
             data = request.get_json(force=True)
             
             errors = MyModel.validate_input(data)
@@ -216,7 +254,7 @@ Full Example
     api.add_resource(MyModelHandler, '/mymodel/')
 
 
-This is one of the simplest example that can be done to create a simple resource.
+This is one of the simplest example that can be done to create a simple resource that can use auth.
 
 In this case the ``validate_input`` can return errors when the `request.data` is malformed
 - meaning that does not respects jsonapi standards, like it does not have the `data` root
@@ -226,3 +264,6 @@ attribute - or, since we added a validation rule to ``attribute``, will return a
 * the attribute is missing (required is defined)
 * the attribute type does not match (we want a string)
 * the length of the attribute is less than 1 (empty string)
+
+After the login succeded, :any:`auth.current_user` contains the actual currently logged :any:`User`
+instance, so any attribute or method in that class can be easily accessed through that.
