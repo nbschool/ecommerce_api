@@ -662,7 +662,7 @@ class OrderItem(BaseModel):
 
 class Favorite(BaseModel):
     """ Many to many table to relate an item with a user."""
-    uuid = UUIDField(unique=True, default=uuid4)
+    uuid = UUIDField(unique=True)
     user = ForeignKeyField(User, related_name="favorites")
     item = ForeignKeyField(Item, related_name="favorites")
     _schema = FavoriteSchema
