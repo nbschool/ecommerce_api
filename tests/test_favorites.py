@@ -125,8 +125,8 @@ class TestFavorites(TestCase):
     def test_delete_favorites__success(self):
         user = add_user(USER1, PASS1)
         item = add_item()
-        add_favorite(user, item)
-        user_path = 'favorites/{}'.format(str(item.uuid))
+        favorite = add_favorite(user, item)
+        user_path = 'favorites/{}'.format(str(favorite.id))
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
                               user.email, PASS1, None, None)
         assert resp.status_code == OK
@@ -136,8 +136,8 @@ class TestFavorites(TestCase):
     def test_delete_favorites__fail(self):
         user = add_user(USER1, PASS1)
         item = add_item()
-        add_favorite(user, item)
-        user_path = 'favorites/{}'.format(str(item.uuid))
+        favorite = add_favorite(user, item)
+        user_path = 'favorites/{}'.format(str(favorite.id))
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
                               user.email, PASS2, None, None)
 
@@ -147,9 +147,8 @@ class TestFavorites(TestCase):
         user1 = add_user(USER1, PASS1)
         user2 = add_user(USER2, PASS2)
         item = add_item()
-        add_favorite(user2, item)
-
-        user_path = 'favorites/{}'.format(str(item.uuid))
+        favorite = add_favorite(user2, item)
+        user_path = 'favorites/{}'.format(str(favorite.id))
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
                               user1.email, PASS1, None, None)
 
@@ -161,10 +160,10 @@ class TestFavorites(TestCase):
         item = add_item()
         item2 = add_item()
         item3 = add_item()
-        add_favorite(user, item)
+        favorite = add_favorite(user, item)
         add_favorite(user, item2)
         add_favorite(user, item3)
-        user_path = 'favorites/{}'.format(str(item.uuid))
+        user_path = 'favorites/{}'.format(str(favorite.id))
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
                               user.email, PASS1, None, None)
 
