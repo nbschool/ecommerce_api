@@ -15,12 +15,17 @@ User can be deleted using `/api/users/<email>` and a list of all existing users
 can be retrieved making a GET to `/api/users/`
 """
 
+import os
+import utils # flake8: noqa
+
 from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
 
+from auth import auth
 from models import database
 from views.address import AddressesHandler, AddressHandler
+from views.auth import LoginHandler
 from views.orders import OrdersHandler, OrderHandler
 from views.items import ItemHandler, ItemsHandler
 from views.user import UsersHandler, UserHandler
@@ -28,9 +33,16 @@ from views.pictures import PictureHandler, ItemPictureHandler
 from views.favorites import FavoritesHandler, FavoriteHandler
 
 
+
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
+
+auth.init_app(app)
+app.secret_key = os.getenv(
+    'SECRET_KEY',
+    'development_secret_key',
+)
 
 
 @app.before_request
@@ -48,6 +60,7 @@ def database_disconnect(response):
 
 api.add_resource(AddressesHandler, "/addresses/")
 api.add_resource(AddressHandler, "/addresses/<uuid:address_uuid>")
+api.add_resource(LoginHandler, "/auth/login/")
 api.add_resource(ItemsHandler, "/items/")
 api.add_resource(ItemHandler, "/items/<uuid:item_uuid>")
 api.add_resource(ItemPictureHandler, '/items/<uuid:item_uuid>/pictures/')

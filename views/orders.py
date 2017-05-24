@@ -5,12 +5,12 @@ Orders-view: this module contains functions for the interaction with the orders.
 from http.client import (BAD_REQUEST, CREATED, NO_CONTENT, NOT_FOUND, OK,
                          UNAUTHORIZED)
 
-from flask import abort, g, request
+from flask import abort, request
 from flask_restful import Resource
 
+from auth import auth
 from models import database, Address, Order, Item
 from notifications import notify_new_order
-from auth import auth
 from utils import generate_response
 
 from exceptions import InsufficientAvailabilityException
@@ -53,7 +53,7 @@ class OrdersHandler(Resource):
             try:
                 order = Order.create(
                     delivery_address=address,
-                    user=g.user,
+                    user=auth.current_user,
                 )
 
                 for item in items:
@@ -116,7 +116,7 @@ class OrderHandler(Resource):
             # auth.py::verify() function, called by @auth.login_required decorator
             # and match it against the found user.
             # This is to prevent uses from modify other users' order.
-            if g.user != order.user and g.user.admin is False:
+            if auth.current_user != order.user and auth.current_user.admin is False:
                 return ({'message': "You can't delete another user's order"},
                         UNAUTHORIZED)
 
@@ -167,7 +167,7 @@ class OrderHandler(Resource):
         # auth.py::verify() function, called by @auth.login_required decorator
         # and match it against the found user.
         # This is to prevent users from deleting other users' account.
-        if g.user != obj.user and g.user.admin is False:
+        if auth.current_user != obj.user and auth.current_user.admin is False:
             return ({'message': "You can't delete another user's order"},
                     UNAUTHORIZED)
 

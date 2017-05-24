@@ -1,5 +1,5 @@
 
-from flask import request, g
+from flask import request
 from flask_restful import Resource
 from http.client import (CREATED, NO_CONTENT, NOT_FOUND, OK,
                          BAD_REQUEST, CONFLICT, UNAUTHORIZED)
@@ -21,8 +21,7 @@ class UsersHandler(Resource):
     """
     @auth.login_required
     def get(self):
-
-        if not g.user.admin:
+        if not auth.current_user.admin:
             return ({'message': "You can't get the list users."}, UNAUTHORIZED)
 
         data = User.json_list(User.select())
@@ -84,7 +83,7 @@ class UserHandler(Resource):
         # auth.py::verify() function, called by @auth.login_required decorator
         # and match it against the found user.
         # This is to prevent users from deleting other users' account.
-        if g.user != user:
+        if auth.current_user != user:
             return ({'message': "You can't delete another user's account"},
                     UNAUTHORIZED)
 

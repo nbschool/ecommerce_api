@@ -4,6 +4,7 @@ Models contains the database models for the application.
 import datetime
 from uuid import uuid4
 
+from flask_login import UserMixin
 from passlib.hash import pbkdf2_sha256
 from peewee import DateTimeField, TextField, CharField, BooleanField
 from peewee import SqliteDatabase, DecimalField
@@ -12,7 +13,8 @@ from playhouse.signals import Model, post_delete, pre_delete
 
 from exceptions import InsufficientAvailabilityException, WrongQuantity
 from schemas import (ItemSchema, UserSchema, OrderSchema, OrderItemSchema,
-                     BaseSchema, AddressSchema, FavoriteSchema)
+                     BaseSchema, AddressSchema, FavoriteSchema, PictureSchema)
+
 from utils import remove_image
 
 
@@ -54,12 +56,14 @@ class Item(BaseModel):
         price: product price
         description: product description text
         availability: number of available products of this kind
+        category: product category
     """
     uuid = UUIDField(unique=True)
     name = CharField()
     price = DecimalField(auto_round=True)
     description = TextField()
     availability = IntegerField()
+    category = TextField()
     _schema = ItemSchema
 
     def __str__(self):
@@ -96,18 +100,13 @@ class Picture(BaseModel):
     uuid = UUIDField(unique=True)
     extension = CharField()
     item = ForeignKeyField(Item, related_name='pictures')
+    _schema = PictureSchema
 
+    @property
     def filename(self):
         return '{}.{}'.format(
             self.uuid,
             self.extension)
-
-    def json(self):
-        return {
-            'uuid': str(self.uuid),
-            'extension': self.extension,
-            'item_uuid': str(self.item.uuid)
-        }
 
     def __str__(self):
         return '{}.{} -> item: {}'.format(
@@ -123,7 +122,7 @@ def on_delete_picture_handler(model_class, instance):
     remove_image(instance.uuid, instance.extension)
 
 
-class User(BaseModel):
+class User(BaseModel, UserMixin):
     """
     User represents an user for the application.
     Users created are always as role "normal" (admin field = False)
