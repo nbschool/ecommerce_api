@@ -9,7 +9,7 @@ import sys
 import uuid
 from base64 import b64encode
 
-from models import Address, User
+from models import Address, User, Favorite, Item
 from utils import get_image_folder
 
 
@@ -116,6 +116,32 @@ def add_address(user, country='Italy', city='Pistoia', post_code='51100',
         address=address,
         phone=phone,
     )
+
+
+def add_favorite(self, item, id=None):
+    """Link the favorite item to user."""
+    return Favorite.create(
+            uuid=id or uuid.uuid4(),
+            item=item,
+            user=self,
+    )
+
+
+def json_favorite(item):
+    """Link the favorite item to user."""
+    return {
+            'item_uuid': item,
+    }
+
+
+def add_item(name='Item Test', price='15.99', description='test test test', id=None):
+    return Item.create(
+            uuid=id or uuid.uuid4(),
+            name=name,
+            price=price,
+            description=description,
+            availability=random.randint(35, 60),
+            )
 
 
 # ###########################################################

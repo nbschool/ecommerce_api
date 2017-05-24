@@ -13,7 +13,8 @@ from playhouse.signals import Model, post_delete, pre_delete
 
 from exceptions import InsufficientAvailabilityException, WrongQuantity
 from schemas import (ItemSchema, UserSchema, OrderSchema, OrderItemSchema,
-                     BaseSchema, AddressSchema, PictureSchema)
+                     BaseSchema, AddressSchema, FavoriteSchema, PictureSchema)
+
 from utils import remove_image
 
 
@@ -71,6 +72,12 @@ class Item(BaseModel):
             self.name,
             self.price,
             self.description)
+
+    def is_favorite(user, item):
+        for f in user.favorites:
+            if f.item_id == item.id:
+                return True
+        return False
 
 
 @database.atomic()
@@ -155,6 +162,17 @@ class User(BaseModel, UserMixin):
         :returns: bool
         """
         return pbkdf2_sha256.verify(password, self.password)
+
+    def add_favorite(self, item):
+        """Link the favorite item to user."""
+        return Favorite.create(
+                uuid=uuid4(),
+                item=item,
+                user=self,
+                )
+
+    def delete_favorite(self):
+        self.delete_instance()
 
 
 class Address(BaseModel):
@@ -344,3 +362,11 @@ class OrderItem(BaseModel):
     def _calculate_subtotal(self):
         """Calculate the subtotal value of the item(s) in the order."""
         self.subtotal = self.item.price * self.quantity
+
+
+class Favorite(BaseModel):
+    """ Many to many table to relate an item with a user."""
+    uuid = UUIDField(unique=True)
+    user = ForeignKeyField(User, related_name="favorites")
+    item = ForeignKeyField(Item, related_name="favorites")
+    _schema = FavoriteSchema
