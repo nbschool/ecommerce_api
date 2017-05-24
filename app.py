@@ -22,7 +22,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
 
-from auth import login_manager
+import auth
 from models import database
 from views.address import AddressesHandler, AddressHandler
 from views.auth import LoginHandler
@@ -36,7 +36,7 @@ app = Flask(__name__)
 CORS(app)
 api = Api(app)
 
-login_manager.init_app(app)
+auth.init_app(app)
 app.secret_key = os.getenv(
     'SECRET_KEY',
     'development_secret_key',

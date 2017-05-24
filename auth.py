@@ -8,10 +8,6 @@ login_manager = LoginManager()
 
 
 class Auth:
-    @staticmethod
-    def login_required():
-        pass
-
     @property
     def current_user(self):
         return current_user._get_current_object()
@@ -19,6 +15,10 @@ class Auth:
 
 auth = Auth()
 auth.login_required = login_required
+
+
+def init_app(app):
+    return login_manager.init_app(app)
 
 
 @login_manager.user_loader
