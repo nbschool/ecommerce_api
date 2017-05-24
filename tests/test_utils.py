@@ -118,17 +118,25 @@ def add_address(user, country='Italy', city='Pistoia', post_code='51100',
     )
 
 
-def add_favorite(user, item):
+def add_favorite(self, item, id=None):
+    """Link the favorite item to user."""
     return Favorite.create(
-            uuid=uuid.uuid4(),
+            uuid=id or uuid.uuid4(),
             item=item,
-            user=user,
-        )
+            user=self,
+    )
 
 
-def add_item(name='Item Test', price='15.99', description='test test test'):
+def json_favorite(item):
+    """Link the favorite item to user."""
+    return {
+            'item_uuid':item,
+    }
+
+
+def add_item(name='Item Test', price='15.99', description='test test test', id=None):
     return Item.create(
-            uuid=uuid.uuid4(),
+            uuid=id or uuid.uuid4(),
             name=name,
             price=price,
             description=description,
