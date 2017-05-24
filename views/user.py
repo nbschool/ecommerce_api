@@ -5,7 +5,7 @@ from http.client import (CREATED, NO_CONTENT, NOT_FOUND, OK,
                          BAD_REQUEST, CONFLICT, UNAUTHORIZED)
 import uuid
 
-import auth
+from auth import auth
 from models import User
 from utils import generate_response
 from notifications import notify_new_user
