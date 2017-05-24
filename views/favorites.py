@@ -28,7 +28,7 @@ class FavoritesHandler(Resource):
         try:
             item = Item.get(Item.uuid == data['item_uuid'])
         except:
-            return {"message": "Item {} doesn't exist.".format(data['item_uuid'])}, OK
+            return {"message": "Item {} doesn't exist.".format(data['item_uuid'])}, NOT_FOUND
 
         # Check if the item was already selected as favorite by the user.
 

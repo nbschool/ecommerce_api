@@ -88,7 +88,7 @@ class TestFavorites(TestCase):
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'POST',
                               user.email, PASS1, 'application/json',
                               json.dumps(data))
-        assert resp.status_code == OK
+        assert resp.status_code == NOT_FOUND
         assert Favorite.select().count() == 0
         expected_result = EXPECTED_RESULTS['post_favorites__fail']
         assert_valid_response(resp.data, expected_result)
