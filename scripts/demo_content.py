@@ -204,6 +204,8 @@ def main():
         '-o', '--orders', help='Set up the number of insertions in Order table.', default=10)
     parser.add_argument(
         '-p', '--pictures', help='Set up the number of insertions in Picture table.', default=10)
+    parser.add_argument(
+        '-f', '--favorites', help='Set up the number of insertions in Favorite table.', default=10)
 
     args = parser.parse_args()
     num_users = args.users
@@ -211,7 +213,7 @@ def main():
     num_items = args.items
     num_orders = args.orders
     num_pictures = args.pictures
-    num_favorites = 10
+    num_favorites = args.favorites
 
     ACTIONS = {
         '1': {
