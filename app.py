@@ -22,7 +22,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
 
-import auth
+from auth import auth
 from models import database
 from views.address import AddressesHandler, AddressHandler
 from views.auth import LoginHandler
