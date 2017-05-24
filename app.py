@@ -16,7 +16,7 @@ can be retrieved making a GET to `/api/users/`
 """
 
 import os
-import dotenv
+import utils # flake8: noqa
 
 from flask import Flask
 from flask_restful import Api
@@ -31,7 +31,6 @@ from views.items import ItemHandler, ItemsHandler
 from views.user import UsersHandler, UserHandler
 from views.pictures import ItemPictureHandler, PictureHandler
 
-dotenv.load()
 
 app = Flask(__name__)
 CORS(app)

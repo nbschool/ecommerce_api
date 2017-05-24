@@ -1,5 +1,9 @@
+import dotenv
 import os
+
 from flask import Response
+
+dotenv.load()
 
 IMAGE_FOLDER = 'images'
 
