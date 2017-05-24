@@ -151,23 +151,78 @@ Full Example
 ------------
 
 .. code-block:: python
-    :linenos:
+
+    import uuid
 
     from flask import request
     from flask_restful import Resource
-    from models import MyModel
     from marshmallow_jsonapi import fields
+    from marshmallow import validate
     from peewee import CharField
 
     from models import BaseModel
     from schemas import BaseSchema
 
+    # schema definition should go inside ./schemas.py
+
     class MySchema(BaseSchema):
         class Meta:
+            type_ = 'mymodel'
+            self_url_many = '/mymodel/'
             json_module = simplejson
 
-        attribute = fields.Str(attribute='my_attribute')
+        id = fields.Str(dump_only=True, attribute='uuid')
+        attribute = fields.Str(
+            required=True,
+            validate=validate.Length(min=1, error='Field should not be blank'),
+        )
+
+    # model should go in ./models.py
 
     class MyModel(BaseModel):
+        uuid = UUIDField(unique=True, default=uuid.uuid4)
         my_attribute = CharField()
         _schema = MySchema
+    
+    # setup the view in views/myview.py
+
+    class MyModelHandler(Resource):
+        def get(self):
+            
+            return generate_response(
+                # select is part of peewee API,
+                # whilst json_list is part of our API
+                MyModel.json_list(MyModel.select()),
+                200,
+            )
+        
+        def post(self):
+            data = request.get_json(force=True)
+            
+            errors = MyModel.validate_input(data)
+            if errors:
+                return errors, 400
+            
+            obj = MyModel.create(
+                # unsafe, just for example
+                attribute=data.get('attribute'),
+            )
+
+            return generate_response(obj.json(), 201)
+
+
+    # Inside app.py the resource should be added with
+
+    api.add_resource(MyModelHandler, '/mymodel/')
+
+
+This is one of the simplest example that can be done to create a simple resource.
+
+In this case the ``validate_input`` can return errors when the `request.data` is malformed
+- meaning that does not respects jsonapi standards, like it does not have the `data` root
+attribute - or, since we added a validation rule to ``attribute``, will return an error if:
+
+
+* the attribute is missing (required is defined)
+* the attribute type does not match (we want a string)
+* the length of the attribute is less than 1 (empty string)
