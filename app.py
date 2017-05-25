@@ -18,7 +18,7 @@ from models import database
 from views.address import AddressesHandler, AddressHandler
 from views.auth import LoginHandler
 from views.orders import OrdersHandler, OrderHandler
-from views.items import ItemHandler, ItemsHandler
+from views.items import ItemHandler, ItemsHandler, SearchItemHandler
 from views.user import UsersHandler, UserHandler
 from views.pictures import PictureHandler, ItemPictureHandler
 from views.favorites import FavoritesHandler, FavoriteHandler
@@ -55,6 +55,7 @@ api.add_resource(LoginHandler, "/auth/login/")
 api.add_resource(ItemsHandler, "/items/")
 api.add_resource(ItemHandler, "/items/<uuid:item_uuid>")
 api.add_resource(ItemPictureHandler, '/items/<uuid:item_uuid>/pictures/')
+api.add_resource(SearchItemHandler, "/items/db/")
 api.add_resource(OrdersHandler, '/orders/')
 api.add_resource(OrderHandler, '/orders/<uuid:order_uuid>')
 api.add_resource(UsersHandler, '/users/')
