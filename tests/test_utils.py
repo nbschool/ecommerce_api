@@ -145,6 +145,7 @@ def add_item(name='Item Test', price='15.99', description='test test test', id=N
             price=price,
             description=description,
             availability=random.randint(35, 60),
+            category='scarpe',
             )
 
 
