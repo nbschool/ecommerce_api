@@ -72,7 +72,6 @@ class TestFavorites(TestCase):
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'GET',
                               None, None, None, None)
         assert resp.status_code == UNAUTHORIZED
-        assert resp.get_data() == b'Unauthorized Access'
 
     def test_post_favorites__fail(self):
         user = add_user(USER1, PASS1)
