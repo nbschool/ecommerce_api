@@ -208,6 +208,9 @@ class Order(BaseModel):
         Remove all the items from the order.
         Delete all OrderItem related to this order and reset the total_price
         value to 0.
+
+        Returns:
+            models.Order: The updated order
         """
 
         self.total_price = 0
@@ -221,9 +224,22 @@ class Order(BaseModel):
         Create an Order and respective OrderItems. OrderItems are created
         in a single query as well as the Order. It also updates Items'
         availability.
-        :param User user:
-        :param Address address:
-        :param dict items: {<Item>: <quantity:int>}
+
+        Args:
+            user (models.User): order owner
+            address (models.Address): order address
+            items (dict): item updates entries as a dictionary, keys are
+                items and values are new quantities to set. Example of
+                argument:
+
+                ..code-block:: python
+                    items = {
+                        Item.get(pk=1): 3,
+                        Item.get(pk=2): 1,
+                    }
+
+        Returns:
+            models.Order: The new order
         """
         total_price = sum(
             item.price * quantity for item, quantity in items.items())
@@ -242,11 +258,25 @@ class Order(BaseModel):
         Update Order and respective OrderItems by splitting in creation,
         deletion and updating queries, minimizing the interactions with the
         database. It also updates Items' availability.
-        :param dict items: {<Item>: <quantity:int>}
-        :param bool update_total: if True the procedure updates order's
-            total price
-        :param Address new_address: if not None the procedure updates the
-            order with the given address
+
+        Args:
+            items (dict): item updates entries as a dictionary, keys are
+                items and values are new quantities to set. Example of
+                argument:
+
+                ..code-block:: python
+                    items = {
+                        Item.get(pk=1): 3,
+                        Item.get(pk=2): 0,
+                        Item.get(pk=3): 1,
+                    }
+            update_total (bool): if True the procedure updates order's
+                total price. Default to True.
+            new_address (models.Address): if not None the procedure updates
+                the order with the given address. Default to None.
+
+        Returns:
+            models.Order: The new/updated order
         """
         to_create = {}
         to_remove = {}
@@ -297,7 +327,17 @@ class Order(BaseModel):
         """
         Update orderitems using a query for each item, and updates
         items' availability.
-        :param dict items: {<Item>: <difference:int>}
+
+        Args:
+            items (dict): item updates entries as a dictionary, keys are
+                items and values are new quantities to set. Example of
+                argument:
+
+                ..code-block:: python
+                    items = {
+                        Item.get(pk=1): 3,
+                        Item.get(pk=3): 1,
+                    }
         """
         if not items:
             return
@@ -319,7 +359,17 @@ class Order(BaseModel):
     def delete_items(self, items):
         """
         Delete orderitems in a single query and updates items' availability.
-        :param dict items: {<Item>: <quantity:int>}
+
+        Args:
+            items (dict): item entries as a dictionary, keys are
+                items to delete and values are previously reserved quantities.
+                Example of argument:
+
+                ..code-block:: python
+                    items = {
+                        Item.get(pk=1): 3,
+                        Item.get(pk=2): 2,
+                    }
         """
         if not items:
             return
@@ -335,7 +385,17 @@ class Order(BaseModel):
     def create_items(self, items):
         """
         Creates orderitems in a single query and updates items' availability.
-        :param dict items: {<Item>: <quantity:int>}
+
+        Args:
+            items (dict): item entries as a dictionary, keys are
+                items to create and values are new quantities to set.
+                Example of argument:
+
+                ..code-block:: python
+                    items = {
+                        Item.get(pk=1): 3,
+                        Item.get(pk=2): 1,
+                    }
         """
         if not items:
             return
@@ -357,8 +417,12 @@ class Order(BaseModel):
         """
         Add items to the order. It updates item availability.
 
-        :param Item item: the Item to add
-        :param int quantity: how many to add
+        Args:
+            item (models.Item): the Item to add
+            quantity (int): how many items to add
+
+        Returns:
+            order (models.Order): the updated order
         """
         return self.update_items({item: quantity})
 
@@ -368,8 +432,13 @@ class Order(BaseModel):
         OrderItem entity or deleting it if removing the last item
         (OrderItem.quantity == 0).
         It also restores the item availability.
-        :param Item item: the Item to remove
-        :param int quantity: how many to remove
+
+        Args:
+            item (models.Item): the Item to remove
+            quantity (int): how many items to remove
+
+        Returns:
+            order (models.Order): the updated order
         """
         return self.update_items({item: -quantity})
 
