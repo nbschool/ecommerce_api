@@ -54,7 +54,7 @@ def load_user(user_id):
     Current user loading logic. If the user exists return it, otherwise None.
 
     Args:
-        user id (int): Peewee user id
+        user_id (int): Peewee user id
 
     Returns:
         models.User: The requested user

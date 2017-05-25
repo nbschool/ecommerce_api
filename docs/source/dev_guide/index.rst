@@ -1,5 +1,5 @@
 Introduction to the developer's guide
-==============================
+=====================================
 
 This section explains how to contribute to the project, specifically *how things work*,
 such as schemas and models integration, how to develop new tests, setup views and substantially not mess things up.

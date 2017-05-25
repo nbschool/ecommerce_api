@@ -154,7 +154,7 @@ To implement the authorization on the endpoint, allowing user's to access only t
 `profile`, `orders` etc, is as simple as importing ``auth`` from :mod:`auth` module and using the
 ``@auth.login_required`` decorator on the desired resource method (i.e. `GET`).
 
-The currently authorized user can be found in :any:`auth.current_user`
+The currently authorized user can be found in :any:`Auth.current_user`
 
 Assuming that we added a Relationship to ``MyModel``, pointing to a ``User`` model, we can then do
 
@@ -265,5 +265,5 @@ attribute - or, since we added a validation rule to ``attribute``, will return a
 * the attribute type does not match (we want a string)
 * the length of the attribute is less than 1 (empty string)
 
-After the login succeded, :any:`auth.current_user` contains the actual currently logged :any:`User`
+After the login succeded, :any:`Auth.current_user` contains the actual currently logged :any:`User`
 instance, so any attribute or method in that class can be easily accessed through that.
