@@ -1,5 +1,5 @@
 from auth import auth
-from flask import g, request
+from flask import request
 from flask_restful import Resource
 from models import Favorite, Item, User
 from http.client import (CREATED, NOT_FOUND, OK, BAD_REQUEST)
@@ -9,13 +9,13 @@ from utils import generate_response
 class FavoritesHandler(Resource):
     @auth.login_required
     def get(self):
-        data = Favorite.json_list(g.user.favorites)
+        data = Favorite.json_list(auth.current_user.favorites)
 
         return generate_response(data, OK)
 
     @auth.login_required
     def post(self):
-        user = g.user
+        user = auth.current_user
 
         res = request.get_json(force=True)
         errors = Favorite.validate_input(res)
@@ -47,6 +47,6 @@ class FavoriteHandler(Resource):
         except Favorite.DoesNotExist:
             return {'message': 'item `{}` not found'.format(item_id)}, NOT_FOUND
 
-        if favorite.user == g.user:
+        if favorite.user == auth.current_user:
             User.delete_favorite(favorite)
             return {'message': 'item `{}` deleted'.format(favorite.uuid)}, OK
