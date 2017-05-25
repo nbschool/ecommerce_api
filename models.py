@@ -490,5 +490,7 @@ class OrderItem(BaseModel):
         return quantity
 
     def _calculate_subtotal(self):
-        """Calculate the subtotal value of the item(s) in the order and update the relative attribute."""
+        """
+        Calculate the subtotal value of the item(s) in the order and update the relative attribute.
+        """
         self.subtotal = self.item.price * self.quantity
