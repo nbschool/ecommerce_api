@@ -322,7 +322,6 @@ class AddressSchema(BaseSchema):
     )
 
 
-<<<<<<< HEAD
 class PictureSchema(BaseSchema):
     """
     Schema for describing :any:`Picture` resources.
