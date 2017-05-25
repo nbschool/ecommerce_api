@@ -11,7 +11,27 @@ such as schemas and models integration, how to develop new tests, setup views an
 Project structure
 -----------------
 
-.. TODO:: Describe project structure
+.. code-block:: none
+
+    /
+    ├─ docs/                        Documentation
+    ├─ scripts/                     admin scripts
+    ├─ templates/                   html templates
+    ├─ tests/                       test suite and utils
+    │   ├─ conftest.py              pytest fixtures configuration
+    │   ├─ expected_results.json    tests results for jsonapi
+    │   └─ test_utils.py            utilities for testing and mocking
+    │
+    ├─ views/                       flask resources' endpoints
+    ├─ app.py                       app entry point and resource builder
+    ├─ auth.py                      http auth module
+    ├─ exceptions.py                custom exceptions
+    ├─ models.py                    ORM models
+    ├─ notifications.py             handlers to notify users
+    ├─ schemas.py                   models' schemas for jsonapi validation/output
+    ├─ utils.py                     generic utilities for models and flask
+
+
 
 Running dev server
 ------------------
