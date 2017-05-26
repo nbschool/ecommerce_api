@@ -71,12 +71,12 @@ class TestFavorites(TestCase):
         user = add_user(USER1, PASS1)
         data = {
                 "data": {
-                    "type": "favorite",
+                    "type": "favorite", 
                     "attributes": {
                         "item_uuid": "2aabf825-40b3-03d5-e686-9eaebd156c0e"
                     }
                 }
-        }
+            }
         resp = open_with_auth(self.app, API_ENDPOINT.format('favorites/'), 'POST',
                               user.email, PASS1, 'application/json',
                               json.dumps(data))
@@ -116,7 +116,7 @@ class TestFavorites(TestCase):
         user = add_user(USER1, PASS1)
         item = add_item()
         favorite = add_favorite(user, item)
-        user_path = 'favorites/{}'.format(str(item.uuid))
+        user_path = 'favorites/{}'.format(str(favorite.uuid))
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
                               user.email, PASS1, None, None)
 
@@ -127,7 +127,7 @@ class TestFavorites(TestCase):
         user = add_user(USER1, PASS1)
         item = add_item()
         favorite = add_favorite(user, item)
-        user_path = 'favorites/{}'.format(str(item.uuid))
+        user_path = 'favorites/{}'.format(str(favorite.uuid))
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
                               user.email, PASS2, None, None)
 
@@ -138,7 +138,7 @@ class TestFavorites(TestCase):
         user2 = add_user(USER2, PASS2)
         item = add_item()
         favorite = add_favorite(user2, item)
-        user_path = 'favorites/{}'.format(str(item.uuid))
+        user_path = 'favorites/{}'.format(str(favorite.uuid))
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
                               user1.email, PASS1, None, None)
 
@@ -153,7 +153,7 @@ class TestFavorites(TestCase):
         favorite = add_favorite(user, item)
         add_favorite(user, item2)
         add_favorite(user, item3)
-        user_path = 'favorites/{}'.format(str(item.uuid))
+        user_path = 'favorites/{}'.format(str(favorite.uuid))
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
                               user.email, PASS1, None, None)
 
