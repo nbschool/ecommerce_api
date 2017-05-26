@@ -26,12 +26,13 @@ class FavoritesHandler(Resource):
 
         try:
             item = Item.get(Item.uuid == data['item_uuid'])
-        except:
-            return {"message": "Item {} doesn't exist.".format(data['item_uuid'])}, NOT_FOUND
+        except Item.DoesNotExist:
+            return {"message": "Item {} doesn't exist as Favorite.".format(
+                    data['item_uuid'])}, NOT_FOUND
 
         has_already = Item.is_favorite(user, item)
         if has_already:
-            return {"message": "The item {} was already been inserted.".format(
+            return {"message": "Item {} was already been inserted as Favorite.".format(
                     data['item_uuid'])}, OK
 
         favorite = user.add_favorite(item)
@@ -43,10 +44,16 @@ class FavoriteHandler(Resource):
     @auth.login_required
     def delete(self, item_id):
         try:
-            favorite = Favorite.get(Favorite.user == item_id)
-        except Favorite.DoesNotExist:
-            return {'message': 'item `{}` not found'.format(item_id)}, NOT_FOUND
+            item = Item.get(Item.uuid == item_id)
+        except Item.DoesNotExist:
+            return {"message": "Item {} doesn't exist as Favorite.".format(data['item_uuid'])}, NOT_FOUND
 
-        if favorite.user == auth.current_user:
-            User.delete_favorite(favorite)
-            return {'message': 'item `{}` deleted'.format(favorite.uuid)}, OK
+        try:
+            favorite = Favorite.get(Favorite.item == item)
+        except Favorite.DoesNotExist:
+            return {'message': 'Item `{}` not found as Favorite'.format(item_id)}, NOT_FOUND
+
+        if favorite.user != auth.current_user:
+            return {'message': 'Item `{}` not found as Favorite'.format(item_id)}, NOT_FOUND
+
+        User.delete_favorite(favorite)
