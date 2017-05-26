@@ -122,12 +122,12 @@ def add_address(user, country='Italy', city='Pistoia', post_code='51100',
     )
 
 
-def add_favorite(self, item, id=None):
+def add_favorite(user, item, id=None):
     """Link the favorite item to user."""
     return Favorite.create(
             uuid=id or uuid.uuid4(),
             item=item,
-            user=self,
+            user=user,
     )
 
 
