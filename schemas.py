@@ -277,12 +277,6 @@ class UserSchema(BaseSchema):
         dump_only=True, id_field='uuid',
     )
 
-    # favorites = fields.Relationship(
-    #     many= True, include_resource_linkage=True,
-    #     type_='favorite', schema='FavoriteSchema',
-    #     dump_only=True, id_field='uuid',
-    # )
-
 
 class AddressSchema(BaseSchema):
     """
@@ -363,13 +357,16 @@ class FavoriteSchema(BaseSchema):
         json_module = simplejson
 
     id = fields.Str(dump_only=True, attribute='uuid')
-    item_uuid = fields.Str(attribute='item.uuid', validate=NOT_BLANK)
-    name = fields.Str(attribute='item.name')
-    price = fields.Float(attribute='item.price')
+    item_uuid = fields.Str(required=True, validate=NOT_BLANK)
+
+    item = fields.Relationship(
+        include_resource_linkage=True,
+        type_='item', schema='ItemSchema',
+        id_field='uuid',
+    )
 
     user = fields.Relationship(
         include_resource_linkage=True,
         type_='user', schema='UserSchema',
-        id_field='uuid', required=False,
-        validate=NOT_EMPTY,
+        id_field='uuid',
     )
