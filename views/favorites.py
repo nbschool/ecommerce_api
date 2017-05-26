@@ -1,7 +1,7 @@
 from auth import auth
 from flask import request
 from flask_restful import Resource
-from models import Favorite, Item, User
+from models import Favorite, Item
 from http.client import (CREATED, NOT_FOUND, OK, BAD_REQUEST)
 from utils import generate_response
 
@@ -42,18 +42,16 @@ class FavoritesHandler(Resource):
 
 class FavoriteHandler(Resource):
     @auth.login_required
-    def delete(self, item_id):
+    def delete(self, favorite_id):
+        user = auth.current_user
         try:
-            item = Item.get(Item.uuid == item_id)
-        except Item.DoesNotExist:
-            return {"message": "Item {} doesn't exist as Favorite.".format(data['item_uuid'])}, NOT_FOUND
-
-        try:
-            favorite = Favorite.get(Favorite.item == item)
+            favorite = Favorite.get(Favorite.uuid == favorite_id)
         except Favorite.DoesNotExist:
-            return {'message': 'Item `{}` not found as Favorite'.format(item_id)}, NOT_FOUND
+            return {"message": "Favorite {} doesn't exist.".format(favorite_id)}, NOT_FOUND
 
         if favorite.user != auth.current_user:
-            return {'message': 'Item `{}` not found as Favorite'.format(item_id)}, NOT_FOUND
+            return {'message': 'Favorite `{}` not found'.format(favorite_id)}, NOT_FOUND
 
-        item.delete_favorite(favorite)
+        user.delete_favorite(favorite)
+
+        return {'message': 'Favorite `{}` deleted.'.format(favorite_id)}, OK

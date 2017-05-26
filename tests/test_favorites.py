@@ -71,7 +71,7 @@ class TestFavorites(TestCase):
         user = add_user(USER1, PASS1)
         data = {
                 "data": {
-                    "type": "favorite", 
+                    "type": "favorite",
                     "attributes": {
                         "item_uuid": "2aabf825-40b3-03d5-e686-9eaebd156c0e"
                     }
