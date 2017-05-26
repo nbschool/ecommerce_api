@@ -265,16 +265,16 @@ class User(BaseModel, UserMixin):
         """
         return pbkdf2_sha256.verify(password, self.password)
 
-    def add_favorite(self, item):
+    def add_favorite(user, item):
         """Link the favorite item to user."""
         return Favorite.create(
                 uuid=uuid4(),
                 item=item,
-                user=self,
+                user=user,
                 )
 
-    def delete_favorite(self):
-        self.delete_instance()
+    def delete_favorite(self, obj):
+        obj.delete_instance()
 
 
 class Address(BaseModel):
