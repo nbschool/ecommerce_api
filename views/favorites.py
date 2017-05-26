@@ -56,4 +56,4 @@ class FavoriteHandler(Resource):
         if favorite.user != auth.current_user:
             return {'message': 'Item `{}` not found as Favorite'.format(item_id)}, NOT_FOUND
 
-        User.delete_favorite(favorite)
+        item.delete_favorite(favorite)
