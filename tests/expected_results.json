@@ -4,16 +4,17 @@
             {
                 "data": {
                     "type": "favorite",
-                    "attributes": {
-                        "name": "Item Test",
-                        "price": 15.99,
-                        "item_uuid": "00000000-0000-0000-0000-000000000002"
-                    },
                     "relationships": {
                         "user": {
                             "data": {
                                 "type": "user",
                                 "id": "00000000-0000-0000-0000-000000000001"
+                            }
+                        },
+                        "item": {
+                            "data": {
+                                "type": "item",
+                                "id": "00000000-0000-0000-0000-000000000002"
                             }
                         }
                     },
@@ -31,20 +32,21 @@
             {
                 "data": {
                     "type": "favorite",
-                    "id": "00000000-0000-0000-0000-000000000006",
-                    "attributes": {
-                        "name": "Item Test",
-                        "price": 15.99,
-                        "item_uuid": "00000000-0000-0000-0000-000000000003"
-                    },
                     "relationships": {
                         "user": {
                             "data": {
                                 "type": "user",
                                 "id": "00000000-0000-0000-0000-000000000001"
                             }
+                        },
+                        "item": {
+                            "data": {
+                                "type": "item",
+                                "id": "00000000-0000-0000-0000-000000000003"
+                            }
                         }
                     },
+                    "id": "00000000-0000-0000-0000-000000000006",
                     "links": {
                         "self": "/favorites/00000000-0000-0000-0000-000000000006"
                     }
@@ -56,20 +58,21 @@
             {
                 "data": {
                     "type": "favorite",
-                    "id": "00000000-0000-0000-0000-000000000008",
-                    "attributes": {
-                        "name": "Item Test",
-                        "price": 15.99,
-                        "item_uuid": "00000000-0000-0000-0000-000000000005"
-                    },
                     "relationships": {
                         "user": {
                             "data": {
                                 "type": "user",
                                 "id": "00000000-0000-0000-0000-000000000001"
                             }
+                        },
+                        "item": {
+                            "data": {
+                                "type": "item",
+                                "id": "00000000-0000-0000-0000-000000000005"
+                            }
                         }
                     },
+                    "id": "00000000-0000-0000-0000-000000000008",
                     "links": {
                         "self": "/favorites/00000000-0000-0000-0000-000000000008"
                     }
@@ -80,7 +83,7 @@
             }
         ],
         "post_favorites__fail": {
-            "message": "Item 2aabf825-40b3-03d5-e686-9eaebd156c0e doesn't exist."
+            "message": "Item 2aabf825-40b3-03d5-e686-9eaebd156c0e doesn't exist as Favorite."
         }
     },
     "addresses": {
