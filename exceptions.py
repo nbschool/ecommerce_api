@@ -1,3 +1,7 @@
+"""
+Custom exceptions to handle particular cases of our e-commerce API
+"""
+
 
 class InsufficientAvailabilityException(Exception):
 

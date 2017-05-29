@@ -1,18 +1,9 @@
 """
-Module contains the route handlers for the user part of the RESTful part of the
-flask application.
+Application entry point.
 
-Enpoints can be found at `/users/` and allow the creation of new users with
-* `first_name`
-* `last_name`
-* `email`
-* `password`
+Creates the Flask application and flask-restful Resources using our :mod:`views`
+modules.
 
-Fields are required non empty strings. At the current stage of development
-there is no validation on what the fields contain.
-
-User can be deleted using `/api/users/<email>` and a list of all existing users
-can be retrieved making a GET to `/api/users/`
 """
 
 import os

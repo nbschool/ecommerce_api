@@ -9,6 +9,11 @@ from app import app
 from models import Address, Item, Order, OrderItem, Picture, User
 
 TABLES = [Address, Item, Order, OrderItem, Picture, User]
+"""
+TABLES = list(BaseModel)
+
+All the tables that the tests needs to work with.
+"""
 
 
 @pytest.mark.usefixtures('mockuuid4')
@@ -21,6 +26,10 @@ class TestCase:
 
     @classmethod
     def setup_class(cls):
+        """
+        When a Test is created override the ``database`` attribute for all
+        the tables with a SqliteDatabase in memory.
+        """
         for table in TABLES:
             table._meta.database = cls.TEST_DB
             table.create_table(fail_silently=True)
@@ -28,6 +37,8 @@ class TestCase:
         cls.app = app.test_client()
 
     def setup_method(self):
-
+        """
+        When setting up a new test method clear all the tables
+        """
         for table in TABLES:
             table.delete().execute()

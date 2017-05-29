@@ -1,3 +1,6 @@
+"""
+Utility module for Flask resource handlers and models.
+"""
 import dotenv
 import os
 
