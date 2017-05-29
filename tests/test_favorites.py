@@ -1,0 +1,161 @@
+from tests.test_utils import (RESULTS, add_user, open_with_auth, add_favorite, add_item,
+                              assert_valid_response, json_favorite, format_jsonapi_request)
+from tests.test_case import TestCase
+from http.client import OK, UNAUTHORIZED, CREATED, NOT_FOUND, BAD_REQUEST
+from models import Favorite
+import json
+
+USER1 = 'fatima.caputo@tiscali.it'
+USER2 = 'pepito.pepon@gmail.com'
+PASS1 = '9J0'
+PASS2 = '0J9'
+# main endpoint for API
+API_ENDPOINT = '/{}'
+EXPECTED_RESULTS = RESULTS['favorites']
+
+
+class TestFavorites(TestCase):
+
+    def test_get_favorites__empty(self):
+        user = add_user(USER1, PASS1)
+        resp = open_with_auth(self.app, API_ENDPOINT.format('favorites/'), 'GET',
+                              user.email, PASS1, None, None)
+        assert resp.status_code == OK
+        assert json.loads(resp.data) == []
+
+    def test_get_favorites__success(self):
+        user = add_user(USER1, PASS1)
+        item = add_item()
+        add_favorite(user, item)
+        resp = open_with_auth(self.app, API_ENDPOINT.format('favorites/'), 'GET',
+                              user.email, PASS1, None, None)
+        assert resp.status_code == OK
+        expected_result = EXPECTED_RESULTS['get_favorites__success']
+        assert_valid_response(resp.data, expected_result)
+
+    def test_get_favorites2__success(self):
+        user = add_user(USER1, PASS1)
+        user2 = add_user(USER2, PASS2)
+        item = add_item()
+        item2 = add_item()
+        item3 = add_item()
+        add_favorite(user, item)
+        add_favorite(user2, item2)
+        add_favorite(user, item3)
+        resp = open_with_auth(self.app, API_ENDPOINT.format('favorites/'), 'GET',
+                              user.email, PASS1, None, None)
+        assert resp.status_code == OK
+        expected_result = EXPECTED_RESULTS['get_favorites2__success']
+        assert_valid_response(resp.data, expected_result)
+
+    def test_get_favorites_pass__wrong(self):
+        user = add_user(USER1, PASS1)
+        resp = open_with_auth(self.app, API_ENDPOINT.format('favorites/'), 'GET',
+                              user.email, PASS2, None, None)
+        assert resp.status_code == UNAUTHORIZED
+
+    def test_get_favorites_pass2__wrong(self):
+        """Forced case where a users uses the password of another user."""
+        user1 = add_user(USER1, PASS1)
+        user2 = add_user(None, PASS2)  # noqa: F841
+        resp = open_with_auth(self.app, API_ENDPOINT.format('favorites/'), 'GET',
+                              user1.email, PASS2, None, None)
+        assert resp.status_code == UNAUTHORIZED
+
+    def test_get_favorites_pass3__wrong(self):
+        resp = open_with_auth(self.app, API_ENDPOINT.format('favorites/'), 'GET',
+                              None, None, None, None)
+        assert resp.status_code == UNAUTHORIZED
+
+    def test_post_favorites__fail(self):
+        user = add_user(USER1, PASS1)
+        data = {
+                "data": {
+                    "type": "favorite",
+                    "attributes": {
+                        "item_uuid": "2aabf825-40b3-03d5-e686-9eaebd156c0e"
+                    }
+                }
+            }
+        resp = open_with_auth(self.app, API_ENDPOINT.format('favorites/'), 'POST',
+                              user.email, PASS1, 'application/json',
+                              json.dumps(data))
+        assert resp.status_code == NOT_FOUND
+        assert Favorite.select().count() == 0
+        expected_result = EXPECTED_RESULTS['post_favorites__fail']
+        assert_valid_response(resp.data, expected_result)
+
+    def test_post_favorites2__fail(self):
+        user = add_user(USER1, PASS1)
+        data = {
+                "data": {
+                    "type": "favorite",
+                    "attributes": {
+                        "item_uuid": ""
+                    }
+                }
+        }
+        resp = open_with_auth(self.app, API_ENDPOINT.format('favorites/'), 'POST',
+                              user.email, PASS1, 'application/json',
+                              json.dumps(data))
+        assert resp.status_code == BAD_REQUEST
+        assert Favorite.select().count() == 0
+
+    def test_post_favorites__success(self):
+        user = add_user(USER1, PASS1)
+        item = add_item()
+        favorite = json_favorite(str(item.uuid))
+        data = format_jsonapi_request('favorite', favorite)
+        resp = open_with_auth(self.app, API_ENDPOINT.format('favorites/'), 'POST',
+                              user.email, PASS1, 'application/json',
+                              json.dumps(data))
+        assert resp.status_code == CREATED
+        assert Favorite.select().count() == 1
+
+    def test_delete_favorites__success(self):
+        user = add_user(USER1, PASS1)
+        item = add_item()
+        favorite = add_favorite(user, item)
+        user_path = 'favorites/{}'.format(str(favorite.uuid))
+        resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
+                              user.email, PASS1, None, None)
+
+        assert resp.status_code == OK
+        assert Favorite.select().count() == 0
+
+    def test_delete_favorites__fail(self):
+        user = add_user(USER1, PASS1)
+        item = add_item()
+        favorite = add_favorite(user, item)
+        user_path = 'favorites/{}'.format(str(favorite.uuid))
+        resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
+                              user.email, PASS2, None, None)
+
+        assert resp.status_code == UNAUTHORIZED
+
+    def test_delete_alien_favorites__fail(self):
+        user1 = add_user(USER1, PASS1)
+        user2 = add_user(USER2, PASS2)
+        item = add_item()
+        favorite = add_favorite(user2, item)
+        user_path = 'favorites/{}'.format(str(favorite.uuid))
+        resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
+                              user1.email, PASS1, None, None)
+
+        assert resp.status_code == NOT_FOUND
+        assert Favorite.select().count() == 1
+
+    def test_delete_only_one_favorites__success(self):
+        user = add_user(USER1, PASS1)
+        item = add_item()
+        item2 = add_item()
+        item3 = add_item()
+        favorite = add_favorite(user, item)
+        add_favorite(user, item2)
+        add_favorite(user, item3)
+        user_path = 'favorites/{}'.format(str(favorite.uuid))
+        resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
+                              user.email, PASS1, None, None)
+
+        assert resp.status_code == OK
+        assert Favorite.select().count() == 2

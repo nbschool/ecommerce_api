@@ -343,3 +343,29 @@ class PictureSchema(BaseSchema):
         type_='item', schema='ItemSchema',
         id_field='uuid', required=True,
     )
+
+
+class FavoriteSchema(BaseSchema):
+    """Schema for models.Favorite"""
+
+    class Meta:
+        type_ = 'favorite'
+        self_url = '/favorites/{uuid}'
+        self_url_many = '/favorites/'
+        self_url_kwargs = {'uuid': '<id>'}
+        json_module = simplejson
+
+    id = fields.Str(dump_only=True, attribute='uuid')
+    item_uuid = fields.Str(required=True, validate=NOT_BLANK)
+
+    item = fields.Relationship(
+        include_resource_linkage=True,
+        type_='item', schema='ItemSchema',
+        id_field='uuid',
+    )
+
+    user = fields.Relationship(
+        include_resource_linkage=True,
+        type_='user', schema='UserSchema',
+        id_field='uuid',
+    )

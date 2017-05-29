@@ -6,9 +6,10 @@ import pytest
 from peewee import SqliteDatabase
 
 from app import app
-from models import Address, Item, Order, OrderItem, Picture, User
+from models import Address, Item, Order, OrderItem, Picture, User, Favorite
 
-TABLES = [Address, Item, Order, OrderItem, Picture, User]
+
+TABLES = [Address, Item, Order, OrderItem, Picture, User, Favorite]
 """
 TABLES = list(BaseModel)
 

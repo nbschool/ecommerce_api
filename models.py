@@ -14,7 +14,7 @@ from playhouse.signals import Model, post_delete, pre_delete
 
 from exceptions import InsufficientAvailabilityException, WrongQuantity
 from schemas import (ItemSchema, UserSchema, OrderSchema, OrderItemSchema,
-                     BaseSchema, AddressSchema, PictureSchema)
+                     BaseSchema, AddressSchema, PictureSchema, FavoriteSchema)
 from utils import remove_image
 
 
@@ -145,6 +145,12 @@ class Item(BaseModel):
             self.price,
             self.description)
 
+    def is_favorite(self, item):
+        for f in self.favorites:
+            if f.item_id == item.id:
+                return True
+        return False
+
 
 @database.atomic()
 @pre_delete(sender=Item)
@@ -258,6 +264,17 @@ class User(BaseModel, UserMixin):
             bool: wether the given email matches the stored one
         """
         return pbkdf2_sha256.verify(password, self.password)
+
+    def add_favorite(user, item):
+        """Link the favorite item to user."""
+        return Favorite.create(
+                uuid=uuid4(),
+                item=item,
+                user=user,
+                )
+
+    def delete_favorite(self, obj):
+        obj.delete_instance()
 
 
 class Address(BaseModel):
@@ -641,3 +658,11 @@ class OrderItem(BaseModel):
         Calculate the subtotal value of the item(s) in the order and update the relative attribute.
         """
         self.subtotal = self.item.price * self.quantity
+
+
+class Favorite(BaseModel):
+    """ Many to many table to relate an item with a user."""
+    uuid = UUIDField(unique=True)
+    user = ForeignKeyField(User, related_name="favorites")
+    item = ForeignKeyField(Item, related_name="favorites")
+    _schema = FavoriteSchema
