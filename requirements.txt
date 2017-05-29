@@ -36,4 +36,3 @@ sphinx-autobuild==0.6.0
 sphinx-rtd-theme==0.2.4
 six==1.10.0
 Werkzeug==0.12.1
-python-env==1.0.0
