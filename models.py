@@ -2,12 +2,13 @@
 Application ORM Models built with Peewee
 """
 import datetime
+import os
 from uuid import uuid4
 
 from flask_login import UserMixin
 from passlib.hash import pbkdf2_sha256
 from peewee import DateTimeField, TextField, CharField, BooleanField
-from peewee import SqliteDatabase, DecimalField
+from peewee import DecimalField, PostgresqlDatabase
 from peewee import UUIDField, ForeignKeyField, IntegerField
 from playhouse.signals import Model, post_delete, pre_delete
 
@@ -17,7 +18,21 @@ from schemas import (ItemSchema, UserSchema, OrderSchema, OrderItemSchema,
 from utils import remove_image
 
 
-database = SqliteDatabase('database.db')
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'dev')
+if ENVIRONMENT != 'dev':
+    import urllib.parse
+    urllib.parse.uses_netloc.append('postgres')
+    url = urllib.parse.urlparse(os.getenv('DATABASE_URL'))
+    database = PostgresqlDatabase(database=url.path[1:],
+                                  user=url.username,
+                                  password=url.password,
+                                  host=url.hostname,
+                                  port=url.port,
+                                  )
+
+else:
+    from peewee import SqliteDatabase
+    database = SqliteDatabase('database.db')
 
 
 class BaseModel(Model):
