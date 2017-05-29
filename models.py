@@ -316,7 +316,7 @@ class Order(BaseModel):
         to this order and resetting the order's total_price value to 0.
 
         Returns:
-            Order: callee order instance
+            models.Order: The updated order
         """
 
         self.total_price = 0
@@ -324,71 +324,215 @@ class Order(BaseModel):
         self.save()
         return self
 
-    def add_item(self, item, quantity=1):
+    @staticmethod
+    def create_order(user, address, items):
         """
-        Add one item to the order.
-        Creates one OrderItem row if the item is not present in the order yet,
-        or increasing the count of the existing OrderItem. It also updates the
-        item availability counter and raise InsufficientAvailability if
-        quantity is less than item availability.
+        Create an Order and respective OrderItems. OrderItems are created
+        in a single query as well as the Order. It also updates Items'
+        availability.
 
         Args:
-            item (Item): The Item to be added
-            quantity(int, optional): How many items to add
+            user (models.User): order owner
+            address (models.Address): order address
+            items (dict): item updates entries as a dictionary, keys are
+                items and values are new quantities to set. Example of
+                argument:
+
+                ..code-block:: python
+                    items = {
+                        Item.get(pk=1): 3,
+                        Item.get(pk=2): 1,
+                    }
+
+        Returns:
+            models.Order: The new order
+        """
+        total_price = sum(
+            item.price * quantity for item, quantity in items.items())
+
+        with database.atomic():
+            order = Order.create(
+                delivery_address=address,
+                user=user,
+                total_price=total_price,
+            )
+            order.update_items(items, update_total=False)
+            return order
+
+    def update_items(self, items, update_total=True, new_address=None):
+        """
+        Update Order and respective OrderItems by splitting in creation,
+        deletion and updating queries, minimizing the interactions with the
+        database. It also updates Items' availability.
+
+        Args:
+            items (dict): item updates entries as a dictionary, keys are
+                items and values are new quantities to set. Example of
+                argument:
+
+                ..code-block:: python
+                    items = {
+                        Item.get(pk=1): 3,
+                        Item.get(pk=2): 0,
+                        Item.get(pk=3): 1,
+                    }
+            update_total (bool): if True the procedure updates order's
+                total price. Default to True.
+            new_address (models.Address): if not None the procedure updates
+                the order with the given address. Default to None.
+
+        Returns:
+            models.Order: The new/updated order
+        """
+        to_create = {}
+        to_remove = {}
+        to_edit = {}
+        total_price_difference = 0
+        orderitems = self.order_items
+
+        # split items in insert, delete and update sets
+        for item, quantity in items.items():
+            for orderitem in orderitems:
+                if orderitem.item == item:
+                    difference = quantity - orderitem.quantity
+                    if quantity == 0:
+                        to_remove[item] = orderitem.quantity
+                    elif difference > item.availability:
+                        raise InsufficientAvailabilityException(
+                            item, quantity)
+                    elif quantity < 0:
+                        raise WrongQuantity()
+                    else:
+                        to_edit[item] = difference
+                    total_price_difference += item.price * difference
+                    break
+            else:
+                if quantity <= 0:
+                    raise WrongQuantity()
+                elif quantity > item.availability:
+                    raise InsufficientAvailabilityException(
+                        item, quantity)
+                else:
+                    to_create[item] = quantity
+                total_price_difference += item.price * quantity
+
+        with database.atomic():
+            self.edit_items_quantity(to_edit)
+            self.create_items(to_create)
+            self.delete_items(to_remove)
+            if update_total:
+                self.total_price += total_price_difference
+            if new_address:
+                self.address = new_address
+            if update_total or new_address:
+                self.save()
+        return self
+
+    @database.atomic()
+    def edit_items_quantity(self, items):
+        """
+        Update orderitems using a query for each item, and updates
+        items' availability.
+
+        Args:
+            items (dict): item updates entries as a dictionary, keys are
+                items and values are new quantities to set. Example of
+                argument:
+
+                ..code-block:: python
+                    items = {
+                        Item.get(pk=1): 3,
+                        Item.get(pk=3): 1,
+                    }
         Returns:
             Order: callee instance
         """
-        for orderitem in self.order_items:
-            # Looping all the OrderItem related to this order, if one with the
-            # same item is found we update that row.
-            if orderitem.item == item:
-                orderitem.add_item(quantity)
+        if not items:
+            return
 
-                self.total_price += (item.price * quantity)
-                self.save()
-                return self
+        orderitems = OrderItem.select().where(
+            OrderItem.item << [k for k in items.keys()],
+            OrderItem.order == self)
 
-        # if no existing OrderItem is found with this order and this Item,
-        # create a new row in the OrderItem table and use OrderItem.add_item
-        # to properly use the calculus logic that handles updating prices and
-        # availability. To use correctly add_item the initial quantity and
-        # subtotal are set to 0
-        OrderItem.create(
-            order=self,
-            item=item,
-            quantity=0,
-            subtotal=0,
-        ).add_item(quantity)
+        for orderitem in orderitems:
+            for item, difference in items.items():
+                if orderitem.item == item:
+                    item.availability -= difference
+                    item.save()
+                    orderitem.quantity += difference
+                    orderitem._calculate_subtotal()
+                    orderitem.save()
+                    break
 
-        self.total_price += (item.price * quantity)
-        self.save()
-
-        return self
-
-    def update_item(self, item, quantity):
+    def delete_items(self, items):
         """
-        Update the Order with the new quantity of the given item. Takes care
-        of creating a new :class:`models.OrderItem` if needed or, adding or removing
-        the correct quantity for an existing OrderItem.
+        Delete orderitems in a single query and updates items' availability.
 
         Args:
-            item (Item): Item to update for this order
-            quantity (int): **new** quantity for the item
+            items (dict): item entries as a dictionary, keys are
+                items to delete and values are previously reserved quantities.
+                Example of argument:
+
+                ..code-block:: python
+                    items = {
+                        Item.get(pk=1): 3,
+                        Item.get(pk=2): 2,
+                    }
+        """
+        if not items:
+            return
+
+        with database.atomic():
+            for item, quantity in items.items():
+                item.availability += quantity
+                item.save()
+            OrderItem.delete().where(
+                OrderItem.order == self).where(
+                OrderItem.item << [k for k in items.keys()]).execute()
+
+    def create_items(self, items):
+        """
+        Creates orderitems in a single query and updates items' availability.
+
+        Args:
+            items (dict): item entries as a dictionary, keys are
+                items to create and values are new quantities to set.
+                Example of argument:
+
+                ..code-block:: python
+                    items = {
+                        Item.get(pk=1): 3,
+                        Item.get(pk=2): 1,
+                    }
+        """
+        if not items:
+            return
+
+        with database.atomic():
+            for item, quantity in items.items():
+                item.availability -= quantity
+                item.save()
+
+            OrderItem.insert_many([
+                {
+                    'order': self,
+                    'item': item,
+                    'quantity': quantity,
+                    'subtotal': item.price * quantity,
+                } for item, quantity in items.items()]).execute()
+
+    def add_item(self, item, quantity=1):
+        """
+        Add items to the order. It updates item availability.
+
+        Args:
+            item (models.Item): the Item to add
+            quantity (int): how many items to add
 
         Returns:
-            None
-
+            order (models.Order): the updated order
         """
-        for order_item in self.order_items:
-            if order_item.item == item:
-                diff = quantity - order_item.quantity
-                if diff > 0:
-                    self.add_item(item, abs(diff))
-                elif diff < 0:
-                    self.remove_item(item, abs(diff))
-                break
-        else:
-            self.add_item(item, quantity)
+        return self.update_items({item: quantity})
 
     def remove_item(self, item, quantity=1):
         """
@@ -398,25 +542,13 @@ class Order(BaseModel):
         It also restores the item availability.
 
         Args:
-            item (Item): Item to be removed
-            quantity (int): How many item to remove
+            item (models.Item): the Item to remove
+            quantity (int): how many items to remove
 
         Returns:
-            Order: callee instance
-
+            order (models.Order): the updated order
         """
-        for orderitem in self.order_items:
-            if orderitem.item == item:
-                removed_items = orderitem.remove_item(quantity)
-                item.availability += quantity
-                item.save()
-                self.total_price -= (item.price * removed_items)
-                self.save()
-                return self
-
-        # No OrderItem found for this item
-        # TODO: Raise or return something more explicit
-        return self
+        return self.update_items({item: -quantity})
 
 
 class OrderItem(BaseModel):

@@ -275,6 +275,48 @@
                 "self": "/orders/b975ed38-f426-4965-8633-85a48442aaa5"
             }
         },
+        "get_order__success_2": {
+            "data": {
+                "attributes": {
+                    "date": "2017-02-20T10:16:50.140620+00:00",
+                    "total_price": 80.60
+                },
+                "id": "c121e159-1d88-49b0-a36c-b2169ac69474",
+                "links": {
+                    "self": "/orders/c121e159-1d88-49b0-a36c-b2169ac69474"
+                },
+                "relationships": {
+                    "delivery_address": {
+                        "data": {
+                            "id": "03e071e4-e89e-46a3-8dfd-3da1bd52c02f",
+                            "type": "address"
+                        }
+                    },
+                    "items": {
+                        "data": [
+                            {
+                                "id": "429994bf-784e-47cc-a823-e0c394b823e8",
+                                "type": "item"
+                            },
+                            {
+                                "id": "577ad826-a79d-41e9-a5b2-7955bcf03499",
+                                "type": "item"
+                            }
+                        ]
+                    },
+                    "user": {
+                        "data": {
+                            "id": "f79d9cd9-d5a3-4285-b6c0-54e0a8497b2a",
+                            "type": "user"
+                        }
+                    }
+                },
+                "type": "order"
+            },
+            "links": {
+                "self": "/orders/c121e159-1d88-49b0-a36c-b2169ac69474"
+            }
+        },
         "create_order__success": {
             "data": {
                 "attributes": {
