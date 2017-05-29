@@ -37,3 +37,4 @@ sphinx-autobuild==0.6.0
 sphinx-rtd-theme==0.2.4
 six==1.10.0
 Werkzeug==0.12.1
+jellyfish==0.5.6
