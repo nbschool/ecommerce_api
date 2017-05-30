@@ -9,6 +9,7 @@ import uuid
 import jellyfish
 from flask import request
 from flask_restful import Resource
+import search
 
 from models import Item
 from utils import generate_response
@@ -117,45 +118,20 @@ class SearchItemHandler(Resource):
         query = request.args.get('query')
         limit = int(request.args.get('limit', -1))
 
-        print('query: {}, limit: {}'.format(query, limit))
-        matches = []
+        if query is not None and (limit > 0 and limit < 100):
 
-        print('Found:')
+            matches = []
+            for item in Item.select():
+                match = search.similarity(item.name.lower(), query.lower())
 
-        for item in Item.select():
-            match = jellyfish.jaro_winkler(item.name.lower(), query.lower())
+                if match >= .75:
+                    matches.append({'item': item, 'match': match})
 
-            print('{} -> match: {}'.format(item.name, match))
+            matches.sort(key=lambda m: m['match'], reverse=True)
 
-            if match >= .75:
-                matches.append({'item': item, 'match': match})
-                print('!!! {}'.format(item.name))
+            return generate_response(
+                Item.json_list([i['item'] for i in matches]),
+                client.OK
+            )
 
-        matches.sort(key=lambda m: m['match'], reverse=True)
-
-        return generate_response(
-            Item.json_list([i['item'] for i in matches]),
-            client.OK
-        )
-
-        # # 1: controllare l'esistenza di questi parametri e la loro validità,
-        # # altrimenti BAD_REQUEST
-        # if query != '' and (limit > 0 and limit < 100):
-        #     return generate_response(query, client.OK)
-        # else:
-        #     return None, client.BAD_REQUEST
-        # # 2: prendere tutti gli item dal database
-        # item = Item.get(Item.uuid == item_uuid)
-        # # 3: per ogni item calcoliamo la distanza da query usando
-        # # distance.hamming
-
-        # #   a: distanza della query dal nome
-        # distance.hamming1("query", Item.name, normalized=True)
-        # #   b: distanza della query dalla descrizione
-        # distance.hamming2("query", Item.description, normalized=True)
-        # #   c: facciamo la media delle due distanze
-        # average = (distance.hamming1 + distance.hamming2) / 2
-        # # 4: ordiniamo la mia lista di item per la distanza da query
-
-        # # 5: ritornimo solo i primi n item come da limit
-        # return {}
+        return None, client.BAD_REQUEST
