@@ -119,13 +119,23 @@ class SearchItemHandler(Resource):
     def get(self):
         query = request.args.get('query')
         limit = int(request.args.get('limit', -1))
+        min_limit, max_limit = 0, 100
 
-        if query is not None and (limit > 0 and limit < 100):
+        limit_in_range = limit > min_limit and limit <= max_limit
 
+        if query is not None and limit_in_range:
             matches = search.search(query, SEARCH_FIELDS, Item, limit)
-
             return generate_response(Item.json_list(matches), client.OK)
 
-        # TODO: Return an error specifying what went wrong (i.e. missing
-        # query or limit or limit out of range)
-        return None, client.BAD_REQUEST
+        def fmt_error(msg):
+            return {'detail': msg}
+
+        errors = {"errors": []}
+        if not query:
+            errors['errors'].append(fmt_error('Missing query.'))
+        if not limit_in_range:
+            msg = 'Limit out of range. must be between {} and {}. Requested: {}'
+            errors['errors'].append(
+                fmt_error(msg.format(min_limit, max_limit, limit)))
+
+        return errors, client.BAD_REQUEST
