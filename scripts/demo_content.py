@@ -18,11 +18,7 @@ import shutil
 
 init(autoreset=True)
 
-SEED = 9623954
 fake = Factory.create('it_IT')
-fake.seed(SEED)
-random.seed(SEED)
-
 
 TEXT_DISPLAY = Fore.MAGENTA + Style.BRIGHT + """
                       WELCOME TO DEMO CONTENT CREATOR.
@@ -206,6 +202,8 @@ def main():
         '-p', '--pictures', help='Set up the number of insertions in Picture table.', default=10)
     parser.add_argument(
         '-f', '--favorites', help='Set up the number of insertions in Favorite table.', default=10)
+    parser.add_argument(
+        '-s', '--seed', help='Set up seed number to generate predictable data.', default=9623954)
 
     args = parser.parse_args()
     num_users = args.users
@@ -214,6 +212,10 @@ def main():
     num_orders = args.orders
     num_pictures = args.pictures
     num_favorites = args.favorites
+    seed = args.seed
+
+    fake.seed(seed)
+    random.seed(seed)
 
     ACTIONS = {
         '1': {
