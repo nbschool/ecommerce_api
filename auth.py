@@ -1,6 +1,4 @@
-"""
-Auth module handles authorization requests and checks.
-"""
+"""Auth module handles authorization requests and checks."""
 
 from flask_login import login_required, LoginManager
 
@@ -13,7 +11,6 @@ class Auth:
     """
     Auth manager class, it offers methods to get the current user
     and to initialize the login manager of the app.
-
     """
 
     @staticmethod
@@ -28,7 +25,6 @@ class Auth:
         We forward the flask_login current_user converted from a proxy object
         to our ``models.User``. We import the flask_login current_user inside
         the method to forbid a direct import from flask_login.
-
         Returns:
             models.User: currently logged user
         """
