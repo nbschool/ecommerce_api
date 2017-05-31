@@ -15,6 +15,8 @@ from models import Item, Picture
 from tests import test_utils
 import utils
 
+EXPECTED_RESULTS = test_utils.RESULTS['pictures']
+
 TEST_IMAGE_FOLDER = 'test_images'
 
 TEST_ITEM = {
@@ -23,6 +25,7 @@ TEST_ITEM = {
     'price': 20.20,
     'description': 'svariati mariii',
     'availability': 1,
+    'category': 'scarpe',
 }
 
 TEST_ITEM2 = {
@@ -31,6 +34,7 @@ TEST_ITEM2 = {
     'price': 30.20,
     'description': 'svariati GINIIIII',
     'availability': 1,
+    'category': 'accessori',
 }
 
 TEST_PICTURE = {
@@ -59,13 +63,14 @@ class TestPictures(TestCase):
         test_utils.setup_images()
         item = Item.create(**TEST_ITEM)
         picture = Picture.create(item=item, **TEST_PICTURE)
+
         open("{path}/{picture_uuid}.jpg".format(
             path=utils.get_image_folder(),
             picture_uuid=picture.uuid), "wb")
+
         resp = self.app.get('/pictures/{picture_uuid}'.format(
             picture_uuid=picture.uuid))
         assert resp.status_code == client.OK
-
         test_picture = TEST_PICTURE.copy()
         test_picture['item_uuid'] = item.uuid
         assert resp.data == b''
@@ -83,14 +88,10 @@ class TestPictures(TestCase):
         Picture.create(item=item, **TEST_PICTURE2)
         resp = self.app.get('/items/{item_uuid}/pictures/'.format(
             item_uuid=item.uuid))
-        pictures = json.loads(resp.data)
         assert resp.status_code == client.OK
-        assert len(pictures) == 2
 
-        test_picture = test_picture2 = TEST_PICTURE.copy()
-        test_picture['item_uuid'] = test_picture2['item_uuid'] = item.uuid
-        assert test_picture in pictures
-        assert test_picture2 in pictures
+        test_utils.assert_valid_response(
+            resp.data, EXPECTED_RESULTS['get_item_pictures__success'])
 
     def test_get_item_pictures__empty(self):
         item = Item.create(**TEST_ITEM)

@@ -1,13 +1,13 @@
+import http.client as client
 import os
-import utils
 import uuid
 
 from flask import request, send_from_directory
 from flask_restful import Resource
-import http.client as client
 
-from models import Item
-from models import Picture
+import utils
+from models import Item, Picture
+from utils import generate_response
 
 ALLOWED_EXTENSION = ['jpg', 'jpeg', 'png', 'gif']
 
@@ -16,11 +16,12 @@ class ItemPictureHandler(Resource):
 
     def get(self, item_uuid):
         """Retrieve every picture of an item"""
-        items = [o.json() for o in Picture.select().join(Item).where(
-            Item.uuid == item_uuid)]
+        pictures = Picture.select().join(Item).where(Item.uuid == item_uuid)
 
-        if items:
-            return items, client.OK
+        if pictures:
+            data = Picture.json_list(pictures)
+            return generate_response(data, client.OK)
+
         return None, client.NOT_FOUND
 
     def post(self, item_uuid):
@@ -62,7 +63,7 @@ class PictureHandler(Resource):
             return None, client.NOT_FOUND
 
         return send_from_directory(utils.get_image_folder(),
-                                   picture.filename(), as_attachment=True)
+                                   picture.filename, as_attachment=True)
 
     def delete(self, picture_uuid):
         """Remove the picture specified by picture_uuid"""

@@ -9,7 +9,7 @@ from flask import abort, request
 from flask_restful import Resource
 
 from auth import auth
-from models import database, Address, Order, Item
+from models import database, Address, Order, Item, User
 from notifications import notify_new_order
 from utils import generate_response
 
@@ -36,6 +36,21 @@ class OrdersHandler(Resource):
         # Extract data to create the new order
         req_items = res['data']['relationships']['items']['data']
         req_address = res['data']['relationships']['delivery_address']['data']
+        req_user = res['data']['relationships']['user']['data']
+
+        # Check that the address exist
+        try:
+            user = User.get(User.uuid == req_user['id'])
+        except User.DoesNotExist:
+            abort(BAD_REQUEST)
+
+        # get the user from the flask.g global object registered inside the
+        # auth.py::verify() function, called by @auth.login_required decorator
+        # and match it against the found user.
+        # This is to prevent users from creating other users' order.
+        if auth.current_user != user and auth.current_user.admin is False:
+            return ({'message': "You can't create a new order for another user"},
+                    UNAUTHORIZED)
 
         # Check that the items exist
         item_ids = [req_item['id'] for req_item in req_items]
@@ -49,7 +64,12 @@ class OrdersHandler(Resource):
         except Address.DoesNotExist:
             abort(BAD_REQUEST)
 
-        with database.transaction() as txn:
+        # Generate the dict of {<Item>: <int:quantity>} to call Order.create_order
+        items_to_add = {}
+        for req_item in req_items:
+            item = next(i for i in items if str(i.uuid) == req_item['id'])
+            items_to_add[item] = req_item['quantity']
+        with database.atomic():
             try:
                 order = Order.create(
                     delivery_address=address,
@@ -64,19 +84,8 @@ class OrdersHandler(Resource):
                             order.add_item(item, req_item['quantity'])
                             break
                 notify_new_order(address=order.delivery_address, user=order.user)
-
             except InsufficientAvailabilityException:
-                txn.rollback()
-                return None, BAD_REQUEST
-            except KeyError:
-                # FIXME: This catch is required to catch missing quantity attribute
-                # on the post request. This should be done from the validate_input
-                # function but this needs to be implemented yet, so this prevents
-                # raising KeyError later on when adding items
-                msg = {
-                    'message': 'Item {} missing quantity attribute'.format(item.uuid)
-                }
-                return msg, BAD_REQUEST
+                abort(BAD_REQUEST)
 
         return generate_response(order.json(), CREATED)
 
@@ -103,14 +112,22 @@ class OrderHandler(Resource):
             return errors, BAD_REQUEST
 
         data = res['data']['relationships']
-        req_items = data.get('items')
+        req_items = data.get('items', {})
         req_address = data.get('delivery_address')
 
-        with database.transaction() as txn:
+        with database.atomic():
             try:
                 order = Order.get(uuid=str(order_uuid))
             except Order.DoesNotExist:
                 abort(NOT_FOUND)
+
+            address = None
+            if req_address:
+                try:
+                    address = Address.get(Address.uuid == req_address['data']['id'])
+                except Address.DoesNotExist:
+                    abort(BAD_REQUEST)
+                order.delivery_address = address
 
             # get the user from the flask.g global object registered inside the
             # auth.py::verify() function, called by @auth.login_required decorator
@@ -120,38 +137,20 @@ class OrderHandler(Resource):
                 return ({'message': "You can't delete another user's order"},
                         UNAUTHORIZED)
 
-            if req_address:
-                try:
-                    address = Address.get(Address.uuid == req_address['data']['id'])
-                    order.delivery_address = address
-                except Address.DoesNotExist:
-                    abort(BAD_REQUEST)
-
-            if req_items:
-                req_items = req_items['data']  # avoid refactoring everything
-                items_uuids = [e['id'] for e in req_items]
-                items_query = Item.select().where(Item.uuid << items_uuids)
-                items = {str(item.uuid): item for item in items_query}
-
-                if len(items) != len(items_uuids):
-                    return None, BAD_REQUEST
-
-                for req_item in req_items:
-                    item = items[req_item['id']]
-                    try:
-                        order.update_item(item, req_item['quantity'])
-                    except InsufficientAvailabilityException:
-                        txn.rollback()
-                        return None, BAD_REQUEST
-                    except KeyError:
-                        # FIXME: Prevent future KeyError when adding items. See post method
-                        # for further info.
-                        msg = {
-                            'message': 'Item {} missing quantity attribute'.format(item.uuid)
-                        }
-                        return msg, BAD_REQUEST
-
-            order.save()
+            # Generate the dict of {<Item>: <int:quantity>} to call Order.update_items
+            items_uuids = [e['id'] for e in req_items.get('data', [])]
+            items = list(Item.select().where(Item.uuid << items_uuids))
+            if len(items) != len(items_uuids):
+                abort(BAD_REQUEST)
+            items_to_add = {
+                item: req_item['quantity']
+                for item in items for req_item in req_items.get('data', [])
+                if str(item.uuid) == req_item['id']
+            }
+            try:
+                order.update_items(items_to_add, new_address=address)
+            except InsufficientAvailabilityException:
+                abort(BAD_REQUEST)
 
         return generate_response(order.json(), OK)
 

@@ -1,8 +1,9 @@
 """
 Auth login view: this module provides the login method
 """
-from flask_cors import cross_origin
+
 from flask import abort, request
+from flask_cors import cross_origin
 from flask_login import login_user
 from flask_restful import Resource
 import http.client as client

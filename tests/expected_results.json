@@ -1,4 +1,91 @@
 {
+    "favorites": {
+        "get_favorites__success": [
+            {
+                "data": {
+                    "type": "favorite",
+                    "relationships": {
+                        "user": {
+                            "data": {
+                                "type": "user",
+                                "id": "00000000-0000-0000-0000-000000000001"
+                            }
+                        },
+                        "item": {
+                            "data": {
+                                "type": "item",
+                                "id": "00000000-0000-0000-0000-000000000002"
+                            }
+                        }
+                    },
+                    "id": "00000000-0000-0000-0000-000000000003",
+                    "links": {
+                        "self": "/favorites/00000000-0000-0000-0000-000000000003"
+                    }
+                },
+                "links": {
+                    "self": "/favorites/00000000-0000-0000-0000-000000000003"
+                }
+            }
+        ],
+        "get_favorites2__success": [
+            {
+                "data": {
+                    "type": "favorite",
+                    "relationships": {
+                        "user": {
+                            "data": {
+                                "type": "user",
+                                "id": "00000000-0000-0000-0000-000000000001"
+                            }
+                        },
+                        "item": {
+                            "data": {
+                                "type": "item",
+                                "id": "00000000-0000-0000-0000-000000000003"
+                            }
+                        }
+                    },
+                    "id": "00000000-0000-0000-0000-000000000006",
+                    "links": {
+                        "self": "/favorites/00000000-0000-0000-0000-000000000006"
+                    }
+                },
+                "links": {
+                    "self": "/favorites/00000000-0000-0000-0000-000000000006"
+                }
+            },
+            {
+                "data": {
+                    "type": "favorite",
+                    "relationships": {
+                        "user": {
+                            "data": {
+                                "type": "user",
+                                "id": "00000000-0000-0000-0000-000000000001"
+                            }
+                        },
+                        "item": {
+                            "data": {
+                                "type": "item",
+                                "id": "00000000-0000-0000-0000-000000000005"
+                            }
+                        }
+                    },
+                    "id": "00000000-0000-0000-0000-000000000008",
+                    "links": {
+                        "self": "/favorites/00000000-0000-0000-0000-000000000008"
+                    }
+                },
+                "links": {
+                    "self": "/favorites/00000000-0000-0000-0000-000000000008"
+                }
+            }
+        ],
+        "post_favorites__fail": {
+            "message": "Item 2aabf825-40b3-03d5-e686-9eaebd156c0e doesn't exist as Favorite."
+        }
+    },
     "addresses": {
         "get_addresses__success": [
             {
@@ -275,6 +362,48 @@
                 "self": "/orders/b975ed38-f426-4965-8633-85a48442aaa5"
             }
         },
+        "get_order__success_2": {
+            "data": {
+                "attributes": {
+                    "date": "2017-02-20T10:16:50.140620+00:00",
+                    "total_price": 80.60
+                },
+                "id": "c121e159-1d88-49b0-a36c-b2169ac69474",
+                "links": {
+                    "self": "/orders/c121e159-1d88-49b0-a36c-b2169ac69474"
+                },
+                "relationships": {
+                    "delivery_address": {
+                        "data": {
+                            "id": "03e071e4-e89e-46a3-8dfd-3da1bd52c02f",
+                            "type": "address"
+                        }
+                    },
+                    "items": {
+                        "data": [
+                            {
+                                "id": "429994bf-784e-47cc-a823-e0c394b823e8",
+                                "type": "item"
+                            },
+                            {
+                                "id": "577ad826-a79d-41e9-a5b2-7955bcf03499",
+                                "type": "item"
+                            }
+                        ]
+                    },
+                    "user": {
+                        "data": {
+                            "id": "f79d9cd9-d5a3-4285-b6c0-54e0a8497b2a",
+                            "type": "user"
+                        }
+                    }
+                },
+                "type": "order"
+            },
+            "links": {
+                "self": "/orders/c121e159-1d88-49b0-a36c-b2169ac69474"
+            }
+        },
         "create_order__success": {
             "data": {
                 "attributes": {
@@ -442,7 +571,7 @@
                 },
                 "attributes": {
                     "date": "2017-02-20T10:16:50.140620+00:00",
-                    "total_price": 403.0
+                    "total_price": 403
                 },
                 "id": "00000000-0000-0000-0000-000000000001",
                 "links": {
@@ -517,7 +646,7 @@
                     }
                 },
                 "attributes": {
-                    "total_price": 604.0,
+                    "total_price": 604,
                     "date": "2017-02-20T10:16:50.140620+00:00"
                 },
                 "id": "00000000-0000-0000-0000-000000000001",
@@ -559,7 +688,7 @@
                     }
                 },
                 "attributes": {
-                    "total_price": 806.0,
+                    "total_price": 806,
                     "date": "2017-02-20T10:16:50.140620+00:00"
                 },
                 "id": "00000000-0000-0000-0000-000000000001",
@@ -580,9 +709,15 @@
                     "description": "svariati mariii",
                     "price": 20.2,
                     "availability": 1,
-                    "name": "mario"
+                    "name": "mario",
+                    "category": "scarpe"
                 },
                 "id": "00000000-0000-0000-0000-000000000001",
+                "relationships": {
+                    "pictures": {
+                        "data": []
+                    }
+                },
                 "links": {
                     "self": "/items/00000000-0000-0000-0000-000000000001"
                 }
@@ -598,7 +733,13 @@
                     "description": "lorem ipsum",
                     "price": 30.222222,
                     "name": "Anna Pannocchia",
-                    "availability": 1
+                    "availability": 1,
+                    "category": "scarpe"
+                },
+                "relationships": {
+                    "pictures": {
+                        "data": []
+                    }
                 },
                 "id": "00000000-0000-0000-0000-000000000001",
                 "links": {
@@ -617,7 +758,13 @@
                         "description": "svariati mariii",
                         "price": 20.2,
                         "name": "mario",
-                        "availability": 1
+                        "availability": 1,
+                        "category": "scarpe"
+                    },
+                    "relationships": {
+                        "pictures": {
+                            "data": []
+                        }
                     },
                     "id": "429994bf-784e-47cc-a823-e0c394b823e8",
                     "links": {
@@ -635,7 +782,13 @@
                         "description": "svariati GINIIIII",
                         "price": 30.2,
                         "name": "GINO",
-                        "availability": 2
+                        "availability": 2,
+                        "category": "accessori"
+                    },
+                    "relationships": {
+                        "pictures": {
+                            "data": []
+                        }
                     },
                     "id": "577ad826-a79d-41e9-a5b2-7955bcf03499",
                     "links": {
@@ -654,7 +807,13 @@
                     "description": "svariati mariii",
                     "price": 20.2,
                     "name": "mario",
-                    "availability": 1
+                    "availability": 1,
+                    "category": "scarpe"
+                },
+                "relationships": {
+                    "pictures": {
+                        "data": []
+                    }
                 },
                 "id": "429994bf-784e-47cc-a823-e0c394b823e8",
                 "links": {
@@ -672,7 +831,13 @@
                     "description": "svariati mariii",
                     "price": 20.2,
                     "name": "new-name",
-                    "availability": 1
+                    "availability": 1,
+                    "category": "scarpe"
+                },
+                "relationships": {
+                    "pictures": {
+                        "data": []
+                    }
                 },
                 "id": "429994bf-784e-47cc-a823-e0c394b823e8",
                 "links": {
@@ -691,7 +856,13 @@
                     "availability": 2,
                     "price": 40.2,
                     "name": "new-name",
-                    "description": "new-description"
+                    "description": "new-description",
+                    "category": "new-category"
+                },
+                "relationships": {
+                    "pictures": {
+                        "data": []
+                    }
                 },
                 "links": {
                     "self": "/items/429994bf-784e-47cc-a823-e0c394b823e8"
@@ -829,6 +1000,58 @@
                 }
             ]
         }
+    },
+    "pictures": {
+        "get_item_pictures__success": [
+            {
+                "data": {
+                    "type": "picture",
+                    "attributes": {
+                        "filename": "df690434-a488-419f-899e-8853cba1a22b.jpg",
+                        "extension": "jpg"
+                    },
+                    "relationships": {
+                        "item": {
+                            "data": {
+                                "type": "item",
+                                "id": "429994bf-784e-47cc-a823-e0c394b823e8"
+                            }
+                        }
+                    },
+                    "id": "df690434-a488-419f-899e-8853cba1a22b",
+                    "links": {
+                        "self": "/pictures/df690434-a488-419f-899e-8853cba1a22b"
+                    }
+                },
+                "links": {
+                    "self": "/pictures/df690434-a488-419f-899e-8853cba1a22b"
+                }
+            },
+            {
+                "data": {
+                    "type": "picture",
+                    "attributes": {
+                        "filename": "c0001a48-10a3-43c1-b87b-eabac0b2d42f.png",
+                        "extension": "png"
+                    },
+                    "relationships": {
+                        "item": {
+                            "data": {
+                                "type": "item",
+                                "id": "429994bf-784e-47cc-a823-e0c394b823e8"
+                            }
+                        }
+                    },
+                    "id": "c0001a48-10a3-43c1-b87b-eabac0b2d42f",
+                    "links": {
+                        "self": "/pictures/c0001a48-10a3-43c1-b87b-eabac0b2d42f"
+                    }
+                },
+                "links": {
+                    "self": "/pictures/c0001a48-10a3-43c1-b87b-eabac0b2d42f"
+                }
+            }
+        ]
     },
     "schemas": {
         "users": {
@@ -1442,6 +1665,12 @@
                     {
                         "detail": "Field cannot be blank",
                         "source": {
+                            "pointer": "/data/attributes/category"
+                        }
+                    },
+                    {
+                        "detail": "Field cannot be blank",
+                        "source": {
                             "pointer": "/data/attributes/description"
                         }
                     },
@@ -1463,12 +1692,23 @@
                 "data": {
                     "type": "item",
                     "attributes": {
+                        "description": "Item 1 description",
+                        "name": "Item 1",
                         "availability": 5,
                         "price": 5.24,
-                        "description": "Item 1 description",
-                        "name": "Item 1"
+                        "category": "scarpe"
                     },
                     "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a",
+                    "relationships": {
+                        "pictures": {
+                            "data": [
+                                {
+                                    "type": "picture",
+                                    "id": "08bd8de0-a4ac-459d-956f-cf6d8b8a7507"
+                                }
+                            ]
+                        }
+                    },
                     "links": {
                         "self": "/items/25da606b-dbd3-45e1-bb23-ff1f84a5622a"
                     }
@@ -1482,12 +1722,23 @@
                     "data": {
                         "type": "item",
                         "attributes": {
+                            "description": "Item 1 description",
+                            "name": "Item 1",
                             "availability": 5,
                             "price": 5.24,
-                            "description": "Item 1 description",
-                            "name": "Item 1"
+                            "category": "scarpe"
                         },
                         "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a",
+                        "relationships": {
+                            "pictures": {
+                                "data": [
+                                    {
+                                        "type": "picture",
+                                        "id": "08bd8de0-a4ac-459d-956f-cf6d8b8a7507"
+                                    }
+                                ]
+                            }
+                        },
                         "links": {
                             "self": "/items/25da606b-dbd3-45e1-bb23-ff1f84a5622a"
                         }
@@ -1500,10 +1751,16 @@
                     "data": {
                         "type": "item",
                         "attributes": {
-                            "availability": 10,
                             "price": 8,
+                            "availability": 10,
+                            "name": "Item 2",
                             "description": "Item 2 description",
-                            "name": "Item 2"
+                            "category": "accessori"
+                        },
+                        "relationships": {
+                            "pictures": {
+                                "data": []
+                            }
                         },
                         "id": "08bd8de0-a4ac-459d-956f-cf6d8b8a7507",
                         "links": {
@@ -1514,7 +1771,83 @@
                         "self": "/items/08bd8de0-a4ac-459d-956f-cf6d8b8a7507"
                     }
                 }
-            ]
+            ],
+            "get_item_include_pictures__success": {
+                "data": {
+                    "type": "item",
+                    "attributes": {
+                        "description": "Item 1 description",
+                        "name": "Item 1",
+                        "availability": 5,
+                        "price": 5.24,
+                        "category": "scarpe"
+                    },
+                    "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a",
+                    "relationships": {
+                        "pictures": {
+                            "data": [
+                                {
+                                    "type": "picture",
+                                    "id": "08bd8de0-a4ac-459d-956f-cf6d8b8a7507"
+                                }
+                            ]
+                        }
+                    },
+                    "links": {
+                        "self": "/items/25da606b-dbd3-45e1-bb23-ff1f84a5622a"
+                    }
+                },
+                "links": {
+                    "self": "/items/25da606b-dbd3-45e1-bb23-ff1f84a5622a"
+                },
+                "included": [
+                    {
+                        "type": "picture",
+                        "attributes": {
+                            "extension": "png",
+                            "filename": "08bd8de0-a4ac-459d-956f-cf6d8b8a7507.png"
+                        },
+                        "id": "08bd8de0-a4ac-459d-956f-cf6d8b8a7507",
+                        "relationships": {
+                            "item": {
+                                "data": {
+                                    "type": "item",
+                                    "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a"
+                                }
+                            }
+                        },
+                        "links": {
+                            "self": "/pictures/08bd8de0-a4ac-459d-956f-cf6d8b8a7507"
+                        }
+                    }
+                ]
+            }
+        },
+        "pictures": {
+            "get_picture_json__success": {
+                "data": {
+                    "type": "picture",
+                    "attributes": {
+                        "filename": "08bd8de0-a4ac-459d-956f-cf6d8b8a7507.png",
+                        "extension": "png"
+                    },
+                    "relationships": {
+                        "item": {
+                            "data": {
+                                "type": "item",
+                                "id": "25da606b-dbd3-45e1-bb23-ff1f84a5622a"
+                            }
+                        }
+                    },
+                    "id": "08bd8de0-a4ac-459d-956f-cf6d8b8a7507",
+                    "links": {
+                        "self": "/pictures/08bd8de0-a4ac-459d-956f-cf6d8b8a7507"
+                    }
+                },
+                "links": {
+                    "self": "/pictures/08bd8de0-a4ac-459d-956f-cf6d8b8a7507"
+                }
+            }
         }
     }
 }

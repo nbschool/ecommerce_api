@@ -1,3 +1,7 @@
+"""
+Utilities toolkit for testing the application with pytest.
+
+"""
 from functools import reduce
 import datetime
 import inspect
@@ -9,7 +13,7 @@ import sys
 import uuid
 from base64 import b64encode
 
-from models import Address, User
+from models import Address, User, Favorite, Item
 from utils import get_image_folder
 
 
@@ -118,13 +122,43 @@ def add_address(user, country='Italy', city='Pistoia', post_code='51100',
     )
 
 
+def add_favorite(user, item, id=None):
+    """Link the favorite item to user."""
+    return Favorite.create(
+            uuid=id or uuid.uuid4(),
+            item=item,
+            user=user,
+    )
+
+
+def json_favorite(item):
+    """Link the favorite item to user."""
+    return {
+            'item_uuid': item,
+    }
+
+
+def add_item(name='Item Test', price='15.99', description='test test test', id=None):
+    return Item.create(
+            uuid=id or uuid.uuid4(),
+            name=name,
+            price=price,
+            description=description,
+            availability=random.randint(35, 60),
+            category='scarpe',
+            )
+
+
 # ###########################################################
 # Flask helpers
 # Common operations for flask functionalities
 
 
 def open_with_auth(app, url, method, username, password, content_type, data):
-    """Generic call to app for http request. """
+    """
+    Generic call to app for http request, required for requests that need
+    to send a ``Basic Auth`` request to the server.
+    """
 
     AUTH_TYPE = 'Basic'
     bytes_auth = bytes('{}:{}'.format(username, password), 'ascii')
@@ -157,6 +191,13 @@ def setup_images():
         os.makedirs(get_image_folder())
 
 
+def count_order_items(order):
+    """ Given an Order instance count the total items in the order. """
+    tot = 0
+    for oi in order.order_items:
+        tot += oi.quantity
+    return tot
+
 # ###########################################################
 # JSONAPI testing utilities
 
@@ -164,10 +205,12 @@ def setup_images():
 path = os.path.abspath(os.path.dirname(__file__))
 path = os.path.join(path, 'expected_results.json')
 with open(path) as fo:
-    """
-    Expected results dict loaded from `expected_results.json` that can be used
-    to match tests operations with flask.
-    """
+    # TODO: autodoc evaluates the result of the load, so in the documentation
+    #       RESULTS is like 3 pages long value.
+    # Find a way to assign an example value or remove the var value from the
+    # docs.
+    #: Expected results dict loaded from `expected_results.json` that can be
+    #: used to match tests operations with flask.
     RESULTS = json.load(fo)
 
 
@@ -179,11 +222,11 @@ def format_jsonapi_request(type_, data):
     ``['data']['attributes']`` of the request.
     Relationships key value will be mapped inside ``['data']['relationship']``
 
-    > NOTE:
-    > All relationship ** must ** map to the related field inside the Schema of
-    > the type and have a ``type`` and ``id`` properties.
+    .. NOTE::
+        All relationship **must** map to the related field inside the Schema of
+        the type and have a ``type`` and ``id`` properties.
 
-    .. code-block: : python
+    .. code-block:: python
 
         data = {
             "<attribute field": "bar"
@@ -195,7 +238,7 @@ def format_jsonapi_request(type_, data):
                 "<field_name>": [
                     {
                         "type": "item",
-                        "id": < Resource id > ,
+                        "id": < Resource id >,
                         "<metadata>": < metadata_value(ie. quantity of items) >
                     }
                 ]
@@ -226,7 +269,7 @@ def assert_valid_response(data, expected):
     """
     def sort_data_lists(data, attribute, key):
         """
-        sort a given data structure's attribute (list) using the given key function
+        sort a given data structure's attribute(list) using the given key function
         """
         try:
             data[attribute] = sorted(data[attribute], key=key)
@@ -265,7 +308,7 @@ def assert_valid_response(data, expected):
 
 def wrong_dump(data):
     """
-    Give a wrong encoding (urlencode-like) to the given dictionary
+    Give a wrong encoding(urlencode - like) to the given dictionary
     """
     return reduce(lambda x, y: "{}&{}".format(x, y), [
         "{}={}".format(k, v) for k, v in zip(data.keys(), data.values())])
