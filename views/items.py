@@ -8,7 +8,7 @@ import uuid
 
 from flask import request
 from flask_restful import Resource
-from search import search
+import search
 
 from models import Item
 from utils import generate_response

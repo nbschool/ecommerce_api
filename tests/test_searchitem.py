@@ -3,7 +3,7 @@
 import json
 
 from models import Item
-from search import search
+import search
 from tests import test_utils
 from tests.test_case import TestCase
 
