@@ -33,7 +33,11 @@ from views.pictures import ItemPictureHandler, PictureHandler
 
 
 app = Flask(__name__)
-CORS(app)
+CORS(
+    app,
+    resources={r"/*": {"origins": ".*localhost.*"}},
+    supports_credentials=True,
+)
 api = Api(app)
 
 auth.init_app(app)

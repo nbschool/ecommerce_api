@@ -1,6 +1,7 @@
 """
 Auth login view: this module provides the login method
 """
+from flask_cors import cross_origin
 from flask import abort, request
 from flask_login import login_user
 from flask_restful import Resource
@@ -13,8 +14,13 @@ from utils import generate_response
 class LoginHandler(Resource):
     """Handler of the login authentication"""
 
+    @cross_origin(supports_credentials=True)
     def post(self):
         request_data = request.get_json(force=True)
+
+        if 'email' not in request_data or 'password' not in request_data:
+            abort(client.BAD_REQUEST)
+
         email = request_data['email']
         password = request_data['password']
 
