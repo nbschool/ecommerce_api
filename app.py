@@ -26,7 +26,7 @@ from views.favorites import FavoritesHandler, FavoriteHandler
 app = Flask(__name__)
 CORS(
     app,
-    resources={r"/*": {"origins": ".*localhost.*"}},
+    resources={r"/*": {"origins": "*"}},
     supports_credentials=True,
 )
 api = Api(app)
