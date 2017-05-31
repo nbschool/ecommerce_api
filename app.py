@@ -23,9 +23,6 @@ from views.user import UsersHandler, UserHandler
 from views.pictures import PictureHandler, ItemPictureHandler
 from views.favorites import FavoritesHandler, FavoriteHandler
 
-
-
-
 app = Flask(__name__)
 CORS(
     app,

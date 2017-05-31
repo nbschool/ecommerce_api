@@ -1,7 +1,8 @@
-"""Auth module handles authorization requests and checks."""
+"""
+Auth module handles authorization requests and checks.
+"""
 
 from flask_login import login_required, LoginManager
-
 from models import User
 
 login_manager = LoginManager()
@@ -25,6 +26,7 @@ class Auth:
         We forward the flask_login current_user converted from a proxy object
         to our ``models.User``. We import the flask_login current_user inside
         the method to forbid a direct import from flask_login.
+
         Returns:
             models.User: currently logged user
         """
@@ -53,6 +55,7 @@ def load_user(user_id):
 
     Args:
         user_id (int): Peewee user id
+
     Returns:
         models.User: The requested user
     """
@@ -70,6 +73,7 @@ def load_user_from_request(request):
 
     Args:
         request (Request): The flask request object used in endpoint handlers
+
     Returns:
         models.User: The logged user, None if login fails
     """
