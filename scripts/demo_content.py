@@ -5,27 +5,16 @@ and supply a new one db with new down-to-earth data.
 
 from peewee import fn
 from faker import Factory
-from colorama import init, Fore, Style
 from models import User, Item, Order, OrderItem, Address, Picture, Favorite
 import utils
 import argparse
-import sys
 import glob
 import random
 import os
 import shutil
 
 
-init(autoreset=True)
-
 fake = Factory.create('it_IT')
-
-TEXT_DISPLAY = Fore.MAGENTA + Style.BRIGHT + """
-                      WELCOME TO DEMO CONTENT CREATOR.
-                      --------------------------------
-                    """ + Fore.WHITE + Style.DIM + """
-                Here you could create a new simulated database.
-                """
 
 
 def write_db(num_items, num_users, num_orders, num_addrs, num_pictures, num_favorites):
@@ -167,26 +156,6 @@ def favorite_creator(num_favorites):
             )
 
 
-def good_bye(word, default='has'):
-    print(Fore.BLUE + Style.BRIGHT + '*-* Your database {1} been {0}. *-*'.format(word, default))
-    print(Fore.CYAN + Style.BRIGHT + '*_* Have a nice day! *_*')
-    sys.exit()
-
-
-def prompt_menu_1(actions):
-    print(Fore.GREEN + Style.BRIGHT + '\t' * 2 + '*' * 47)
-    print(Fore.GREEN + Style.BRIGHT + '\t' * 2 + '* Press:' + ' ' * 37 + ' *')
-    for action in actions.values():
-        print(Fore.GREEN + Style.BRIGHT + '\t' * 2 + '  ({key}) {text}'.format(**action))
-    print(Fore.GREEN + Style.BRIGHT + '\t' * 2 + '*' * 47)
-
-    choice = None
-    while choice not in actions.keys():
-        choice = input(Fore.YELLOW + Style.BRIGHT + ' > ').strip()
-
-    actions[choice]['action']()
-
-
 def main():
     parser = argparse.ArgumentParser(
         description='Set up the number of rows' + 'to insert in each table from CLI.')
@@ -217,21 +186,7 @@ def main():
     fake.seed(seed)
     random.seed(seed)
 
-    ACTIONS = {
-        '1': {
-            'key': '1', 'text': 'Add data to the current database',
-            'action': lambda: write_db(num_items, num_users, num_orders,
-                                       num_addrs, num_pictures, num_favorites)
-        },
-        '': {
-            'key': 'Enter', 'text': 'Just exit',
-            'action': lambda: good_bye('change', default='hasn\'t')
-        },
-    }
-
-    print(TEXT_DISPLAY)
-    print(Fore.YELLOW + Style.BRIGHT + 'You have already a database.')
-    prompt_menu_1(ACTIONS)
+    write_db(num_items, num_users, num_orders, num_addrs, num_pictures, num_favorites)
 
 
 if __name__ == '__main__':
