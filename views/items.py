@@ -6,10 +6,9 @@ with items resources
 import http.client as client
 import uuid
 
-import jellyfish
 from flask import request
 from flask_restful import Resource
-import search
+from search import search
 
 from models import Item
 from utils import generate_response
@@ -122,7 +121,7 @@ class SearchItemHandler(Resource):
 
             matches = []
             for item in Item.select():
-                match = search.similarity(item.name.lower(), query.lower())
+                match = search.get_match(query.lower(), item.name.lower())
 
                 if match >= .75:
                     matches.append({'item': item, 'match': match})
