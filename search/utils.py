@@ -1,12 +1,8 @@
 import re
 
-STOP_WORDS = [
-    'in', 'con', 'da', 'di', 'del', 'dal', 'su', 'per', 'tra', 'fra',
-]
-
 
 def _dec(fl):
-    """Return a stringified more readable float."""
+    """Return a stringified more readable float, for debugging purposes."""
     return '{:.2f}'.format(fl)
 
 
@@ -17,7 +13,7 @@ def clean_split(string):
     """
     return [
         w for w in re.split(r'\W+', string)
-        if len(w) >= 3 and w not in STOP_WORDS
+        if len(w) > 3
     ]
 
 

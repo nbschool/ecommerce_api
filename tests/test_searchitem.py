@@ -1,28 +1,112 @@
+
+
+from models import Item
+from tests import test_utils
 from tests.test_case import TestCase
 
-import http.client as client
-import os
+from search import search
 
-import simplejson as json
 
-import utils
+NAMES = [
+    'scarpe', 'scarpine', 'scarpette', 'scarpe da ballo',
+    'scarpe da ginnastica', 'scarponi', 'scarpacce',
+    'sedie', 'sedie deco', 'sedie da cucina', 'set di sedie',
+    'tavolo con sedie', 'tavolo con set di sedie', 'divano', 'divano letto',
+    'letto', 'letto singolo', 'letto matrimoniale', 'letto francese',
+    'poltrona', 'poltrona elettrica', 'sgabello', 'maglietta', 'canottiera',
+    'pantaloni', 'mutande', 'tavolo', 'tavolo da cucina', 'tavolino', 'tavola',
+    'tavola di legno', 'legno di tavola',
+]
 
-from models import Item, Picture
-from tests import test_utils
-from tests.test_utils import format_jsonapi_request, RESULTS, assert_valid_response
 
-class TestSearchItems(TestCase):
+def get_names(objects):
+    return [r.name for r in objects]
 
+
+class TestSearchItemsByName(TestCase):
     @classmethod
     def setup_class(cls):
-        super(TestSearchItems, cls).setup_class()
-        utils.get_image_folder = lambda: TEST_IMAGE_FOLDER
-        test_utils.get_image_folder = utils.get_image_folder
+        super(TestSearchItemsByName, cls).setup_class()
 
-    def test_get_search__success(self):
-        import pdb; pdb.set_trace()
-        data = "sedia"
-        resp = self.app.get('/items/db/', data=json.dumps(data),
-                             content_type='application/json')
-        assert resp.status_code == client.OK
-    
+        for name in NAMES:
+            test_utils.add_item(
+                name=name,
+                description='random description',
+                category='',
+            )
+            pass
+
+    def setup_method(self):
+        # NOTE: TestCase clear the tables on every method
+        # we don't what that, so simple override
+        pass
+
+    @classmethod
+    def teardown_class(cls):
+        Item.delete().execute()
+
+    def search(self, query, attributes=['name', 'description'], limit=10):
+        return search.search(query, attributes, Item, limit)
+
+    def test_search_tavolo_sedie(self):
+        result = self.search('tavolo sedie')
+
+        res = ['tavolo con sedie', 'tavolo con set di sedie', 'tavolo da cucina', 'tavolino',
+               'tavola di legno', 'sedie', 'set di sedie', 'tavolo', 'tavola', 'scarpe']
+        assert res == get_names(result)
+
+    def test_search_tavolo(self):
+        result = self.search('tavolo')
+
+        res = ['tavolo', 'tavolino', 'tavola', 'tavola di legno', 'legno di tavola', 'tavolo con sedie',
+               'tavolo con set di sedie', 'tavolo da cucina', 'poltrona', 'letto singolo']
+        assert res == get_names(result)
+
+    def test_search_sedia(self):
+        result = self.search('sedia')
+
+        res = ['sedie', 'set di sedie', 'sedie da cucina', 'sedie deco', 'divano',
+               'tavolo con sedie', 'tavolo con set di sedie', 'divano letto', 'scarpe', 'scarpine']
+        assert res == get_names(result)
+
+    def test_search_sedie(self):
+        result = self.search('sedie')
+
+        res = ['sedie', 'set di sedie', 'sedie deco', 'sedie da cucina', 'tavolo con sedie',
+               'tavolo con set di sedie', 'scarpine', 'scarpe', 'scarpette', 'scarpe da ballo']
+        assert res == get_names(result)
+
+    def test_search_scarpe(self):
+        result = self.search('scarpe')
+
+        res = ['scarpe', 'scarpine', 'scarpette', 'scarpacce', 'scarponi',
+               'scarpe da ballo', 'scarpe da ginnastica', 'sgabello', 'canottiera', 'sedie']
+        assert res == get_names(result)
+
+    def test_search_letto(self):
+        result = self.search('letto')
+
+        res = ['letto', 'letto matrimoniale', 'divano letto', 'letto singolo', 'letto francese',
+               'tavola di legno', 'legno di tavola', 'poltrona elettrica', 'sedie deco', 'tavolo']
+        assert res == get_names(result)
+
+    def test_search_scarpette(self):
+        result = self.search('scarpette')
+
+        res = ['scarpette', 'scarpe', 'scarpine', 'scarpacce', 'scarponi',
+               'scarpe da ginnastica', 'scarpe da ballo', 'maglietta', 'canottiera', 'letto francese']
+        assert res == get_names(result)
+
+    def test_search_scarponi(self):
+        result = self.search('scarponi')
+
+        res = ['scarponi', 'scarpine', 'scarpe', 'scarpette', 'scarpacce', 'scarpe da ballo',
+               'scarpe da ginnastica', 'sedie', 'sedie deco', 'sedie da cucina']
+        assert res == get_names(result)
+
+    def test_search_divano(self):
+        result = self.search('divano')
+
+        res = ['divano', 'divano letto', 'scarpe', 'scarpine', 'scarpette',
+               'scarpe da ballo', 'scarpe da ginnastica', 'scarponi', 'scarpacce', 'sedie']
+        assert res == get_names(result)

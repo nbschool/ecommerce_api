@@ -14,6 +14,9 @@ from models import Item
 from utils import generate_response
 
 
+SEARCH_FIELDS = ['name', 'description']
+
+
 class ItemsHandler(Resource):
     """Handler of the collection of items"""
 
@@ -119,18 +122,10 @@ class SearchItemHandler(Resource):
 
         if query is not None and (limit > 0 and limit < 100):
 
-            matches = []
-            for item in Item.select():
-                match = search.get_match(query.lower(), item.name.lower())
+            matches = search.search(query, SEARCH_FIELDS, Item, limit)
 
-                if match >= .75:
-                    matches.append({'item': item, 'match': match})
+            return generate_response(Item.json_list(matches), client.OK)
 
-            matches.sort(key=lambda m: m['match'], reverse=True)
-
-            return generate_response(
-                Item.json_list([i['item'] for i in matches]),
-                client.OK
-            )
-
+        # TODO: Return an error specifying what went wrong (i.e. missing
+        # query or limit or limit out of range)
         return None, client.BAD_REQUEST
