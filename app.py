@@ -23,10 +23,12 @@ from views.user import UsersHandler, UserHandler
 from views.pictures import PictureHandler, ItemPictureHandler
 from views.favorites import FavoritesHandler, FavoriteHandler
 
-
-
 app = Flask(__name__)
-CORS(app)
+CORS(
+    app,
+    resources={r"/*": {"origins": "*"}},
+    supports_credentials=True,
+)
 api = Api(app)
 
 auth.init_app(app)
