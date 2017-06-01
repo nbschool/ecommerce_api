@@ -20,4 +20,7 @@ class WrongQuantity(Exception):
 
 
 class SearchAttributeMismatch(Exception):
+    """Raised when a model tries to call its ``search`` method but no
+    fields to lookup are set, either as class attributes or at call time.
+    """
     pass
