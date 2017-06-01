@@ -81,16 +81,16 @@ def tokenize(string):
     ]
 
 
-def get_max_moves(list_, idx):
+def max_distance(phrase, word_index):
     """
-    Given a list an int in range(len(list_)), determine the maximum
+    Given a list an int in range(len(phrase)), determine the maximum
     amount of `movements` available from that index position in the list.
 
     Arguments:
-        list_(any with __len__): iterable to calculate the maximum moves into.
+        phrase(any with __len__): iterable to calculate the maximum moves into.
             It's used only to get its `len`, so any object that implements the
             `__len__` method will do.
-        idx(int): integer representing the index of the position to count
+        word_index(int): integer representing the index of the position to count
             from. The value ** must ** be `>= 0` but ** can ** be over the length
             of the list.
 
@@ -99,13 +99,12 @@ def get_max_moves(list_, idx):
 
     Example:
         >>> utils.get_max_moves(['a', 'b', 'c', 'd', 'e'], 1)
-        4  # idx 1 -> 'b', so max is 4 moves right
+        4  # word_index 1 -> 'b', so max is 4 moves right
         >>> utils.get_max_moves(['a', 'b', 'c', 'd', 'e'], 6)
         5  # can move left 5
     """
 
-    length = len(list_)
-    return max(idx, (length - (idx + 1)))
+    return max(word_index, (len(phrase) - (word_index + 1)))
 
 
 def pos_dist(s1, s2, l1, l2):
@@ -141,6 +140,6 @@ def pos_dist(s1, s2, l1, l2):
     s1idx = l1.index(s1)
     s2idx = l2.index(s2)
     moves = abs(s1idx - s2idx)
-    max_moves = get_max_moves(l1, idx=s1idx)
+    max_moves = max_distance(l1, idx=s1idx)
 
     return abs(1 - (moves / max_moves))
