@@ -44,7 +44,7 @@ def scale_to_one(iterable):
     return [v / m for v in iterable]
 
 
-def weighted_avg(values, weights):
+def weighted_average(values, weights):
     """Calculate the weighted mean average between two iterables of `values`
     and matching `weights`
 
@@ -107,26 +107,26 @@ def max_distance(phrase, word_index):
     return max(word_index, (len(phrase) - (word_index + 1)))
 
 
-def pos_dist(s1, s2, l1, l2):
+def position_similarity(token1, token2, phrase1, phrase2):
     """
-    Get the normalized inverted movement cost for for between `s1` and s2`
-    on the `l2` iterable.
+    Get the normalized inverted movement cost for for between `token1` and token2`
+    on the `phrase2` iterable.
 
     The function is used to get a value describing how far two words are in a
     phrase(as list, as in ``string.split(' ')`` or, in our case through
     :func:`search.utils.tokenize').
 
-    Moves are relative to s1 on l1, which `should` be the longest set for the
+    Moves are relative to token1 on phrase1, which `should` be the longest set for the
     function to work properly.
 
     .. note: : The given strings ** MUST ** be inside the corresponding list.
 
     Arguments:
-        s1(str): string inside ``l1`` iterable
-        s2(str): string inside ``l2`` iterable
-        l1(iterable): iterable allowing the ``index`` method, should be the
+        token1(str): string inside ``phrase1`` iterable
+        token2(str): string inside ``phrase2`` iterable
+        phrase1(iterable): iterable allowing the ``index`` method, should be the
             longest of the two iterables
-        l2(iterable): iterable allowing the ``index`` method, should be the
+        phrase2(iterable): iterable allowing the ``index`` method, should be the
             shortest of the two iterables
 
     Returns:
@@ -135,11 +135,11 @@ def pos_dist(s1, s2, l1, l2):
         the farthest on the maximum available moves possible on ``l1``
 
     """
-    if len(l2) == 1:
+    if len(phrase2) == 1:
         return 1
-    s1idx = l1.index(s1)
-    s2idx = l2.index(s2)
-    moves = abs(s1idx - s2idx)
-    max_moves = max_distance(l1, idx=s1idx)
+    token1idx = phrase1.index(token1)
+    token2idx = phrase2.index(token2)
+    moves = abs(token1idx - token2idx)
+    max_moves = max_distance(phrase1, word_index=token1idx)
 
     return abs(1 - (moves / max_moves))

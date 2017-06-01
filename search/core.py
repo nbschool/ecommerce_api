@@ -8,7 +8,7 @@ import jellyfish as jf
 from search import utils, config
 
 
-def get_match(query, string):
+def similarity(query, string):
     """
     Calculate the match for the given `query` and `string`.
 
@@ -46,7 +46,7 @@ def get_match(query, string):
         match = jf.jaro_winkler(string1, string2)
         # calculate the distance factor for the position of the segments
         # on their respective lists
-        positional = utils.pos_dist(string1, string2, longest, shortest)
+        positional = utils.position_similarity(string1, string2, longest, shortest)
 
         # get them together and append to the matches dictionary
         match = (match, positional)
@@ -56,7 +56,7 @@ def get_match(query, string):
     # the key takes the jaro winkler distance value to get the max value
     matches = [max(m, key=lambda x: x[0]) for m in matches.values()]
     _weights = (config.MATCH_WEIGHT, config.DIST_WEIGHT)
-    matches = [utils.weighted_avg((m, d), _weights) for m, d in matches]
+    matches = [utils.weighted_average((m, d), _weights) for m, d in matches]
 
     # get the weighted mean for all the highest matches and apply the highest
     # match value found as coefficient as multiplier, to add weights to more
@@ -136,7 +136,7 @@ def search(
                 msg = 'Search error: Cannot find field "{a}" in the resources.'
                 raise AttributeError(msg.format(attrval))
 
-            match = get_match(query, attrval)
+            match = similarity(query, attrval)
             partial_matches.append({'attr': attr, 'match': match})
 
         # get the highest match for each attribute and multiply it by the
