@@ -3,7 +3,8 @@ Application ORM Models built with Peewee
 """
 import datetime
 import os
-from exceptions import InsufficientAvailabilityException, WrongQuantity
+from exceptions import (InsufficientAvailabilityException,
+                        WrongQuantity, SearchAttributeMismatch)
 from uuid import uuid4
 
 from flask_login import UserMixin
@@ -151,7 +152,7 @@ class BaseModel(Model):
             list: list of resources that may match the query.
 
         Raises:
-            AttributeError:
+            SearchAttributeMismatch:
                 if ``attributes`` are missing, either as model
                 default in ``<Model>._search_attributes`` or as param
                 one of the object does not have one of the given attribute(s).
@@ -167,7 +168,7 @@ class BaseModel(Model):
         weights = weights or cls._search_weights
 
         if not attributes:
-            raise ValueError(
+            raise SearchAttributeMismatch(
                 'Attributes to look for not defined for {}. \
                 Please update the Model or specify during search call.\
                 '.format(cls.__name__))

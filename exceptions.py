@@ -17,3 +17,7 @@ class InsufficientAvailabilityException(Exception):
 
 class WrongQuantity(Exception):
     pass
+
+
+class SearchAttributeMismatch(Exception):
+    pass
