@@ -1,5 +1,3 @@
-
-
 import json
 
 from models import Item
@@ -23,10 +21,10 @@ def get_names(objects):
     return [r.name for r in objects]
 
 
-class TestSearchItemsByName(TestCase):
+class TestSearchItems(TestCase):
     @classmethod
     def setup_class(cls):
-        super(TestSearchItemsByName, cls).setup_class()
+        super(TestSearchItems, cls).setup_class()
         Item.delete().execute()
         for name in NAMES:
             test_utils.add_item(
@@ -51,30 +49,29 @@ class TestSearchItemsByName(TestCase):
     def test_search_tavolo_sedie(self):
         result = self.search('tavolo sedie')
 
-        res = ['tavolo con sedie', 'tavolo con set di sedie', 'tavolo da cucina', 'tavolino',
-               'tavola di legno', 'sedie', 'set di sedie', 'tavolo', 'tavola', 'scarpe']
+        res = ['tavolo con sedie', 'tavolo con set di sedie', 'tavolo da cucina',
+               'tavolino', 'tavola di legno', 'sedie', 'set di sedie', 'tavolo', 'tavola']
         assert res == get_names(result)
 
     def test_search_tavolo(self):
         result = self.search('tavolo')
 
-        res = ['tavolo', 'tavolino', 'tavola', 'tavola di legno', 'legno di tavola',
-               'tavolo con sedie', 'tavolo con set di sedie', 'tavolo da cucina',
-               'poltrona', 'letto singolo']
+        res = ['tavolo', 'tavolino', 'tavola', 'tavola di legno', 'legno di tavola', 'tavolo con sedie',
+               'tavolo con set di sedie', 'tavolo da cucina', 'letto singolo', 'sgabello']
         assert res == get_names(result)
 
     def test_search_sedia(self):
         result = self.search('sedia')
 
-        res = ['sedie', 'set di sedie', 'sedie da cucina', 'sedie deco', 'divano',
-               'tavolo con sedie', 'tavolo con set di sedie', 'divano letto', 'scarpe', 'scarpine']
+        res = ['sedie', 'set di sedie', 'sedie da cucina', 'sedie deco',
+               'divano', 'tavolo con sedie', 'tavolo con set di sedie', 'divano letto']
         assert res == get_names(result)
 
     def test_search_sedie(self):
         result = self.search('sedie')
 
-        res = ['sedie', 'set di sedie', 'sedie deco', 'sedie da cucina', 'tavolo con sedie',
-               'tavolo con set di sedie', 'scarpine', 'scarpe', 'scarpette', 'scarpe da ballo']
+        res = ['sedie', 'set di sedie', 'sedie deco', 'sedie da cucina',
+               'tavolo con sedie', 'tavolo con set di sedie', 'scarpine']
         assert res == get_names(result)
 
     def test_search_scarpe(self):
@@ -102,26 +99,23 @@ class TestSearchItemsByName(TestCase):
     def test_search_scarponi(self):
         result = self.search('scarponi')
 
-        res = ['scarponi', 'scarpine', 'scarpe', 'scarpette', 'scarpacce', 'scarpe da ballo',
-               'scarpe da ginnastica', 'sedie', 'sedie deco', 'sedie da cucina']
+        res = ['scarponi', 'scarpine', 'scarpe', 'scarpette',
+               'scarpacce', 'scarpe da ballo', 'scarpe da ginnastica']
         assert res == get_names(result)
 
     def test_search_divano(self):
         result = self.search('divano')
 
-        res = ['divano', 'divano letto', 'scarpe', 'scarpine', 'scarpette',
-               'scarpe da ballo', 'scarpe da ginnastica', 'scarponi', 'scarpacce', 'sedie']
+        res = ['divano', 'divano letto']
         assert res == get_names(result)
 
     def test_search_rest_divano(self):
         resp = self.app.get('/items/db/?query=divano&limit=10')
 
         assert resp.status_code == 200
+
+        res = ['divano', 'divano letto']
         result = json.loads(resp.data)
-
-        res = ['divano', 'divano letto', 'scarpe', 'scarpine', 'scarpette',
-               'scarpe da ballo', 'scarpe da ginnastica', 'scarponi', 'scarpacce', 'sedie']
-
         assert res == [d['data']['attributes']['name'] for d in result]
 
     def test_search_rest_no_query_limit_over(self):
