@@ -46,7 +46,8 @@ def similarity(query, string):
         match = jf.jaro_winkler(string1, string2)
         # calculate the distance factor for the position of the segments
         # on their respective lists
-        positional = utils.position_similarity(string1, string2, longest, shortest)
+        positional = utils.position_similarity(
+            string1, string2, longest, shortest)
 
         # get them together and append to the matches dictionary
         match = (match, positional)
@@ -130,11 +131,7 @@ def search(
         partial_matches = []
 
         for attr in attributes:
-            try:
-                attrval = getattr(obj, attr)
-            except AttributeError:
-                msg = 'Search error: Cannot find field "{a}" in the resources.'
-                raise AttributeError(msg.format(attrval))
+            attrval = getattr(obj, attr)
 
             match = similarity(query, attrval)
             partial_matches.append({'attr': attr, 'match': match})
@@ -144,12 +141,8 @@ def search(
         match = max(partial_matches, key=lambda m: m['match'])
         match = match['match'] * weights[match['attr']]
 
-        try:
-            if match >= threshold:
-                matches.append({'data': obj, 'match': match})
-        except Exception:
-            import pdb
-            pdb.set_trace()
+        if match >= threshold:
+            matches.append({'data': obj, 'match': match})
 
     matches.sort(key=lambda m: m['match'], reverse=True)
 
