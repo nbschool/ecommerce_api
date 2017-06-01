@@ -151,13 +151,14 @@ class BaseModel(Model):
             list: list of resources that may match the query.
 
         Raises:
-            AttributeError: if ``attributes`` are missing, either as model
-            default in :any:`_search_attributes` or as param  one of the
-            object does not have one of the given attribute(s).
+            AttributeError:
+                if ``attributes`` are missing, either as model
+                default in ``<Model>._search_attributes`` or as param
+                one of the object does not have one of the given attribute(s).
 
         Examples:
 
-            ..code-block:: python
+            .. code-block:: python
 
                 results = Item.search('shoes', Item.select(), limit=20)
         """
