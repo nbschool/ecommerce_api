@@ -8,7 +8,6 @@ import uuid
 
 from flask import request
 from flask_restful import Resource
-import search
 
 from models import Item
 from utils import generate_response
@@ -124,15 +123,17 @@ class SearchItemHandler(Resource):
         limit_in_range = limit > min_limit and limit <= max_limit
 
         if query is not None and limit_in_range:
-            matches = search.search(query, SEARCH_FIELDS, Item.select(), limit)
+            matches = Item.search(query, Item.select(), limit)
             return generate_response(Item.json_list(matches), client.OK)
 
         def fmt_error(msg):
             return {'detail': msg}
 
         errors = {"errors": []}
+
         if not query:
             errors['errors'].append(fmt_error('Missing query.'))
+
         if not limit_in_range:
             msg = 'Limit out of range. must be between {} and {}. Requested: {}'
             errors['errors'].append(

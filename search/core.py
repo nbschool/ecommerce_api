@@ -115,7 +115,6 @@ def search(
         Will have the same effect
     """
     matches = []
-
     if not weights or len(weights) != len(attributes):
         # list of integers of the same length of `attributes` as in [3, 2, 1]
         # for attributes = ['a', 'b', 'c']
@@ -124,14 +123,17 @@ def search(
     weights = utils.scale_to_one(weights)
     weights = {attr: w for attr, w in zip(attributes, weights)}
 
-    for object in dataset:
+    if not threshold:
+        threshold = 0
+
+    for obj in dataset:
         partial_matches = []
 
         for attr in attributes:
             try:
-                attrval = getattr(object, attr)
+                attrval = getattr(obj, attr)
             except AttributeError:
-                msg = 'Search error: Cannot find field "{a}"in the resources.'
+                msg = 'Search error: Cannot find field "{a}" in the resources.'
                 raise AttributeError(msg.format(attrval))
 
             match = get_match(query, attrval)
@@ -142,8 +144,12 @@ def search(
         match = max(partial_matches, key=lambda m: m['match'])
         match = match['match'] * weights[match['attr']]
 
-        if match >= threshold:
-            matches.append({'data': object, 'match': match})
+        try:
+            if match >= threshold:
+                matches.append({'data': obj, 'match': match})
+        except Exception:
+            import pdb
+            pdb.set_trace()
 
     matches.sort(key=lambda m: m['match'], reverse=True)
 
