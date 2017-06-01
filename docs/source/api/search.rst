@@ -1,5 +1,5 @@
 Search Engine Package
-=============
+=====================
 
 .. automodule:: search
     :members:

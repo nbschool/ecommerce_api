@@ -9,9 +9,12 @@ search\.utils
 
    .. autosummary::
    
-      clean_split
       get_max_moves
+      normalize
       pos_dist
+      scale_to_one
+      tokenize
+      weighted_avg
    
    
 

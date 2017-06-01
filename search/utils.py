@@ -118,7 +118,8 @@ def pos_dist(s1, s2, l1, l2):
     on the `l2` iterable.
 
     The function is used to get a value describing how far two words are in a
-    phrase(as list, as in ``string.split(' ')`` or, in our case through: func: `search.utils.tokenize').
+    phrase(as list, as in ``string.split(' ')`` or, in our case through
+    :func:`search.utils.tokenize').
 
     Moves are relative to s1 on l1, which `should` be the longest set for the
     function to work properly.

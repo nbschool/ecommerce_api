@@ -66,7 +66,7 @@ def get_match(query, string):
 
 
 def search(
-        query, attributes, table, limit=-1,
+        query, attributes, dataset, limit=-1,
         threshold=config.THRESHOLD, weights=None):
     """
     Main function of the package, allows to do a fuzzy full-text search on the
@@ -78,7 +78,8 @@ def search(
     Arguments:
         query (str): String to search for
         attributes (list): The names of thetable columns to search into.
-        table (:any:`BaseModel`): Database table model.
+        dataset (iterable): iterable of `objects` to lookup. All the objects
+            in the dataset **must** have the specified attribute(s)
         limit (int): max number of results to return. if ``-1`` will return
             everything.
         threshold (float): value under which results are considered not valid.
@@ -91,9 +92,13 @@ def search(
         list: A list containing ``[0:limit]`` resources from the given table,
         sorted by relevance.
 
+    Raises:
+        AttributeError: if one of the object does not have one of the given
+            attribute(s).
+
     Example:
         Assuming a random number of items in the Item table, that defines
-        `name`, `category, `description`, `availability`, one can do:
+        `name`, `category`, `description`, `availability`, one can do:
 
         >>> from models import Item
         >>> from search import search
@@ -119,15 +124,15 @@ def search(
     weights = utils.scale_to_one(weights)
     weights = {attr: w for attr, w in zip(attributes, weights)}
 
-    for object in table.select():
+    for object in dataset:
         partial_matches = []
 
         for attr in attributes:
             try:
                 attrval = getattr(object, attr)
             except AttributeError:
-                msg = 'Search error: "{t}" table does not have {a} field.'
-                raise AttributeError(msg.format(table.__name__, attrval))
+                msg = 'Search error: Cannot find field "{a}"in the resources.'
+                raise AttributeError(msg.format(attrval))
 
             match = get_match(query, attrval)
             partial_matches.append({'attr': attr, 'match': match})

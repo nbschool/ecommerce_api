@@ -124,7 +124,7 @@ class SearchItemHandler(Resource):
         limit_in_range = limit > min_limit and limit <= max_limit
 
         if query is not None and limit_in_range:
-            matches = search.search(query, SEARCH_FIELDS, Item, limit)
+            matches = search.search(query, SEARCH_FIELDS, Item.select(), limit)
             return generate_response(Item.json_list(matches), client.OK)
 
         def fmt_error(msg):

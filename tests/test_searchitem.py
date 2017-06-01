@@ -44,7 +44,7 @@ class TestSearchItems(TestCase):
         Item.delete().execute()
 
     def search(self, query, attributes=['name', 'description'], limit=10):
-        return search.search(query, attributes, Item, limit)
+        return search.search(query, attributes, Item.select(), limit)
 
     def test_search_tavolo_sedie(self):
         result = self.search('tavolo sedie')
@@ -55,9 +55,9 @@ class TestSearchItems(TestCase):
 
     def test_search_tavolo(self):
         result = self.search('tavolo')
-
-        res = ['tavolo', 'tavolino', 'tavola', 'tavola di legno', 'legno di tavola', 'tavolo con sedie',
-               'tavolo con set di sedie', 'tavolo da cucina', 'letto singolo', 'sgabello']
+        res = ['tavolo', 'tavolino', 'tavola', 'tavola di legno', 'legno di tavola',
+               'tavolo con sedie', 'tavolo con set di sedie', 'tavolo da cucina', 'poltrona',
+               'letto singolo']
         assert res == get_names(result)
 
     def test_search_sedia(self):
@@ -78,7 +78,7 @@ class TestSearchItems(TestCase):
         result = self.search('scarpe')
 
         res = ['scarpe', 'scarpine', 'scarpette', 'scarpacce', 'scarponi',
-               'scarpe da ballo', 'scarpe da ginnastica', 'sgabello', 'canottiera', 'sedie']
+               'scarpe da ballo', 'scarpe da ginnastica', 'sgabello', 'canottiera']
         assert res == get_names(result)
 
     def test_search_letto(self):
