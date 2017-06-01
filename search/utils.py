@@ -104,12 +104,8 @@ def get_max_moves(list_, idx):
         5  # can move left 5
     """
 
-    l = len(list_)
-    min_moves = l // 2
-    moves = min_moves + abs(min_moves - idx + 1)
-    # compensate for even length lists
-    moves -= 1 if l % 2 == 0 and idx < min_moves else 0
-    return moves
+    length = len(list_)
+    return max(idx, (length - (idx + 1)))
 
 
 def pos_dist(s1, s2, l1, l2):
