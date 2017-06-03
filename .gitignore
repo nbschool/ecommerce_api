@@ -105,5 +105,5 @@ test_images/
 
 docs/_build_html/
 
-docs/source/api/quick_reference/
+docs/source/api/quick_reference/*
 !docs/source/api/quick_reference/index.rst
