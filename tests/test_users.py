@@ -122,6 +122,76 @@ class TestUser(TestCase):
         assert resp.status_code == BAD_REQUEST
         assert User.select().count() == 0
 
+    def test_patch_change1user_attribute__success(self):
+        email = 'mail@email.it'
+        user = add_user(email, TEST_USER_PSW)
+
+        post_data = format_jsonapi_request('user', {'first_name': 'new-first-name'})
+        content_type = 'application/json'
+        user_path = 'users/{}'.format(user.uuid)
+        resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'PATCH',
+                              email, TEST_USER_PSW, content_type, json.dumps(post_data))
+
+        assert resp.status_code == OK
+
+        expected_result = EXPECTED_RESULTS['patch_change1user_attribute__success']
+        assert_valid_response(resp.data, expected_result)
+
+        assert User.select().count() == 1
+        assert User.get().admin is False
+        assert User.get().first_name == 'new-first-name'
+
+    def test_patch_change_all_user_attribute__success(self):
+        email = 'mail@email.it'
+        user = add_user(email, TEST_USER_PSW)
+
+        post_data = format_jsonapi_request('user', {
+            'first_name': 'new-first-name',
+            'last_name': 'new-last-name',
+            'email': 'new-email@email.it'
+        })
+        content_type = 'application/json'
+        user_path = 'users/{}'.format(user.uuid)
+        resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'PATCH',
+                              email, TEST_USER_PSW, content_type, json.dumps(post_data))
+
+        assert resp.status_code == OK
+
+        expected_result = EXPECTED_RESULTS['patch_change_all_user_attribute__success']
+        assert_valid_response(resp.data, expected_result)
+
+        assert User.select().count() == 1
+        assert User.get().admin is False
+        assert User.get().first_name == 'new-first-name'
+        assert User.get().last_name == 'new-last-name'
+        assert User.get().email == 'new-email@email.it'
+
+    def test_patch_user__wrong_uuid(self):
+        email = 'mail@email.it'
+        user = add_user(email, TEST_USER_PSW)
+
+        post_data = format_jsonapi_request('user', {'first_name': 'new-first-name'})
+        content_type = 'application/json'
+        wrong_uuid = uuid.UUID(int=user.uuid.int + 1)
+        user_path = 'users/{}'.format(wrong_uuid)
+        resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'PATCH',
+                              email, TEST_USER_PSW, content_type, json.dumps(post_data))
+
+        assert resp.status_code == NOT_FOUND
+
+    def test_patch_user_other_user__fail(self):
+        email = 'mail@email.it'
+        user = add_user(email, TEST_USER_PSW)
+
+        email2 = 'pippo@email.it'
+
+        post_data = format_jsonapi_request('user', {'first_name': 'new-first-name'})
+        content_type = 'application/json'
+        user_path = 'users/{}'.format(user.uuid)
+        resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'PATCH',
+                              email2, TEST_USER_PSW, content_type, json.dumps(post_data))
+        assert resp.status_code == UNAUTHORIZED
+
     def test_delete_user__success(self):
         email = 'mail@email.it'
         user = add_user(email, TEST_USER_PSW)
