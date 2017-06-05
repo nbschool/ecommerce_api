@@ -62,10 +62,6 @@ class UsersHandler(Resource):
     def patch(self):
         """Edit the current logged user"""
 
-        if not auth.current_user:
-            return ({'message': "You can't edit another user's account"},
-                    UNAUTHORIZED)
-
         request_data = request.get_json(force=True)
 
         errors = User.validate_input(request_data, partial=True)
@@ -97,14 +93,6 @@ class UsersHandler(Resource):
         """
         Delete the current logged user from the database.
         """
-        # get the user from the flask.g global object registered inside the
-        # auth.py::verify() function, called by @auth.login_required decorator
-        # and match it against the found user.
-        # This is to prevent users from deleting other users' account.
-        if not auth.current_user:
-            return ({'message': "You can't delete another user's account"},
-                    UNAUTHORIZED)
-
         user = auth.current_user
 
         user.delete_instance(recursive=True)
