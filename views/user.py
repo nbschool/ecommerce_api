@@ -1,7 +1,7 @@
 
 from flask import request
 from flask_restful import Resource
-from http.client import (CREATED, NO_CONTENT, NOT_FOUND, OK,
+from http.client import (CREATED, NO_CONTENT, OK,
                          BAD_REQUEST, CONFLICT, UNAUTHORIZED)
 import uuid
 
@@ -58,34 +58,42 @@ class UsersHandler(Resource):
         # empty
         return generate_response(new_user.json(), CREATED)
 
+    @auth.login_required
+    def patch(self):
+        """Edit the current logged user"""
 
-class UserHandler(Resource):
-    """
-    Handler for the operating on a single user.
+        request_data = request.get_json(force=True)
 
-    Implements:
-    * `delete` method to remove an existing user from the database.
-    """
+        errors = User.validate_input(request_data, partial=True)
+        if errors:
+            return errors, BAD_REQUEST
+
+        user = auth.current_user
+        data = request_data['data']['attributes']
+
+        first_name = data.get('first_name')
+        last_name = data.get('last_name')
+        email = data.get('email')
+
+        if first_name:
+            user.first_name = first_name
+
+        if last_name:
+            user.last_name = last_name
+
+        if email:
+            user.email = email
+
+        user.save()
+
+        return generate_response(user.json(), OK)
 
     @auth.login_required
-    def delete(self, user_uuid):
+    def delete(self):
         """
-        Delete an existing user from the database, looking up by user_uuid.
-        If the user_uuid does not exists return NOT_FOUND.
+        Delete the current logged user from the database.
         """
-        try:
-            user = User.get(User.uuid == user_uuid)
-        except User.DoesNotExist:
-            return ({'message': 'user `{}` not found'.format(user_uuid)},
-                    NOT_FOUND)
-
-        # get the user from the flask.g global object registered inside the
-        # auth.py::verify() function, called by @auth.login_required decorator
-        # and match it against the found user.
-        # This is to prevent users from deleting other users' account.
-        if auth.current_user != user:
-            return ({'message': "You can't delete another user's account"},
-                    UNAUTHORIZED)
+        user = auth.current_user
 
         user.delete_instance(recursive=True)
         return None, NO_CONTENT

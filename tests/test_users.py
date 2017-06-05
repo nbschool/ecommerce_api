@@ -2,8 +2,7 @@
 Test suite for User(s) resources.
 """
 import json
-import uuid
-from http.client import (BAD_REQUEST, CONFLICT, CREATED, NO_CONTENT, NOT_FOUND,
+from http.client import (BAD_REQUEST, CONFLICT, CREATED, NO_CONTENT,
                          OK, UNAUTHORIZED)
 
 from models import Address, Item, Order, User
@@ -122,11 +121,68 @@ class TestUser(TestCase):
         assert resp.status_code == BAD_REQUEST
         assert User.select().count() == 0
 
+    def test_patch_change1user_attribute__success(self):
+        email = 'mail@email.it'
+        add_user(email, TEST_USER_PSW)
+
+        post_data = format_jsonapi_request('user', {'first_name': 'new-first-name'})
+        content_type = 'application/json'
+        user_path = 'users/'
+        resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'PATCH',
+                              email, TEST_USER_PSW, content_type, json.dumps(post_data))
+
+        assert resp.status_code == OK
+
+        expected_result = EXPECTED_RESULTS['patch_change1user_attribute__success']
+        assert_valid_response(resp.data, expected_result)
+
+        assert User.select().count() == 1
+        assert User.get().admin is False
+        assert User.get().first_name == 'new-first-name'
+
+    def test_patch_change_all_user_attribute__success(self):
+        email = 'mail@email.it'
+        add_user(email, TEST_USER_PSW)
+
+        post_data = format_jsonapi_request('user', {
+            'first_name': 'new-first-name',
+            'last_name': 'new-last-name',
+            'email': 'new-email@email.it'
+        })
+        content_type = 'application/json'
+        user_path = 'users/'
+        resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'PATCH',
+                              email, TEST_USER_PSW, content_type, json.dumps(post_data))
+
+        assert resp.status_code == OK
+
+        expected_result = EXPECTED_RESULTS['patch_change_all_user_attribute__success']
+        assert_valid_response(resp.data, expected_result)
+
+        assert User.select().count() == 1
+        assert User.get().admin is False
+        assert User.get().first_name == 'new-first-name'
+        assert User.get().last_name == 'new-last-name'
+        assert User.get().email == 'new-email@email.it'
+
+    def test_patch_user_other_user__fail(self):
+        email = 'mail@email.it'
+        add_user(email, TEST_USER_PSW)
+
+        email2 = 'pippo@email.it'
+
+        post_data = format_jsonapi_request('user', {'first_name': 'new-first-name'})
+        content_type = 'application/json'
+        user_path = 'users/'
+        resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'PATCH',
+                              email2, TEST_USER_PSW, content_type, json.dumps(post_data))
+        assert resp.status_code == UNAUTHORIZED
+
     def test_delete_user__success(self):
         email = 'mail@email.it'
-        user = add_user(email, TEST_USER_PSW)
+        add_user(email, TEST_USER_PSW)
 
-        user_path = 'users/{}'.format(user.uuid)
+        user_path = 'users/'
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path),
                               'DELETE', email, TEST_USER_PSW, None, None)
 
@@ -158,7 +214,7 @@ class TestUser(TestCase):
         Order.create(delivery_address=addr, user=user)
         order1 = Order.create(delivery_address=addr1, user=user1)
 
-        user_path = 'users/{}'.format(user.uuid)
+        user_path = 'users/'
         resp = open_with_auth(self.app, API_ENDPOINT.format(user_path), 'DELETE',
                               email, TEST_USER_PSW, None, None)
         assert resp.status_code == NO_CONTENT
@@ -172,23 +228,11 @@ class TestUser(TestCase):
         user2 = User.get()
         assert user2 == user1
 
-    def test_delete_user_dont_exists__fail(self):
-        user = add_user(None, TEST_USER_PSW)
-
-        wrong_uuid = uuid.UUID(int=user.uuid.int + 1)
-        user_path = 'users/{}'.format(wrong_uuid)
-
-        resp = open_with_auth(self.app, API_ENDPOINT.format(user_path),
-                              'DELETE', user.email, TEST_USER_PSW, None, None)
-
-        assert resp.status_code == NOT_FOUND
-        assert User.select().count() == 1
-
     def test_delete_user_other_user__fail(self):
         user_A = add_user('user.a@users.com', TEST_USER_PSW)
         user_B = add_user('user.b@users.com', TEST_USER_PSW)
 
-        path = 'users/{}'.format(user_A.uuid)
+        path = 'users/'
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'DELETE',
                               user_B.uuid, TEST_USER_PSW, None, None)
 
@@ -200,7 +244,7 @@ class TestUser(TestCase):
     def test_delete_user_auth_does_not_exists__fail(self):
         user = add_user(None, TEST_USER_PSW)
 
-        path = 'users/{}'.format(user.uuid)
+        path = 'users/'
         resp = open_with_auth(self.app, API_ENDPOINT.format(path), 'DELETE',
                               'donot@exists.com', 'unused_psw', None, None)
 

@@ -999,7 +999,60 @@
                     }
                 }
             ]
+        },
+        "patch_change1user_attribute__success": {
+            "data": {
+                "type": "user",
+                "attributes": {
+                    "email": "mail@email.it",
+                    "admin": false,
+                    "last_name": "Doe",
+                    "first_name": "new-first-name"
+                },
+                "relationships": {
+                    "addresses": {
+                        "data": []
+                    },
+                    "orders": {
+                        "data": []
+                    }
+                },
+                "id": "00000000-0000-0000-0000-000000000001",
+                "links": {
+                    "self": "/users/00000000-0000-0000-0000-000000000001"
+                }
+            },
+            "links": {
+                "self": "/users/00000000-0000-0000-0000-000000000001"
+            }
+        },
+        "patch_change_all_user_attribute__success": {
+            "data": {
+                "type": "user",
+                "attributes": {
+                    "email": "new-email@email.it",
+                    "admin": false,
+                    "last_name": "new-last-name",
+                    "first_name": "new-first-name"
+                },
+                "relationships": {
+                    "addresses": {
+                        "data": []
+                    },
+                    "orders": {
+                        "data": []
+                    }
+                },
+                "id": "00000000-0000-0000-0000-000000000001",
+                "links": {
+                    "self": "/users/00000000-0000-0000-0000-000000000001"
+                }
+            },
+            "links": {
+                "self": "/users/00000000-0000-0000-0000-000000000001"
+            }
         }
+
     },
     "pictures": {
         "get_item_pictures__success": [
