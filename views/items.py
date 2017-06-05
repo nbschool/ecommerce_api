@@ -3,15 +3,17 @@ Items view: this module provides methods to interact
 with items resources
 """
 
+import http.client as client
 import uuid
 
 from flask import request
 from flask_restful import Resource
-import http.client as client
 
 from models import Item
-
 from utils import generate_response
+
+
+SEARCH_FIELDS = ['name', 'description']
 
 
 class ItemsHandler(Resource):
@@ -110,3 +112,31 @@ class ItemHandler(Resource):
 
         item.delete_instance()
         return None, client.NO_CONTENT
+
+
+class SearchItemHandler(Resource):
+    def get(self):
+        query = request.args.get('query')
+        limit = int(request.args.get('limit', -1))
+        min_limit, max_limit = 0, 100
+
+        limit_in_range = limit > min_limit and limit <= max_limit
+
+        if query is not None and limit_in_range:
+            matches = Item.search(query, Item.select(), limit)
+            return generate_response(Item.json_list(matches), client.OK)
+
+        def fmt_error(msg):
+            return {'detail': msg}
+
+        errors = {"errors": []}
+
+        if not query:
+            errors['errors'].append(fmt_error('Missing query.'))
+
+        if not limit_in_range:
+            msg = 'Limit out of range. must be between {} and {}. Requested: {}'
+            errors['errors'].append(
+                fmt_error(msg.format(min_limit, max_limit, limit)))
+
+        return errors, client.BAD_REQUEST

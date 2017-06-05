@@ -3,18 +3,20 @@ Application ORM Models built with Peewee
 """
 import datetime
 import os
+from exceptions import (InsufficientAvailabilityException,
+                        WrongQuantity, SearchAttributeMismatch)
 from uuid import uuid4
 
 from flask_login import UserMixin
 from passlib.hash import pbkdf2_sha256
-from peewee import DateTimeField, TextField, CharField, BooleanField
-from peewee import DecimalField, PostgresqlDatabase
-from peewee import UUIDField, ForeignKeyField, IntegerField
+from peewee import (BooleanField, CharField, DateTimeField, DecimalField,
+                    ForeignKeyField, IntegerField, PostgresqlDatabase,
+                    TextField, UUIDField)
 from playhouse.signals import Model, post_delete, pre_delete
 
-from exceptions import InsufficientAvailabilityException, WrongQuantity
-from schemas import (ItemSchema, UserSchema, OrderSchema, OrderItemSchema,
-                     BaseSchema, AddressSchema, PictureSchema, FavoriteSchema)
+from schemas import (AddressSchema, BaseSchema, FavoriteSchema, ItemSchema,
+                     OrderItemSchema, OrderSchema, PictureSchema, UserSchema)
+import search
 from utils import remove_image
 
 
@@ -56,6 +58,16 @@ class BaseModel(Model):
     created_at = DateTimeField(default=datetime.datetime.now)
     updated_at = DateTimeField(default=datetime.datetime.now)
     _schema = BaseSchema
+
+    #: Each model that needs to implement the search functionality `should`
+    #: override this attribute with the fields that needs to be checked while
+    #: searching.
+    #: Attribute should be a list of names of class attributes (strings)
+    _search_attributes = None
+    #: Attributes weights can be specified with a list of numbers that will
+    #: map each weight to attributes (:any:`BaseModel._search_attributes`)
+    #: indexes.
+    _search_weights = None
 
     def save(self, *args, **kwargs):
         """
@@ -116,6 +128,53 @@ class BaseModel(Model):
         """
         return cls._schema.validate_input(data, partial=partial)
 
+    @classmethod
+    def search(cls, query, dataset, limit=-1,
+               attributes=None, weights=None,
+               threshold=search.config.THRESHOLD):
+        """
+        Search a list of resources with the callee class.
+
+        Arguments:
+            query (str): Query to lookup for
+            dataset (iterable): sequence of resource objects to lookup into
+            limit (int): maximum number of resources to return (default -1, all)
+            attributes (list): model attribute names. Can be set as default
+                inside the model definition or specified on the fly while
+                searching.
+            weights (list): attributes weights values,indexes should
+                match the attribute position in the `attributes` argument.
+                if length does not match it will be ignored.
+            threshold (float): value between 0 and 1, identify the matching
+                threshold for a result to be included.
+
+        Returns:
+            list: list of resources that may match the query.
+
+        Raises:
+            SearchAttributeMismatch:
+                if ``attributes`` are missing, either as model
+                default in ``<Model>._search_attributes`` or as param
+                one of the object does not have one of the given attribute(s).
+
+        Examples:
+
+            .. code-block:: python
+
+                results = Item.search('shoes', Item.select(), limit=20)
+        """
+
+        attributes = attributes or cls._search_attributes
+        weights = weights or cls._search_weights
+
+        if not attributes:
+            raise SearchAttributeMismatch(
+                'Attributes to look for not defined for {}. \
+                Please update the Model or specify during search call.\
+                '.format(cls.__name__))
+
+        return search.search(query, attributes, dataset, limit, threshold, weights)
+
 
 class Item(BaseModel):
     """
@@ -137,6 +196,7 @@ class Item(BaseModel):
     availability = IntegerField()
     category = TextField()
     _schema = ItemSchema
+    _search_attributes = ['name', 'category', 'description']
 
     def __str__(self):
         return '{}, {}, {}, {}'.format(
@@ -268,10 +328,10 @@ class User(BaseModel, UserMixin):
     def add_favorite(user, item):
         """Link the favorite item to user."""
         return Favorite.create(
-                uuid=uuid4(),
-                item=item,
-                user=user,
-                )
+            uuid=uuid4(),
+            item=item,
+            user=user,
+        )
 
     def delete_favorite(self, obj):
         obj.delete_instance()
