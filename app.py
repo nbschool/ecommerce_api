@@ -7,7 +7,7 @@ modules.
 """
 
 import os
-import utils # flake8: noqa
+import utils  # flake8: noqa
 
 from flask import Flask
 from flask_restful import Api
@@ -16,7 +16,7 @@ from flask_cors import CORS
 from auth import auth
 from models import database
 from views.address import AddressesHandler, AddressHandler
-from views.auth import LoginHandler
+from views.auth import LoginHandler, LogoutHandler
 from views.orders import OrdersHandler, OrderHandler
 from views.items import ItemHandler, ItemsHandler, SearchItemHandler
 from views.user import UsersHandler
@@ -54,6 +54,7 @@ def database_disconnect(response):
 api.add_resource(AddressesHandler, "/addresses/")
 api.add_resource(AddressHandler, "/addresses/<uuid:address_uuid>")
 api.add_resource(LoginHandler, "/auth/login/")
+api.add_resource(LogoutHandler, "/auth/logout/")
 api.add_resource(ItemsHandler, "/items/")
 api.add_resource(ItemHandler, "/items/<uuid:item_uuid>")
 api.add_resource(ItemPictureHandler, '/items/<uuid:item_uuid>/pictures/')
