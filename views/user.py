@@ -97,3 +97,15 @@ class UsersHandler(Resource):
 
         user.delete_instance(recursive=True)
         return None, NO_CONTENT
+
+
+class UserHandler(Resource):
+    """
+    Handler for main user endpoint.
+
+    Implements:
+    * `get` method to retrieve the current user
+    """
+    @auth.login_required
+    def get(self):
+        return generate_response(auth.current_user.json(), OK)
