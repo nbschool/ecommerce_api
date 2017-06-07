@@ -178,6 +178,33 @@ class TestUser(TestCase):
                               email2, TEST_USER_PSW, content_type, json.dumps(post_data))
         assert resp.status_code == UNAUTHORIZED
 
+    def test_get_usersme__success(self):
+        email = 'mail@email.it'
+        user = add_user(email, TEST_USER_PSW)
+
+        resp = open_with_auth(self.app, API_ENDPOINT.format('users/me/'), 'GET',
+                              user.email, TEST_USER_PSW, None, None)
+
+        assert resp.status_code == OK
+
+        expected_result = EXPECTED_RESULTS['get_usersme__success']
+        assert_valid_response(resp.data, expected_result)
+
+        assert User.select().count() == 1
+        assert User.get().admin is False
+        assert User.get().email == email
+
+    def test_get_users_otherme__success(self):
+        email = 'mail@email.it'
+        add_user(email, TEST_USER_PSW)
+
+        email2 = 'pippo@email.it'
+
+        resp = open_with_auth(self.app, API_ENDPOINT.format('users/me/'), 'GET',
+                              email2, TEST_USER_PSW, None, None)
+
+        assert resp.status_code == UNAUTHORIZED
+
     def test_delete_user__success(self):
         email = 'mail@email.it'
         add_user(email, TEST_USER_PSW)

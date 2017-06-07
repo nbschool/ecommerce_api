@@ -1051,8 +1051,33 @@
             "links": {
                 "self": "/users/00000000-0000-0000-0000-000000000001"
             }
+        },
+        "get_usersme__success": {
+            "data": {
+                "type": "user",
+                "attributes": {
+                    "email": "mail@email.it",
+                    "admin": false,
+                    "last_name": "Doe",
+                    "first_name": "John"
+                },
+                "relationships": {
+                    "addresses": {
+                        "data": []
+                    },
+                    "orders": {
+                        "data": []
+                    }
+                },
+                "id": "00000000-0000-0000-0000-000000000001",
+                "links": {
+                    "self": "/users/00000000-0000-0000-0000-000000000001"
+                }
+            },
+            "links": {
+                "self": "/users/00000000-0000-0000-0000-000000000001"
+            }
         }
-
     },
     "pictures": {
         "get_item_pictures__success": [
