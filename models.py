@@ -68,6 +68,7 @@ class BaseModel(Model):
     #: map each weight to attributes (:any:`BaseModel._search_attributes`)
     #: indexes.
     _search_weights = None
+    searchEngine = search.SearchEngine()
 
     def save(self, *args, **kwargs):
         """
@@ -173,7 +174,8 @@ class BaseModel(Model):
                 Please update the Model or specify during search call.\
                 '.format(cls.__name__))
 
-        return search.search(query, attributes, dataset, limit, threshold, weights)
+        return cls.searchEngine.search(
+            query, dataset, attributes, limit, threshold, weights)
 
 
 class Item(BaseModel):

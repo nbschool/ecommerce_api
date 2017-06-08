@@ -1,152 +1,177 @@
 """
 Search API core module
 
-Contains the main functions to get match values and searching
+Contains the main functions to perform a search.
 """
-import jellyfish as jf
-
-from search import utils, config
+from search import utils, config, matchers
 
 
-def similarity(query, string):
+class SearchEngine:
     """
-    Calculate the match for the given `query` and `string`.
+    Creates callable objects to perform lazy search in iterables of objects.
+    The engine is customizable upon creation, and when the function is called.
 
-    The match is calculated using the `jaro winkler` for each set of the matrix
-    (`query` x `string`) and takes into consideration the position difference
-    into the strings.
+    Search can be performed calling directly the object
 
-    Arguments:
-        query (str): search query
-        string (str): string to test against
+        >>> search = SearchEngine(['attr_name'], limit=10)
+        >>> result = search('john doe', [people])
 
-    Returns:
-        float: normalized value indicating the probability of match, where
-        0 means completely dissimilar and 1 means equal.
+    or through the search method
+
+        >>> search_engine = SearchEngine(['attr_name'], limit=10)
+        >>> result = search_engine.search('john doe')
+
+    For actual documentation on the search functionality and parameters refer
+    to the :any:`SearchEngine.search` method documentation.
     """
 
-    # split the two strings cleaning out some stuff
-    query = utils.tokenize(query.lower())
-    string = utils.tokenize(string.lower())
+    def __init__(self, attributes=None, limit=-1,
+                 threshold=config.THRESHOLD, weights=None,
+                 matcher=matchers.lazy_match):
+        self.attributes = attributes
+        self.limit = limit
+        self.threshold = threshold
+        self.weights = weights
+        self.matcher = matcher
 
-    # if one of the two strings is falsy (no content, or was passed with items
-    # short enough to be trimmed out), return 0 here to avoid ZeroDivisionError
-    # later on while processing.
-    if len(query) == 0 or len(string) == 0:
-        return 0
+        if attributes:
+            if not self.weights or len(attributes) != len(weights):
+                self.weights = utils.generate_weights(attributes)
 
-    shortest, longest = sorted((query, string), key=lambda x: len(x))
+    def __call__(self, query, dataset, attributes=None, limit=None,
+                 threshold=None, weights=None, matcher=None):
 
-    # matrix of tuples for each segment of both query and string
-    matrix = [(s1, s2) for s1 in longest for s2 in shortest]
+        return self.search(
+            query=query,
+            dataset=dataset,
+            attributes=attributes,
+            limit=limit,
+            threshold=threshold,
+            weights=weights,
+            matcher=matcher,
+        )
 
-    matches = {}
-    for string1, string2 in matrix:
-        # get the jaro winkler equality between the two strings
-        match = jf.jaro_winkler(string1, string2)
-        # calculate the distance factor for the position of the segments
-        # on their respective lists
-        positional = utils.position_similarity(
-            string1, string2, longest, shortest)
+    def search(
+            self, query, dataset, attributes=None, limit=None,
+            threshold=None, weights=None, matcher=None):
+        """
+        Main function of the package, allows to do a fuzzy full-text search on
+        the rows of the given `table` model, looking up the value
+        on the given `attributes` list against the passed `query` string.
 
-        # get them together and append to the matches dictionary
-        match = (match, positional)
-        matches.setdefault(string1, []).append(match)
+        Extra arguments allows customization on the search results (see below)
 
-    # get the highest value for each list, the apply the word-distance factor
-    # the key takes the jaro winkler distance value to get the max value
-    matches = [max(m, key=lambda x: x[0]) for m in matches.values()]
-    _weights = (config.MATCH_WEIGHT, config.DIST_WEIGHT)
-    matches = [utils.weighted_average((m, d), _weights) for m, d in matches]
+        .. note::
+            Since this function implements the core functionality, it has the
+            shortcut import
 
-    # get the weighted mean for all the highest matches and apply the highest
-    # match value found as coefficient as multiplier, to add weights to more
-    # coherent matches.
-    mean_match = (sum(matches) / len(matches)) * max(matches)
-    return mean_match
+            >>> from search.core import search
+            >>> from search import search
 
+            Will have the same effect
 
-def search(
-        query, attributes, dataset, limit=-1,
-        threshold=config.THRESHOLD, weights=None):
-    """
-    Main function of the package, allows to do a fuzzy full-text search on the
-    rows of the given `table` model, looking up the value
-    on the given `attributes` list against the passed `query` string.
+        Arguments:
+            query (str): String to search for
+            attributes (list): The names of thetable columns to search into.
+            dataset (iterable): iterable of `objects` to lookup. All objects
+                in the dataset **must** have the specified attribute(s)
+            limit (int): max number of results to return. if ``-1`` will return
+                everything.
+            threshold (float): paragon for validating match results.
+            weights (list): matching `attributes` argument, describes the
+                attributes weights. if not provided **or** if different length
+                the weight will generated automatically, considering
+                the index of the attribute name, reversed.
 
-    Extra arguments allows some customization on the search results (see below)
+        Returns:
+            list: A list containing ``[0:limit]`` resources from the given
+            dataset, sorted by relevance.
 
-    Arguments:
-        query (str): String to search for
-        attributes (list): The names of thetable columns to search into.
-        dataset (iterable): iterable of `objects` to lookup. All the objects
-            in the dataset **must** have the specified attribute(s)
-        limit (int): max number of results to return. if ``-1`` will return
-            everything.
-        threshold (float): value under which results are considered not valid.
-        weights (list): matching `attributes` argument, describes the
-            attributes weights. if not provided **or** if different length
-            the weight will generated automatically, considering
-            the index of the attribute name, reversed (first -> more weight).
+        Raises:
+            AttributeError: if one of the object does not have one of the given
+                attribute(s).
 
-    Returns:
-        list: A list containing ``[0:limit]`` resources from the given table,
-        sorted by relevance.
+        Example:
+            Assuming a random number of items in the Item table, that defines
+            `name`, `category`, `description`, `availability`, one can do:
 
-    Raises:
-        AttributeError: if one of the object does not have one of the given
-            attribute(s).
+            >>> from models import Item
+            >>> from search import search
+            >>> results = search('aweso', ['name', 'category'], Item.select())
+            [
+                <Item name: 'awesome item' cat: 'generic'>,
+                <Item name: 'normal item', cat: 'awesome'>,
+            ]
 
-    Example:
-        Assuming a random number of items in the Item table, that defines
-        `name`, `category`, `description`, `availability`, one can do:
+            Note that even though the category is a perfect match, it's ranked
+            lower priority, so it comes after.
 
-        >>> from models import Item
-        >>> from search import search
-        >>> results = search('awesome', ['name', 'category'], Item.select())
-        [<Item name: 'awesome item' cat: 'generic'>]
+        """
+        if len(utils.tokenize(query)) == 0:
+            return []
 
-    .. note::
-        Since this function implements the core functionality, it has the
-        shortcut import
+        attributes = attributes or self.attributes
+        weights = weights or self.weights
+        limit = limit or self.limit
+        threshold = threshold or self.threshold
+        matcher = matcher or self.matcher
 
-        >>> from search.core import search
-        >>> from search import search
+        if not attributes:
+            raise ValueError('Attributes are missing on the SearchEngine')
 
-        Will have the same effect
-    """
-    matches = []
-    if not weights or len(weights) != len(attributes):
-        # list of integers of the same length of `attributes` as in [3, 2, 1]
-        # for attributes = ['a', 'b', 'c']
-        weights = list(range(len(attributes), 0, -1))
+        matches = []
+        if not weights or len(weights) != len(attributes):
+            # list of integers of the same length of `attributes` as in
+            # [3, 2, 1] for attributes = ['a', 'b', 'c']
+            weights = list(range(len(attributes), 0, -1))
 
-    weights = utils.scale_to_one(weights)
-    weights = {attr: w for attr, w in zip(attributes, weights)}
+        weights = utils.normalize(weights)
+        weights = dict(zip(attributes, weights))
 
-    if not threshold:
-        threshold = 0
+        for obj in dataset:
+            partial_matches = []
 
-    for obj in dataset:
-        partial_matches = []
+            for attr in attributes:
+                attrval = getattr(obj, attr)
 
-        for attr in attributes:
-            attrval = getattr(obj, attr)
+                match = matcher(query, attrval)
+                partial_matches.append({'attr': attr, 'match': match})
 
-            match = similarity(query, attrval)
-            partial_matches.append({'attr': attr, 'match': match})
+            # get the highest match found for each object after processing
+            # all the attributes
+            match = max(partial_matches, key=lambda m: m['match'])
+            value = match['match']
+            if value >= threshold:
+                attr = match['attr']
+                # Consider all the other matches when generating the actual
+                # total value of matching for the rating. This helps when
+                # we may have one object with two high match and one with
+                # just one match.
+                tot_value = value + sum([p['match'] for p in partial_matches])
+                result_data = {
+                    'data': obj,
+                    'match': value,
+                    'rating': tot_value + weights[attr],
+                    'attr': attr,
+                }
+                matches.append(result_data)
 
-        # get the highest match for each attribute and multiply it by the
-        # attribute weight, so we can get the weighted average to return
-        match = max(partial_matches, key=lambda m: m['match'])
-        match = match['match'] * weights[match['attr']]
+        # adjust weights, setting the highest attribute weight to the attribute
+        # that got more matches. This helps when searching through a keyword
+        # attribute (like a `category`) that has a default lower weight but
+        # that, if searched by name, should be higher in rating.
+        # This is done by checking the amount of results for each attribute
+        # and creating the weights from those values.
+        adjusted_weights = utils.generate_weights_from_matches(matches)
 
-        if match >= threshold:
-            matches.append({'data': obj, 'match': match})
+        # adjust the rating adding the new weight for the attribute that
+        # generated the highest match for each object.
+        for match in matches:
+            match['rating'] += adjusted_weights[match['attr']]
 
-    matches.sort(key=lambda m: m['match'], reverse=True)
+        matches.sort(key=lambda m: m['rating'], reverse=True)
 
-    if limit > 0:
-        matches = matches[:limit]
+        if limit > 0:
+            matches = matches[:limit]
 
-    return [m['data'] for m in matches]
+        return [m['data'] for m in matches]

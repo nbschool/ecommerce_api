@@ -34,6 +34,10 @@ class TestSearchItems(TestCase):
             )
             pass
 
+        cls.searchEngine = search.SearchEngine(
+            ['name', 'description'], limit=10
+        )
+
     def setup_method(self):
         # NOTE: TestCase clear the tables on every method
         # we don't what that, so simple override
@@ -44,63 +48,60 @@ class TestSearchItems(TestCase):
         Item.delete().execute()
 
     def search(self, query, attributes=['name', 'description'], limit=10):
-        return search.search(query, attributes, Item.select(), limit)
+        return self.searchEngine(query, Item.select(), attributes, limit)
 
     def test_search_tavolo_sedie(self):
         result = self.search('tavolo sedie')
+        res = ['sedie', 'sedie deco', 'sedie da cucina', 'set di sedie', 'tavolo con sedie',
+               'tavolo con set di sedie', 'tavolo', 'tavolo da cucina', 'tavola',
+               'tavola di legno']
 
-        res = ['tavolo con sedie', 'tavolo con set di sedie', 'tavolo da cucina',
-               'tavolino', 'tavola di legno', 'sedie', 'set di sedie', 'tavolo', 'tavola']
         assert res == get_names(result)
 
     def test_search_tavolo(self):
         result = self.search('tavolo')
-        res = ['tavolo', 'tavolino', 'tavola', 'tavola di legno', 'legno di tavola',
-               'tavolo con sedie', 'tavolo con set di sedie', 'tavolo da cucina', 'poltrona',
-               'letto singolo']
+        res = ['tavolo con sedie', 'tavolo con set di sedie', 'tavolo', 'tavolo da cucina',
+               'tavolino', 'tavola', 'tavola di legno', 'legno di tavola']
+
         assert res == get_names(result)
 
     def test_search_sedia(self):
         result = self.search('sedia')
 
-        res = ['sedie', 'set di sedie', 'sedie da cucina', 'sedie deco',
-               'divano', 'tavolo con sedie', 'tavolo con set di sedie', 'divano letto']
+        res = ['sedie', 'sedie deco', 'sedie da cucina']
         assert res == get_names(result)
 
     def test_search_sedie(self):
         result = self.search('sedie')
+        res = ['sedie', 'sedie deco', 'sedie da cucina', 'tavolo con sedie',
+               'tavolo con set di sedie']
 
-        res = ['sedie', 'set di sedie', 'sedie deco', 'sedie da cucina',
-               'tavolo con sedie', 'tavolo con set di sedie', 'scarpine']
         assert res == get_names(result)
 
     def test_search_scarpe(self):
         result = self.search('scarpe')
+        res = ['scarpe', 'scarpe da ballo', 'scarpe da ginnastica', 'scarpine',
+               'scarpette', 'scarpacce']
 
-        res = ['scarpe', 'scarpine', 'scarpette', 'scarpacce', 'scarponi',
-               'scarpe da ballo', 'scarpe da ginnastica', 'sgabello', 'canottiera']
         assert res == get_names(result)
 
     def test_search_letto(self):
         result = self.search('letto')
 
-        res = ['letto', 'letto matrimoniale', 'divano letto', 'letto singolo', 'letto francese',
-               'tavola di legno', 'legno di tavola', 'poltrona elettrica', 'sedie deco', 'tavolo']
+        res = ['divano letto', 'letto', 'letto singolo', 'letto matrimoniale',
+               'letto francese']
         assert res == get_names(result)
 
     def test_search_scarpette(self):
         result = self.search('scarpette')
 
-        res = ['scarpette', 'scarpe', 'scarpine', 'scarpacce', 'scarponi',
-               'scarpe da ginnastica', 'scarpe da ballo', 'maglietta', 'canottiera',
-               'letto francese']
+        res = ['scarpette', 'scarpe']
         assert res == get_names(result)
 
     def test_search_scarponi(self):
         result = self.search('scarponi')
 
-        res = ['scarponi', 'scarpine', 'scarpe', 'scarpette',
-               'scarpacce', 'scarpe da ballo', 'scarpe da ginnastica']
+        res = ['scarponi', 'scarpine']
         assert res == get_names(result)
 
     def test_search_divano(self):
