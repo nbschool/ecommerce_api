@@ -1,1 +1,1 @@
-from search.core import search  # noqa: F401
+from search.core import SearchEngine  # noqa: F401
